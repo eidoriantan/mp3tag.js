@@ -1,0 +1,47 @@
+{
+  "name": "mp3tag.js",
+  "version": "0.1.0",
+  "description": "MP3 tagging written in pure JavaScript",
+  "main": "dist/mp3tag.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "mocha": "^7.1.0",
+    "rollup": "^1.31.1",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-terser": "^5.2.0",
+    "standard": "^14.3.1"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "test": "eslint -c .eslintrc **/*.js && mocha --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eidoriantan/mp3tag.js.git"
+  },
+  "keywords": [
+    "audio",
+    "mp3",
+    "id3",
+    "tag",
+    "read",
+    "write",
+    "browser",
+    "javascript"
+  ],
+  "author": "Adriane Justine Tan <eidoriantan@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eidoriantan/mp3tag.js/issues"
+  },
+  "homepage": "https://github.com/eidoriantan/mp3tag.js#readme"
+}
