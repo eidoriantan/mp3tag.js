@@ -82,47 +82,53 @@ function writeAudio (data, imageBuffer) {
     const input = $(`#${key}`)
     const frameInfo = getFrame(key)
 
+    if (this.value === '') return true
     switch (frameInfo.type) {
       case 'string':
-        if (this.value !== '') {
-          mp3tag.frames.push({
-            id: frameInfo.id,
-            value: this.value
-          })
-        }
+        mp3tag.frames.push({
+          id: frameInfo.id,
+          value: this.value
+        })
         break
 
       case 'array':
-        if (this.value !== '') {
-          mp3tag.frames.push({
-            id: frameInfo.id,
-            value: this.value.split(SEPARATOR)
-          })
-        }
+        mp3tag.frames.push({
+          id: frameInfo.id,
+          value: this.value.split(SEPARATOR)
+        })
         break
+
+      case 'set': {
+        const set = this.value.split('/')
+        mp3tag.frames.push({
+          id: frameInfo.id,
+          value: {
+            position: parseInt(set[0]),
+            total: parseInt(set[1])
+          }
+        })
+        break
+      }
 
       case 'integer':
-        if (this.value !== '') {
-          mp3tag.frames.push({
-            id: frameInfo.id,
-            value: parseInt(this.value)
-          })
-        }
+        mp3tag.frames.push({
+          id: frameInfo.id,
+          value: parseInt(this.value)
+        })
         break
 
-      case 'lyrics':
-        if (this.value !== '') {
-          const lyrics = this.value.split('||')
-          mp3tag.frames.push({
-            id: frameInfo.id,
-            value: {
-              language: lyrics[0],
-              descriptor: '',
-              text: lyrics[1]
-            }
-          })
-        }
+      case 'descLang': {
+        const lyrics = this.value.split('||')
+        mp3tag.frames.push({
+          id: frameInfo.id,
+          value: {
+            language: lyrics[0],
+            descriptor: '',
+            text: lyrics[1]
+          }
+        })
         break
+      }
 
       default:
         toast('Writing Error', `Unsupported frame type: ${frameInfo.type}`)
@@ -171,12 +177,12 @@ function getFrame (name) {
 
     case 'track':
       frame.id = 'TRCK'
-      frame.type = 'string'
+      frame.type = 'set'
       break
 
     case 'genre':
       frame.id = 'TCON'
-      frame.type = 'array'
+      frame.type = 'string'
       break
 
     case 'isrc':
@@ -196,7 +202,7 @@ function getFrame (name) {
 
     case 'lyrics':
       frame.id = 'USLT'
-      frame.type = 'lyrics'
+      frame.type = 'descLang'
       break
   }
 
