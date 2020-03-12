@@ -1,0 +1,34 @@
+
+body > header.navbar {
+  height: 58px;
+}
+
+.toaster-container {
+  position: relative;
+  z-index: 1060;
+}
+
+.toaster {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  width: 200px;
+  min-width: 200px;
+}
+
+.fill {
+  height: calc(100vh - 58px);
+  max-height: calc(100vh - 58px);
+  overflow-y: scroll;
+}
+
+.pointer { cursor: pointer !important; }
+.user-select-none { user-select: none !important; }
+
+.zindex-dropdown { z-index: 1000 !important; }
+.zindex-sticky { z-index: 1020 !important; }
+.zindex-fixed { z-index: 1030 !important; }
+.zindex-modal-backdrop { z-index: 1040 !important; }
+.zindex-modal { z-index: 1050 !important; }
+.zindex-popover { z-index: 1060 !important; }
+.zindex-tooltip { z-index: 1070 !important; }
