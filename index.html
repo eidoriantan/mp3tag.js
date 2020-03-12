@@ -137,14 +137,16 @@
           <tbody id="audio-list"></tbody>
         </table>
 
-        <p id="no-audio" class="card-body text-center pt-5 w-50 mx-auto">
+        <div id="no-audio" class="text-center w-50 pt-5 mx-auto">
           <i class="fas fa-arrow-down" aria-hidden="true"></i> <strong>No audio imported.</strong><br>
           Any audios imported here doesn't upload to our servers therefore it's not using any data or
           internet connections and everything is done via your browser. You can also work offline.
+        </div>
 
+        <div class="text-center mx-auto">
           <input type="file" id="file-audios" accept="audio/mpeg" class="mt-5" multiple>
           <label for="file-audios">Select file(s)</label>
-        </p>
+        </div>
       </div>
     </div>
   </main>
