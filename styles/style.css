@@ -1,8 +1,4 @@
 
-body > header.navbar {
-  height: 58px;
-}
-
 .toaster-container {
   position: relative;
   z-index: 1060;
@@ -17,8 +13,8 @@ body > header.navbar {
 }
 
 .fill {
-  height: calc(100vh - 58px);
-  max-height: calc(100vh - 58px);
+  height: calc(100vh - 56px);
+  max-height: calc(100vh - 56px);
   overflow-y: scroll;
 }
 
