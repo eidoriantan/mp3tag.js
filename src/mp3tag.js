@@ -28,13 +28,8 @@ export default class MP3Tag {
     } else {
       // Default to id3v2 and get the raw audio data for writing
       this.tagger = new ID3v2(this.buffer, __options)
-      console.warn('Unknown tag. Getting raw audio data for writing')
-
-      if (this.tagger.getAudio().length > 0) {
-        this.save()
-      } else {
-        throw new TagError(1)
-      }
+      if (this.tagger.getAudio().length > 0) this.save()
+      else throw new TagError(1)
     }
   }
 
