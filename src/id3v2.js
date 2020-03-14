@@ -91,7 +91,7 @@ export default class ID3v2 {
         throw new TagError(204, frame.id)
       }
 
-      const bytes = frameDesc.getBytes.call(tagger, frame)
+      const bytes = frameDesc.write.call(tagger, frame)
       bytes.forEach(byte => framesBytes.push(byte))
     })
 
