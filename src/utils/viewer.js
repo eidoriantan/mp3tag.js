@@ -62,8 +62,12 @@ export default class BufferView extends DataView {
   }
 
   getUint8String (offset, length) {
-    const bytes = this.getUint8(offset, length)
+    let bytes = this.getUint8(offset, length)
     let string = ''
+
+    if (!ArrayBuffer.isView(bytes)) {
+      bytes = [bytes]
+    }
 
     for (let i = 0; i < bytes.length; i++) {
       const character = String.fromCharCode(bytes[i])
@@ -74,8 +78,12 @@ export default class BufferView extends DataView {
   }
 
   getUint8CString (offset) {
-    const bytes = this.getUint8(offset, this.byteLength - offset)
+    let bytes = this.getUint8(offset, this.byteLength - offset)
     let string = ''
+
+    if (!ArrayBuffer.isView(bytes)) {
+      bytes = [bytes]
+    }
 
     for (let i = 0; i < bytes.length; i++) {
       const byte = bytes[i]
