@@ -3,7 +3,7 @@ const MP3Tag = require('../../dist/mp3tag.js')
 const assert = require('assert')
 
 const v23Bytes = new Uint8Array([
-  73, 68, 51, 3, 0, 0, 0, 0, 0, 25, // ID3 Header
+  73, 68, 51, 3, 0, 0, 0, 0, 0, 33, // ID3 Header
   84, 65, 76, 66, 0, 0, 0, 15, 0, 0, // Frame "TALB" header
   1, 255, 254, 65, 0, 76, 0, 66, 0, 85, 0, 77, 0, 0, 0, // Frame content
   0, 0, 0, 0, 0, 0, 0, 0, // padding of 8 bytes
@@ -11,7 +11,7 @@ const v23Bytes = new Uint8Array([
 ])
 
 const v24Bytes = new Uint8Array([
-  73, 68, 51, 4, 0, 0, 0, 0, 0, 17, // ID3 Header
+  73, 68, 51, 4, 0, 0, 0, 0, 0, 25, // ID3 Header
   84, 65, 76, 66, 0, 0, 0, 7, 0, 0, // Frame "TALB" header
   3, 65, 76, 66, 85, 77, 0, // Frame content
   0, 0, 0, 0, 0, 0, 0, 0, // padding of 8 bytes
