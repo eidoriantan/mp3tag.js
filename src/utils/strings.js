@@ -10,7 +10,7 @@ export function decodeUTF8 (bytes) {
   while (i < bytes.length) {
     c = bytes[i++]
     switch (c >> 4) {
-      case 1: case 2: case 3: case 4: case 5: case 6: case 7:
+      case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
         string += String.fromCharCode(c)
         break
 
