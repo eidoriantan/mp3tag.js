@@ -45,7 +45,6 @@ describe('ID3v2', function () {
     })
 
     mp3tag.save()
-
     const actual = new Uint8Array(mp3tag.buffer)
     // bit "5" in flags indicates that the tags are in experimental stage
     const expected = new Uint8Array([
@@ -63,7 +62,7 @@ describe('ID3v2', function () {
   it('Read then write data v2.4', function () {
     const mp3tag = new MP3Tag(v24Bytes.buffer, {
       padding: 0,
-      writer: { version: 4 }
+      version: 4
     })
 
     mp3tag.read()
@@ -73,7 +72,6 @@ describe('ID3v2', function () {
     })
 
     mp3tag.save()
-
     const actual = new Uint8Array(mp3tag.buffer)
     // bit "5" in flags indicates that the tags are in experimental stage
     const expected = new Uint8Array([
@@ -92,13 +90,12 @@ describe('ID3v2', function () {
     const audioBytes = new Uint8Array([255, 251, 176, 0, 0])
     const mp3tag = new MP3Tag(audioBytes.buffer, {
       padding: 8,
-      writer: { version: 3 }
+      version: 3
     })
 
     mp3tag.read()
     mp3tag.frames = [{ id: 'TALB', value: 'ALBUM' }]
     mp3tag.save()
-
     const actual = new Uint8Array(mp3tag.buffer)
     const expected = new Uint8Array([
       // bit "5" in flags indicates that the tags are in experimental stage
@@ -116,13 +113,12 @@ describe('ID3v2', function () {
     const audioBytes = new Uint8Array([255, 251, 176, 0, 0])
     const mp3tag = new MP3Tag(audioBytes.buffer, {
       padding: 8,
-      writer: { version: 4 }
+      version: 4
     })
 
     mp3tag.read()
     mp3tag.frames = [{ id: 'TALB', value: 'ALBUM' }]
     mp3tag.save()
-
     const actual = new Uint8Array(mp3tag.buffer)
     const expected = new Uint8Array([
       // bit "5" in flags indicates that the tags are in experimental stage

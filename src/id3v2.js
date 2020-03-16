@@ -6,24 +6,13 @@ import { decodeSynch, encodeSynch, mergeBytes, unsynch } from './utils/bytes'
 import BufferView from './utils/viewer'
 import TagError from './error'
 
-const options = {
-  padding: 2048,
-  writer: {
-    version: false
-  }
-}
-
 export default class ID3v2 {
-  get options () { return options }
-  set options (value) {
-    for (const key in options) {
-      if (value[key] !== undefined) options[key] = value[key]
-    }
-  }
-
   constructor (buffer, options = {}) {
     this.buffer = buffer
-    this.options = options
+    this.options = {
+      padding: options.padding !== undefined ? options.padding : 4096,
+      version: options.version !== undefined ? options.version : false
+    }
     this.frames = []
   }
 
@@ -61,39 +50,48 @@ export default class ID3v2 {
   }
 
   validate () {
-    const tagger = this
-    this.frames.forEach(function (frame) {
-      const frameDesc = frames[frame.id]
-      if (frameDesc) frameDesc.validate.call(tagger, frame)
-      else throw new TagError(202, frame.id)
-    })
+    const framesObj = this.parse()
+    let frameDesc
+    let frame
+
+    for (const id in framesObj) {
+      frameDesc = frames[id]
+      frame = { id: id, value: framesObj[id] }
+
+      if (frameDesc) frameDesc.validate(frame, this.major)
+      else throw new TagError(202, id)
+    }
 
     return true
   }
 
   save () {
-    if (this.frames.length === 0) return this.getAudio()
+    if (this.frames.length === 0) return this.getAudio().buffer
     if (!this.validate()) return false
 
-    this.major = this.options.writer.version || 3
+    this.major = this.options.version || this.major || 3
     this.minor = 0
 
+    const framesObj = this.parse()
     const headerBytes = [0x49, 0x44, 0x33, this.major, this.minor, 0b00100000]
     const sizeView = new BufferView(new ArrayBuffer(4))
     const paddingBytes = new Uint8Array(this.options.padding)
     const audioBytes = this.getAudio()
     const framesBytes = []
-    const tagger = this
+    let frameDesc
+    let frame
 
-    this.frames.forEach(function (frame) {
-      const frameDesc = frames[frame.id]
-      if (!frameDesc.version.includes(tagger.major)) {
-        throw new TagError(204, frame.id)
+    for (const id in framesObj) {
+      frameDesc = frames[id]
+      frame = { id: id, value: framesObj[id] }
+
+      if (!frameDesc.version.includes(this.major)) {
+        throw new TagError(204, id)
       }
 
-      const bytes = frameDesc.write.call(tagger, frame)
+      const bytes = frameDesc.write(frame, this.major)
       bytes.forEach(byte => framesBytes.push(byte))
-    })
+    }
 
     sizeView.setUint32(0, encodeSynch(framesBytes.length + paddingBytes.length))
     const resultBytes = mergeBytes(
@@ -105,6 +103,24 @@ export default class ID3v2 {
     this.read()
 
     return this.buffer
+  }
+
+  parse () {
+    const framesObj = {}
+
+    this.frames.forEach(function (frame) {
+      if (framesObj[frame.id]) {
+        if (Array.isArray(framesObj[frame.id])) {
+          framesObj[frame.id].push(frame.value)
+        } else {
+          framesObj[frame.id] = [framesObj[frame.id], frame.value]
+        }
+      } else {
+        framesObj[frame.id] = frame.value
+      }
+    })
+
+    return framesObj
   }
 
   getAudio () {
@@ -128,12 +144,20 @@ function decodeFrame (bytes) {
   const frame = {}
   frame.id = frameView.getUint8String(0, 4)
 
-  if (this.major === 3) frame.size = frameView.getUint32(4)
-  else if (this.major === 4) frame.size = decodeSynch(frameView.getUint32(4))
-  else throw new TagError(201, this.major)
+  switch (this.major) {
+    case 3:
+      frame.size = frameView.getUint32(4)
+      break
+
+    case 4:
+      frame.size = decodeSynch(frameView.getUint32(4))
+      break
+
+    default:
+      throw new TagError(201, this.major)
+  }
 
   frame.flags = flags.getFrameFlags(this.major, frameView.getUint8(8, 2))
-
   const frameDesc = frames[frame.id]
   let offset = 10
   let actualSize = frame.size
@@ -161,6 +185,6 @@ function decodeFrame (bytes) {
     contentBytes = frameView.buffer.slice(offset, offset + actualSize)
   }
 
-  frame.value = frameDesc.parse.call(this, new BufferView(contentBytes))
+  frame.value = frameDesc.parse(new BufferView(contentBytes), this.major)
   return frame
 }

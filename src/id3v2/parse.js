@@ -1,4 +1,7 @@
 
+import { mergeAsArray } from '../utils/array'
+import TagError from '../error'
+
 export const ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8']
 
 /**
@@ -7,55 +10,87 @@ export const ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8']
 
 /**
  *  Frame Parsers
- *  @param {BufferView} view - View of the entire frame including the header
- *  @this ID3v2 tagger class
+ *  @param {BufferView} view - View of the entire frame excluding the header
+ *  @param {number} version - Frame will be parsed with this version
  */
 
-export function textFrame (view) {
+export function textFrame (view, version) {
   /**
    *  Text encoding   $xx
    *  Information     <text string according to encoding>
    */
 
   const encoding = ENCODINGS[view.getUint8(0)]
-  return view.getCString(1, encoding).string
-}
+  let value
 
-export function arrayFrame (view) {
-  // Multiple-value text frames
-  const text = textFrame.call(this, view)
-  let value = []
+  switch (version) {
+    case 3:
+      value = view.getCString(1, encoding).string
+      break
 
-  if (this.major === 3) value = text.split('/')
-  /**
-   *  @TODO: ID3v2.4 can now have multiple text frames with the same ID
-   */
-  else if (this.major === 4) value = text.split(';')
+    case 4:
+      value = view.getString(1, view.byteLength - 1, encoding).split('\0')
+      if (value.length === 1) value = value[0]
+      break
+
+    default:
+      throw new TagError(201, version)
+  }
 
   return value
 }
 
-export function numberFrame (view) {
+export function arrayFrame (view, version) {
+  // Multiple-value text frames
+  const text = textFrame(view, version)
+  let value = []
+
+  switch (version) {
+    case 3:
+      value = text.split('/')
+      break
+
+    case 4:
+      if (!Array.isArray(text)) value = [text]
+      else value = text
+      break
+
+    default:
+      throw new TagError(201, version)
+  }
+
+  return value
+}
+
+export function numberFrame (view, version) {
   // Text numerical string frames
-  const text = textFrame.call(this, view)
+  const text = textFrame(view, version)
   return text.match(/^(\d+)$/) ? parseInt(text) : text
 }
 
-export function setFrame (view) {
+export function setFrame (view, version) {
   // Set frames (e.g. "1/2")
-  const text = textFrame.call(this, view)
-  return text.match(/^(\d+)\/(\d+)/) ? {
-    position: parseInt(text.split('/')[0]),
-    total: parseInt(text.split('/')[1])
-  } : text
+  const text = textFrame(view, version)
+  const array = mergeAsArray(text)
+  const value = []
+
+  array.forEach(function (elem) {
+    const splitted = elem.split('/')
+    value.push(elem.match(/^(\d+)\/(\d+)/) ? {
+      position: parseInt(splitted[0]),
+      total: parseInt(splitted[1])
+    } : elem)
+  })
+
+  return value.length === 1 ? value[0] : value
 }
 
-export function urlFrame (view) {
+export function urlFrame (view, version) {
   // URL   <text string>
   return view.getCString(0, 'ascii').string
 }
 
-export function txxxFrame (view) {
+export function txxxFrame (view, version) {
   /**
    *  Text encoding   $xx
    *  Description     <text string according to encoding> $00 (00)
