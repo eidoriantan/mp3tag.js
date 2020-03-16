@@ -7,6 +7,9 @@
 audio files. It currently can read both ID3v2.3 and ID3v2.4 tags, write tags and
 remove tags.
 
+Visit [https://mp3tag.js.org](https://mp3tag.js.org) to learn more about the
+library and view it in action through an editor.
+
 You can learn about the frames by visiting the
 [Official ID3 site](http://id3.org)
 
@@ -14,6 +17,7 @@ You can learn about the frames by visiting the
  * Read ID3v2.3 and ID3v2.4 tags
  * Write ID3v2.3 and ID3v2.4 tags
  * Remove tags
+ * Multiple frames
  * Supports unsynchronization flag
  * Input validation
 
