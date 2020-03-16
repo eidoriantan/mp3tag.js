@@ -153,6 +153,7 @@
       c = bytes[i++];
 
       switch (c >> 4) {
+        case 0:
         case 1:
         case 2:
         case 3:
@@ -315,6 +316,10 @@
         var bytes = this.getUint8(offset, length);
         var string = '';
 
+        if (!ArrayBuffer.isView(bytes)) {
+          bytes = [bytes];
+        }
+
         for (var i = 0; i < bytes.length; i++) {
           var character = String.fromCharCode(bytes[i]);
           string += character;
@@ -327,6 +332,10 @@
       value: function getUint8CString(offset) {
         var bytes = this.getUint8(offset, this.byteLength - offset);
         var string = '';
+
+        if (!ArrayBuffer.isView(bytes)) {
+          bytes = [bytes];
+        }
 
         for (var i = 0; i < bytes.length; i++) {
           var _byte = bytes[i];
@@ -573,6 +582,21 @@
     return flags;
   }
 
+  function mergeAsArray() {
+    var array = [];
+
+    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+      params[_key] = arguments[_key];
+    }
+
+    params.forEach(function (param) {
+      if (Array.isArray(param)) param.forEach(function (elem) {
+        return array.push(elem);
+      });else array.push(param);
+    });
+    return array;
+  }
+
   var ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8'];
   /**
    *  @see http://id3.org/id3v2.3.0
@@ -580,47 +604,78 @@
 
   /**
    *  Frame Parsers
-   *  @param {BufferView} view - View of the entire frame including the header
-   *  @this ID3v2 tagger class
+   *  @param {BufferView} view - View of the entire frame excluding the header
+   *  @param {number} version - Frame will be parsed with this version
    */
 
-  function textFrame(view) {
+  function textFrame(view, version) {
     /**
      *  Text encoding   $xx
      *  Information     <text string according to encoding>
      */
     var encoding = ENCODINGS[view.getUint8(0)];
-    return view.getCString(1, encoding).string;
-  }
-  function arrayFrame(view) {
-    // Multiple-value text frames
-    var text = textFrame.call(this, view);
-    var value = [];
-    if (this.major === 3) value = text.split('/');
-    /**
-     *  @TODO: ID3v2.4 can now have multiple text frames with the same ID
-     */
-    else if (this.major === 4) value = text.split(';');
+    var value;
+
+    switch (version) {
+      case 3:
+        value = view.getCString(1, encoding).string;
+        break;
+
+      case 4:
+        value = view.getString(1, view.byteLength - 1, encoding).split('\0');
+        if (value.length === 1) value = value[0];
+        break;
+
+      default:
+        throw new TagError(201, version);
+    }
+
     return value;
   }
-  function numberFrame(view) {
+  function arrayFrame(view, version) {
+    // Multiple-value text frames
+    var text = textFrame(view, version);
+    var value = [];
+
+    switch (version) {
+      case 3:
+        value = text.split('/');
+        break;
+
+      case 4:
+        if (!Array.isArray(text)) value = [text];else value = text;
+        break;
+
+      default:
+        throw new TagError(201, version);
+    }
+
+    return value;
+  }
+  function numberFrame(view, version) {
     // Text numerical string frames
-    var text = textFrame.call(this, view);
+    var text = textFrame(view, version);
     return text.match(/^(\d+)$/) ? parseInt(text) : text;
   }
-  function setFrame(view) {
+  function setFrame(view, version) {
     // Set frames (e.g. "1/2")
-    var text = textFrame.call(this, view);
-    return text.match(/^(\d+)\/(\d+)/) ? {
-      position: parseInt(text.split('/')[0]),
-      total: parseInt(text.split('/')[1])
-    } : text;
+    var text = textFrame(view, version);
+    var array = mergeAsArray(text);
+    var value = [];
+    array.forEach(function (elem) {
+      var splitted = elem.split('/');
+      value.push(elem.match(/^(\d+)\/(\d+)/) ? {
+        position: parseInt(splitted[0]),
+        total: parseInt(splitted[1])
+      } : elem);
+    });
+    return value.length === 1 ? value[0] : value;
   }
-  function urlFrame(view) {
+  function urlFrame(view, version) {
     // URL   <text string>
     return view.getCString(0, 'ascii').string;
   }
-  function txxxFrame(view) {
+  function txxxFrame(view, version) {
     /**
      *  Text encoding   $xx
      *  Description     <text string according to encoding> $00 (00)
@@ -693,119 +748,106 @@
   var langRegex = /^([a-z]{3})$/;
 
   function validateID(id) {
-    if (typeof id !== 'string') {
-      throw new TagError(203, 'ID is not a string');
-    }
-
     if (!id.match(/^([a-zA-Z0-9]{4})$/)) {
       throw new TagError(203, 'ID is invalid');
     }
 
     return true;
   }
-
-  function noDuplicate(frames, frame, keys) {
-    var duplicate = 0;
-    frames.forEach(function (compare) {
-      var sameCount = 0;
-      keys.forEach(function (key) {
-        if (key === 'id' && frame[key] === compare[key] || key !== 'id' && frame.id === compare.id && frame.value[key] === compare.value[key]) sameCount++;
-      });
-      duplicate += sameCount === keys.length ? 1 : 0;
-    });
-
-    if (duplicate > 1) {
-      var ks = keys.join(', ');
-      throw new TagError(203, "There may only 1 ".concat(frame.id, " with the same ").concat(ks));
-    }
-  }
   /**
    *  Validators
    *  @param {Object} frame - Frame to be validated
-   *  @this ID3v2 tagger class
+   *  @param {number} version - Frame will be validated with this version
    */
 
 
-  function textFrame$1(frame) {
+  function textFrame$1(frame, version) {
     validateID(frame.id);
-    if (this.major === 3) noDuplicate(this.frames, frame, ['id']);
-
-    if (typeof frame.value !== 'string') {
-      throw new TagError(203, "".concat(frame.id, " value is not a string"));
-    }
-
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      if (typeof elem !== 'string') {
+        throw new TagError(203, "".concat(frame.id, " value is not a string"));
+      }
+    });
     return true;
   }
-  function arrayFrame$1(frame) {
+  function arrayFrame$1(frame, version) {
     validateID(frame.id);
-    if (this.major === 3) noDuplicate(this.frames, frame, ['id']);
 
     if (!Array.isArray(frame.value)) {
       throw new TagError(203, "".concat(frame.id, " value is not an array"));
     }
 
+    frame.value.forEach(function (text) {
+      if (typeof text !== 'string') {
+        throw new TagError(203, "".concat(frame.id, " value is not a string"));
+      }
+    });
     return true;
   }
-  function numberFrame$1(frame) {
+  function numberFrame$1(frame, version) {
     validateID(frame.id);
-    if (this.major === 3) noDuplicate(this.frames, frame, ['id']);
-
-    if (typeof frame.value !== 'number') {
-      throw new TagError(203, "".concat(frame.id, " value is not a number"));
-    }
-
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      if (typeof elem !== 'number') {
+        throw new TagError(203, "".concat(frame.id, " value is not a number"));
+      }
+    });
     return true;
   }
-  function setFrame$1(frame) {
+  function setFrame$1(frame, version) {
     validateID(frame.id);
-    if (this.major === 3) noDuplicate(this.frames, frame, ['id']);
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      if (typeof elem.position !== 'number' || typeof elem.total !== 'number') {
+        throw new TagError(203, "".concat(frame.id, " position/total is not a number"));
+      }
 
-    if (typeof frame.value.position !== 'number' || typeof frame.value.total !== 'number') {
-      throw new TagError(203, 'Set frame position/total is not a number');
-    }
-
-    if (frame.value.position > frame.value.total) {
-      throw new TagError(203, 'Position is greater than total');
-    }
-
+      if (elem.position > elem.total) {
+        throw new TagError(203, "".concat(frame.id, " position is greater than total"));
+      }
+    });
     return true;
   }
-  function timeFrame(frame) {
+  function timeFrame(frame, version) {
     validateID(frame.id);
-    if (this.major === 3) noDuplicate(this.frames, frame, ['id']);
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      switch (version) {
+        case 3:
+          if (!elem.toString().match(/^([0-9]{4})$/)) {
+            throw new TagError(203, "".concat(frame.id, " is not 4 numeric characters"));
+          }
 
-    switch (this.major) {
-      case 3:
-        if (!frame.value.toString().match(/^([0-9]{4})$/)) {
-          throw new TagError(203, 'Date Frame is not 4 numeric characters long');
-        }
+          break;
 
-        break;
-
-      case 4:
-        if (typeof frame.value !== 'string') {
-          throw new TagError(203, 'Time Frames is not a string');
-        }
-        /**
-         *  @TODO Improve regex matching the format
-         */
+        case 4:
+          if (typeof elem !== 'string') {
+            throw new TagError(203, "".concat(frame.id, " value is not a string"));
+          }
+          /**
+           *  @TODO Improve regex matching the format
+           */
 
 
-        if (!frame.value.match(/^([0-9]{8})T([0-9]{6})$/)) {
-          throw new TagError(203, 'Time Frames should follow this format: YYYYMMDD\\THHMMSS');
-        }
+          if (!elem.match(/^([0-9]{8})T([0-9]{6})$/)) {
+            throw new TagError(203, 'Time Frames should follow this format: YYYYMMDD\\THHMMSS');
+          }
 
-        break;
+          break;
 
-      default:
-        throw new TagError(201, this.major);
-    }
-
+        default:
+          throw new TagError(201, version);
+      }
+    });
     return true;
   }
-  function urlFrame$1(frame) {
+  function urlFrame$1(frame, version) {
     validateID(frame.id);
-    noDuplicate(this.frames, frame, ['id']);
+
+    if (typeof frame.value !== 'string') {
+      throw new TagError(203, "".concat(frame.id, " value is not a string"));
+    }
 
     if (!frame.value.match(urlRegex)) {
       throw new TagError(203, 'URL is not a valid URL');
@@ -815,109 +857,132 @@
   }
   function txxxFrame$1(frame) {
     validateID(frame.id);
-    noDuplicate(this.frames, frame, ['description']);
+    var array = mergeAsArray(frame.value);
+    var descriptions = [];
+    array.forEach(function (elem) {
+      if (typeof elem.description !== 'string' || typeof elem.text !== 'string') {
+        throw new TagError(203, 'User-defined text/description is not a string');
+      }
 
-    if (typeof frame.value.description !== 'string' || typeof frame.value.text !== 'string') {
-      throw new TagError(203, 'User-defined text/description is not a string');
-    }
-
+      if (descriptions.includes(elem.description)) {
+        throw new TagError(203, 'User-defined description should not duplicate');
+      } else {
+        descriptions.push(elem.description);
+      }
+    });
     return true;
   }
-  function wxxxFrame$1(frame) {
+  function wxxxFrame$1(frame, version) {
     validateID(frame.id);
-    noDuplicate(this.frames, frame, ['description']);
+    var array = mergeAsArray(frame.value);
+    var descriptions = [];
+    array.forEach(function (elem) {
+      if (typeof elem.description !== 'string' || typeof elem.url !== 'string') {
+        throw new TagError(203, 'User-defined text/description is not a string');
+      }
 
-    if (typeof frame.value.description !== 'string' || typeof frame.value.url !== 'string') {
-      throw new TagError(203, 'User-defined text/description is not a string');
-    }
+      if (!elem.url.match(urlRegex)) {
+        throw new TagError(203, 'User-defined URL is an invalid URL');
+      }
 
-    if (!frame.value.url.match(urlRegex)) {
-      throw new TagError(203, 'URL is not a valid URL');
-    }
-
+      if (descriptions.includes(elem.description)) {
+        throw new TagError(203, 'User-defined description should not duplicate');
+      } else {
+        descriptions.push(elem.description);
+      }
+    });
     return true;
   }
-  function tkeyFrame(frame) {
+  function tkeyFrame(frame, version) {
     validateID(frame.id);
-    if (this.major === 3) noDuplicate(this.frames, frame, ['id']);
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      if (typeof elem !== 'string') {
+        throw new TagError(203, 'TKEY is not a string');
+      }
 
-    if (typeof frame.value !== 'string') {
-      throw new TagError(203, 'TKEY is not a string');
-    }
-
-    if (!frame.value.match(/^([A-Gb#mo]{3})$/)) {
-      throw new TagError(203, 'Invalid TKEY Format (e.g. Cbm)');
-    }
-
+      if (!elem.match(/^([A-Gb#mo]{3})$/)) {
+        throw new TagError(203, 'Invalid TKEY Format (e.g. Cbm)');
+      }
+    });
     return true;
   }
-  function tlanFrame(frame) {
+  function tlanFrame(frame, version) {
     validateID(frame.id);
-    if (this.major === 3) noDuplicate(this.frames, frame, ['id']);
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      if (typeof elem !== 'string') {
+        throw new TagError(203, 'TLAN is not a string');
+      }
 
-    if (typeof frame.value !== 'string') {
-      throw new TagError(203, 'TLAN is not a string');
-    }
-
-    if (!frame.value.toString().match(/^([a-z]{3})$/)) {
-      throw new TagError(203, 'Language does not follow ISO 639-2');
-    }
-
+      if (!elem.match(langRegex)) {
+        throw new TagError(203, 'Language does not follow ISO 639-2');
+      }
+    });
     return true;
   }
-  function tsrcFrame(frame) {
+  function tsrcFrame(frame, version) {
     validateID(frame.id);
-    if (this.major === 3) noDuplicate(this.frames, frame, ['id']);
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      if (typeof elem !== 'string') {
+        throw new TagError(203, 'TSRC is not a string');
+      }
 
-    if (typeof frame.value !== 'string') {
-      throw new TagError(203, 'TSRC is not a string');
-    }
-
-    if (!frame.value.match(/^([a-zA-Z0-9]{12})$/)) {
-      throw new TagError(203, 'Invalid ISRC format');
-    }
-
+      if (!elem.match(/^([a-zA-Z0-9]{12})$/)) {
+        throw new TagError(203, 'Invalid ISRC format');
+      }
+    });
     return true;
   }
-  function langDescFrame$1(frame) {
+  function langDescFrame$1(frame, version) {
     validateID(frame.id);
-    noDuplicate(this.frames, frame, ['language', 'descriptor']);
-    frame.value.descriptor = frame.value.descriptor || '';
+    var array = mergeAsArray(frame.value);
+    var descriptors = [];
+    array.forEach(function (elem) {
+      if (typeof elem.language !== 'string' || typeof elem.descriptor !== 'string' || typeof elem.text !== 'string') {
+        throw new TagError(203, 'Language/descriptor/text is not a string');
+      }
 
-    if (typeof frame.value.language !== 'string' || typeof frame.value.descriptor !== 'string' || typeof frame.value.text !== 'string') {
-      throw new TagError(203, 'Language/descriptor/text is not a string');
-    }
+      if (!elem.language.match(langRegex)) {
+        throw new TagError(203, 'Language does not follow ISO 639-2');
+      }
 
-    if (!frame.value.language.match(langRegex)) {
-      throw new TagError(203, 'Language does not follow ISO 639-2');
-    }
-
+      if (descriptors.includes(elem.descriptor)) {
+        throw new TagError(203, 'Language/descriptor/text should not duplicate');
+      } else {
+        descriptors.push(elem.descriptor);
+      }
+    });
     return true;
   }
-  function apicFrame$1(frame) {
+  function apicFrame$1(frame, version) {
     validateID(frame.id);
-    noDuplicate(this.frames, frame, ['id', 'description']);
+    var array = mergeAsArray(frame.value);
+    var descriptions = [];
+    array.forEach(function (elem) {
+      if (typeof elem.format !== 'string' || typeof elem.description !== 'string' || typeof elem.type !== 'number') {
+        throw new TagError(203, 'MIME, type, or description is invalid');
+      }
 
-    if (typeof frame.value.format !== 'string' || typeof frame.value.description !== 'string' || typeof frame.value.type !== 'number') {
-      throw new TagError(203, 'MIME, type, or description is not a string');
-    }
+      if (!(elem.data instanceof ArrayBuffer) && !Array.isArray(elem.data) && !ArrayBuffer.isView(elem.data)) {
+        throw new TagError(203, 'Image data should be ArrayBuffer or an array');
+      }
 
-    if (frame.value.format === 'png' || frame.value.format === 'jpeg') {
-      frame.value.format = 'image/' + frame.value.format;
-    }
+      if (descriptions.includes(elem.description)) {
+        throw new TagError(203, 'Cover description should not duplicate');
+      } else {
+        descriptions.push(elem.description);
+      }
 
-    if (!frame.value.format.match(/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/)) {
-      throw new TagError(203, 'MIME type should be an image');
-    }
+      if (elem.description.length > 64) {
+        throw new TagError(203, 'Description should not exceed 64');
+      }
 
-    if (frame.value.description.length > 64) {
-      throw new TagError(203, 'Description should not exceed 64');
-    }
-
-    if (frame.value.data instanceof ArrayBuffer || Array.isArray(frame.value.data) || ArrayBuffer.isView(frame.value.data) && !(frame.value.data instanceof DataView)) ; else {
-      throw new TagError(203, 'Image data should be ArrayBuffer or an array');
-    }
-
+      if (!elem.format.match(/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/)) {
+        throw new TagError(203, 'MIME type should be an image');
+      }
+    });
     return true;
   }
 
@@ -928,548 +993,617 @@
   function getHeaderBytes(id, size, version) {
     var idBytes = encodeString(id, 'ascii');
     var sizeView = new BufferView(new ArrayBuffer(4));
-    if (version === 3) sizeView.setUint32(0, size);else if (version === 4) sizeView.setUint32(0, encodeSynch(size));
+
+    switch (version) {
+      case 3:
+        sizeView.setUint32(0, size);
+        break;
+
+      case 4:
+        sizeView.setUint32(0, encodeSynch(size));
+        break;
+
+      default:
+        throw new TagError(201, version);
+    }
+
     return mergeBytes(idBytes, sizeView.getUint8(0, 4), 0, 0);
   }
   /**
    *  Frames writers
    *  @param {Object} frame - Frame id and its value
-   *  @this ID3v2 tagger class
+   *  @param {number} version - Frame will be written with this version
    */
 
 
-  function textFrame$2(frame) {
+  function textFrame$2(frame, version) {
     var encoding = 0;
     var strBytes = [];
 
-    switch (this.major) {
+    switch (version) {
       case 3:
         encoding = 1;
         strBytes = encodeString(frame.value + '\0', 'utf-16');
         break;
 
       case 4:
+        if (Array.isArray(frame.value)) frame.value = frame.value.join('\0');
         encoding = 3;
         strBytes = encodeString(frame.value + '\0', 'utf-8');
         break;
 
       default:
-        throw new TagError(201, this.major);
+        throw new TagError(201, version);
     }
 
-    var header = getHeaderBytes(frame.id, strBytes.length + 1, this.major);
+    var header = getHeaderBytes(frame.id, strBytes.length + 1, version);
     return mergeBytes(header, encoding, strBytes);
   }
-  function arrayFrame$2(frame) {
-    /**
-     *  @TODO ID3v2.4 - Add another frame with the same ID instead of joining
-     *  them with a separator
-     */
-    frame.value = frame.value.join('/');
-    return textFrame$2.call(this, frame);
+  function arrayFrame$2(frame, version) {
+    switch (version) {
+      case 3:
+        frame.value = frame.value.join('/');
+        break;
+
+      case 4:
+        frame.value = frame.value.join('\0');
+        break;
+
+      default:
+        throw new TagError(201, version);
+    }
+
+    return textFrame$2(frame, version);
   }
-  function asciiFrame(frame) {
-    var encoding = 0;
-    var strBytes = encodeString(frame.value.toString(), 'ascii');
-    var header = getHeaderBytes(frame.id, strBytes.length + 1, this.major);
-    return mergeBytes(header, encoding, strBytes);
+  function asciiFrame(frame, version) {
+    var strBytes = encodeString(frame.value.toString() + '\0', 'ascii');
+    var header = getHeaderBytes(frame.id, strBytes.length + 1, version);
+    return mergeBytes(header, 0, strBytes);
   }
-  function setFrame$2(frame) {
-    frame.value = frame.value.position + '/' + frame.value.total;
-    return textFrame$2.call(this, frame);
+  function setFrame$2(frame, version) {
+    switch (version) {
+      case 3:
+        frame.value = frame.value.position + '/' + frame.value.total;
+        break;
+
+      case 4:
+        {
+          var array = mergeAsArray(frame.value);
+          var value = [];
+          array.forEach(function (elem) {
+            value.push(elem.position + '/' + elem.total);
+          });
+          frame.value = value.join('\0');
+          break;
+        }
+    }
+
+    return asciiFrame(frame, version);
   }
-  function urlFrame$2(frame) {
-    var strBytes = encodeString(frame.value, 'ascii');
-    var header = getHeaderBytes(frame.id, strBytes.length, this.major);
+  function urlFrame$2(frame, version) {
+    var strBytes = encodeString(frame.value + '\0', 'ascii');
+    var header = getHeaderBytes(frame.id, strBytes.length, version);
     return mergeBytes(header, strBytes);
   }
-  function txxxFrame$2(frame) {
-    var encoding = 0;
-    var descBytes = [];
-    var strBytes = [];
+  function txxxFrame$2(frame, version) {
+    var bytes = [];
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      var encoding = 0;
+      var descBytes = [];
+      var strBytes = [];
 
-    switch (this.major) {
-      case 3:
-        encoding = 1;
-        descBytes = encodeString(frame.value.description + '\0', 'utf-16');
-        strBytes = encodeString(frame.value.text, 'utf-16');
-        break;
+      switch (version) {
+        case 3:
+          encoding = 1;
+          descBytes = encodeString(elem.description + '\0', 'utf-16');
+          strBytes = encodeString(elem.text + '\0', 'utf-16');
+          break;
 
-      case 4:
-        encoding = 3;
-        descBytes = encodeString(frame.value.description + '\0', 'utf-8');
-        strBytes = encodeString(frame.value.text, 'utf-8');
-        break;
+        case 4:
+          encoding = 3;
+          descBytes = encodeString(elem.description + '\0', 'utf-8');
+          strBytes = encodeString(elem.text + '\0', 'utf-8');
+          break;
 
-      default:
-        throw new TagError(201, this.major);
-    }
+        default:
+          throw new TagError(201, version);
+      }
 
-    var size = descBytes.length + strBytes.length + 1;
-    var header = getHeaderBytes(frame.id, size, this.major);
-    return mergeBytes(header, encoding, descBytes, strBytes);
+      var size = descBytes.length + strBytes.length + 1;
+      var header = getHeaderBytes(frame.id, size, version);
+      var merged = mergeBytes(header, encoding, descBytes, strBytes);
+      merged.forEach(function (_byte) {
+        return bytes.push(_byte);
+      });
+    });
+    return bytes;
   }
-  function wxxxFrame$2(frame) {
-    var encoding = 0;
-    var descBytes = [];
-    var strBytes = [];
+  function wxxxFrame$2(frame, version) {
+    var bytes = [];
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      var encoding = 0;
+      var descBytes = [];
+      var strBytes = [];
 
-    switch (this.major) {
-      case 3:
-        encoding = 1;
-        descBytes = encodeString(frame.value.description + '\0', 'utf-16');
-        strBytes = encodeString(frame.value.text, 'ascii');
-        break;
+      switch (version) {
+        case 3:
+          encoding = 1;
+          descBytes = encodeString(elem.description + '\0', 'utf-16');
+          strBytes = encodeString(elem.url, 'ascii');
+          break;
 
-      case 4:
-        encoding = 3;
-        descBytes = encodeString(frame.value.description + '\0', 'utf-8');
-        strBytes = encodeString(frame.value.text, 'ascii');
-        break;
+        case 4:
+          encoding = 3;
+          descBytes = encodeString(elem.description + '\0', 'utf-8');
+          strBytes = encodeString(elem.url, 'ascii');
+          break;
 
-      default:
-        throw new TagError(201, this.major);
-    }
+        default:
+          throw new TagError(201, version);
+      }
 
-    var size = descBytes.length + strBytes.length + 1;
-    var header = getHeaderBytes(frame.id, size, this.major);
-    return mergeBytes(header, encoding, descBytes, strBytes);
+      var size = descBytes.length + strBytes.length + 1;
+      var header = getHeaderBytes(frame.id, size, version);
+      var merged = mergeBytes(header, encoding, descBytes, strBytes);
+      merged.forEach(function (_byte2) {
+        return bytes.push(_byte2);
+      });
+    });
+    return bytes;
   }
-  function langDescFrame$2(frame) {
-    var encoding = 0;
-    var langBytes = encodeString(frame.value.language, 'ascii');
-    var descBytes = [];
-    var textBytes = [];
+  function langDescFrame$2(frame, version) {
+    var bytes = [];
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      var encoding = 0;
+      var langBytes = encodeString(elem.language, 'ascii');
+      var descBytes = [];
+      var textBytes = [];
 
-    switch (this.major) {
-      case 3:
-        encoding = 1;
-        descBytes = encodeString(frame.value.descriptor + '\0', 'utf-16');
-        textBytes = encodeString(frame.value.text, 'utf-16');
-        break;
+      switch (version) {
+        case 3:
+          encoding = 1;
+          descBytes = encodeString(elem.descriptor + '\0', 'utf-16');
+          textBytes = encodeString(elem.text, 'utf-16');
+          break;
 
-      case 4:
-        encoding = 3;
-        descBytes = encodeString(frame.value.descriptor + '\0', 'utf-16');
-        textBytes = encodeString(frame.value.text, 'utf-16');
-        break;
+        case 4:
+          encoding = 3;
+          descBytes = encodeString(elem.descriptor + '\0', 'utf-8');
+          textBytes = encodeString(elem.text, 'utf-8');
+          break;
 
-      default:
-        throw new TagError(201, this.major);
-    }
+        default:
+          throw new TagError(201, version);
+      }
 
-    var size = descBytes.length + textBytes.length + 4;
-    var header = getHeaderBytes(frame.id, size, this.major);
-    return mergeBytes(header, encoding, langBytes, descBytes, textBytes);
+      var size = descBytes.length + textBytes.length + 4;
+      var header = getHeaderBytes(frame.id, size, version);
+      var merged = mergeBytes(header, encoding, langBytes, descBytes, textBytes);
+      merged.forEach(function (_byte3) {
+        return bytes.push(_byte3);
+      });
+    });
+    return bytes;
   }
-  function apicFrame$2(frame) {
-    var encoding = 0;
-    var mimeBytes = encodeString(frame.value.format + '\0', 'ascii');
-    var imageBytes = new Uint8Array(frame.value.data);
-    var strBytes = [];
+  function apicFrame$2(frame, version) {
+    var bytes = [];
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      var encoding = 0;
+      var mimeBytes = encodeString(elem.format + '\0', 'ascii');
+      var imageBytes = new Uint8Array(elem.data);
+      var strBytes = [];
 
-    switch (this.major) {
-      case 3:
-        encoding = 1;
-        strBytes = encodeString(frame.value.description + '\0', 'utf-16');
-        break;
+      switch (version) {
+        case 3:
+          encoding = 1;
+          strBytes = encodeString(elem.description + '\0', 'utf-16');
+          break;
 
-      case 4:
-        encoding = 3;
-        strBytes = encodeString(frame.value.description + '\0', 'utf-8');
-        break;
+        case 4:
+          encoding = 3;
+          strBytes = encodeString(elem.description + '\0', 'utf-8');
+          break;
 
-      default:
-        throw new TagError(201, this.major);
-    }
+        default:
+          throw new TagError(201, version);
+      }
 
-    var size = mimeBytes.length + strBytes.length + imageBytes.length + 2;
-    var header = getHeaderBytes(frame.id, size, this.major);
-    return mergeBytes(header, encoding, mimeBytes, frame.value.type, strBytes, imageBytes);
+      var size = mimeBytes.length + strBytes.length + imageBytes.length + 2;
+      var header = getHeaderBytes(frame.id, size, version);
+      var merged = mergeBytes(header, encoding, mimeBytes, elem.type, strBytes, imageBytes);
+      merged.forEach(function (_byte4) {
+        return bytes.push(_byte4);
+      });
+    });
+    return bytes;
   }
 
   var APIC = {
     parse: apicFrame,
     validate: apicFrame$1,
-    getBytes: apicFrame$2,
+    write: apicFrame$2,
     version: [3, 4]
   };
   var COMM = {
     parse: langDescFrame,
     validate: langDescFrame$1,
-    getBytes: langDescFrame$2,
+    write: langDescFrame$2,
     version: [3, 4]
   };
   var TALB = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TBPM = {
     parse: numberFrame,
     validate: numberFrame$1,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [3, 4]
   };
   var TCOM = {
     parse: arrayFrame,
     validate: arrayFrame$1,
-    getBytes: arrayFrame$2,
+    write: arrayFrame$2,
     version: [3, 4]
   };
   var TCON = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TCOP = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TDAT = {
     parse: numberFrame,
     validate: timeFrame,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [3]
   };
   var TDEN = {
     parse: textFrame,
     validate: timeFrame,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [4]
   };
   var TDLY = {
     parse: numberFrame,
     validate: numberFrame$1,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [3]
   };
   var TDOR = {
     parse: textFrame,
     validate: timeFrame,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [4]
   };
   var TDRC = {
     parse: textFrame,
     validate: timeFrame,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [4]
   };
   var TDRL = {
     parse: textFrame,
     validate: timeFrame,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [4]
   };
   var TDTG = {
     parse: textFrame,
     validate: timeFrame,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [4]
   };
   var TENC = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TEXT = {
     parse: arrayFrame,
     validate: arrayFrame$1,
-    getBytes: arrayFrame$2,
+    write: arrayFrame$2,
     version: [3, 4]
   };
   var TFLT = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TIME = {
     parse: numberFrame,
     validate: timeFrame,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [3]
   };
   var TIPL = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [4]
   };
   var TIT1 = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TIT2 = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TIT3 = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TKEY = {
     parse: textFrame,
     validate: tkeyFrame,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [3, 4]
   };
   var TLAN = {
     parse: textFrame,
     validate: tlanFrame,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [3, 4]
   };
   var TLEN = {
     parse: numberFrame,
     validate: numberFrame$1,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [3, 4]
   };
   var TMED = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TMOO = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [4]
   };
   var TOAL = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TOFN = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TOLY = {
     parse: arrayFrame,
     validate: arrayFrame$1,
-    getBytes: arrayFrame$2,
+    write: arrayFrame$2,
     version: [3, 4]
   };
   var TOPE = {
     parse: arrayFrame,
     validate: arrayFrame$1,
-    getBytes: arrayFrame$2,
+    write: arrayFrame$2,
     version: [3, 4]
   };
   var TORY = {
     parse: numberFrame,
     validate: timeFrame,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [3]
   };
   var TOWN = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TPE1 = {
     parse: arrayFrame,
     validate: arrayFrame$1,
-    getBytes: arrayFrame$2,
+    write: arrayFrame$2,
     version: [3, 4]
   };
   var TPE2 = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TPE3 = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TPE4 = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TPOS = {
     parse: setFrame,
     validate: setFrame$1,
-    getBytes: setFrame$2,
+    write: setFrame$2,
     version: [3, 4]
   };
   var TPRO = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [4]
   };
   var TPUB = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TRCK = {
     parse: setFrame,
     validate: setFrame$1,
-    getBytes: setFrame$2,
+    write: setFrame$2,
     version: [3, 4]
   };
   var TRDA = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3]
   };
   var TRSN = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TRSO = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TSIZ = {
     parse: numberFrame,
     validate: numberFrame$1,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [3]
   };
   var TSOA = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [4]
   };
   var TSOC = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [4]
   };
   var TSOP = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [4]
   };
   var TSOT = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [4]
   };
   var TSRC = {
     parse: textFrame,
     validate: tsrcFrame,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [3, 4]
   };
   var TSSE = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [3, 4]
   };
   var TSST = {
     parse: textFrame,
     validate: textFrame$1,
-    getBytes: textFrame$2,
+    write: textFrame$2,
     version: [4]
   };
   var TYER = {
     parse: numberFrame,
     validate: timeFrame,
-    getBytes: asciiFrame,
+    write: asciiFrame,
     version: [3]
   };
   var TXXX = {
     parse: txxxFrame,
     validate: txxxFrame$1,
-    getBytes: txxxFrame$2,
+    write: txxxFrame$2,
     version: [3, 4]
   };
   var USLT = {
     parse: langDescFrame,
     validate: langDescFrame$1,
-    getBytes: langDescFrame$2,
+    write: langDescFrame$2,
     version: [3, 4]
   };
   var WCOM = {
     parse: urlFrame,
     validate: urlFrame$1,
-    getBytes: urlFrame$2,
+    write: urlFrame$2,
     version: [3, 4]
   };
   var WCOP = {
     parse: urlFrame,
     validate: urlFrame$1,
-    getBytes: urlFrame$2,
+    write: urlFrame$2,
     version: [3, 4]
   };
   var WOAF = {
     parse: urlFrame,
     validate: urlFrame$1,
-    getBytes: urlFrame$2,
+    write: urlFrame$2,
     version: [3, 4]
   };
   var WOAR = {
     parse: urlFrame,
     validate: urlFrame$1,
-    getBytes: urlFrame$2,
+    write: urlFrame$2,
     version: [3, 4]
   };
   var WOAS = {
     parse: urlFrame,
     validate: urlFrame$1,
-    getBytes: urlFrame$2,
+    write: urlFrame$2,
     version: [3, 4]
   };
   var WORS = {
     parse: urlFrame,
     validate: urlFrame$1,
-    getBytes: urlFrame$2,
+    write: urlFrame$2,
     version: [3, 4]
   };
   var WPAY = {
     parse: urlFrame,
     validate: urlFrame$1,
-    getBytes: urlFrame$2,
+    write: urlFrame$2,
     version: [3, 4]
   };
   var WPUB = {
     parse: urlFrame,
     validate: urlFrame$1,
-    getBytes: urlFrame$2,
+    write: urlFrame$2,
     version: [3, 4]
   };
   var WXXX = {
     parse: wxxxFrame,
     validate: wxxxFrame$1,
-    getBytes: wxxxFrame$2,
+    write: wxxxFrame$2,
     version: [3, 4]
   };
 
@@ -1541,33 +1675,17 @@
     WXXX: WXXX
   });
 
-  var options = {
-    padding: 2048,
-    writer: {
-      version: false
-    }
-  };
-
   var ID3v2 = /*#__PURE__*/function () {
-    _createClass(ID3v2, [{
-      key: "options",
-      get: function get() {
-        return options;
-      },
-      set: function set(value) {
-        for (var key in options) {
-          if (value[key] !== undefined) options[key] = value[key];
-        }
-      }
-    }]);
-
     function ID3v2(buffer) {
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
       _classCallCheck(this, ID3v2);
 
       this.buffer = buffer;
-      this.options = options;
+      this.options = {
+        padding: options.padding !== undefined ? options.padding : 4096,
+        version: options.version !== undefined ? options.version : false
+      };
       this.frames = [];
     }
 
@@ -1609,43 +1727,76 @@
     }, {
       key: "validate",
       value: function validate() {
-        var tagger = this;
-        this.frames.forEach(function (frame) {
-          var frameDesc = frames[frame.id];
-          if (frameDesc) frameDesc.validate.call(tagger, frame);else throw new TagError(202, frame.id);
-        });
+        var framesObj = this.parse();
+        var frameDesc;
+        var frame;
+
+        for (var id in framesObj) {
+          frameDesc = frames[id];
+          frame = {
+            id: id,
+            value: framesObj[id]
+          };
+          if (frameDesc) frameDesc.validate(frame, this.major);else throw new TagError(202, id);
+        }
+
         return true;
       }
     }, {
       key: "save",
       value: function save() {
-        if (this.frames.length === 0) return this.getAudio();
+        if (this.frames.length === 0) return this.getAudio().buffer;
         if (!this.validate()) return false;
-        this.major = this.options.writer.version || 3;
+        this.major = this.options.version || this.major || 3;
         this.minor = 0;
+        var framesObj = this.parse();
         var headerBytes = [0x49, 0x44, 0x33, this.major, this.minor, 32];
         var sizeView = new BufferView(new ArrayBuffer(4));
         var paddingBytes = new Uint8Array(this.options.padding);
         var audioBytes = this.getAudio();
         var framesBytes = [];
-        var tagger = this;
-        this.frames.forEach(function (frame) {
-          var frameDesc = frames[frame.id];
+        var frameDesc;
+        var frame;
 
-          if (!frameDesc.version.includes(tagger.major)) {
-            throw new TagError(204, frame.id);
+        for (var id in framesObj) {
+          frameDesc = frames[id];
+          frame = {
+            id: id,
+            value: framesObj[id]
+          };
+
+          if (!frameDesc.version.includes(this.major)) {
+            throw new TagError(204, id);
           }
 
-          var bytes = frameDesc.getBytes.call(tagger, frame);
+          var bytes = frameDesc.write(frame, this.major);
           bytes.forEach(function (_byte) {
             return framesBytes.push(_byte);
           });
-        });
+        }
+
         sizeView.setUint32(0, encodeSynch(framesBytes.length + paddingBytes.length));
         var resultBytes = mergeBytes(headerBytes, sizeView.getUint8(0, 4), framesBytes, paddingBytes, audioBytes);
         this.buffer = resultBytes.buffer;
         this.read();
         return this.buffer;
+      }
+    }, {
+      key: "parse",
+      value: function parse() {
+        var framesObj = {};
+        this.frames.forEach(function (frame) {
+          if (framesObj[frame.id]) {
+            if (Array.isArray(framesObj[frame.id])) {
+              framesObj[frame.id].push(frame.value);
+            } else {
+              framesObj[frame.id] = [framesObj[frame.id], frame.value];
+            }
+          } else {
+            framesObj[frame.id] = frame.value;
+          }
+        });
+        return framesObj;
       }
     }, {
       key: "getAudio",
@@ -1671,7 +1822,20 @@
     if (frameView.getUint8(0) === 0x00) return false;
     var frame = {};
     frame.id = frameView.getUint8String(0, 4);
-    if (this.major === 3) frame.size = frameView.getUint32(4);else if (this.major === 4) frame.size = decodeSynch(frameView.getUint32(4));else throw new TagError(201, this.major);
+
+    switch (this.major) {
+      case 3:
+        frame.size = frameView.getUint32(4);
+        break;
+
+      case 4:
+        frame.size = decodeSynch(frameView.getUint32(4));
+        break;
+
+      default:
+        throw new TagError(201, this.major);
+    }
+
     frame.flags = getFrameFlags(this.major, frameView.getUint8(8, 2));
     var frameDesc = frames[frame.id];
     var offset = 10;
@@ -1699,11 +1863,9 @@
       contentBytes = frameView.buffer.slice(offset, offset + actualSize);
     }
 
-    frame.value = frameDesc.parse.call(this, new BufferView(contentBytes));
+    frame.value = frameDesc.parse(new BufferView(contentBytes), this.major);
     return frame;
   }
-
-  var __options = {};
 
   var MP3Tag = /*#__PURE__*/function () {
     _createClass(MP3Tag, [{
@@ -1725,7 +1887,7 @@
 
       this.buffer = buffer;
       this.tagger = {};
-      __options = options;
+      this.options = options;
     }
 
     _createClass(MP3Tag, [{
@@ -1734,18 +1896,12 @@
         var mediaView = new BufferView(this.buffer);
 
         if (mediaView.getUint8String(0, 3) === 'ID3') {
-          this.tagger = new ID3v2(this.buffer, __options);
+          this.tagger = new ID3v2(this.buffer, this.options);
           this.tagger.read();
         } else {
           // Default to id3v2 and get the raw audio data for writing
-          this.tagger = new ID3v2(this.buffer, __options);
-          console.warn('Unknown tag. Getting raw audio data for writing');
-
-          if (this.tagger.getAudio().length > 0) {
-            this.save();
-          } else {
-            throw new TagError(1);
-          }
+          this.tagger = new ID3v2(this.buffer, this.options);
+          if (this.tagger.getAudio().length > 0) this.save();else throw new TagError(1);
         }
       }
     }, {
