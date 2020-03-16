@@ -147,8 +147,8 @@ export function langDescFrame (frame) {
 
     case 4:
       encoding = 3
-      descBytes = encodeString(frame.value.descriptor + '\0', 'utf-16')
-      textBytes = encodeString(frame.value.text, 'utf-16')
+      descBytes = encodeString(frame.value.descriptor + '\0', 'utf-8')
+      textBytes = encodeString(frame.value.text, 'utf-8')
       break
 
     default:
