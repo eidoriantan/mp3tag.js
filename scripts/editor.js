@@ -217,6 +217,7 @@ function audioView (event) {
   const audioItem = $(this)
   const file = importedFiles[currentIndex]
 
+  toast('Reading file', 'Reading file and tags. Please wait...', TOAST_INFO)
   loadFile(file, function (buffer) {
     $('#edit-form [disabled]').attr('disabled', null)
     $('#edit-form .disabled').removeClass('disabled')
@@ -275,6 +276,8 @@ function audioView (event) {
             break
         }
       })
+
+      toast('Read Successfully', 'Details was displayed', TOAST_SUCCESS)
     } catch (e) {
       toast('Reading Error', e.message, TOAST_DANGER)
     }
