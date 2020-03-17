@@ -23,7 +23,7 @@ export default class BufferView extends DataView {
           maxlength -= 2
         }
 
-        string = this.getUint16String(offset, maxlength, le)
+        string = this.getUint16String(offset, maxlength, le === true)
         break
       }
 
@@ -65,10 +65,7 @@ export default class BufferView extends DataView {
     let bytes = this.getUint8(offset, length)
     let string = ''
 
-    if (!ArrayBuffer.isView(bytes)) {
-      bytes = [bytes]
-    }
-
+    if (!ArrayBuffer.isView(bytes)) bytes = [bytes]
     for (let i = 0; i < bytes.length; i++) {
       const character = String.fromCharCode(bytes[i])
       string += character
@@ -81,10 +78,7 @@ export default class BufferView extends DataView {
     let bytes = this.getUint8(offset, this.byteLength - offset)
     let string = ''
 
-    if (!ArrayBuffer.isView(bytes)) {
-      bytes = [bytes]
-    }
-
+    if (!ArrayBuffer.isView(bytes)) bytes = [bytes]
     for (let i = 0; i < bytes.length; i++) {
       const byte = bytes[i]
       if (byte !== 0x00) {
@@ -97,9 +91,10 @@ export default class BufferView extends DataView {
   }
 
   getUint16String (offset, length, le = true) {
-    const bytes = this.getUint16(offset, length, le)
+    let bytes = this.getUint16(offset, length, le)
     let string = ''
 
+    if (!ArrayBuffer.isView(bytes)) bytes = [bytes]
     for (let i = 0; i < bytes.length; i++) {
       const character = String.fromCharCode(bytes[i])
       string += character
@@ -109,9 +104,10 @@ export default class BufferView extends DataView {
   }
 
   getUint16CString (offset, le = false) {
-    const bytes = this.getUint16(offset, this.byteLength - offset, le)
+    let bytes = this.getUint16(offset, this.byteLength - offset, le)
     let string = ''
 
+    if (!ArrayBuffer.isView(bytes)) bytes = [bytes]
     for (let i = 0; i < bytes.length; i++) {
       const byte = bytes[i]
       if (byte !== 0x0000) {
