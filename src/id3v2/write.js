@@ -46,9 +46,15 @@ export function textFrame (frame, version) {
       break
 
     case 4:
-      if (Array.isArray(frame.value)) frame.value = frame.value.join('\0')
       encoding = 3
-      strBytes = encodeString(frame.value + '\0', 'utf-8')
+      if (Array.isArray(frame.value)) {
+        frame.value.forEach(function (string) {
+          const encoded = encodeString(string + '\0', 'utf-8')
+          encoded.forEach(byte => strBytes.push(byte))
+        })
+      } else {
+        strBytes = encodeString(frame.value + '\0', 'utf-8')
+      }
       break
 
     default:
@@ -66,7 +72,6 @@ export function arrayFrame (frame, version) {
       break
 
     case 4:
-      frame.value = frame.value.join('\0')
       break
 
     default:
