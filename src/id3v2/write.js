@@ -98,6 +98,9 @@ export function setFrame (frame, version) {
       frame.value = value.join('\0')
       break
     }
+
+    default:
+      throw new TagError(201, version)
   }
 
   return asciiFrame(frame, version)
@@ -178,6 +181,29 @@ export function wxxxFrame (frame, version) {
   })
 
   return bytes
+}
+
+export function iplsFrame (frame, version) {
+  let encoding
+  const strBytes = []
+
+  switch (version) {
+    case 3:
+      encoding = 1
+      frame.value.forEach(function (string) {
+        const encoded = encodeString(string + '\0', 'utf-16')
+        encoded.forEach(byte => strBytes.push(byte))
+      })
+      break
+
+    case 4:
+    default:
+      throw new TagError(201, version)
+  }
+
+  const size = strBytes.length + 1
+  const header = getHeaderBytes(frame.id, size, version)
+  return mergeBytes(header, encoding, strBytes)
 }
 
 export function langDescFrame (frame, version) {

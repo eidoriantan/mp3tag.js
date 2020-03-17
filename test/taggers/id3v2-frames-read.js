@@ -342,6 +342,21 @@ describe('Reading ID3v2 Frames', function () {
     })
   })
 
+  it('Read ipls frame v2.3', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v23Header, 0, 0, 0, 35,
+      73, 80, 76, 83, 0, 0, 0, 25, 0, 0,
+      1, 255, 254, 80, 0, 69, 0, 82, 0, 49, 0, 0, 0,
+      255, 254, 80, 0, 69, 0, 82, 0, 50, 0, 0, 0,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'IPLS')
+    assert.deepStrictEqual(mp3tag.frames[0].value, ['PER1', 'PER2'])
+  })
+
   it('Read langDesc frames v2.3', function () {
     const mp3tag = new MP3Tag(new Uint8Array([
       ...v23Header, 0, 0, 0, 48,

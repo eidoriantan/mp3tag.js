@@ -105,7 +105,7 @@ export function txxxFrame (view, version) {
   return { description: description.string, text: value }
 }
 
-export function wxxxFrame (view) {
+export function wxxxFrame (view, version) {
   /**
    *  Text encoding   $xx
    *  Description     <text string according to encoding> $00 (00)
@@ -120,7 +120,27 @@ export function wxxxFrame (view) {
   return { description: description.string, url: url }
 }
 
-export function langDescFrame (view) {
+export function iplsFrame (view, version) {
+  /**
+   *  <Header for 'Involved people list', ID: "IPLS">
+   *  Text encoding         $xx
+   *  People list strings  <text strings according to encoding>
+   */
+
+  const encoding = ENCODINGS[view.getUint8(0)]
+  const people = []
+  let length = 1
+
+  while (length < view.byteLength) {
+    const person = view.getCString(length, encoding)
+    people.push(person.string)
+    length += person.length
+  }
+
+  return people
+}
+
+export function langDescFrame (view, version) {
   /**
    *  Text encoding           $xx
    *  Language                $xx xx xx
@@ -140,7 +160,7 @@ export function langDescFrame (view) {
   }
 }
 
-export function apicFrame (view) {
+export function apicFrame (view, version) {
   /**
    *  Text encoding   $xx
    *  MIME type       <text string> $00

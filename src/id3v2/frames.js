@@ -17,6 +17,13 @@ export const COMM = {
   version: [3, 4]
 }
 
+export const IPLS = {
+  parse: parsers.iplsFrame,
+  validate: validators.arrayFrame,
+  write: writers.iplsFrame,
+  version: [3]
+}
+
 export const TALB = {
   parse: parsers.textFrame,
   validate: validators.textFrame,
