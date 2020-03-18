@@ -118,13 +118,13 @@ function writeAudio (data, imageBuffer) {
         break
 
       case 'descLang': {
-        const lyrics = this.value.split('||')
+        const lyrics = this.value.split('|')
         mp3tag.frames.push({
           id: frameInfo.id,
           value: {
             language: lyrics[0],
-            descriptor: '',
-            text: lyrics[1]
+            descriptor: lyrics[1],
+            text: lyrics[2]
           }
         })
         break
@@ -272,7 +272,8 @@ function audioView (event) {
             break
 
           case 'USLT':
-            $('#lyrics').val(frame.value.language + '||' + frame.value.text)
+            $('#lyrics').val(frame.value.language + '|' +
+              frame.value.descriptor + '|' + frame.value.text)
             break
         }
       })
