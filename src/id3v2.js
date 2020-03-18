@@ -72,11 +72,11 @@ export default class ID3v2 {
 
   save () {
     if (this.frames.length === 0) return this.getAudio().buffer
-    if (!this.validate()) return false
 
     this.major = this.options.version || this.major || 3
     this.minor = 0
 
+    if (!this.validate()) return false
     const framesObj = this.parse()
     const headerBytes = [0x49, 0x44, 0x33, this.major, this.minor, 0b00100000]
     const sizeView = new BufferView(new ArrayBuffer(4))
