@@ -17,9 +17,9 @@ You can learn about the frames by visiting the
  * Read ID3v2.3 and ID3v2.4 tags
  * Write ID3v2.3 and ID3v2.4 tags
  * Remove tags
- * Multiple frames
- * Supports unsynchronization flag
- * Input validation
+ * Write multiple frames with the same kind
+ * Supports reading unsynchronization flag
+ * Input validation following the standards
 
 ## Installation
 
