@@ -137,8 +137,8 @@ export const TIME = {
 }
 
 export const TIPL = {
-  parse: parsers.textFrame,
-  validate: validators.textFrame,
+  parse: parsers.arrayFrame,
+  validate: validators.arrayFrame,
   write: writers.textFrame,
   version: [4]
 }
@@ -183,6 +183,13 @@ export const TLEN = {
   validate: validators.numberFrame,
   write: writers.asciiFrame,
   version: [3, 4]
+}
+
+export const TMCL = {
+  parse: parsers.arrayFrame,
+  validate: validators.arrayFrame,
+  write: writers.textFrame,
+  version: [4]
 }
 
 export const TMED = {
