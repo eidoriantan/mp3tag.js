@@ -1,6 +1,6 @@
 {
   "name": "mp3tag.js",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "MP3 tagging written in pure JavaScript",
   "main": "dist/mp3tag.js",
   "dependencies": {},
@@ -13,7 +13,7 @@
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^7.1.0",
+    "mocha": "^7.1.1",
     "rollup": "^1.32.1",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-terser": "^5.3.0",
