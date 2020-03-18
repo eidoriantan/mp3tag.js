@@ -56,8 +56,15 @@ export default class ID3v2 {
       const frameDesc = frames[id]
       const frame = { id: id, value: framesObj[id] }
 
-      if (frameDesc) frameDesc.validate(frame, this.major)
-      else throw new TagError(202, id)
+      if (frameDesc) {
+        if (frameDesc.version.includes(this.major)) {
+          frameDesc.validate(frame, this.major)
+        } else {
+          throw new TagError(204, id)
+        }
+      } else {
+        throw new TagError(202, id)
+      }
     }
 
     return true
@@ -80,11 +87,6 @@ export default class ID3v2 {
     for (const id in framesObj) {
       const frameDesc = frames[id]
       const frame = { id: id, value: framesObj[id] }
-
-      if (!frameDesc.version.includes(this.major)) {
-        throw new TagError(204, id)
-      }
-
       const bytes = frameDesc.write(frame, this.major)
       bytes.forEach(byte => framesBytes.push(byte))
     }
