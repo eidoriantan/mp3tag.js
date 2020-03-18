@@ -51,12 +51,10 @@ export default class ID3v2 {
 
   validate () {
     const framesObj = this.parse()
-    let frameDesc
-    let frame
 
     for (const id in framesObj) {
-      frameDesc = frames[id]
-      frame = { id: id, value: framesObj[id] }
+      const frameDesc = frames[id]
+      const frame = { id: id, value: framesObj[id] }
 
       if (frameDesc) frameDesc.validate(frame, this.major)
       else throw new TagError(202, id)
@@ -78,12 +76,10 @@ export default class ID3v2 {
     const paddingBytes = new Uint8Array(this.options.padding)
     const audioBytes = this.getAudio()
     const framesBytes = []
-    let frameDesc
-    let frame
 
     for (const id in framesObj) {
-      frameDesc = frames[id]
-      frame = { id: id, value: framesObj[id] }
+      const frameDesc = frames[id]
+      const frame = { id: id, value: framesObj[id] }
 
       if (!frameDesc.version.includes(this.major)) {
         throw new TagError(204, id)
@@ -125,8 +121,8 @@ export default class ID3v2 {
 
   getAudio () {
     const audioData = new Uint8Array(this.buffer)
-    let i = 0
 
+    let i = 0
     while (i < audioData.length) {
       if (audioData[i] === 0xff && audioData[i + 1] === 0xfb) {
         return new Uint8Array(this.buffer.slice(i))
