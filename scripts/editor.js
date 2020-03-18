@@ -64,6 +64,7 @@ function writeData (data) {
 
 function writeAudio (data, imageBuffer) {
   toast('Writing', 'Writing the tags to file', TOAST_INFO)
+  mp3tag.frames = []
 
   if (imageBuffer) {
     mp3tag.frames = [{
