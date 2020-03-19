@@ -13,7 +13,7 @@ export default class MP3Tag {
     }
 
     this.buffer = buffer
-    this.options = options
+    this.options = options || {}
     this.tagger = {}
   }
 
