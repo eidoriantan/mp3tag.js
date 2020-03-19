@@ -395,6 +395,13 @@ export const TXXX = {
   version: [3, 4]
 }
 
+export const UFID = {
+  parse: parsers.ufidFrame,
+  validate: validators.ufidFrame,
+  write: writers.ufidFrame,
+  version: [3, 4]
+}
+
 export const USLT = {
   parse: parsers.langDescFrame,
   validate: validators.langDescFrame,

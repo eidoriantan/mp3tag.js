@@ -183,3 +183,18 @@ export function apicFrame (view, version) {
     data: img
   }
 }
+
+export function ufidFrame (view, version) {
+  /**
+   * Owner identifier  <text string> $00
+   * Identifier        <up to 64 bytes binary data>
+   */
+
+  const ownerId = view.getCString(0, 'ascii')
+  const id = view.getUint8(ownerId.length, view.byteLength - ownerId.length)
+
+  return {
+    ownerId: ownerId.string,
+    id: id
+  }
+}

@@ -556,4 +556,92 @@ describe('Reading ID3v2 Frames', function () {
       data: new Uint8Array([255, 216, 255, 226, 255, 217])
     })
   })
+
+  it('Read UFID frame v2.3', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v23Header, 0, 0, 0, 33,
+      85, 70, 73, 68, 0, 0, 0, 15, 0, 0,
+      103, 105, 116, 104, 117, 98, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'UFID')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      ownerId: 'github',
+      id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    })
+  })
+
+  it('Read multiple UFID frame v2.3', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v23Header, 0, 0, 0, 59,
+      85, 70, 73, 68, 0, 0, 0, 15, 0, 0,
+      103, 105, 116, 104, 117, 98, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      85, 70, 73, 68, 0, 0, 0, 16, 0, 0,
+      103, 105, 116, 104, 117, 98, 50, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'UFID')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      ownerId: 'github',
+      id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    })
+    assert.deepStrictEqual(mp3tag.frames[1].id, 'UFID')
+    assert.deepStrictEqual(mp3tag.frames[1].value, {
+      ownerId: 'github2',
+      id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    })
+  })
+
+  it('Read UFID frame v2.4', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v24Header, 0, 0, 0, 33,
+      85, 70, 73, 68, 0, 0, 0, 15, 0, 0,
+      103, 105, 116, 104, 117, 98, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 4)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'UFID')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      ownerId: 'github',
+      id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    })
+  })
+
+  it('Read multiple UFID frame v2.4', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v24Header, 0, 0, 0, 59,
+      85, 70, 73, 68, 0, 0, 0, 15, 0, 0,
+      103, 105, 116, 104, 117, 98, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      85, 70, 73, 68, 0, 0, 0, 16, 0, 0,
+      103, 105, 116, 104, 117, 98, 50, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 4)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'UFID')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      ownerId: 'github',
+      id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    })
+    assert.deepStrictEqual(mp3tag.frames[1].id, 'UFID')
+    assert.deepStrictEqual(mp3tag.frames[1].value, {
+      ownerId: 'github2',
+      id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    })
+  })
 })

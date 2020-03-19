@@ -287,3 +287,34 @@ export function apicFrame (frame, version) {
 
   return true
 }
+
+export function ufidFrame (frame, version) {
+  validateID(frame.id)
+
+  const array = mergeAsArray(frame.value)
+  const ownerIds = []
+
+  array.forEach(function (elem) {
+    if (typeof elem.ownerId !== 'string') {
+      throw new TagError(203, 'UFID ownerId is not a string')
+    }
+
+    if (!(elem.id instanceof ArrayBuffer) && !Array.isArray(elem.id) &&
+      !ArrayBuffer.isView(elem.id)) {
+      throw new TagError(203, 'UFID id should be ArrayBuffer or an array')
+    }
+
+    const idLength = elem.id.byteLength || elem.id.length || 0
+    if (idLength > 64) {
+      throw new TagError(203, 'UFID id exceeds 64 bytes')
+    }
+
+    if (ownerIds.includes(elem.ownerId)) {
+      throw new TagError(203, 'UFID ownerId should not duplicate')
+    } else {
+      ownerIds.push(elem.ownerId)
+    }
+  })
+
+  return true
+}

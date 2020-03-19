@@ -283,3 +283,18 @@ export function apicFrame (frame, version) {
 
   return bytes
 }
+
+export function ufidFrame (frame, version) {
+  const bytes = []
+  const array = mergeAsArray(frame.value)
+
+  array.forEach(function (elem) {
+    const ownerBytes = encodeString(elem.ownerId + '\0', 'ascii')
+    const idBytes = new Uint8Array(elem.id)
+    const header = getHeaderBytes(frame.id, ownerBytes.length + idBytes.length)
+    const merged = mergeBytes(header, ownerBytes, idBytes)
+    merged.forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}
