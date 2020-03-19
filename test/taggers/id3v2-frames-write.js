@@ -1153,4 +1153,97 @@ describe('Writing ID3v2 Frames', function () {
       mp3tag.save()
     }, /MIME, type, or description is invalid/)
   })
+
+  it('Write ufid frame v2.3', function () {
+    const mp3tag = new MP3Tag(v23Bytes.buffer, { padding: 8 })
+    mp3tag.read()
+    mp3tag.frames.push({
+      id: 'UFID',
+      value: {
+        ownerId: 'github',
+        id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      }
+    })
+
+    mp3tag.save()
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([
+      73, 68, 51, 3, 0, 0b00100000, 0, 0, 0, 58,
+      84, 65, 76, 66, 0, 0, 0, 15, 0, 0,
+      1, 255, 254, 65, 0, 76, 0, 66, 0, 85, 0, 77, 0, 0, 0,
+      85, 70, 73, 68, 0, 0, 0, 15, 0, 0,
+      103, 105, 116, 104, 117, 98, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      255, 251, 176, 0, 0
+    ])
+
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(actual, expected)
+  })
+
+  it('Write multiple ufid frame v2.3', function () {
+    const mp3tag = new MP3Tag(v23Bytes.buffer, { padding: 8 })
+    mp3tag.read()
+    mp3tag.frames.push({
+      id: 'UFID',
+      value: {
+        ownerId: 'github',
+        id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      }
+    }, {
+      id: 'UFID',
+      value: {
+        ownerId: 'github2',
+        id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      }
+    })
+
+    mp3tag.save()
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([
+      73, 68, 51, 3, 0, 0b00100000, 0, 0, 0, 84,
+      84, 65, 76, 66, 0, 0, 0, 15, 0, 0,
+      1, 255, 254, 65, 0, 76, 0, 66, 0, 85, 0, 77, 0, 0, 0,
+      85, 70, 73, 68, 0, 0, 0, 15, 0, 0,
+      103, 105, 116, 104, 117, 98, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      85, 70, 73, 68, 0, 0, 0, 16, 0, 0,
+      103, 105, 116, 104, 117, 98, 50, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      255, 251, 176, 0, 0
+    ])
+
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(actual, expected)
+  })
+
+  it('Write ufid frame v2.4', function () {
+    const mp3tag = new MP3Tag(v24Bytes.buffer, { padding: 8 })
+    mp3tag.read()
+    mp3tag.frames.push({
+      id: 'UFID',
+      value: {
+        ownerId: 'github',
+        id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      }
+    })
+
+    mp3tag.save()
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([
+      73, 68, 51, 4, 0, 0b00100000, 0, 0, 0, 50,
+      84, 65, 76, 66, 0, 0, 0, 7, 0, 0,
+      3, 65, 76, 66, 85, 77, 0,
+      85, 70, 73, 68, 0, 0, 0, 15, 0, 0,
+      103, 105, 116, 104, 117, 98, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      255, 251, 176, 0, 0
+    ])
+
+    assert.deepStrictEqual(mp3tag.tagger.major, 4)
+    assert.deepStrictEqual(actual, expected)
+  })
 })
