@@ -2,7 +2,7 @@
 import { isBitSet } from '../utils/bytes'
 import TagError from '../error'
 
-export function getHeaderFlags (version, byte) {
+export function getHeaderFlags (byte, version) {
   const flags = {}
   switch (version) {
     case 3:
@@ -25,7 +25,7 @@ export function getHeaderFlags (version, byte) {
   return flags
 }
 
-export function getFrameFlags (version, bytes) {
+export function getFrameFlags (bytes, version) {
   const flags = {}
   switch (version) {
     case 3:

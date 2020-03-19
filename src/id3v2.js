@@ -32,13 +32,13 @@ export default class ID3v2 {
     }
 
     this.size = decodeSynch(mediaView.getUint32(6))
-    this.flags = flags.getHeaderFlags(this.major, mediaView.getUint8(5))
+    this.flags = flags.getHeaderFlags(mediaView.getUint8(5), this.major)
     this.frames = []
 
     let offset = 10
     while (offset < this.size) {
-      const frameView = mediaView.getUint8(offset, this.size)
-      const frame = decodeFrame.call(this, frameView)
+      const frameBytes = mediaView.getUint8(offset, this.size)
+      const frame = decodeFrame.call(this, frameBytes)
 
       if (frame) {
         this.frames.push(frame)
@@ -51,7 +51,6 @@ export default class ID3v2 {
 
   validate () {
     const framesObj = this.parse()
-
     for (const id in framesObj) {
       const frameDesc = frames[id]
       const frame = { id: id, value: framesObj[id] }
@@ -155,7 +154,7 @@ function decodeFrame (bytes) {
       throw new TagError(201, this.major)
   }
 
-  frame.flags = flags.getFrameFlags(this.major, frameView.getUint8(8, 2))
+  frame.flags = flags.getFrameFlags(frameView.getUint8(8, 2), this.major)
   const frameDesc = frames[frame.id]
   let offset = 10
   let actualSize = frame.size
