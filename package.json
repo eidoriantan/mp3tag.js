@@ -22,7 +22,7 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
-    "test": "eslint -c .eslintrc **/*.js && mocha --recursive"
+    "test": "eslint -c .eslintrc **/*.js && mocha"
   },
   "repository": {
     "type": "git",
@@ -39,6 +39,10 @@
     "javascript"
   ],
   "author": "Adriane Justine Tan <eidoriantan@gmail.com>",
+  "funding": {
+    "type": "patreon",
+    "url": "https://patreon.com/eidoriantan"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/eidoriantan/mp3tag.js/issues"

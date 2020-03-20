@@ -131,4 +131,21 @@ describe('ID3v2', function () {
 
     assert.deepStrictEqual(actual, expected)
   })
+
+  after(function () {
+    const tests = this.test.parent.tests
+    let success = true
+
+    for (let i = 0; i < tests.length; i++) {
+      if (tests[i].state === 'failed') {
+        success = false
+        break
+      }
+    }
+
+    if (success) {
+      require('./id3v2-frames-read')
+      require('./id3v2-frames-write')
+    }
+  })
 })
