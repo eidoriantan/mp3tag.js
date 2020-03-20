@@ -557,6 +557,121 @@ describe('Reading ID3v2 Frames', function () {
     })
   })
 
+  it('Read GEOB frame v2.3', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v23Header, 0, 0, 0, 70,
+      71, 69, 79, 66, 0, 0, 0, 52, 0, 0,
+      1, 116, 101, 120, 116, 47, 112, 108, 97, 105, 110, 0,
+      255, 254, 102, 0, 105, 0, 108, 0, 101, 0,
+      46, 0, 116, 0, 120, 0, 116, 0, 0, 0,
+      255, 254, 68, 0, 69, 0, 83, 0, 67, 0, 0, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'GEOB')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      format: 'text/plain',
+      filename: 'file.txt',
+      description: 'DESC',
+      object: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    })
+  })
+
+  it('Read multiple GEOB frame v2.3', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v23Header, 0, 0, 1, 6,
+      71, 69, 79, 66, 0, 0, 0, 52, 0, 0,
+      1, 116, 101, 120, 116, 47, 112, 108, 97, 105, 110, 0,
+      255, 254, 102, 0, 105, 0, 108, 0, 101, 0,
+      46, 0, 116, 0, 120, 0, 116, 0, 0, 0,
+      255, 254, 68, 0, 69, 0, 83, 0, 67, 0, 0, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      71, 69, 79, 66, 0, 0, 0, 54, 0, 0,
+      1, 116, 101, 120, 116, 47, 112, 108, 97, 105, 110, 0,
+      255, 254, 102, 0, 105, 0, 108, 0, 101, 0,
+      46, 0, 116, 0, 120, 0, 116, 0, 0, 0,
+      255, 254, 68, 0, 69, 0, 83, 0, 67, 0, 50, 0, 0, 0,
+      9, 10, 11, 12, 13, 14, 15, 16,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'GEOB')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      format: 'text/plain',
+      filename: 'file.txt',
+      description: 'DESC',
+      object: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    })
+    assert.deepStrictEqual(mp3tag.frames[1].id, 'GEOB')
+    assert.deepStrictEqual(mp3tag.frames[1].value, {
+      format: 'text/plain',
+      filename: 'file.txt',
+      description: 'DESC2',
+      object: new Uint8Array([9, 10, 11, 12, 13, 14, 15, 16])
+    })
+  })
+
+  it('Read GEOB frame v2.4', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v24Header, 0, 0, 0, 52,
+      71, 69, 79, 66, 0, 0, 0, 34, 0, 0,
+      3, 116, 101, 120, 116, 47, 112, 108, 97, 105, 110, 0,
+      102, 105, 108, 101, 46, 116, 120, 116, 0,
+      68, 69, 83, 67, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 4)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'GEOB')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      format: 'text/plain',
+      filename: 'file.txt',
+      description: 'DESC',
+      object: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    })
+  })
+
+  it('Read multiple GEOB frame v2.3', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v24Header, 0, 0, 0, 97,
+      71, 69, 79, 66, 0, 0, 0, 34, 0, 0,
+      3, 116, 101, 120, 116, 47, 112, 108, 97, 105, 110, 0,
+      102, 105, 108, 101, 46, 116, 120, 116, 0,
+      68, 69, 83, 67, 0,
+      1, 2, 3, 4, 5, 6, 7, 8,
+      71, 69, 79, 66, 0, 0, 0, 35, 0, 0,
+      3, 116, 101, 120, 116, 47, 112, 108, 97, 105, 110, 0,
+      102, 105, 108, 101, 46, 116, 120, 116, 0,
+      68, 69, 83, 67, 50, 0,
+      9, 10, 11, 12, 13, 14, 15, 16,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 4)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'GEOB')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      format: 'text/plain',
+      filename: 'file.txt',
+      description: 'DESC',
+      object: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    })
+    assert.deepStrictEqual(mp3tag.frames[1].id, 'GEOB')
+    assert.deepStrictEqual(mp3tag.frames[1].value, {
+      format: 'text/plain',
+      filename: 'file.txt',
+      description: 'DESC2',
+      object: new Uint8Array([9, 10, 11, 12, 13, 14, 15, 16])
+    })
+  })
+
   it('Read UFID frame v2.3', function () {
     const mp3tag = new MP3Tag(new Uint8Array([
       ...v23Header, 0, 0, 0, 33,

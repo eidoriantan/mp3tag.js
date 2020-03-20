@@ -17,6 +17,13 @@ export const COMM = {
   version: [3, 4]
 }
 
+export const GEOB = {
+  parse: parsers.geobFrame,
+  validate: validators.geobFrame,
+  write: writers.geobFrame,
+  version: [3, 4]
+}
+
 export const IPLS = {
   parse: parsers.iplsFrame,
   validate: validators.arrayFrame,

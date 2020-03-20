@@ -184,10 +184,35 @@ export function apicFrame (view, version) {
   }
 }
 
+export function geobFrame (view, version) {
+  /**
+   *  Text encoding        $xx
+   *  MIME type            <text string> $00
+   *  Filename             <text string according to encoding> $00 (00)
+   *  Content description  <text string according to encoding> $00 (00)
+   *  Encapsulated object  <binary data>
+   */
+
+  const encoding = ENCODINGS[view.getUint8(0)]
+  const mime = view.getCString(1, 'ascii')
+  const fname = view.getCString(mime.length + 1, encoding)
+  const desc = view.getCString(fname.length + mime.length + 1, encoding)
+  const binOffset = mime.length + fname.length + desc.length + 1
+  const binSize = view.byteLength - binOffset
+  const binObject = view.getUint8(binOffset, binSize)
+
+  return {
+    format: mime.string,
+    filename: fname.string,
+    description: desc.string,
+    object: binObject
+  }
+}
+
 export function ufidFrame (view, version) {
   /**
-   * Owner identifier  <text string> $00
-   * Identifier        <up to 64 bytes binary data>
+   *  Owner identifier  <text string> $00
+   *  Identifier        <up to 64 bytes binary data>
    */
 
   const ownerId = view.getCString(0, 'ascii')

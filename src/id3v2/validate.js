@@ -288,6 +288,37 @@ export function apicFrame (frame, version) {
   return true
 }
 
+export function geobFrame (frame, version) {
+  validateID(frame.id)
+
+  const array = mergeAsArray(frame.value)
+  const descriptions = []
+
+  array.forEach(function (elem) {
+    if (typeof elem.format !== 'string' || typeof elem.filename !== 'string' ||
+      typeof elem.description !== 'string') {
+      throw new TagError(203, 'GEOB MIME/Filename/description is not a string')
+    }
+
+    if (!(elem.object instanceof ArrayBuffer) && !Array.isArray(elem.object) &&
+      !ArrayBuffer.isView(elem.object)) {
+      throw new TagError(203, 'Object data should be ArrayBuffer or an array')
+    }
+
+    if (descriptions.includes(elem.description)) {
+      throw new TagError(203, 'GEOB description should not duplicate')
+    } else {
+      descriptions.push(elem.description)
+    }
+
+    /**
+     *  @TODO: No duplicate of contents
+     */
+  })
+
+  return true
+}
+
 export function ufidFrame (frame, version) {
   validateID(frame.id)
 

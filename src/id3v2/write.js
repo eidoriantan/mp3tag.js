@@ -284,6 +284,46 @@ export function apicFrame (frame, version) {
   return bytes
 }
 
+export function geobFrame (frame, version) {
+  const bytes = []
+  const array = mergeAsArray(frame.value)
+
+  array.forEach(function (elem) {
+    let encoding
+    const mime = encodeString(elem.format + '\0', 'ascii')
+    let filename
+    let description
+    const object = new Uint8Array(elem.object)
+
+    switch (version) {
+      case 3:
+        encoding = 1
+        filename = encodeString(elem.filename + '\0', 'utf-16')
+        description = encodeString(elem.description + '\0', 'utf-16')
+        break
+
+      case 4:
+        encoding = 3
+        filename = encodeString(elem.filename + '\0', 'utf-8')
+        description = encodeString(elem.description + '\0', 'utf-8')
+        break
+
+      default:
+        throw new TagError(201, version)
+    }
+
+    const size = mime.length + filename.length + description.length +
+      object.length + 1
+    const header = getHeaderBytes(frame.id, size, version)
+    const merged = mergeBytes(header, encoding, mime, filename, description,
+      object)
+
+    merged.forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}
+
 export function ufidFrame (frame, version) {
   const bytes = []
   const array = mergeAsArray(frame.value)
