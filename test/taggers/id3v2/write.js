@@ -1234,6 +1234,38 @@ describe('Writing ID3v2 Frames', function () {
     assert.deepStrictEqual(actual, expected)
   })
 
+  it('Throws if multiple content geob frame v2.3', function () {
+    const mp3tag = new MP3Tag(v23Bytes.buffer)
+    mp3tag.read()
+    mp3tag.frames.push({
+      id: 'GEOB',
+      value: {
+        format: 'text/plain',
+        filename: 'file.txt',
+        description: 'DESC',
+        object: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      }
+    }, {
+      id: 'GEOB',
+      value: {
+        format: 'text/plain',
+        filename: 'file.txt',
+        description: 'DESC',
+        object: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      }
+    })
+
+    assert.throws(function () {
+      mp3tag.save()
+    }, /GEOB description should not duplicate/)
+
+    mp3tag.frames[2].value.description = 'DESC2'
+
+    assert.throws(function () {
+      mp3tag.save()
+    }, /GEOB object should not duplicate/)
+  })
+
   it('Write geob frame v2.4', function () {
     const mp3tag = new MP3Tag(v24Bytes.buffer, { padding: 8 })
     mp3tag.read()

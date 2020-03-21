@@ -1,5 +1,5 @@
 
-import { mergeAsArray } from '../utils/array'
+import { mergeAsArray, includesArray } from '../utils/array'
 import TagError from '../error'
 
 const urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/
@@ -94,7 +94,7 @@ export function timeFrame (frame, version) {
   array.forEach(function (elem) {
     switch (version) {
       case 3:
-        if (!elem.toString().match(/^([0-9]{4})$/)) {
+        if (!elem.toString().match(/^(\d{4})$/)) {
           throw new TagError(203, `${frame.id} is not 4 numeric characters`)
         }
         break
@@ -298,6 +298,7 @@ export function geobFrame (frame, version) {
 
   const array = mergeAsArray(frame.value)
   const descriptions = []
+  const objects = []
 
   array.forEach(function (elem) {
     if (typeof elem.format !== 'string' || typeof elem.filename !== 'string' ||
@@ -316,9 +317,11 @@ export function geobFrame (frame, version) {
       descriptions.push(elem.description)
     }
 
-    /**
-     *  @TODO: No duplicate of contents
-     */
+    if (includesArray(objects, elem.object)) {
+      throw new TagError(203, 'GEOB object should not duplicate')
+    } else {
+      objects.push(elem.object)
+    }
   })
 
   return true
