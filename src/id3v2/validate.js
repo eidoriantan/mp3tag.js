@@ -3,7 +3,15 @@ import { mergeAsArray } from '../utils/array'
 import TagError from '../error'
 
 const urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/
-const langRegex = /^([a-z]{3})$/
+const langRegex = /^([a-z]{3}|XXX)$/
+const year = '(\\d{4})'
+const month = '(0[1-9]|1[0-2])'
+const day = '(0[1-9]|1\\d|2\\d|3[0-1])'
+const hour = '(0\\d|1\\d|2[0-3])'
+const minute = '(0\\d|1\\d|2\\d|3\\d|4\\d|5\\d)'
+const second = minute
+const timeRegex =
+  `^(${year}(-${month}(-${day}(T${hour}(:${minute}(:${second})?)?)?)?)?)$`
 
 function validateID (id) {
   if (!id.match(/^([a-zA-Z0-9]{4})$/)) {
@@ -96,12 +104,9 @@ export function timeFrame (frame, version) {
           throw new TagError(203, `${frame.id} value is not a string`)
         }
 
-        /**
-         *  @TODO Improve regex matching the format
-         */
-        if (!elem.match(/^([0-9]{8})T([0-9]{6})$/)) {
+        if (!elem.match(timeRegex)) {
           throw new TagError(203,
-            'Time Frames should follow this format: YYYYMMDD\\THHMMSS')
+            'Time Frames should follow ISO 8601')
         }
         break
 

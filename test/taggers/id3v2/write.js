@@ -301,7 +301,7 @@ describe('Writing ID3v2 Frames', function () {
 
     assert.throws(function () {
       mp3tag.save()
-    }, /Time Frames should follow this format: YYYYMMDD\\THHMMSS/)
+    }, /Time Frames should follow ISO 8601/)
   })
 
   it('Write url frame v2.3', function () {
