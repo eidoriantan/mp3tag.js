@@ -57,7 +57,7 @@
     return _setPrototypeOf(o, p);
   }
 
-  function isNativeReflectConstruct() {
+  function _isNativeReflectConstruct() {
     if (typeof Reflect === "undefined" || !Reflect.construct) return false;
     if (Reflect.construct.sham) return false;
     if (typeof Proxy === "function") return true;
@@ -71,7 +71,7 @@
   }
 
   function _construct(Parent, args, Class) {
-    if (isNativeReflectConstruct()) {
+    if (_isNativeReflectConstruct()) {
       _construct = Reflect.construct;
     } else {
       _construct = function _construct(Parent, args, Class) {
@@ -139,6 +139,23 @@
     }
 
     return _assertThisInitialized(self);
+  }
+
+  function _createSuper(Derived) {
+    return function () {
+      var Super = _getPrototypeOf(Derived),
+          result;
+
+      if (_isNativeReflectConstruct()) {
+        var NewTarget = _getPrototypeOf(this).constructor;
+
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+
+      return _possibleConstructorReturn(this, result);
+    };
   }
 
   function decodeUTF8(bytes) {
@@ -243,10 +260,12 @@
   var BufferView = /*#__PURE__*/function (_DataView) {
     _inherits(BufferView, _DataView);
 
+    var _super = _createSuper(BufferView);
+
     function BufferView() {
       _classCallCheck(this, BufferView);
 
-      return _possibleConstructorReturn(this, _getPrototypeOf(BufferView).apply(this, arguments));
+      return _super.apply(this, arguments);
     }
 
     _createClass(BufferView, [{
@@ -271,7 +290,7 @@
                 maxlength -= 2;
               }
 
-              string = this.getUint16String(offset, maxlength, le);
+              string = this.getUint16String(offset, maxlength, le === true);
               break;
             }
 
@@ -315,10 +334,7 @@
       value: function getUint8String(offset, length) {
         var bytes = this.getUint8(offset, length);
         var string = '';
-
-        if (!ArrayBuffer.isView(bytes)) {
-          bytes = [bytes];
-        }
+        if (!ArrayBuffer.isView(bytes)) bytes = [bytes];
 
         for (var i = 0; i < bytes.length; i++) {
           var character = String.fromCharCode(bytes[i]);
@@ -332,10 +348,7 @@
       value: function getUint8CString(offset) {
         var bytes = this.getUint8(offset, this.byteLength - offset);
         var string = '';
-
-        if (!ArrayBuffer.isView(bytes)) {
-          bytes = [bytes];
-        }
+        if (!ArrayBuffer.isView(bytes)) bytes = [bytes];
 
         for (var i = 0; i < bytes.length; i++) {
           var _byte = bytes[i];
@@ -354,6 +367,7 @@
         var le = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
         var bytes = this.getUint16(offset, length, le);
         var string = '';
+        if (!ArrayBuffer.isView(bytes)) bytes = [bytes];
 
         for (var i = 0; i < bytes.length; i++) {
           var character = String.fromCharCode(bytes[i]);
@@ -368,6 +382,7 @@
         var le = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
         var bytes = this.getUint16(offset, this.byteLength - offset, le);
         var string = '';
+        if (!ArrayBuffer.isView(bytes)) bytes = [bytes];
 
         for (var i = 0; i < bytes.length; i++) {
           var _byte2 = bytes[i];
@@ -487,12 +502,14 @@
   var TagError = /*#__PURE__*/function (_Error) {
     _inherits(TagError, _Error);
 
+    var _super = _createSuper(TagError);
+
     function TagError(code) {
       var _this;
 
       _classCallCheck(this, TagError);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(TagError).call(this, E_CODES[code]));
+      _this = _super.call(this, E_CODES[code]);
       _this.name = 'TagError';
       _this.code = code;
       _this.errorId = arguments.length <= 1 ? undefined : arguments[1];
@@ -528,7 +545,7 @@
     return TagError;
   }( /*#__PURE__*/_wrapNativeSuper(Error));
 
-  function getHeaderFlags(version, _byte) {
+  function getHeaderFlags(_byte, version) {
     var flags = {};
 
     switch (version) {
@@ -551,7 +568,7 @@
 
     return flags;
   }
-  function getFrameFlags(version, bytes) {
+  function getFrameFlags(bytes, version) {
     var flags = {};
 
     switch (version) {
@@ -582,6 +599,29 @@
     return flags;
   }
 
+  function includesArray(array, element) {
+    var included = false;
+    var i = 0;
+
+    while (i < array.length && !included) {
+      if (array[i].length === element.length) {
+        var same = true;
+
+        for (var index = 0; index < element.length; index++) {
+          if (element[index] !== array[i][index]) {
+            same = false;
+            break;
+          }
+        }
+
+        if (same) included = true;
+      }
+
+      i++;
+    }
+
+    return included;
+  }
   function mergeAsArray() {
     var array = [];
 
@@ -690,7 +730,7 @@
       text: value
     };
   }
-  function wxxxFrame(view) {
+  function wxxxFrame(view, version) {
     /**
      *  Text encoding   $xx
      *  Description     <text string according to encoding> $00 (00)
@@ -705,7 +745,25 @@
       url: url
     };
   }
-  function langDescFrame(view) {
+  function iplsFrame(view, version) {
+    /**
+     *  <Header for 'Involved people list', ID: "IPLS">
+     *  Text encoding         $xx
+     *  People list strings  <text strings according to encoding>
+     */
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var people = [];
+    var length = 1;
+
+    while (length < view.byteLength) {
+      var person = view.getCString(length, encoding);
+      people.push(person.string);
+      length += person.length;
+    }
+
+    return people;
+  }
+  function langDescFrame(view, version) {
     /**
      *  Text encoding           $xx
      *  Language                $xx xx xx
@@ -722,7 +780,7 @@
       text: text
     };
   }
-  function apicFrame(view) {
+  function apicFrame(view, version) {
     /**
      *  Text encoding   $xx
      *  MIME type       <text string> $00
@@ -743,9 +801,50 @@
       data: img
     };
   }
+  function geobFrame(view, version) {
+    /**
+     *  Text encoding        $xx
+     *  MIME type            <text string> $00
+     *  Filename             <text string according to encoding> $00 (00)
+     *  Content description  <text string according to encoding> $00 (00)
+     *  Encapsulated object  <binary data>
+     */
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var mime = view.getCString(1, 'ascii');
+    var fname = view.getCString(mime.length + 1, encoding);
+    var desc = view.getCString(fname.length + mime.length + 1, encoding);
+    var binOffset = mime.length + fname.length + desc.length + 1;
+    var binSize = view.byteLength - binOffset;
+    var binObject = view.getUint8(binOffset, binSize);
+    return {
+      format: mime.string,
+      filename: fname.string,
+      description: desc.string,
+      object: binObject
+    };
+  }
+  function ufidFrame(view, version) {
+    /**
+     *  Owner identifier  <text string> $00
+     *  Identifier        <up to 64 bytes binary data>
+     */
+    var ownerId = view.getCString(0, 'ascii');
+    var id = view.getUint8(ownerId.length, view.byteLength - ownerId.length);
+    return {
+      ownerId: ownerId.string,
+      id: id
+    };
+  }
 
   var urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/;
-  var langRegex = /^([a-z]{3})$/;
+  var langRegex = /^([a-z]{3}|XXX)$/;
+  var year = '(\\d{4})';
+  var month = '(0[1-9]|1[0-2])';
+  var day = '(0[1-9]|1\\d|2\\d|3[0-1])';
+  var hour = '(0\\d|1\\d|2[0-3])';
+  var minute = '(0\\d|1\\d|2\\d|3\\d|4\\d|5\\d)';
+  var second = minute;
+  var timeRegex = "^(".concat(year, "(-").concat(month, "(-").concat(day, "(T").concat(hour, "(:").concat(minute, "(:").concat(second, ")?)?)?)?)?)$");
 
   function validateID(id) {
     if (!id.match(/^([a-zA-Z0-9]{4})$/)) {
@@ -815,7 +914,7 @@
     array.forEach(function (elem) {
       switch (version) {
         case 3:
-          if (!elem.toString().match(/^([0-9]{4})$/)) {
+          if (!elem.toString().match(/^(\d{4})$/)) {
             throw new TagError(203, "".concat(frame.id, " is not 4 numeric characters"));
           }
 
@@ -825,13 +924,9 @@
           if (typeof elem !== 'string') {
             throw new TagError(203, "".concat(frame.id, " value is not a string"));
           }
-          /**
-           *  @TODO Improve regex matching the format
-           */
 
-
-          if (!elem.match(/^([0-9]{8})T([0-9]{6})$/)) {
-            throw new TagError(203, 'Time Frames should follow this format: YYYYMMDD\\THHMMSS');
+          if (!elem.match(timeRegex)) {
+            throw new TagError(203, 'Time Frames should follow ISO 8601');
           }
 
           break;
@@ -985,6 +1080,61 @@
     });
     return true;
   }
+  function geobFrame$1(frame, version) {
+    validateID(frame.id);
+    var array = mergeAsArray(frame.value);
+    var descriptions = [];
+    var objects = [];
+    array.forEach(function (elem) {
+      if (typeof elem.format !== 'string' || typeof elem.filename !== 'string' || typeof elem.description !== 'string') {
+        throw new TagError(203, 'GEOB MIME/Filename/description is not a string');
+      }
+
+      if (!(elem.object instanceof ArrayBuffer) && !Array.isArray(elem.object) && !ArrayBuffer.isView(elem.object)) {
+        throw new TagError(203, 'Object data should be ArrayBuffer or an array');
+      }
+
+      if (descriptions.includes(elem.description)) {
+        throw new TagError(203, 'GEOB description should not duplicate');
+      } else {
+        descriptions.push(elem.description);
+      }
+
+      if (includesArray(objects, elem.object)) {
+        throw new TagError(203, 'GEOB object should not duplicate');
+      } else {
+        objects.push(elem.object);
+      }
+    });
+    return true;
+  }
+  function ufidFrame$1(frame, version) {
+    validateID(frame.id);
+    var array = mergeAsArray(frame.value);
+    var ownerIds = [];
+    array.forEach(function (elem) {
+      if (typeof elem.ownerId !== 'string') {
+        throw new TagError(203, 'UFID ownerId is not a string');
+      }
+
+      if (!(elem.id instanceof ArrayBuffer) && !Array.isArray(elem.id) && !ArrayBuffer.isView(elem.id)) {
+        throw new TagError(203, 'UFID id should be ArrayBuffer or an array');
+      }
+
+      var idLength = elem.id.byteLength || elem.id.length || 0;
+
+      if (idLength > 64) {
+        throw new TagError(203, 'UFID id exceeds 64 bytes');
+      }
+
+      if (ownerIds.includes(elem.ownerId)) {
+        throw new TagError(203, 'UFID ownerId should not duplicate');
+      } else {
+        ownerIds.push(elem.ownerId);
+      }
+    });
+    return true;
+  }
 
   /**
    *  @see http://id3.org/id3v2.3.0
@@ -1027,9 +1177,19 @@
         break;
 
       case 4:
-        if (Array.isArray(frame.value)) frame.value = frame.value.join('\0');
         encoding = 3;
-        strBytes = encodeString(frame.value + '\0', 'utf-8');
+
+        if (Array.isArray(frame.value)) {
+          frame.value.forEach(function (string) {
+            var encoded = encodeString(string + '\0', 'utf-8');
+            encoded.forEach(function (_byte) {
+              return strBytes.push(_byte);
+            });
+          });
+        } else {
+          strBytes = encodeString(frame.value + '\0', 'utf-8');
+        }
+
         break;
 
       default:
@@ -1046,7 +1206,6 @@
         break;
 
       case 4:
-        frame.value = frame.value.join('\0');
         break;
 
       default:
@@ -1076,6 +1235,9 @@
           frame.value = value.join('\0');
           break;
         }
+
+      default:
+        throw new TagError(201, version);
     }
 
     return asciiFrame(frame, version);
@@ -1113,8 +1275,8 @@
       var size = descBytes.length + strBytes.length + 1;
       var header = getHeaderBytes(frame.id, size, version);
       var merged = mergeBytes(header, encoding, descBytes, strBytes);
-      merged.forEach(function (_byte) {
-        return bytes.push(_byte);
+      merged.forEach(function (_byte2) {
+        return bytes.push(_byte2);
       });
     });
     return bytes;
@@ -1147,11 +1309,35 @@
       var size = descBytes.length + strBytes.length + 1;
       var header = getHeaderBytes(frame.id, size, version);
       var merged = mergeBytes(header, encoding, descBytes, strBytes);
-      merged.forEach(function (_byte2) {
-        return bytes.push(_byte2);
+      merged.forEach(function (_byte3) {
+        return bytes.push(_byte3);
       });
     });
     return bytes;
+  }
+  function iplsFrame$1(frame, version) {
+    var encoding;
+    var strBytes = [];
+
+    switch (version) {
+      case 3:
+        encoding = 1;
+        frame.value.forEach(function (string) {
+          var encoded = encodeString(string + '\0', 'utf-16');
+          encoded.forEach(function (_byte4) {
+            return strBytes.push(_byte4);
+          });
+        });
+        break;
+
+      case 4:
+      default:
+        throw new TagError(201, version);
+    }
+
+    var size = strBytes.length + 1;
+    var header = getHeaderBytes(frame.id, size, version);
+    return mergeBytes(header, encoding, strBytes);
   }
   function langDescFrame$2(frame, version) {
     var bytes = [];
@@ -1182,8 +1368,8 @@
       var size = descBytes.length + textBytes.length + 4;
       var header = getHeaderBytes(frame.id, size, version);
       var merged = mergeBytes(header, encoding, langBytes, descBytes, textBytes);
-      merged.forEach(function (_byte3) {
-        return bytes.push(_byte3);
+      merged.forEach(function (_byte5) {
+        return bytes.push(_byte5);
       });
     });
     return bytes;
@@ -1215,8 +1401,58 @@
       var size = mimeBytes.length + strBytes.length + imageBytes.length + 2;
       var header = getHeaderBytes(frame.id, size, version);
       var merged = mergeBytes(header, encoding, mimeBytes, elem.type, strBytes, imageBytes);
-      merged.forEach(function (_byte4) {
-        return bytes.push(_byte4);
+      merged.forEach(function (_byte6) {
+        return bytes.push(_byte6);
+      });
+    });
+    return bytes;
+  }
+  function geobFrame$2(frame, version) {
+    var bytes = [];
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      var encoding;
+      var mime = encodeString(elem.format + '\0', 'ascii');
+      var filename;
+      var description;
+      var object = new Uint8Array(elem.object);
+
+      switch (version) {
+        case 3:
+          encoding = 1;
+          filename = encodeString(elem.filename + '\0', 'utf-16');
+          description = encodeString(elem.description + '\0', 'utf-16');
+          break;
+
+        case 4:
+          encoding = 3;
+          filename = encodeString(elem.filename + '\0', 'utf-8');
+          description = encodeString(elem.description + '\0', 'utf-8');
+          break;
+
+        default:
+          throw new TagError(201, version);
+      }
+
+      var size = mime.length + filename.length + description.length + object.length + 1;
+      var header = getHeaderBytes(frame.id, size, version);
+      var merged = mergeBytes(header, encoding, mime, filename, description, object);
+      merged.forEach(function (_byte7) {
+        return bytes.push(_byte7);
+      });
+    });
+    return bytes;
+  }
+  function ufidFrame$2(frame, version) {
+    var bytes = [];
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      var ownerBytes = encodeString(elem.ownerId + '\0', 'ascii');
+      var idBytes = new Uint8Array(elem.id);
+      var header = getHeaderBytes(frame.id, ownerBytes.length + idBytes.length, version);
+      var merged = mergeBytes(header, ownerBytes, idBytes);
+      merged.forEach(function (_byte8) {
+        return bytes.push(_byte8);
       });
     });
     return bytes;
@@ -1233,6 +1469,18 @@
     validate: langDescFrame$1,
     write: langDescFrame$2,
     version: [3, 4]
+  };
+  var GEOB = {
+    parse: geobFrame,
+    validate: geobFrame$1,
+    write: geobFrame$2,
+    version: [3, 4]
+  };
+  var IPLS = {
+    parse: iplsFrame,
+    validate: arrayFrame$1,
+    write: iplsFrame$1,
+    version: [3]
   };
   var TALB = {
     parse: textFrame,
@@ -1331,8 +1579,8 @@
     version: [3]
   };
   var TIPL = {
-    parse: textFrame,
-    validate: textFrame$1,
+    parse: arrayFrame,
+    validate: arrayFrame$1,
     write: textFrame$2,
     version: [4]
   };
@@ -1371,6 +1619,12 @@
     validate: numberFrame$1,
     write: asciiFrame,
     version: [3, 4]
+  };
+  var TMCL = {
+    parse: arrayFrame,
+    validate: arrayFrame$1,
+    write: textFrame$2,
+    version: [4]
   };
   var TMED = {
     parse: textFrame,
@@ -1546,6 +1800,12 @@
     write: txxxFrame$2,
     version: [3, 4]
   };
+  var UFID = {
+    parse: ufidFrame,
+    validate: ufidFrame$1,
+    write: ufidFrame$2,
+    version: [3, 4]
+  };
   var USLT = {
     parse: langDescFrame,
     validate: langDescFrame$1,
@@ -1611,6 +1871,8 @@
     __proto__: null,
     APIC: APIC,
     COMM: COMM,
+    GEOB: GEOB,
+    IPLS: IPLS,
     TALB: TALB,
     TBPM: TBPM,
     TCOM: TCOM,
@@ -1634,6 +1896,7 @@
     TKEY: TKEY,
     TLAN: TLAN,
     TLEN: TLEN,
+    TMCL: TMCL,
     TMED: TMED,
     TMOO: TMOO,
     TOAL: TOAL,
@@ -1663,6 +1926,7 @@
     TSST: TSST,
     TYER: TYER,
     TXXX: TXXX,
+    UFID: UFID,
     USLT: USLT,
     WCOM: WCOM,
     WCOP: WCOP,
@@ -1708,13 +1972,13 @@
         }
 
         this.size = decodeSynch(mediaView.getUint32(6));
-        this.flags = getHeaderFlags(this.major, mediaView.getUint8(5));
+        this.flags = getHeaderFlags(mediaView.getUint8(5), this.major);
         this.frames = [];
         var offset = 10;
 
         while (offset < this.size) {
-          var frameView = mediaView.getUint8(offset, this.size);
-          var frame = decodeFrame.call(this, frameView);
+          var frameBytes = mediaView.getUint8(offset, this.size);
+          var frame = decodeFrame.call(this, frameBytes);
 
           if (frame) {
             this.frames.push(frame);
@@ -1728,16 +1992,23 @@
       key: "validate",
       value: function validate() {
         var framesObj = this.parse();
-        var frameDesc;
-        var frame;
 
         for (var id in framesObj) {
-          frameDesc = frames[id];
-          frame = {
+          var frameDesc = frames[id];
+          var frame = {
             id: id,
             value: framesObj[id]
           };
-          if (frameDesc) frameDesc.validate(frame, this.major);else throw new TagError(202, id);
+
+          if (frameDesc) {
+            if (frameDesc.version.includes(this.major)) {
+              frameDesc.validate(frame, this.major);
+            } else {
+              throw new TagError(204, id);
+            }
+          } else {
+            throw new TagError(202, id);
+          }
         }
 
         return true;
@@ -1746,29 +2017,22 @@
       key: "save",
       value: function save() {
         if (this.frames.length === 0) return this.getAudio().buffer;
-        if (!this.validate()) return false;
         this.major = this.options.version || this.major || 3;
         this.minor = 0;
+        if (!this.validate()) return false;
         var framesObj = this.parse();
         var headerBytes = [0x49, 0x44, 0x33, this.major, this.minor, 32];
         var sizeView = new BufferView(new ArrayBuffer(4));
         var paddingBytes = new Uint8Array(this.options.padding);
         var audioBytes = this.getAudio();
         var framesBytes = [];
-        var frameDesc;
-        var frame;
 
         for (var id in framesObj) {
-          frameDesc = frames[id];
-          frame = {
+          var frameDesc = frames[id];
+          var frame = {
             id: id,
             value: framesObj[id]
           };
-
-          if (!frameDesc.version.includes(this.major)) {
-            throw new TagError(204, id);
-          }
-
           var bytes = frameDesc.write(frame, this.major);
           bytes.forEach(function (_byte) {
             return framesBytes.push(_byte);
@@ -1836,7 +2100,7 @@
         throw new TagError(201, this.major);
     }
 
-    frame.flags = getFrameFlags(this.major, frameView.getUint8(8, 2));
+    frame.flags = getFrameFlags(frameView.getUint8(8, 2), this.major);
     var frameDesc = frames[frame.id];
     var offset = 10;
     var actualSize = frame.size;
@@ -1886,8 +2150,8 @@
       }
 
       this.buffer = buffer;
+      this.options = options || {};
       this.tagger = {};
-      this.options = options;
     }
 
     _createClass(MP3Tag, [{
