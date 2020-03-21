@@ -67,7 +67,7 @@ export const TCOP = {
 }
 
 export const TDAT = {
-  parse: parsers.numberFrame,
+  parse: parsers.textFrame,
   validate: validators.timeFrame,
   write: writers.asciiFrame,
   version: [3]
@@ -137,7 +137,7 @@ export const TFLT = {
 }
 
 export const TIME = {
-  parse: parsers.numberFrame,
+  parse: parsers.textFrame,
   validate: validators.timeFrame,
   write: writers.asciiFrame,
   version: [3]
@@ -242,7 +242,7 @@ export const TOPE = {
 }
 
 export const TORY = {
-  parse: parsers.numberFrame,
+  parse: parsers.textFrame,
   validate: validators.timeFrame,
   write: writers.asciiFrame,
   version: [3]
@@ -389,7 +389,7 @@ export const TSST = {
 }
 
 export const TYER = {
-  parse: parsers.numberFrame,
+  parse: parsers.textFrame,
   validate: validators.timeFrame,
   write: writers.asciiFrame,
   version: [3]
