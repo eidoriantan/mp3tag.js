@@ -1,5 +1,5 @@
 
-const MP3Tag = require('../../dist/mp3tag.js')
+const MP3Tag = require('../../../dist/mp3tag')
 const assert = require('assert')
 
 const v23Header = [73, 68, 51, 3, 0, 0]

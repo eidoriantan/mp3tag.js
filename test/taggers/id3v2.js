@@ -1,5 +1,5 @@
 
-const MP3Tag = require('../../dist/mp3tag.js')
+const MP3Tag = require('../../dist/mp3tag')
 const assert = require('assert')
 
 const v23Bytes = new Uint8Array([
@@ -144,8 +144,8 @@ describe('ID3v2', function () {
     }
 
     if (success) {
-      require('./id3v2-frames-read')
-      require('./id3v2-frames-write')
+      require('./id3v2/read')
+      require('./id3v2/write')
     }
   })
 })

@@ -1,5 +1,5 @@
 
-const MP3Tag = require('../../dist/mp3tag.js')
+const MP3Tag = require('../../../dist/mp3tag')
 const assert = require('assert')
 
 const v23Bytes = new Uint8Array([
