@@ -37,6 +37,33 @@ $(document).ready(function () {
       $('#cover-preview').attr('src', url)
     })
   })
+
+  $('#month').on('change', function () {
+    $('#day').find('option').attr('disabled', null)
+    switch ($(this).val()) {
+      case '04': case '06': case '09': case '11':
+        $('#day').find('option[value=\'31\']').attr('disabled', true)
+        break
+
+      case '02': {
+        const removeOptions = function (leapYear) {
+          $('#day').find('option[value=\'30\'], option[value=\'31\']')
+            .attr('disabled', true)
+
+          if (!leapYear) {
+            $('#day').find('option[value=\'29\']').attr('disabled', true)
+          }
+        }
+
+        if ($('#year').val() === '') {
+          removeOptions(false)
+        } else {
+          const year = parseInt($('#year').val())
+          removeOptions((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0)
+        }
+      }
+    }
+  })
 })
 
 const TOAST_NONE = ['', '']
