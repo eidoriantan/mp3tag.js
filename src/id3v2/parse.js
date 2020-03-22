@@ -29,7 +29,9 @@ export function textFrame (view, version) {
       break
 
     case 4:
-      value = view.getString(1, view.byteLength - 1, encoding).split('\0')
+      value = view.getString(1, view.byteLength - 1, encoding)
+        .string.split('\0')
+
       if (value.length === 1) value = value[0]
       break
 
@@ -99,10 +101,11 @@ export function txxxFrame (view, version) {
 
   const encoding = ENCODINGS[view.getUint8(0)]
   const description = view.getCString(1, encoding)
-  const valueLength = view.byteLength - description.length - 1
-  const value = view.getString(description.length + 1, valueLength, encoding)
+  const valueOffset = description.length + 1
+  const valueLength = view.byteLength - valueOffset
+  const value = view.getString(valueOffset, valueLength, encoding)
 
-  return { description: description.string, text: value }
+  return { description: description.string, text: value.string }
 }
 
 export function wxxxFrame (view, version) {
@@ -114,10 +117,11 @@ export function wxxxFrame (view, version) {
 
   const encoding = ENCODINGS[view.getUint8(0)]
   const description = view.getCString(1, encoding)
-  const urlLength = view.byteLength - description.length - 1
-  const url = view.getString(description.length + 1, urlLength, 'ascii')
+  const urlOffset = description.length + 1
+  const urlLength = view.byteLength - urlOffset
+  const url = view.getString(urlOffset, urlLength, 'ascii')
 
-  return { description: description.string, url: url }
+  return { description: description.string, url: url.string }
 }
 
 export function iplsFrame (view, version) {
@@ -149,14 +153,15 @@ export function langDescFrame (view, version) {
    */
 
   const encoding = ENCODINGS[view.getUint8(0)]
-  const description = view.getCString(4, encoding)
-  const textLength = view.byteLength - description.length - 4
-  const text = view.getString(description.length + 4, textLength, encoding)
+  const descriptor = view.getCString(4, encoding)
+  const textOffset = descriptor.length + 4
+  const textLength = view.byteLength - textOffset
+  const text = view.getString(textOffset, textLength, encoding)
 
   return {
-    language: view.getString(1, 3, 'ascii'),
-    descriptor: description.string,
-    text: text
+    language: view.getString(1, 3, 'ascii').string,
+    descriptor: descriptor.string,
+    text: text.string
   }
 }
 
@@ -173,8 +178,9 @@ export function apicFrame (view, version) {
   const mime = view.getCString(1, 'ascii')
   const type = view.getUint8(mime.length + 1)
   const desc = view.getCString(mime.length + 2, encoding)
-  const imgLength = view.byteLength - mime.length - desc.length - 2
-  const img = view.getUint8(mime.length + desc.length + 2, imgLength)
+  const imgOffset = mime.length + desc.length + 2
+  const imgLength = view.byteLength - imgOffset
+  const img = view.getUint8(imgOffset, imgLength)
 
   return {
     format: mime.string,
@@ -198,8 +204,8 @@ export function geobFrame (view, version) {
   const fname = view.getCString(mime.length + 1, encoding)
   const desc = view.getCString(fname.length + mime.length + 1, encoding)
   const binOffset = mime.length + fname.length + desc.length + 1
-  const binSize = view.byteLength - binOffset
-  const binObject = view.getUint8(binOffset, binSize)
+  const binLength = view.byteLength - binOffset
+  const binObject = view.getUint8(binOffset, binLength)
 
   return {
     format: mime.string,

@@ -2,6 +2,13 @@
 import { decodeUTF8 } from './strings'
 
 export default class BufferView extends DataView {
+  constructor (buffer) {
+    if (typeof buffer === 'number') { buffer = new Uint8Array(buffer) }
+    if (Array.isArray(buffer)) { buffer = new Uint8Array(buffer).buffer }
+    if (ArrayBuffer.isView(buffer)) { buffer = buffer.buffer }
+    super(buffer)
+  }
+
   getString (offset, maxlength, format) {
     const bytes = this.getUint8(offset, maxlength)
     let string = ''
@@ -31,41 +38,44 @@ export default class BufferView extends DataView {
         string = this.getUint8String(offset, maxlength)
     }
 
-    if (string.match(/^[\s\S]+(\0)$/)) {
-      string = string.substr(0, string.length - 1)
+    return {
+      string: string[string.length - 1] === '\0'
+        ? string.substr(0, string.length - 1) : string,
+      length: bytes.length
     }
-
-    return string
   }
 
   getCString (offset, format) {
-    const terminated = []
-    let bytes = []
-    let bytesPerChar = 1
+    let bytes, bytesPerChar
+    let limit = this.byteLength - offset
 
-    if (format === 'utf-16' || format === 'utf-16be') {
-      bytes = this.getUint16(offset, this.byteLength - offset)
-    } else {
-      bytes = this.getUint8(offset, this.byteLength - offset)
+    switch (format) {
+      case 'utf-16':
+      case 'utf-16be':
+        bytesPerChar = 2
+        bytes = this.getUint16(offset, limit)
+        break
+
+      default:
+        bytesPerChar = 1
+        bytes = this.getUint8(offset, limit)
     }
 
     for (let i = 0; i < bytes.length; i++) {
-      if (bytes[i] !== 0x00) terminated.push(bytes[i])
-      else break
+      if (bytes[i] === 0x00) {
+        limit = (i + 1) * bytesPerChar
+        break
+      }
     }
 
-    bytesPerChar = bytes.BYTES_PER_ELEMENT
-    const length = terminated.length * bytesPerChar
-    const string = this.getString(offset, length, format)
-
-    return { string: string, length: length + bytesPerChar }
+    return this.getString(offset, limit, format)
   }
 
   getUint8String (offset, length) {
     let bytes = this.getUint8(offset, length)
     let string = ''
 
-    if (!ArrayBuffer.isView(bytes)) bytes = [bytes]
+    if (!Array.isArray(bytes)) bytes = [bytes]
     for (let i = 0; i < bytes.length; i++) {
       const character = String.fromCharCode(bytes[i])
       string += character
@@ -74,75 +84,42 @@ export default class BufferView extends DataView {
     return string
   }
 
-  getUint8CString (offset) {
-    let bytes = this.getUint8(offset, this.byteLength - offset)
-    let string = ''
-
-    if (!ArrayBuffer.isView(bytes)) bytes = [bytes]
-    for (let i = 0; i < bytes.length; i++) {
-      const byte = bytes[i]
-      if (byte !== 0x00) {
-        const character = String.fromCharCode(byte)
-        string += character
-      } else break
-    }
-
-    return string
-  }
-
-  getUint16String (offset, length, le = true) {
+  getUint16String (offset, length, le = false) {
     let bytes = this.getUint16(offset, length, le)
     let string = ''
 
-    if (!ArrayBuffer.isView(bytes)) bytes = [bytes]
+    if (!Array.isArray(bytes)) bytes = [bytes]
     for (let i = 0; i < bytes.length; i++) {
       const character = String.fromCharCode(bytes[i])
       string += character
-    }
-
-    return string
-  }
-
-  getUint16CString (offset, le = false) {
-    let bytes = this.getUint16(offset, this.byteLength - offset, le)
-    let string = ''
-
-    if (!ArrayBuffer.isView(bytes)) bytes = [bytes]
-    for (let i = 0; i < bytes.length; i++) {
-      const byte = bytes[i]
-      if (byte !== 0x0000) {
-        const character = String.fromCharCode(byte)
-        string += character
-      } else break
     }
 
     return string
   }
 
   getUint8 (offset, length = 1) {
-    const end = offset + length
-    const bytes = new Uint8Array(length)
-    let i = 0
+    const limit = offset + length
+    const bytes = []
 
-    while (offset < this.byteLength && offset < end) {
-      bytes[i] = DataView.prototype.getUint8.call(this, offset++)
-      i++
+    if (this.byteLength - limit < 0) return false
+    for (let i = offset; i < limit; i++) {
+      const byte = DataView.prototype.getUint8.call(this, i)
+      bytes.push(byte)
     }
 
-    return length === 1 ? bytes[0] : bytes
+    return bytes.length === 1 ? bytes[0] : bytes
   }
 
   getUint16 (offset, length = 1, le = false) {
-    const end = offset + length
-    const bytes = new Uint16Array(length / 2)
-    let i = 0
+    const limit = offset + length
+    const bytes = []
 
-    while (offset < this.byteLength && offset < end) {
-      bytes[i] = DataView.prototype.getUint16.call(this, offset, le)
-      offset += 2
-      i++
+    if (this.byteLength - limit < 0) return false
+    for (let i = offset; i < limit; i += 2) {
+      const byte = DataView.prototype.getUint16.call(this, i, le)
+      bytes.push(byte)
     }
 
-    return length === 1 ? bytes[0] : bytes
+    return bytes.length === 1 ? bytes[0] : bytes
   }
 }

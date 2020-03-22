@@ -36,13 +36,15 @@ export default class ID3v2 {
     this.frames = []
 
     let offset = 10
+    let limit = this.size
     while (offset < this.size) {
-      const frameBytes = mediaView.getUint8(offset, this.size)
+      const frameBytes = mediaView.getUint8(offset, limit)
       const frame = decodeFrame.call(this, frameBytes)
 
       if (frame) {
         this.frames.push(frame)
         offset += frame.size + 10
+        limit -= frame.size + 10
       } else break
     }
 
@@ -78,7 +80,7 @@ export default class ID3v2 {
     if (!this.validate()) return false
     const framesObj = this.parse()
     const headerBytes = [0x49, 0x44, 0x33, this.major, this.minor, 0b00100000]
-    const sizeView = new BufferView(new ArrayBuffer(4))
+    const sizeView = new BufferView(4)
     const paddingBytes = new Uint8Array(this.options.padding)
     const audioBytes = this.getAudio()
     const framesBytes = []
@@ -91,14 +93,12 @@ export default class ID3v2 {
     }
 
     sizeView.setUint32(0, encodeSynch(framesBytes.length + paddingBytes.length))
-    const resultBytes = mergeBytes(
+    this.buffer = mergeBytes(
       headerBytes, sizeView.getUint8(0, 4),
       framesBytes, paddingBytes, audioBytes
-    )
+    ).buffer
 
-    this.buffer = resultBytes.buffer
     this.read()
-
     return this.buffer
   }
 
@@ -135,7 +135,8 @@ export default class ID3v2 {
 }
 
 function decodeFrame (bytes) {
-  const frameView = new BufferView(bytes.buffer)
+  if (bytes === false) console.debug('Why are you false!?')
+  const frameView = new BufferView(bytes)
   if (frameView.getUint8(0) === 0x00) return false
 
   const frame = {}
@@ -159,7 +160,7 @@ function decodeFrame (bytes) {
   let offset = 10
   let actualSize = frame.size
   let dataLength = frame.size
-  let contentBytes = []
+  let contentBuffer = []
 
   if (!frameDesc) {
     console.warn(`Skipping unsupported frame: ${frame.id}`)
@@ -176,12 +177,11 @@ function decodeFrame (bytes) {
     (this.flags.unsynchronisation || frame.flags.unsynchronisation))) {
     const uint8 = frameView.getUint8(offset, dataLength)
     const unsynched = unsynch(uint8)
-    contentBytes = new ArrayBuffer(actualSize)
-    new Uint8Array(contentBytes).set(unsynched)
+    contentBuffer = new Uint8Array(unsynched)
   } else {
-    contentBytes = frameView.buffer.slice(offset, offset + actualSize)
+    contentBuffer = frameView.getUint8(offset, actualSize)
   }
 
-  frame.value = frameDesc.parse(new BufferView(contentBytes), this.major)
+  frame.value = frameDesc.parse(new BufferView(contentBuffer), this.major)
   return frame
 }

@@ -468,7 +468,7 @@ describe('Reading ID3v2 Frames', function () {
       format: 'image/jpeg',
       type: 3,
       description: 'DESC',
-      data: new Uint8Array([255, 216, 255, 226, 255, 217])
+      data: [255, 216, 255, 226, 255, 217]
     })
   })
 
@@ -493,14 +493,14 @@ describe('Reading ID3v2 Frames', function () {
       format: 'image/jpeg',
       type: 3,
       description: 'DESC',
-      data: new Uint8Array([255, 216, 255, 226, 255, 217])
+      data: [255, 216, 255, 226, 255, 217]
     })
     assert.deepStrictEqual(mp3tag.frames[1].id, 'APIC')
     assert.deepStrictEqual(mp3tag.frames[1].value, {
       format: 'image/jpeg',
       type: 0,
       description: 'DESC2',
-      data: new Uint8Array([255, 216, 255, 226, 255, 217])
+      data: [255, 216, 255, 226, 255, 217]
     })
   })
 
@@ -521,7 +521,7 @@ describe('Reading ID3v2 Frames', function () {
       format: 'image/jpeg',
       type: 3,
       description: 'DESC',
-      data: new Uint8Array([255, 216, 255, 226, 255, 217])
+      data: [255, 216, 255, 226, 255, 217]
     })
   })
 
@@ -546,14 +546,14 @@ describe('Reading ID3v2 Frames', function () {
       format: 'image/jpeg',
       type: 3,
       description: 'DESC',
-      data: new Uint8Array([255, 216, 255, 226, 255, 217])
+      data: [255, 216, 255, 226, 255, 217]
     })
     assert.deepStrictEqual(mp3tag.frames[1].id, 'APIC')
     assert.deepStrictEqual(mp3tag.frames[1].value, {
       format: 'image/jpeg',
       type: 0,
       description: 'DESC2',
-      data: new Uint8Array([255, 216, 255, 226, 255, 217])
+      data: [255, 216, 255, 226, 255, 217]
     })
   })
 
@@ -576,7 +576,7 @@ describe('Reading ID3v2 Frames', function () {
       format: 'text/plain',
       filename: 'file.txt',
       description: 'DESC',
-      object: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      object: [1, 2, 3, 4, 5, 6, 7, 8]
     })
   })
 
@@ -605,14 +605,14 @@ describe('Reading ID3v2 Frames', function () {
       format: 'text/plain',
       filename: 'file.txt',
       description: 'DESC',
-      object: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      object: [1, 2, 3, 4, 5, 6, 7, 8]
     })
     assert.deepStrictEqual(mp3tag.frames[1].id, 'GEOB')
     assert.deepStrictEqual(mp3tag.frames[1].value, {
       format: 'text/plain',
       filename: 'file.txt',
       description: 'DESC2',
-      object: new Uint8Array([9, 10, 11, 12, 13, 14, 15, 16])
+      object: [9, 10, 11, 12, 13, 14, 15, 16]
     })
   })
 
@@ -634,7 +634,7 @@ describe('Reading ID3v2 Frames', function () {
       format: 'text/plain',
       filename: 'file.txt',
       description: 'DESC',
-      object: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      object: [1, 2, 3, 4, 5, 6, 7, 8]
     })
   })
 
@@ -661,14 +661,14 @@ describe('Reading ID3v2 Frames', function () {
       format: 'text/plain',
       filename: 'file.txt',
       description: 'DESC',
-      object: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      object: [1, 2, 3, 4, 5, 6, 7, 8]
     })
     assert.deepStrictEqual(mp3tag.frames[1].id, 'GEOB')
     assert.deepStrictEqual(mp3tag.frames[1].value, {
       format: 'text/plain',
       filename: 'file.txt',
       description: 'DESC2',
-      object: new Uint8Array([9, 10, 11, 12, 13, 14, 15, 16])
+      object: [9, 10, 11, 12, 13, 14, 15, 16]
     })
   })
 
@@ -686,7 +686,7 @@ describe('Reading ID3v2 Frames', function () {
     assert.deepStrictEqual(mp3tag.frames[0].id, 'UFID')
     assert.deepStrictEqual(mp3tag.frames[0].value, {
       ownerId: 'github',
-      id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      id: [1, 2, 3, 4, 5, 6, 7, 8]
     })
   })
 
@@ -707,12 +707,12 @@ describe('Reading ID3v2 Frames', function () {
     assert.deepStrictEqual(mp3tag.frames[0].id, 'UFID')
     assert.deepStrictEqual(mp3tag.frames[0].value, {
       ownerId: 'github',
-      id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      id: [1, 2, 3, 4, 5, 6, 7, 8]
     })
     assert.deepStrictEqual(mp3tag.frames[1].id, 'UFID')
     assert.deepStrictEqual(mp3tag.frames[1].value, {
       ownerId: 'github2',
-      id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      id: [1, 2, 3, 4, 5, 6, 7, 8]
     })
   })
 
@@ -730,7 +730,7 @@ describe('Reading ID3v2 Frames', function () {
     assert.deepStrictEqual(mp3tag.frames[0].id, 'UFID')
     assert.deepStrictEqual(mp3tag.frames[0].value, {
       ownerId: 'github',
-      id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      id: [1, 2, 3, 4, 5, 6, 7, 8]
     })
   })
 
@@ -751,12 +751,12 @@ describe('Reading ID3v2 Frames', function () {
     assert.deepStrictEqual(mp3tag.frames[0].id, 'UFID')
     assert.deepStrictEqual(mp3tag.frames[0].value, {
       ownerId: 'github',
-      id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      id: [1, 2, 3, 4, 5, 6, 7, 8]
     })
     assert.deepStrictEqual(mp3tag.frames[1].id, 'UFID')
     assert.deepStrictEqual(mp3tag.frames[1].value, {
       ownerId: 'github2',
-      id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+      id: [1, 2, 3, 4, 5, 6, 7, 8]
     })
   })
 })
