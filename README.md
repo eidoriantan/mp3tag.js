@@ -1,7 +1,7 @@
 
 # mp3tag.js
-![Liberapay receiving](https://img.shields.io/liberapay/receives/eidoriantan)
 ![Travis](https://img.shields.io/travis/com/eidoriantan/mp3tag.js)
+![npm](https://img.shields.io/npm/v/mp3tag.js/latest?registry_uri=https%3A%2F%2Fregistry.npmjs.com%2Fmp3tag.js)
 
 **mp3tag.js** is an open sourced JavaScript library used to edit the metadata of
 audio files. It currently can read both ID3v2.3 and ID3v2.4 tags, write tags and
