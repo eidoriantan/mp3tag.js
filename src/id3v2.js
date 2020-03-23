@@ -135,7 +135,6 @@ export default class ID3v2 {
 }
 
 function decodeFrame (bytes) {
-  if (bytes === false) console.debug('Why are you false!?')
   const frameView = new BufferView(bytes)
   if (frameView.getUint8(0) === 0x00) return false
 
