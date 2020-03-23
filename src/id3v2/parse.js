@@ -5,21 +5,12 @@ import TagError from '../error'
 export const ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8']
 
 /**
- *  @see http://id3.org/id3v2.3.0
- */
-
-/**
  *  Frame Parsers
  *  @param {BufferView} view - View of the entire frame excluding the header
  *  @param {number} version - Frame will be parsed with this version
  */
 
 export function textFrame (view, version) {
-  /**
-   *  Text encoding   $xx
-   *  Information     <text string according to encoding>
-   */
-
   const encoding = ENCODINGS[view.getUint8(0)]
   let value
 
@@ -43,7 +34,6 @@ export function textFrame (view, version) {
 }
 
 export function arrayFrame (view, version) {
-  // Multiple-value text frames
   const text = textFrame(view, version)
   let value = []
 
@@ -65,13 +55,11 @@ export function arrayFrame (view, version) {
 }
 
 export function numberFrame (view, version) {
-  // Text numerical string frames
   const text = textFrame(view, version)
   return text.match(/^(\d+)$/) ? parseInt(text) : text
 }
 
 export function setFrame (view, version) {
-  // Set frames (e.g. "1/2")
   const text = textFrame(view, version)
   const array = mergeAsArray(text)
   const value = []
@@ -88,17 +76,10 @@ export function setFrame (view, version) {
 }
 
 export function urlFrame (view, version) {
-  // URL   <text string>
   return view.getCString(0, 'ascii').string
 }
 
 export function txxxFrame (view, version) {
-  /**
-   *  Text encoding   $xx
-   *  Description     <text string according to encoding> $00 (00)
-   *  Value           <text string according to encoding>
-   */
-
   const encoding = ENCODINGS[view.getUint8(0)]
   const description = view.getCString(1, encoding)
   const valueOffset = description.length + 1
@@ -109,12 +90,6 @@ export function txxxFrame (view, version) {
 }
 
 export function wxxxFrame (view, version) {
-  /**
-   *  Text encoding   $xx
-   *  Description     <text string according to encoding> $00 (00)
-   *  URL             <text string>
-   */
-
   const encoding = ENCODINGS[view.getUint8(0)]
   const description = view.getCString(1, encoding)
   const urlOffset = description.length + 1
@@ -125,12 +100,6 @@ export function wxxxFrame (view, version) {
 }
 
 export function iplsFrame (view, version) {
-  /**
-   *  <Header for 'Involved people list', ID: "IPLS">
-   *  Text encoding         $xx
-   *  People list strings  <text strings according to encoding>
-   */
-
   const encoding = ENCODINGS[view.getUint8(0)]
   const people = []
   let length = 1
@@ -145,13 +114,6 @@ export function iplsFrame (view, version) {
 }
 
 export function langDescFrame (view, version) {
-  /**
-   *  Text encoding           $xx
-   *  Language                $xx xx xx
-   *  Short content descrip.  <text string according to encoding> $00 (00)
-   *  The actual text         <full text string according to encoding>
-   */
-
   const encoding = ENCODINGS[view.getUint8(0)]
   const descriptor = view.getCString(4, encoding)
   const textOffset = descriptor.length + 4
@@ -166,14 +128,6 @@ export function langDescFrame (view, version) {
 }
 
 export function apicFrame (view, version) {
-  /**
-   *  Text encoding   $xx
-   *  MIME type       <text string> $00
-   *  Picture type    $xx
-   *  Description     <text string according to encoding> $00 (00)
-   *  Picture data    <binary data>
-   */
-
   const encoding = ENCODINGS[view.getUint8(0)]
   const mime = view.getCString(1, 'ascii')
   const type = view.getUint8(mime.length + 1)
@@ -191,14 +145,6 @@ export function apicFrame (view, version) {
 }
 
 export function geobFrame (view, version) {
-  /**
-   *  Text encoding        $xx
-   *  MIME type            <text string> $00
-   *  Filename             <text string according to encoding> $00 (00)
-   *  Content description  <text string according to encoding> $00 (00)
-   *  Encapsulated object  <binary data>
-   */
-
   const encoding = ENCODINGS[view.getUint8(0)]
   const mime = view.getCString(1, 'ascii')
   const fname = view.getCString(mime.length + 1, encoding)
@@ -216,11 +162,6 @@ export function geobFrame (view, version) {
 }
 
 export function ufidFrame (view, version) {
-  /**
-   *  Owner identifier  <text string> $00
-   *  Identifier        <up to 64 bytes binary data>
-   */
-
   const ownerId = view.getCString(0, 'ascii')
   const id = view.getUint8(ownerId.length, view.byteLength - ownerId.length)
 

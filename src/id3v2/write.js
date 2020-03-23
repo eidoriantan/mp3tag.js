@@ -5,10 +5,6 @@ import { encodeString } from '../utils/strings'
 import BufferView from '../utils/viewer'
 import TagError from '../error'
 
-/**
- *  @see http://id3.org/id3v2.3.0
- */
-
 function getHeaderBytes (id, size, version) {
   const idBytes = encodeString(id, 'ascii')
   const sizeView = new BufferView(new ArrayBuffer(4))
