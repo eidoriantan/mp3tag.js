@@ -409,6 +409,13 @@ export const UFID = {
   version: [3, 4]
 }
 
+export const USER = {
+  parse: parsers.userFrame,
+  validate: validators.userFrame,
+  write: writers.userFrame,
+  version: [3, 4]
+}
+
 export const USLT = {
   parse: parsers.langDescFrame,
   validate: validators.langDescFrame,

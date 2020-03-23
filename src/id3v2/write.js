@@ -41,17 +41,15 @@ export function textFrame (frame, version) {
       strBytes = encodeString(frame.value + '\0', 'utf-16')
       break
 
-    case 4:
+    case 4: {
       encoding = 3
-      if (Array.isArray(frame.value)) {
-        frame.value.forEach(function (string) {
-          const encoded = encodeString(string + '\0', 'utf-8')
-          encoded.forEach(byte => strBytes.push(byte))
-        })
-      } else {
-        strBytes = encodeString(frame.value + '\0', 'utf-8')
-      }
+      const array = mergeAsArray(frame.value)
+      array.forEach(function (elem) {
+        const encoded = encodeString(elem + '\0', 'utf-8')
+        encoded.forEach(byte => strBytes.push(byte))
+      })
       break
+    }
 
     default:
       throw new TagError(201, version)
@@ -78,9 +76,27 @@ export function arrayFrame (frame, version) {
 }
 
 export function asciiFrame (frame, version) {
-  const strBytes = encodeString(frame.value.toString() + '\0', 'ascii')
-  const header = getHeaderBytes(frame.id, strBytes.length + 1, version)
+  let strBytes = []
 
+  switch (version) {
+    case 3:
+      strBytes = encodeString(frame.value.toString() + '\0', 'ascii')
+      break
+
+    case 4: {
+      const array = mergeAsArray(frame.value)
+      array.forEach(function (elem) {
+        const encoded = encodeString(elem.toString() + '\0', 'ascii')
+        encoded.forEach(byte => strBytes.push(byte))
+      })
+      break
+    }
+
+    default:
+      throw new TagError(201, version)
+  }
+
+  const header = getHeaderBytes(frame.id, strBytes.length + 1, version)
   return mergeBytes(header, 0, strBytes)
 }
 
@@ -330,6 +346,38 @@ export function ufidFrame (frame, version) {
     const header = getHeaderBytes(frame.id, ownerBytes.length + idBytes.length,
       version)
     const merged = mergeBytes(header, ownerBytes, idBytes)
+    merged.forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}
+
+export function userFrame (frame, version) {
+  const bytes = []
+  const array = mergeAsArray(frame.value)
+
+  array.forEach(function (elem) {
+    let encoding = 0
+    const langBytes = encodeString(elem.language, 'ascii')
+    let textBytes = []
+
+    switch (version) {
+      case 3:
+        encoding = 1
+        textBytes = encodeString(elem.text + '\0', 'utf-16')
+        break
+
+      case 4:
+        encoding = 3
+        textBytes = encodeString(elem.text + '\0', 'utf-8')
+        break
+
+      default:
+        throw new TagError(201, version)
+    }
+
+    const header = getHeaderBytes(frame.id, textBytes.length + 4, version)
+    const merged = mergeBytes(header, encoding, langBytes, textBytes)
     merged.forEach(byte => bytes.push(byte))
   })
 

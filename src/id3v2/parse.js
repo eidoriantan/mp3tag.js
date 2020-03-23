@@ -170,3 +170,13 @@ export function ufidFrame (view, version) {
     id: id
   }
 }
+
+export function userFrame (view, version) {
+  const encoding = ENCODINGS[view.getUint8(0)]
+  const text = view.getString(4, view.byteLength - 4, encoding)
+
+  return {
+    language: view.getString(1, 3, 'ascii').string,
+    text: text.string
+  }
+}

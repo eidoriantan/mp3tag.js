@@ -759,4 +759,86 @@ describe('Reading ID3v2 Frames', function () {
       id: [1, 2, 3, 4, 5, 6, 7, 8]
     })
   })
+
+  it('Read USER frame v2.3', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v23Header, 0, 0, 0, 34,
+      85, 83, 69, 82, 0, 0, 0, 16, 0, 0,
+      1, 101, 110, 103, 255, 254, 84, 0, 69, 0, 88, 0, 84, 0, 0, 0,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'USER')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      language: 'eng',
+      text: 'TEXT'
+    })
+  })
+
+  it('Read multiple USER frame v2.3', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v23Header, 0, 0, 0, 60,
+      85, 83, 69, 82, 0, 0, 0, 16, 0, 0,
+      1, 101, 110, 103, 255, 254, 84, 0, 69, 0, 88, 0, 84, 0, 0, 0,
+      85, 83, 69, 82, 0, 0, 0, 16, 0, 0,
+      1, 101, 110, 103, 255, 254, 84, 0, 69, 0, 88, 0, 84, 0, 0, 0,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'USER')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      language: 'eng',
+      text: 'TEXT'
+    })
+    assert.deepStrictEqual(mp3tag.frames[1].id, 'USER')
+    assert.deepStrictEqual(mp3tag.frames[1].value, {
+      language: 'eng',
+      text: 'TEXT'
+    })
+  })
+
+  it('Read USER frame v2.4', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v24Header, 0, 0, 0, 27,
+      85, 83, 69, 82, 0, 0, 0, 9, 0, 0,
+      3, 101, 110, 103, 84, 69, 88, 84, 0,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 4)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'USER')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      language: 'eng',
+      text: 'TEXT'
+    })
+  })
+
+  it('Read multiple USER frame v2.4', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v24Header, 0, 0, 0, 46,
+      85, 83, 69, 82, 0, 0, 0, 9, 0, 0,
+      3, 101, 110, 103, 84, 69, 88, 84, 0,
+      85, 83, 69, 82, 0, 0, 0, 9, 0, 0,
+      3, 101, 110, 103, 84, 69, 88, 84, 0,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 4)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'USER')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      language: 'eng',
+      text: 'TEXT'
+    })
+    assert.deepStrictEqual(mp3tag.frames[1].id, 'USER')
+    assert.deepStrictEqual(mp3tag.frames[1].value, {
+      language: 'eng',
+      text: 'TEXT'
+    })
+  })
 })

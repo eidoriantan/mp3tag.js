@@ -357,3 +357,20 @@ export function ufidFrame (frame, version) {
 
   return true
 }
+
+export function userFrame (frame, version) {
+  validateID(frame.id)
+
+  const array = mergeAsArray(frame.value)
+  array.forEach(function (elem) {
+    if (typeof elem.language !== 'string' || typeof elem.text !== 'string') {
+      throw new TagError(203, 'USER language/text is not a string')
+    }
+
+    if (!elem.language.match(langRegex)) {
+      throw new TagError(203, 'Language does not follow ISO 639-2')
+    }
+  })
+
+  return true
+}

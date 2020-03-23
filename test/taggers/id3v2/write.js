@@ -1472,4 +1472,129 @@ describe('Writing ID3v2 Frames', function () {
     assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
+
+  it('Write user frame v2.3', function () {
+    const mp3tag = new MP3Tag(v23Bytes.buffer, { padding: 8 })
+    mp3tag.read()
+    mp3tag.frames.push({
+      id: 'USER',
+      value: {
+        language: 'eng',
+        text: 'TEXT'
+      }
+    })
+
+    mp3tag.save()
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([
+      73, 68, 51, 3, 0, 0b00100000, 0, 0, 0, 59,
+      84, 65, 76, 66, 0, 0, 0, 15, 0, 0,
+      1, 255, 254, 65, 0, 76, 0, 66, 0, 85, 0, 77, 0, 0, 0,
+      85, 83, 69, 82, 0, 0, 0, 16, 0, 0,
+      1, 101, 110, 103, 255, 254, 84, 0, 69, 0, 88, 0, 84, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      255, 251, 176, 0, 0
+    ])
+
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(actual, expected)
+  })
+
+  it('Write multiple user frame v2.3', function () {
+    const mp3tag = new MP3Tag(v23Bytes.buffer, { padding: 8 })
+    mp3tag.read()
+    mp3tag.frames.push({
+      id: 'USER',
+      value: {
+        language: 'eng',
+        text: 'TEXT'
+      }
+    }, {
+      id: 'USER',
+      value: {
+        language: 'jpn',
+        text: 'もしもし'
+      }
+    })
+
+    mp3tag.save()
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([
+      73, 68, 51, 3, 0, 0b00100000, 0, 0, 0, 85,
+      84, 65, 76, 66, 0, 0, 0, 15, 0, 0,
+      1, 255, 254, 65, 0, 76, 0, 66, 0, 85, 0, 77, 0, 0, 0,
+      85, 83, 69, 82, 0, 0, 0, 16, 0, 0,
+      1, 101, 110, 103, 255, 254, 84, 0, 69, 0, 88, 0, 84, 0, 0, 0,
+      85, 83, 69, 82, 0, 0, 0, 16, 0, 0,
+      1, 106, 112, 110, 255, 254, 130, 48, 87, 48, 130, 48, 87, 48, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      255, 251, 176, 0, 0
+    ])
+
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(actual, expected)
+  })
+
+  it('Write user frame v2.4', function () {
+    const mp3tag = new MP3Tag(v24Bytes.buffer, { padding: 8 })
+    mp3tag.read()
+    mp3tag.frames.push({
+      id: 'USER',
+      value: {
+        language: 'eng',
+        text: 'TEXT'
+      }
+    })
+
+    mp3tag.save()
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([
+      73, 68, 51, 4, 0, 0b00100000, 0, 0, 0, 44,
+      84, 65, 76, 66, 0, 0, 0, 7, 0, 0,
+      3, 65, 76, 66, 85, 77, 0,
+      85, 83, 69, 82, 0, 0, 0, 9, 0, 0,
+      3, 101, 110, 103, 84, 69, 88, 84, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      255, 251, 176, 0, 0
+    ])
+
+    assert.deepStrictEqual(mp3tag.tagger.major, 4)
+    assert.deepStrictEqual(actual, expected)
+  })
+
+  it('Write multiple user frame v2.4', function () {
+    const mp3tag = new MP3Tag(v24Bytes.buffer, { padding: 8 })
+    mp3tag.read()
+    mp3tag.frames.push({
+      id: 'USER',
+      value: {
+        language: 'eng',
+        text: 'TEXT'
+      }
+    }, {
+      id: 'USER',
+      value: {
+        language: 'jpn',
+        text: 'もしもし'
+      }
+    })
+
+    mp3tag.save()
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([
+      73, 68, 51, 4, 0, 0b00100000, 0, 0, 0, 71,
+      84, 65, 76, 66, 0, 0, 0, 7, 0, 0,
+      3, 65, 76, 66, 85, 77, 0,
+      85, 83, 69, 82, 0, 0, 0, 9, 0, 0,
+      3, 101, 110, 103, 84, 69, 88, 84, 0,
+      85, 83, 69, 82, 0, 0, 0, 17, 0, 0,
+      3, 106, 112, 110,
+      227, 130, 130, 227, 129, 151, 227, 130, 130, 227, 129, 151, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      255, 251, 176, 0, 0
+    ])
+
+    assert.deepStrictEqual(mp3tag.tagger.major, 4)
+    assert.deepStrictEqual(actual, expected)
+  })
 })
