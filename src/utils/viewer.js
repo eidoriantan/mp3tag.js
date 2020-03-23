@@ -10,7 +10,9 @@ export default class BufferView extends DataView {
   }
 
   getString (offset, maxlength, format) {
-    const bytes = this.getUint8(offset, maxlength)
+    let bytes = this.getUint8(offset, maxlength)
+    if (!Array.isArray(bytes)) bytes = [bytes]
+
     let string = ''
 
     switch (format) {
@@ -61,6 +63,7 @@ export default class BufferView extends DataView {
         bytes = this.getUint8(offset, limit)
     }
 
+    if (!Array.isArray(bytes)) bytes = [bytes]
     for (let i = 0; i < bytes.length; i++) {
       if (bytes[i] === 0x00) {
         limit = (i + 1) * bytesPerChar
