@@ -10,9 +10,6 @@ remove tags.
 Visit [https://mp3tag.js.org](https://mp3tag.js.org) to learn more about the
 library and view it in action through an editor.
 
-You can learn about the frames by visiting the
-[Official ID3 site](http://id3.org)
-
 ### Features
  * Read ID3v2.3 and ID3v2.4 tags
  * Write ID3v2.3 and ID3v2.4 tags
@@ -168,16 +165,3 @@ URL.revokeObjectURL(url)
 ### Support
 If you had found a bug or any unexpected behavior, you can submit an issue
 through [GitHub issues](https://github.com/eidoriantan/mp3tag.js/issues).
-
-### Contributing
-This library is open to contributions from anyone who is interested. Just clone
-this repository, make your changes, test your codes, then send a pull request.
-
-```shell
-npm run test
-```
-
-When committing a request, please also make sure that you are following the
-[Convential Commits](https://www.conventionalcommits.org/en/v1.0.0/).
-
-Any contributions to this project is greatly appreciated.
