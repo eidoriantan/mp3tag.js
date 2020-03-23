@@ -8,16 +8,14 @@ function imageDataURL (buffer, format) {
   return `data:${format};base64,${btoa(encoded)}`
 }
 
-function loadFile (file, successFn, errorFn) {
-  const reader = new FileReader()
-  reader.onload = function () {
-    successFn(this.result)
-  }
+function loadFile (file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      resolve(reader.result)
+    }
 
-  reader.onerror = function () {
-    toast('File Error', 'Unable to read the file', TOAST_DANGER)
-    this.abort()
-  }
-
-  reader.readAsArrayBuffer(file)
+    reader.onerror = reject
+    reader.readAsArrayBuffer(file)
+  })
 }
