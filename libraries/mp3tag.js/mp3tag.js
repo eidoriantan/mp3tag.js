@@ -262,16 +262,29 @@
 
     var _super = _createSuper(BufferView);
 
-    function BufferView() {
+    function BufferView(buffer) {
       _classCallCheck(this, BufferView);
 
-      return _super.apply(this, arguments);
+      if (typeof buffer === 'number') {
+        buffer = new Uint8Array(buffer);
+      }
+
+      if (Array.isArray(buffer)) {
+        buffer = new Uint8Array(buffer).buffer;
+      }
+
+      if (ArrayBuffer.isView(buffer)) {
+        buffer = buffer.buffer;
+      }
+
+      return _super.call(this, buffer);
     }
 
     _createClass(BufferView, [{
       key: "getString",
       value: function getString(offset, maxlength, format) {
         var bytes = this.getUint8(offset, maxlength);
+        if (!Array.isArray(bytes)) bytes = [bytes];
         var string = '';
 
         switch (format) {
@@ -298,65 +311,50 @@
             string = this.getUint8String(offset, maxlength);
         }
 
-        if (string.match(/^[\s\S]+(\0)$/)) {
-          string = string.substr(0, string.length - 1);
-        }
-
-        return string;
+        return {
+          string: string[string.length - 1] === '\0' ? string.substr(0, string.length - 1) : string,
+          length: bytes.length
+        };
       }
     }, {
       key: "getCString",
       value: function getCString(offset, format) {
-        var terminated = [];
-        var bytes = [];
-        var bytesPerChar = 1;
+        var bytes, bytesPerChar;
+        var limit = this.byteLength - offset;
 
-        if (format === 'utf-16' || format === 'utf-16be') {
-          bytes = this.getUint16(offset, this.byteLength - offset);
-        } else {
-          bytes = this.getUint8(offset, this.byteLength - offset);
+        switch (format) {
+          case 'utf-16':
+          case 'utf-16be':
+            bytesPerChar = 2;
+            bytes = this.getUint16(offset, limit);
+            break;
+
+          default:
+            bytesPerChar = 1;
+            bytes = this.getUint8(offset, limit);
         }
+
+        if (!Array.isArray(bytes)) bytes = [bytes];
 
         for (var i = 0; i < bytes.length; i++) {
-          if (bytes[i] !== 0x00) terminated.push(bytes[i]);else break;
+          if (bytes[i] === 0x00) {
+            limit = (i + 1) * bytesPerChar;
+            break;
+          }
         }
 
-        bytesPerChar = bytes.BYTES_PER_ELEMENT;
-        var length = terminated.length * bytesPerChar;
-        var string = this.getString(offset, length, format);
-        return {
-          string: string,
-          length: length + bytesPerChar
-        };
+        return this.getString(offset, limit, format);
       }
     }, {
       key: "getUint8String",
       value: function getUint8String(offset, length) {
         var bytes = this.getUint8(offset, length);
         var string = '';
-        if (!ArrayBuffer.isView(bytes)) bytes = [bytes];
+        if (!Array.isArray(bytes)) bytes = [bytes];
 
         for (var i = 0; i < bytes.length; i++) {
           var character = String.fromCharCode(bytes[i]);
           string += character;
-        }
-
-        return string;
-      }
-    }, {
-      key: "getUint8CString",
-      value: function getUint8CString(offset) {
-        var bytes = this.getUint8(offset, this.byteLength - offset);
-        var string = '';
-        if (!ArrayBuffer.isView(bytes)) bytes = [bytes];
-
-        for (var i = 0; i < bytes.length; i++) {
-          var _byte = bytes[i];
-
-          if (_byte !== 0x00) {
-            var character = String.fromCharCode(_byte);
-            string += character;
-          } else break;
         }
 
         return string;
@@ -364,33 +362,14 @@
     }, {
       key: "getUint16String",
       value: function getUint16String(offset, length) {
-        var le = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+        var le = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
         var bytes = this.getUint16(offset, length, le);
         var string = '';
-        if (!ArrayBuffer.isView(bytes)) bytes = [bytes];
+        if (!Array.isArray(bytes)) bytes = [bytes];
 
         for (var i = 0; i < bytes.length; i++) {
           var character = String.fromCharCode(bytes[i]);
           string += character;
-        }
-
-        return string;
-      }
-    }, {
-      key: "getUint16CString",
-      value: function getUint16CString(offset) {
-        var le = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-        var bytes = this.getUint16(offset, this.byteLength - offset, le);
-        var string = '';
-        if (!ArrayBuffer.isView(bytes)) bytes = [bytes];
-
-        for (var i = 0; i < bytes.length; i++) {
-          var _byte2 = bytes[i];
-
-          if (_byte2 !== 0x0000) {
-            var character = String.fromCharCode(_byte2);
-            string += character;
-          } else break;
         }
 
         return string;
@@ -399,33 +378,34 @@
       key: "getUint8",
       value: function getUint8(offset) {
         var length = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-        var end = offset + length;
-        var bytes = new Uint8Array(length);
-        var i = 0;
+        var limit = offset + length;
+        var bytes = [];
+        if (this.byteLength - limit < 0) return false;
 
-        while (offset < this.byteLength && offset < end) {
-          bytes[i] = DataView.prototype.getUint8.call(this, offset++);
-          i++;
+        for (var i = offset; i < limit; i++) {
+          var _byte = DataView.prototype.getUint8.call(this, i);
+
+          bytes.push(_byte);
         }
 
-        return length === 1 ? bytes[0] : bytes;
+        return bytes.length === 1 ? bytes[0] : bytes;
       }
     }, {
       key: "getUint16",
       value: function getUint16(offset) {
         var length = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
         var le = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-        var end = offset + length;
-        var bytes = new Uint16Array(length / 2);
-        var i = 0;
+        var limit = offset + length;
+        var bytes = [];
+        if (this.byteLength - limit < 0) return false;
 
-        while (offset < this.byteLength && offset < end) {
-          bytes[i] = DataView.prototype.getUint16.call(this, offset, le);
-          offset += 2;
-          i++;
+        for (var i = offset; i < limit; i += 2) {
+          var _byte2 = DataView.prototype.getUint16.call(this, i, le);
+
+          bytes.push(_byte2);
         }
 
-        return length === 1 ? bytes[0] : bytes;
+        return bytes.length === 1 ? bytes[0] : bytes;
       }
     }]);
 
@@ -662,7 +642,7 @@
         break;
 
       case 4:
-        value = view.getString(1, view.byteLength - 1, encoding).split('\0');
+        value = view.getString(1, view.byteLength - 1, encoding).string.split('\0');
         if (value.length === 1) value = value[0];
         break;
 
@@ -723,11 +703,12 @@
      */
     var encoding = ENCODINGS[view.getUint8(0)];
     var description = view.getCString(1, encoding);
-    var valueLength = view.byteLength - description.length - 1;
-    var value = view.getString(description.length + 1, valueLength, encoding);
+    var valueOffset = description.length + 1;
+    var valueLength = view.byteLength - valueOffset;
+    var value = view.getString(valueOffset, valueLength, encoding);
     return {
       description: description.string,
-      text: value
+      text: value.string
     };
   }
   function wxxxFrame(view, version) {
@@ -738,11 +719,12 @@
      */
     var encoding = ENCODINGS[view.getUint8(0)];
     var description = view.getCString(1, encoding);
-    var urlLength = view.byteLength - description.length - 1;
-    var url = view.getString(description.length + 1, urlLength, 'ascii');
+    var urlOffset = description.length + 1;
+    var urlLength = view.byteLength - urlOffset;
+    var url = view.getString(urlOffset, urlLength, 'ascii');
     return {
       description: description.string,
-      url: url
+      url: url.string
     };
   }
   function iplsFrame(view, version) {
@@ -771,13 +753,14 @@
      *  The actual text         <full text string according to encoding>
      */
     var encoding = ENCODINGS[view.getUint8(0)];
-    var description = view.getCString(4, encoding);
-    var textLength = view.byteLength - description.length - 4;
-    var text = view.getString(description.length + 4, textLength, encoding);
+    var descriptor = view.getCString(4, encoding);
+    var textOffset = descriptor.length + 4;
+    var textLength = view.byteLength - textOffset;
+    var text = view.getString(textOffset, textLength, encoding);
     return {
-      language: view.getString(1, 3, 'ascii'),
-      descriptor: description.string,
-      text: text
+      language: view.getString(1, 3, 'ascii').string,
+      descriptor: descriptor.string,
+      text: text.string
     };
   }
   function apicFrame(view, version) {
@@ -792,8 +775,9 @@
     var mime = view.getCString(1, 'ascii');
     var type = view.getUint8(mime.length + 1);
     var desc = view.getCString(mime.length + 2, encoding);
-    var imgLength = view.byteLength - mime.length - desc.length - 2;
-    var img = view.getUint8(mime.length + desc.length + 2, imgLength);
+    var imgOffset = mime.length + desc.length + 2;
+    var imgLength = view.byteLength - imgOffset;
+    var img = view.getUint8(imgOffset, imgLength);
     return {
       format: mime.string,
       type: type,
@@ -814,8 +798,8 @@
     var fname = view.getCString(mime.length + 1, encoding);
     var desc = view.getCString(fname.length + mime.length + 1, encoding);
     var binOffset = mime.length + fname.length + desc.length + 1;
-    var binSize = view.byteLength - binOffset;
-    var binObject = view.getUint8(binOffset, binSize);
+    var binLength = view.byteLength - binOffset;
+    var binObject = view.getUint8(binOffset, binLength);
     return {
       format: mime.string,
       filename: fname.string,
@@ -1513,7 +1497,7 @@
     version: [3, 4]
   };
   var TDAT = {
-    parse: numberFrame,
+    parse: textFrame,
     validate: timeFrame,
     write: asciiFrame,
     version: [3]
@@ -1573,7 +1557,7 @@
     version: [3, 4]
   };
   var TIME = {
-    parse: numberFrame,
+    parse: textFrame,
     validate: timeFrame,
     write: asciiFrame,
     version: [3]
@@ -1663,7 +1647,7 @@
     version: [3, 4]
   };
   var TORY = {
-    parse: numberFrame,
+    parse: textFrame,
     validate: timeFrame,
     write: asciiFrame,
     version: [3]
@@ -1789,7 +1773,7 @@
     version: [4]
   };
   var TYER = {
-    parse: numberFrame,
+    parse: textFrame,
     validate: timeFrame,
     write: asciiFrame,
     version: [3]
@@ -1975,14 +1959,16 @@
         this.flags = getHeaderFlags(mediaView.getUint8(5), this.major);
         this.frames = [];
         var offset = 10;
+        var limit = this.size;
 
         while (offset < this.size) {
-          var frameBytes = mediaView.getUint8(offset, this.size);
+          var frameBytes = mediaView.getUint8(offset, limit);
           var frame = decodeFrame.call(this, frameBytes);
 
           if (frame) {
             this.frames.push(frame);
             offset += frame.size + 10;
+            limit -= frame.size + 10;
           } else break;
         }
 
@@ -2022,7 +2008,7 @@
         if (!this.validate()) return false;
         var framesObj = this.parse();
         var headerBytes = [0x49, 0x44, 0x33, this.major, this.minor, 32];
-        var sizeView = new BufferView(new ArrayBuffer(4));
+        var sizeView = new BufferView(4);
         var paddingBytes = new Uint8Array(this.options.padding);
         var audioBytes = this.getAudio();
         var framesBytes = [];
@@ -2040,8 +2026,7 @@
         }
 
         sizeView.setUint32(0, encodeSynch(framesBytes.length + paddingBytes.length));
-        var resultBytes = mergeBytes(headerBytes, sizeView.getUint8(0, 4), framesBytes, paddingBytes, audioBytes);
-        this.buffer = resultBytes.buffer;
+        this.buffer = mergeBytes(headerBytes, sizeView.getUint8(0, 4), framesBytes, paddingBytes, audioBytes).buffer;
         this.read();
         return this.buffer;
       }
@@ -2082,7 +2067,7 @@
   }();
 
   function decodeFrame(bytes) {
-    var frameView = new BufferView(bytes.buffer);
+    var frameView = new BufferView(bytes);
     if (frameView.getUint8(0) === 0x00) return false;
     var frame = {};
     frame.id = frameView.getUint8String(0, 4);
@@ -2105,7 +2090,7 @@
     var offset = 10;
     var actualSize = frame.size;
     var dataLength = frame.size;
-    var contentBytes = [];
+    var contentBuffer = [];
 
     if (!frameDesc) {
       console.warn("Skipping unsupported frame: ".concat(frame.id));
@@ -2121,13 +2106,12 @@
     if (this.major === 3 && this.flags.unsynchronisation || this.major === 4 && (this.flags.unsynchronisation || frame.flags.unsynchronisation)) {
       var uint8 = frameView.getUint8(offset, dataLength);
       var unsynched = unsynch(uint8);
-      contentBytes = new ArrayBuffer(actualSize);
-      new Uint8Array(contentBytes).set(unsynched);
+      contentBuffer = new Uint8Array(unsynched);
     } else {
-      contentBytes = frameView.buffer.slice(offset, offset + actualSize);
+      contentBuffer = frameView.getUint8(offset, actualSize);
     }
 
-    frame.value = frameDesc.parse(new BufferView(contentBytes), this.major);
+    frame.value = frameDesc.parse(new BufferView(contentBuffer), this.major);
     return frame;
   }
 
@@ -2149,6 +2133,8 @@
         throw new TypeError('buffer is not an instance of ArrayBuffer');
       }
 
+      this.name = 'MP3Tag';
+      this.version = '0.4.1';
       this.buffer = buffer;
       this.options = options || {};
       this.tagger = {};
