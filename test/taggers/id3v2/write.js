@@ -40,7 +40,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -77,7 +76,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -114,7 +112,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -151,7 +148,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -191,7 +187,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -231,7 +226,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -261,7 +255,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -325,7 +318,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -372,7 +364,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -422,7 +413,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -459,7 +449,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -519,7 +508,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -554,7 +542,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -616,7 +603,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -655,7 +641,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -717,7 +702,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -756,7 +740,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -814,7 +797,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -843,7 +825,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -882,7 +863,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -924,7 +904,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -963,7 +942,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1007,7 +985,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1050,7 +1027,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1094,7 +1070,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1137,7 +1112,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1183,7 +1157,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1230,7 +1203,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1294,7 +1266,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1339,7 +1310,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1367,7 +1337,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1404,7 +1373,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1432,7 +1400,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1469,7 +1436,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1496,7 +1462,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1531,7 +1496,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 3)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1558,7 +1522,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 
@@ -1594,7 +1557,6 @@ describe('Writing ID3v2 Frames', function () {
       255, 251, 176, 0, 0
     ])
 
-    assert.deepStrictEqual(mp3tag.tagger.major, 4)
     assert.deepStrictEqual(actual, expected)
   })
 })
