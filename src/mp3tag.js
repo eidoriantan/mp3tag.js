@@ -12,6 +12,8 @@ export default class MP3Tag {
       throw new TypeError('buffer is not an instance of ArrayBuffer')
     }
 
+    this.name = 'MP3Tag'
+    this.version = '0.4.1'
     this.buffer = buffer
     this.options = options || {}
     this.tagger = {}
