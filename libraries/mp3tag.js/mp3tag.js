@@ -4,6 +4,22 @@
   (global = global || self, global.MP3Tag = factory());
 }(this, (function () { 'use strict';
 
+  function _typeof(obj) {
+    "@babel/helpers - typeof";
+
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -475,7 +491,7 @@
     200: 'This file is not an ID3v2',
     201: 'Unsupported ID3v2 major version',
     202: 'Unsupported frame',
-    203: 'Frame validation',
+    203: 'Frame validation failed',
     204: 'Frame is not supported in this version of ID3v2'
   };
 
@@ -619,20 +635,12 @@
 
   var ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8'];
   /**
-   *  @see http://id3.org/id3v2.3.0
-   */
-
-  /**
    *  Frame Parsers
    *  @param {BufferView} view - View of the entire frame excluding the header
    *  @param {number} version - Frame will be parsed with this version
    */
 
   function textFrame(view, version) {
-    /**
-     *  Text encoding   $xx
-     *  Information     <text string according to encoding>
-     */
     var encoding = ENCODINGS[view.getUint8(0)];
     var value;
 
@@ -653,7 +661,6 @@
     return value;
   }
   function arrayFrame(view, version) {
-    // Multiple-value text frames
     var text = textFrame(view, version);
     var value = [];
 
@@ -673,12 +680,10 @@
     return value;
   }
   function numberFrame(view, version) {
-    // Text numerical string frames
     var text = textFrame(view, version);
     return text.match(/^(\d+)$/) ? parseInt(text) : text;
   }
   function setFrame(view, version) {
-    // Set frames (e.g. "1/2")
     var text = textFrame(view, version);
     var array = mergeAsArray(text);
     var value = [];
@@ -692,15 +697,9 @@
     return value.length === 1 ? value[0] : value;
   }
   function urlFrame(view, version) {
-    // URL   <text string>
     return view.getCString(0, 'ascii').string;
   }
   function txxxFrame(view, version) {
-    /**
-     *  Text encoding   $xx
-     *  Description     <text string according to encoding> $00 (00)
-     *  Value           <text string according to encoding>
-     */
     var encoding = ENCODINGS[view.getUint8(0)];
     var description = view.getCString(1, encoding);
     var valueOffset = description.length + 1;
@@ -712,11 +711,6 @@
     };
   }
   function wxxxFrame(view, version) {
-    /**
-     *  Text encoding   $xx
-     *  Description     <text string according to encoding> $00 (00)
-     *  URL             <text string>
-     */
     var encoding = ENCODINGS[view.getUint8(0)];
     var description = view.getCString(1, encoding);
     var urlOffset = description.length + 1;
@@ -728,11 +722,6 @@
     };
   }
   function iplsFrame(view, version) {
-    /**
-     *  <Header for 'Involved people list', ID: "IPLS">
-     *  Text encoding         $xx
-     *  People list strings  <text strings according to encoding>
-     */
     var encoding = ENCODINGS[view.getUint8(0)];
     var people = [];
     var length = 1;
@@ -746,12 +735,6 @@
     return people;
   }
   function langDescFrame(view, version) {
-    /**
-     *  Text encoding           $xx
-     *  Language                $xx xx xx
-     *  Short content descrip.  <text string according to encoding> $00 (00)
-     *  The actual text         <full text string according to encoding>
-     */
     var encoding = ENCODINGS[view.getUint8(0)];
     var descriptor = view.getCString(4, encoding);
     var textOffset = descriptor.length + 4;
@@ -764,13 +747,6 @@
     };
   }
   function apicFrame(view, version) {
-    /**
-     *  Text encoding   $xx
-     *  MIME type       <text string> $00
-     *  Picture type    $xx
-     *  Description     <text string according to encoding> $00 (00)
-     *  Picture data    <binary data>
-     */
     var encoding = ENCODINGS[view.getUint8(0)];
     var mime = view.getCString(1, 'ascii');
     var type = view.getUint8(mime.length + 1);
@@ -786,13 +762,6 @@
     };
   }
   function geobFrame(view, version) {
-    /**
-     *  Text encoding        $xx
-     *  MIME type            <text string> $00
-     *  Filename             <text string according to encoding> $00 (00)
-     *  Content description  <text string according to encoding> $00 (00)
-     *  Encapsulated object  <binary data>
-     */
     var encoding = ENCODINGS[view.getUint8(0)];
     var mime = view.getCString(1, 'ascii');
     var fname = view.getCString(mime.length + 1, encoding);
@@ -808,15 +777,36 @@
     };
   }
   function ufidFrame(view, version) {
-    /**
-     *  Owner identifier  <text string> $00
-     *  Identifier        <up to 64 bytes binary data>
-     */
     var ownerId = view.getCString(0, 'ascii');
     var id = view.getUint8(ownerId.length, view.byteLength - ownerId.length);
     return {
       ownerId: ownerId.string,
       id: id
+    };
+  }
+  function userFrame(view, version) {
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var text = view.getString(4, view.byteLength - 4, encoding);
+    return {
+      language: view.getString(1, 3, 'ascii').string,
+      text: text.string
+    };
+  }
+  function owneFrame(view, version) {
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var currencyCode = view.getString(1, 3, 'ascii');
+    var currency = view.getCString(4, 'ascii');
+    var date = view.getString(currency.length + 4, 8, 'ascii');
+    var sellerOffset = currency.length + date.length + 4;
+    var sellerLength = view.byteLength - sellerOffset;
+    var seller = view.getString(sellerOffset, sellerLength, encoding);
+    return {
+      currency: {
+        code: currencyCode.string,
+        price: currency.string
+      },
+      date: date.string,
+      seller: seller.string
     };
   }
 
@@ -847,9 +837,13 @@
   function textFrame$1(frame, version) {
     validateID(frame.id);
     var array = mergeAsArray(frame.value);
-    array.forEach(function (elem) {
-      if (typeof elem !== 'string') {
+    array.forEach(function (string) {
+      if (typeof string !== 'string') {
         throw new TagError(203, "".concat(frame.id, " value is not a string"));
+      }
+
+      if (!string.match('.+')) {
+        throw new TagError(203, "".concat(frame.id, " value, newlines are not allowed"));
       }
     });
     return true;
@@ -861,8 +855,8 @@
       throw new TagError(203, "".concat(frame.id, " value is not an array"));
     }
 
-    frame.value.forEach(function (text) {
-      if (typeof text !== 'string') {
+    frame.value.forEach(function (string) {
+      if (typeof string !== 'string') {
         throw new TagError(203, "".concat(frame.id, " value is not a string"));
       }
     });
@@ -871,8 +865,8 @@
   function numberFrame$1(frame, version) {
     validateID(frame.id);
     var array = mergeAsArray(frame.value);
-    array.forEach(function (elem) {
-      if (typeof elem !== 'number') {
+    array.forEach(function (number) {
+      if (typeof number !== 'number') {
         throw new TagError(203, "".concat(frame.id, " value is not a number"));
       }
     });
@@ -914,9 +908,6 @@
           }
 
           break;
-
-        default:
-          throw new TagError(201, version);
       }
     });
     return true;
@@ -975,12 +966,12 @@
   function tkeyFrame(frame, version) {
     validateID(frame.id);
     var array = mergeAsArray(frame.value);
-    array.forEach(function (elem) {
-      if (typeof elem !== 'string') {
+    array.forEach(function (string) {
+      if (typeof string !== 'string') {
         throw new TagError(203, 'TKEY is not a string');
       }
 
-      if (!elem.match(/^([A-Gb#mo]{3})$/)) {
+      if (!string.match(/^([A-Gb#mo]{3})$/)) {
         throw new TagError(203, 'Invalid TKEY Format (e.g. Cbm)');
       }
     });
@@ -989,12 +980,12 @@
   function tlanFrame(frame, version) {
     validateID(frame.id);
     var array = mergeAsArray(frame.value);
-    array.forEach(function (elem) {
-      if (typeof elem !== 'string') {
+    array.forEach(function (string) {
+      if (typeof string !== 'string') {
         throw new TagError(203, 'TLAN is not a string');
       }
 
-      if (!elem.match(langRegex)) {
+      if (!string.match(langRegex)) {
         throw new TagError(203, 'Language does not follow ISO 639-2');
       }
     });
@@ -1003,12 +994,12 @@
   function tsrcFrame(frame, version) {
     validateID(frame.id);
     var array = mergeAsArray(frame.value);
-    array.forEach(function (elem) {
-      if (typeof elem !== 'string') {
+    array.forEach(function (string) {
+      if (typeof string !== 'string') {
         throw new TagError(203, 'TSRC is not a string');
       }
 
-      if (!elem.match(/^([a-zA-Z0-9]{12})$/)) {
+      if (!string.match(/^([a-zA-Z0-9]{12})$/)) {
         throw new TagError(203, 'Invalid ISRC format');
       }
     });
@@ -1019,6 +1010,13 @@
     var array = mergeAsArray(frame.value);
     var descriptors = [];
     array.forEach(function (elem) {
+      if (_typeof(elem) !== 'object') {
+        throw new TagError(203, "".concat(frame.id, " is not an object"));
+      }
+
+      elem.language = elem.language || 'eng';
+      elem.descriptor = elem.descriptor || '';
+
       if (typeof elem.language !== 'string' || typeof elem.descriptor !== 'string' || typeof elem.text !== 'string') {
         throw new TagError(203, 'Language/descriptor/text is not a string');
       }
@@ -1048,14 +1046,14 @@
         throw new TagError(203, 'Image data should be ArrayBuffer or an array');
       }
 
+      if (elem.description.length > 64) {
+        throw new TagError(203, 'Description should not exceed 64');
+      }
+
       if (descriptions.includes(elem.description)) {
         throw new TagError(203, 'Cover description should not duplicate');
       } else {
         descriptions.push(elem.description);
-      }
-
-      if (elem.description.length > 64) {
-        throw new TagError(203, 'Description should not exceed 64');
       }
 
       if (!elem.format.match(/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/)) {
@@ -1119,14 +1117,59 @@
     });
     return true;
   }
+  function userFrame$1(frame, version) {
+    validateID(frame.id);
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      if (_typeof(elem) !== 'object') {
+        throw new TagError(203, 'USER value is not an object');
+      }
 
-  /**
-   *  @see http://id3.org/id3v2.3.0
-   */
+      elem.language = elem.language || 'eng';
+
+      if (typeof elem.language !== 'string' || typeof elem.text !== 'string') {
+        throw new TagError(203, 'USER language/text is not a string');
+      }
+
+      if (!elem.language.match(langRegex)) {
+        throw new TagError(203, 'Language does not follow ISO 639-2');
+      }
+    });
+    return true;
+  }
+  function owneFrame$1(frame, version) {
+    validateID(frame.id);
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      if (_typeof(elem) !== 'object') {
+        throw new TagError(203, 'OWNE value is not an object');
+      }
+
+      if (_typeof(elem.currency) !== 'object' || typeof elem.date !== 'string' || typeof elem.seller !== 'string') {
+        throw new TagError(203, 'OWNE value is not valid');
+      }
+
+      if (typeof elem.currency.code !== 'string' || typeof elem.currency.price !== 'string') {
+        throw new TagError(203, 'OWNE currency values are not valid');
+      }
+
+      if (!elem.currency.code.match(/^([A-Z]{3})$/)) {
+        throw new TagError(203, 'OWNE currency code is not valid');
+      }
+
+      if (!elem.currency.price.match(/^(\d*)\.(\d+)$/)) {
+        throw new TagError(203, 'OWNE currency price is not valid');
+      }
+
+      if (!elem.date.match("".concat(year).concat(month).concat(day))) {
+        throw new TagError(203, 'OWNE date must follow this format: YYYYMMDD');
+      }
+    });
+  }
 
   function getHeaderBytes(id, size, version) {
     var idBytes = encodeString(id, 'ascii');
-    var sizeView = new BufferView(new ArrayBuffer(4));
+    var sizeView = new BufferView(4);
 
     switch (version) {
       case 3:
@@ -1136,9 +1179,6 @@
       case 4:
         sizeView.setUint32(0, encodeSynch(size));
         break;
-
-      default:
-        throw new TagError(201, version);
     }
 
     return mergeBytes(idBytes, sizeView.getUint8(0, 4), 0, 0);
@@ -1161,23 +1201,17 @@
         break;
 
       case 4:
-        encoding = 3;
-
-        if (Array.isArray(frame.value)) {
-          frame.value.forEach(function (string) {
-            var encoded = encodeString(string + '\0', 'utf-8');
+        {
+          encoding = 3;
+          var array = mergeAsArray(frame.value);
+          array.forEach(function (elem) {
+            var encoded = encodeString(elem + '\0', 'utf-8');
             encoded.forEach(function (_byte) {
               return strBytes.push(_byte);
             });
           });
-        } else {
-          strBytes = encodeString(frame.value + '\0', 'utf-8');
+          break;
         }
-
-        break;
-
-      default:
-        throw new TagError(201, version);
     }
 
     var header = getHeaderBytes(frame.id, strBytes.length + 1, version);
@@ -1188,18 +1222,31 @@
       case 3:
         frame.value = frame.value.join('/');
         break;
-
-      case 4:
-        break;
-
-      default:
-        throw new TagError(201, version);
     }
 
     return textFrame$2(frame, version);
   }
   function asciiFrame(frame, version) {
-    var strBytes = encodeString(frame.value.toString() + '\0', 'ascii');
+    var strBytes = [];
+
+    switch (version) {
+      case 3:
+        strBytes = encodeString(frame.value.toString() + '\0', 'ascii');
+        break;
+
+      case 4:
+        {
+          var array = mergeAsArray(frame.value);
+          array.forEach(function (elem) {
+            var encoded = encodeString(elem.toString() + '\0', 'ascii');
+            encoded.forEach(function (_byte2) {
+              return strBytes.push(_byte2);
+            });
+          });
+          break;
+        }
+    }
+
     var header = getHeaderBytes(frame.id, strBytes.length + 1, version);
     return mergeBytes(header, 0, strBytes);
   }
@@ -1212,16 +1259,12 @@
       case 4:
         {
           var array = mergeAsArray(frame.value);
-          var value = [];
+          frame.value = [];
           array.forEach(function (elem) {
-            value.push(elem.position + '/' + elem.total);
+            frame.value.push(elem.position + '/' + elem.total);
           });
-          frame.value = value.join('\0');
           break;
         }
-
-      default:
-        throw new TagError(201, version);
     }
 
     return asciiFrame(frame, version);
@@ -1236,8 +1279,7 @@
     var array = mergeAsArray(frame.value);
     array.forEach(function (elem) {
       var encoding = 0;
-      var descBytes = [];
-      var strBytes = [];
+      var descBytes, strBytes;
 
       switch (version) {
         case 3:
@@ -1251,16 +1293,13 @@
           descBytes = encodeString(elem.description + '\0', 'utf-8');
           strBytes = encodeString(elem.text + '\0', 'utf-8');
           break;
-
-        default:
-          throw new TagError(201, version);
       }
 
       var size = descBytes.length + strBytes.length + 1;
       var header = getHeaderBytes(frame.id, size, version);
       var merged = mergeBytes(header, encoding, descBytes, strBytes);
-      merged.forEach(function (_byte2) {
-        return bytes.push(_byte2);
+      merged.forEach(function (_byte3) {
+        return bytes.push(_byte3);
       });
     });
     return bytes;
@@ -1270,8 +1309,7 @@
     var array = mergeAsArray(frame.value);
     array.forEach(function (elem) {
       var encoding = 0;
-      var descBytes = [];
-      var strBytes = [];
+      var descBytes, strBytes;
 
       switch (version) {
         case 3:
@@ -1285,38 +1323,30 @@
           descBytes = encodeString(elem.description + '\0', 'utf-8');
           strBytes = encodeString(elem.url, 'ascii');
           break;
-
-        default:
-          throw new TagError(201, version);
       }
 
       var size = descBytes.length + strBytes.length + 1;
       var header = getHeaderBytes(frame.id, size, version);
       var merged = mergeBytes(header, encoding, descBytes, strBytes);
-      merged.forEach(function (_byte3) {
-        return bytes.push(_byte3);
+      merged.forEach(function (_byte4) {
+        return bytes.push(_byte4);
       });
     });
     return bytes;
   }
   function iplsFrame$1(frame, version) {
-    var encoding;
+    var encoding = 1;
     var strBytes = [];
 
     switch (version) {
       case 3:
-        encoding = 1;
         frame.value.forEach(function (string) {
           var encoded = encodeString(string + '\0', 'utf-16');
-          encoded.forEach(function (_byte4) {
-            return strBytes.push(_byte4);
+          encoded.forEach(function (_byte5) {
+            return strBytes.push(_byte5);
           });
         });
         break;
-
-      case 4:
-      default:
-        throw new TagError(201, version);
     }
 
     var size = strBytes.length + 1;
@@ -1329,8 +1359,7 @@
     array.forEach(function (elem) {
       var encoding = 0;
       var langBytes = encodeString(elem.language, 'ascii');
-      var descBytes = [];
-      var textBytes = [];
+      var descBytes, textBytes;
 
       switch (version) {
         case 3:
@@ -1344,16 +1373,13 @@
           descBytes = encodeString(elem.descriptor + '\0', 'utf-8');
           textBytes = encodeString(elem.text, 'utf-8');
           break;
-
-        default:
-          throw new TagError(201, version);
       }
 
       var size = descBytes.length + textBytes.length + 4;
       var header = getHeaderBytes(frame.id, size, version);
       var merged = mergeBytes(header, encoding, langBytes, descBytes, textBytes);
-      merged.forEach(function (_byte5) {
-        return bytes.push(_byte5);
+      merged.forEach(function (_byte6) {
+        return bytes.push(_byte6);
       });
     });
     return bytes;
@@ -1377,16 +1403,13 @@
           encoding = 3;
           strBytes = encodeString(elem.description + '\0', 'utf-8');
           break;
-
-        default:
-          throw new TagError(201, version);
       }
 
       var size = mimeBytes.length + strBytes.length + imageBytes.length + 2;
       var header = getHeaderBytes(frame.id, size, version);
       var merged = mergeBytes(header, encoding, mimeBytes, elem.type, strBytes, imageBytes);
-      merged.forEach(function (_byte6) {
-        return bytes.push(_byte6);
+      merged.forEach(function (_byte7) {
+        return bytes.push(_byte7);
       });
     });
     return bytes;
@@ -1395,11 +1418,9 @@
     var bytes = [];
     var array = mergeAsArray(frame.value);
     array.forEach(function (elem) {
-      var encoding;
       var mime = encodeString(elem.format + '\0', 'ascii');
-      var filename;
-      var description;
       var object = new Uint8Array(elem.object);
+      var encoding, filename, description;
 
       switch (version) {
         case 3:
@@ -1413,16 +1434,13 @@
           filename = encodeString(elem.filename + '\0', 'utf-8');
           description = encodeString(elem.description + '\0', 'utf-8');
           break;
-
-        default:
-          throw new TagError(201, version);
       }
 
       var size = mime.length + filename.length + description.length + object.length + 1;
       var header = getHeaderBytes(frame.id, size, version);
       var merged = mergeBytes(header, encoding, mime, filename, description, object);
-      merged.forEach(function (_byte7) {
-        return bytes.push(_byte7);
+      merged.forEach(function (_byte8) {
+        return bytes.push(_byte8);
       });
     });
     return bytes;
@@ -1435,8 +1453,67 @@
       var idBytes = new Uint8Array(elem.id);
       var header = getHeaderBytes(frame.id, ownerBytes.length + idBytes.length, version);
       var merged = mergeBytes(header, ownerBytes, idBytes);
-      merged.forEach(function (_byte8) {
-        return bytes.push(_byte8);
+      merged.forEach(function (_byte9) {
+        return bytes.push(_byte9);
+      });
+    });
+    return bytes;
+  }
+  function userFrame$2(frame, version) {
+    var bytes = [];
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      var encoding = 0;
+      var langBytes = encodeString(elem.language, 'ascii');
+      var textBytes;
+
+      switch (version) {
+        case 3:
+          encoding = 1;
+          textBytes = encodeString(elem.text + '\0', 'utf-16');
+          break;
+
+        case 4:
+          encoding = 3;
+          textBytes = encodeString(elem.text + '\0', 'utf-8');
+          break;
+      }
+
+      var header = getHeaderBytes(frame.id, textBytes.length + 4, version);
+      var merged = mergeBytes(header, encoding, langBytes, textBytes);
+      merged.forEach(function (_byte10) {
+        return bytes.push(_byte10);
+      });
+    });
+    return bytes;
+  }
+  function owneFrame$2(frame, version) {
+    var bytes = [];
+    var array = mergeAsArray(frame.value);
+    array.forEach(function (elem) {
+      var encoding = 0;
+      var codeBytes = encodeString(elem.currency.code, 'ascii');
+      var priceBytes = encodeString(elem.currency.price + '\0', 'ascii');
+      var dateBytes = encodeString(elem.date, 'ascii');
+      var sellerBytes;
+
+      switch (version) {
+        case 3:
+          encoding = 1;
+          sellerBytes = encodeString(elem.seller, 'utf-16');
+          break;
+
+        case 4:
+          encoding = 3;
+          sellerBytes = encodeString(elem.seller, 'utf-8');
+          break;
+      }
+
+      var size = priceBytes.length + sellerBytes.length + 12;
+      var header = getHeaderBytes(frame.id, size, version);
+      var merged = mergeBytes(header, encoding, codeBytes, priceBytes, dateBytes, sellerBytes);
+      merged.forEach(function (_byte11) {
+        return bytes.push(_byte11);
       });
     });
     return bytes;
@@ -1465,6 +1542,12 @@
     validate: arrayFrame$1,
     write: iplsFrame$1,
     version: [3]
+  };
+  var OWNE = {
+    parse: owneFrame,
+    validate: owneFrame$1,
+    write: owneFrame$2,
+    version: [3, 4]
   };
   var TALB = {
     parse: textFrame,
@@ -1790,6 +1873,12 @@
     write: ufidFrame$2,
     version: [3, 4]
   };
+  var USER = {
+    parse: userFrame,
+    validate: userFrame$1,
+    write: userFrame$2,
+    version: [3, 4]
+  };
   var USLT = {
     parse: langDescFrame,
     validate: langDescFrame$1,
@@ -1857,6 +1946,7 @@
     COMM: COMM,
     GEOB: GEOB,
     IPLS: IPLS,
+    OWNE: OWNE,
     TALB: TALB,
     TBPM: TBPM,
     TCOM: TCOM,
@@ -1911,6 +2001,7 @@
     TYER: TYER,
     TXXX: TXXX,
     UFID: UFID,
+    USER: USER,
     USLT: USLT,
     WCOM: WCOM,
     WCOP: WCOP,
@@ -1977,6 +2068,10 @@
     }, {
       key: "validate",
       value: function validate() {
+        if (this.major !== 3 && this.major !== 4) {
+          throw new TagError(201, this.major);
+        }
+
         var framesObj = this.parse();
 
         for (var id in framesObj) {
@@ -2134,7 +2229,7 @@
       }
 
       this.name = 'MP3Tag';
-      this.version = '0.4.1';
+      this.version = '0.5.0';
       this.buffer = buffer;
       this.options = options || {};
       this.tagger = {};
