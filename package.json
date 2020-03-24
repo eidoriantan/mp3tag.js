@@ -1,6 +1,6 @@
 {
   "name": "mp3tag.js",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "MP3 tagging written in pure JavaScript",
   "main": "dist/mp3tag.js",
   "dependencies": {},
