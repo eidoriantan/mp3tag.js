@@ -6,7 +6,7 @@ const E_CODES = {
   200: 'This file is not an ID3v2',
   201: 'Unsupported ID3v2 major version',
   202: 'Unsupported frame',
-  203: 'Frame validation',
+  203: 'Frame validation failed',
   204: 'Frame is not supported in this version of ID3v2'
 }
 
