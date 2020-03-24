@@ -3,11 +3,10 @@ import { mergeAsArray } from '../utils/array'
 import { encodeSynch, mergeBytes } from '../utils/bytes'
 import { encodeString } from '../utils/strings'
 import BufferView from '../utils/viewer'
-import TagError from '../error'
 
 function getHeaderBytes (id, size, version) {
   const idBytes = encodeString(id, 'ascii')
-  const sizeView = new BufferView(new ArrayBuffer(4))
+  const sizeView = new BufferView(4)
 
   switch (version) {
     case 3:
@@ -17,9 +16,6 @@ function getHeaderBytes (id, size, version) {
     case 4:
       sizeView.setUint32(0, encodeSynch(size))
       break
-
-    default:
-      throw new TagError(201, version)
   }
 
   return mergeBytes(idBytes, sizeView.getUint8(0, 4), 0, 0)
@@ -44,15 +40,13 @@ export function textFrame (frame, version) {
     case 4: {
       encoding = 3
       const array = mergeAsArray(frame.value)
+
       array.forEach(function (elem) {
         const encoded = encodeString(elem + '\0', 'utf-8')
         encoded.forEach(byte => strBytes.push(byte))
       })
       break
     }
-
-    default:
-      throw new TagError(201, version)
   }
 
   const header = getHeaderBytes(frame.id, strBytes.length + 1, version)
@@ -64,12 +58,6 @@ export function arrayFrame (frame, version) {
     case 3:
       frame.value = frame.value.join('/')
       break
-
-    case 4:
-      break
-
-    default:
-      throw new TagError(201, version)
   }
 
   return textFrame(frame, version)
@@ -91,9 +79,6 @@ export function asciiFrame (frame, version) {
       })
       break
     }
-
-    default:
-      throw new TagError(201, version)
   }
 
   const header = getHeaderBytes(frame.id, strBytes.length + 1, version)
@@ -108,16 +93,13 @@ export function setFrame (frame, version) {
 
     case 4: {
       const array = mergeAsArray(frame.value)
-      const value = []
+      frame.value = []
+
       array.forEach(function (elem) {
-        value.push(elem.position + '/' + elem.total)
+        frame.value.push(elem.position + '/' + elem.total)
       })
-      frame.value = value.join('\0')
       break
     }
-
-    default:
-      throw new TagError(201, version)
   }
 
   return asciiFrame(frame, version)
@@ -136,8 +118,7 @@ export function txxxFrame (frame, version) {
 
   array.forEach(function (elem) {
     let encoding = 0
-    let descBytes = []
-    let strBytes = []
+    let descBytes, strBytes
 
     switch (version) {
       case 3:
@@ -151,9 +132,6 @@ export function txxxFrame (frame, version) {
         descBytes = encodeString(elem.description + '\0', 'utf-8')
         strBytes = encodeString(elem.text + '\0', 'utf-8')
         break
-
-      default:
-        throw new TagError(201, version)
     }
 
     const size = descBytes.length + strBytes.length + 1
@@ -171,8 +149,7 @@ export function wxxxFrame (frame, version) {
 
   array.forEach(function (elem) {
     let encoding = 0
-    let descBytes = []
-    let strBytes = []
+    let descBytes, strBytes
 
     switch (version) {
       case 3:
@@ -186,9 +163,6 @@ export function wxxxFrame (frame, version) {
         descBytes = encodeString(elem.description + '\0', 'utf-8')
         strBytes = encodeString(elem.url, 'ascii')
         break
-
-      default:
-        throw new TagError(201, version)
     }
 
     const size = descBytes.length + strBytes.length + 1
@@ -201,21 +175,16 @@ export function wxxxFrame (frame, version) {
 }
 
 export function iplsFrame (frame, version) {
-  let encoding
+  const encoding = 1
   const strBytes = []
 
   switch (version) {
     case 3:
-      encoding = 1
       frame.value.forEach(function (string) {
         const encoded = encodeString(string + '\0', 'utf-16')
         encoded.forEach(byte => strBytes.push(byte))
       })
       break
-
-    case 4:
-    default:
-      throw new TagError(201, version)
   }
 
   const size = strBytes.length + 1
@@ -230,8 +199,7 @@ export function langDescFrame (frame, version) {
   array.forEach(function (elem) {
     let encoding = 0
     const langBytes = encodeString(elem.language, 'ascii')
-    let descBytes = []
-    let textBytes = []
+    let descBytes, textBytes
 
     switch (version) {
       case 3:
@@ -245,9 +213,6 @@ export function langDescFrame (frame, version) {
         descBytes = encodeString(elem.descriptor + '\0', 'utf-8')
         textBytes = encodeString(elem.text, 'utf-8')
         break
-
-      default:
-        throw new TagError(201, version)
     }
 
     const size = descBytes.length + textBytes.length + 4
@@ -279,9 +244,6 @@ export function apicFrame (frame, version) {
         encoding = 3
         strBytes = encodeString(elem.description + '\0', 'utf-8')
         break
-
-      default:
-        throw new TagError(201, version)
     }
 
     const size = mimeBytes.length + strBytes.length + imageBytes.length + 2
@@ -301,11 +263,9 @@ export function geobFrame (frame, version) {
   const array = mergeAsArray(frame.value)
 
   array.forEach(function (elem) {
-    let encoding
     const mime = encodeString(elem.format + '\0', 'ascii')
-    let filename
-    let description
     const object = new Uint8Array(elem.object)
+    let encoding, filename, description
 
     switch (version) {
       case 3:
@@ -319,9 +279,6 @@ export function geobFrame (frame, version) {
         filename = encodeString(elem.filename + '\0', 'utf-8')
         description = encodeString(elem.description + '\0', 'utf-8')
         break
-
-      default:
-        throw new TagError(201, version)
     }
 
     const size = mime.length + filename.length + description.length +
@@ -359,7 +316,7 @@ export function userFrame (frame, version) {
   array.forEach(function (elem) {
     let encoding = 0
     const langBytes = encodeString(elem.language, 'ascii')
-    let textBytes = []
+    let textBytes
 
     switch (version) {
       case 3:
@@ -371,9 +328,6 @@ export function userFrame (frame, version) {
         encoding = 3
         textBytes = encodeString(elem.text + '\0', 'utf-8')
         break
-
-      default:
-        throw new TagError(201, version)
     }
 
     const header = getHeaderBytes(frame.id, textBytes.length + 4, version)
