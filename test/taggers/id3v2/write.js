@@ -876,7 +876,7 @@ describe('Writing ID3v2 Frames', function () {
 
     assert.throws(function () {
       mp3tag.save()
-    }, /Language\/descriptor\/text is not a string/)
+    }, /USLT is not an object/)
   })
 
   it('Write langDesc frame v2.4', function () {
@@ -955,7 +955,7 @@ describe('Writing ID3v2 Frames', function () {
 
     assert.throws(function () {
       mp3tag.save()
-    }, /Language\/descriptor\/text is not a string/)
+    }, /USLT is not an object/)
   })
 
   it('Write apic frame v2.3', function () {

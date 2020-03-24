@@ -238,6 +238,10 @@ export function langDescFrame (frame, version) {
   const descriptors = []
 
   array.forEach(function (elem) {
+    if (typeof elem !== 'object') {
+      throw new TagError(203, `${frame.id} is not an object`)
+    }
+
     elem.language = elem.language || 'eng'
     elem.descriptor = elem.descriptor || ''
 
@@ -367,6 +371,10 @@ export function userFrame (frame, version) {
 
   const array = mergeAsArray(frame.value)
   array.forEach(function (elem) {
+    if (typeof elem !== 'object') {
+      throw new TagError('USER value is not an object')
+    }
+
     elem.language = elem.language || 'eng'
 
     if (typeof elem.language !== 'string' || typeof elem.text !== 'string') {
