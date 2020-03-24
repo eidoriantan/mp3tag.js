@@ -372,7 +372,7 @@ export function userFrame (frame, version) {
   const array = mergeAsArray(frame.value)
   array.forEach(function (elem) {
     if (typeof elem !== 'object') {
-      throw new TagError('USER value is not an object')
+      throw new TagError(203, 'USER value is not an object')
     }
 
     elem.language = elem.language || 'eng'
@@ -387,4 +387,37 @@ export function userFrame (frame, version) {
   })
 
   return true
+}
+
+export function owneFrame (frame, version) {
+  validateID(frame.id)
+
+  const array = mergeAsArray(frame.value)
+  array.forEach(function (elem) {
+    if (typeof elem !== 'object') {
+      throw new TagError(203, 'OWNE value is not an object')
+    }
+
+    if (typeof elem.currency !== 'object' || typeof elem.date !== 'string' ||
+      typeof elem.seller !== 'string') {
+      throw new TagError(203, 'OWNE value is not valid')
+    }
+
+    if (typeof elem.currency.code !== 'string' ||
+      typeof elem.currency.price !== 'string') {
+      throw new TagError(203, 'OWNE currency values are not valid')
+    }
+
+    if (!elem.currency.code.match(/^([A-Z]{3})$/)) {
+      throw new TagError(203, 'OWNE currency code is not valid')
+    }
+
+    if (!elem.currency.price.match(/^(\d*)\.(\d+)$/)) {
+      throw new TagError(203, 'OWNE currency price is not valid')
+    }
+
+    if (!elem.date.match(`${year}${month}${day}`)) {
+      throw new TagError(203, 'OWNE date must follow this format: YYYYMMDD')
+    }
+  })
 }

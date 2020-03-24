@@ -841,4 +841,122 @@ describe('Reading ID3v2 Frames', function () {
       text: 'TEXT'
     })
   })
+
+  it('Read OWNE frame v2.3', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v23Header, 0, 0, 0, 50,
+      79, 87, 78, 69, 0, 0, 0, 32, 0, 0,
+      1, 69, 85, 82, 49, 50, 46, 53, 48, 0,
+      50, 48, 50, 48, 48, 51, 50, 52,
+      255, 254, 83, 0, 69, 0, 76, 0, 76, 0, 69, 0, 82, 0,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'OWNE')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      currency: {
+        code: 'EUR',
+        price: '12.50'
+      },
+      date: '20200324',
+      seller: 'SELLER'
+    })
+  })
+
+  it('Read multiple OWNE frame v2.3', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v23Header, 0, 0, 0, 92,
+      79, 87, 78, 69, 0, 0, 0, 32, 0, 0,
+      1, 69, 85, 82, 49, 50, 46, 53, 48, 0,
+      50, 48, 50, 48, 48, 51, 50, 52,
+      255, 254, 83, 0, 69, 0, 76, 0, 76, 0, 69, 0, 82, 0,
+      79, 87, 78, 69, 0, 0, 0, 32, 0, 0,
+      1, 69, 85, 82, 49, 50, 46, 53, 48, 0,
+      50, 48, 50, 48, 48, 51, 50, 52,
+      255, 254, 83, 0, 69, 0, 76, 0, 76, 0, 69, 0, 82, 0,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 3)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'OWNE')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      currency: {
+        code: 'EUR',
+        price: '12.50'
+      },
+      date: '20200324',
+      seller: 'SELLER'
+    })
+    assert.deepStrictEqual(mp3tag.frames[1].id, 'OWNE')
+    assert.deepStrictEqual(mp3tag.frames[1].value, {
+      currency: {
+        code: 'EUR',
+        price: '12.50'
+      },
+      date: '20200324',
+      seller: 'SELLER'
+    })
+  })
+
+  it('Read OWNE frame v2.4', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v24Header, 0, 0, 0, 42,
+      79, 87, 78, 69, 0, 0, 0, 24, 0, 0,
+      3, 69, 85, 82, 49, 50, 46, 53, 48, 0,
+      50, 48, 50, 48, 48, 51, 50, 52,
+      83, 69, 76, 76, 69, 82,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 4)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'OWNE')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      currency: {
+        code: 'EUR',
+        price: '12.50'
+      },
+      date: '20200324',
+      seller: 'SELLER'
+    })
+  })
+
+  it('Read OWNE frame v2.4', function () {
+    const mp3tag = new MP3Tag(new Uint8Array([
+      ...v24Header, 0, 0, 0, 76,
+      79, 87, 78, 69, 0, 0, 0, 24, 0, 0,
+      3, 69, 85, 82, 49, 50, 46, 53, 48, 0,
+      50, 48, 50, 48, 48, 51, 50, 52,
+      83, 69, 76, 76, 69, 82,
+      79, 87, 78, 69, 0, 0, 0, 24, 0, 0,
+      3, 69, 85, 82, 49, 50, 46, 53, 48, 0,
+      50, 48, 50, 48, 48, 51, 50, 52,
+      83, 69, 76, 76, 69, 82,
+      ...mp3
+    ]).buffer)
+
+    mp3tag.read()
+    assert.deepStrictEqual(mp3tag.tagger.major, 4)
+    assert.deepStrictEqual(mp3tag.frames[0].id, 'OWNE')
+    assert.deepStrictEqual(mp3tag.frames[0].value, {
+      currency: {
+        code: 'EUR',
+        price: '12.50'
+      },
+      date: '20200324',
+      seller: 'SELLER'
+    })
+    assert.deepStrictEqual(mp3tag.frames[1].id, 'OWNE')
+    assert.deepStrictEqual(mp3tag.frames[1].value, {
+      currency: {
+        code: 'EUR',
+        price: '12.50'
+      },
+      date: '20200324',
+      seller: 'SELLER'
+    })
+  })
 })

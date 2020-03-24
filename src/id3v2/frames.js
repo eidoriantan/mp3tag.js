@@ -31,6 +31,13 @@ export const IPLS = {
   version: [3]
 }
 
+export const OWNE = {
+  parse: parsers.owneFrame,
+  validate: validators.owneFrame,
+  write: writers.owneFrame,
+  version: [3, 4]
+}
+
 export const TALB = {
   parse: parsers.textFrame,
   validate: validators.textFrame,

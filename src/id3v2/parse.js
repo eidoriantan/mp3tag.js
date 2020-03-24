@@ -180,3 +180,22 @@ export function userFrame (view, version) {
     text: text.string
   }
 }
+
+export function owneFrame (view, version) {
+  const encoding = ENCODINGS[view.getUint8(0)]
+  const currencyCode = view.getString(1, 3, 'ascii')
+  const currency = view.getCString(4, 'ascii')
+  const date = view.getString(currency.length + 4, 8, 'ascii')
+  const sellerOffset = currency.length + date.length + 4
+  const sellerLength = view.byteLength - sellerOffset
+  const seller = view.getString(sellerOffset, sellerLength, encoding)
+
+  return {
+    currency: {
+      code: currencyCode.string,
+      price: currency.string
+    },
+    date: date.string,
+    seller: seller.string
+  }
+}

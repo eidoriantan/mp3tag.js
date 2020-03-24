@@ -337,3 +337,37 @@ export function userFrame (frame, version) {
 
   return bytes
 }
+
+export function owneFrame (frame, version) {
+  const bytes = []
+  const array = mergeAsArray(frame.value)
+
+  array.forEach(function (elem) {
+    let encoding = 0
+    const codeBytes = encodeString(elem.currency.code, 'ascii')
+    const priceBytes = encodeString(elem.currency.price + '\0', 'ascii')
+    const dateBytes = encodeString(elem.date, 'ascii')
+    let sellerBytes
+
+    switch (version) {
+      case 3:
+        encoding = 1
+        sellerBytes = encodeString(elem.seller, 'utf-16')
+        break
+
+      case 4:
+        encoding = 3
+        sellerBytes = encodeString(elem.seller, 'utf-8')
+        break
+    }
+
+    const size = priceBytes.length + sellerBytes.length + 12
+    const header = getHeaderBytes(frame.id, size, version)
+    const merged = mergeBytes(header, encoding, codeBytes, priceBytes,
+      dateBytes, sellerBytes)
+
+    merged.forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}

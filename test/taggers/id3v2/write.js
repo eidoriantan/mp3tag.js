@@ -1559,4 +1559,160 @@ describe('Writing ID3v2 Frames', function () {
 
     assert.deepStrictEqual(actual, expected)
   })
+
+  it('Write owne frame v2.3', function () {
+    const mp3tag = new MP3Tag(v23Bytes.buffer, { padding: 8 })
+    mp3tag.read()
+    mp3tag.frames.push({
+      id: 'OWNE',
+      value: {
+        currency: {
+          code: 'EUR',
+          price: '12.50'
+        },
+        date: '20200324',
+        seller: 'SELLER'
+      }
+    })
+
+    mp3tag.save()
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([
+      73, 68, 51, 3, 0, 0b00100000, 0, 0, 0, 75,
+      84, 65, 76, 66, 0, 0, 0, 15, 0, 0,
+      1, 255, 254, 65, 0, 76, 0, 66, 0, 85, 0, 77, 0, 0, 0,
+      79, 87, 78, 69, 0, 0, 0, 32, 0, 0,
+      1, 69, 85, 82, 49, 50, 46, 53, 48, 0,
+      50, 48, 50, 48, 48, 51, 50, 52,
+      255, 254, 83, 0, 69, 0, 76, 0, 76, 0, 69, 0, 82, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      255, 251, 176, 0, 0
+    ])
+
+    assert.deepStrictEqual(actual, expected)
+  })
+
+  it('Write multiple owne frame v2.3', function () {
+    const mp3tag = new MP3Tag(v23Bytes.buffer, { padding: 8 })
+    mp3tag.read()
+    mp3tag.frames.push({
+      id: 'OWNE',
+      value: {
+        currency: {
+          code: 'EUR',
+          price: '12.50'
+        },
+        date: '20200324',
+        seller: 'SELLER'
+      }
+    }, {
+      id: 'OWNE',
+      value: {
+        currency: {
+          code: 'EUR',
+          price: '12.50'
+        },
+        date: '20200324',
+        seller: 'SELLER'
+      }
+    })
+
+    mp3tag.save()
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([
+      73, 68, 51, 3, 0, 0b00100000, 0, 0, 0, 117,
+      84, 65, 76, 66, 0, 0, 0, 15, 0, 0,
+      1, 255, 254, 65, 0, 76, 0, 66, 0, 85, 0, 77, 0, 0, 0,
+      79, 87, 78, 69, 0, 0, 0, 32, 0, 0,
+      1, 69, 85, 82, 49, 50, 46, 53, 48, 0,
+      50, 48, 50, 48, 48, 51, 50, 52,
+      255, 254, 83, 0, 69, 0, 76, 0, 76, 0, 69, 0, 82, 0,
+      79, 87, 78, 69, 0, 0, 0, 32, 0, 0,
+      1, 69, 85, 82, 49, 50, 46, 53, 48, 0,
+      50, 48, 50, 48, 48, 51, 50, 52,
+      255, 254, 83, 0, 69, 0, 76, 0, 76, 0, 69, 0, 82, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      255, 251, 176, 0, 0
+    ])
+
+    assert.deepStrictEqual(actual, expected)
+  })
+
+  it('Write owne frame v2.4', function () {
+    const mp3tag = new MP3Tag(v24Bytes.buffer, { padding: 8 })
+    mp3tag.read()
+    mp3tag.frames.push({
+      id: 'OWNE',
+      value: {
+        currency: {
+          code: 'EUR',
+          price: '12.50'
+        },
+        date: '20200324',
+        seller: 'SELLER'
+      }
+    })
+
+    mp3tag.save()
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([
+      73, 68, 51, 4, 0, 0b00100000, 0, 0, 0, 59,
+      84, 65, 76, 66, 0, 0, 0, 7, 0, 0,
+      3, 65, 76, 66, 85, 77, 0,
+      79, 87, 78, 69, 0, 0, 0, 24, 0, 0,
+      3, 69, 85, 82, 49, 50, 46, 53, 48, 0,
+      50, 48, 50, 48, 48, 51, 50, 52,
+      83, 69, 76, 76, 69, 82,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      255, 251, 176, 0, 0
+    ])
+
+    assert.deepStrictEqual(actual, expected)
+  })
+
+  it('Write multiple owne frame v2.4', function () {
+    const mp3tag = new MP3Tag(v24Bytes.buffer, { padding: 8 })
+    mp3tag.read()
+    mp3tag.frames.push({
+      id: 'OWNE',
+      value: {
+        currency: {
+          code: 'EUR',
+          price: '12.50'
+        },
+        date: '20200324',
+        seller: 'SELLER'
+      }
+    }, {
+      id: 'OWNE',
+      value: {
+        currency: {
+          code: 'EUR',
+          price: '12.50'
+        },
+        date: '20200324',
+        seller: 'SELLER'
+      }
+    })
+
+    mp3tag.save()
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([
+      73, 68, 51, 4, 0, 0b00100000, 0, 0, 0, 93,
+      84, 65, 76, 66, 0, 0, 0, 7, 0, 0,
+      3, 65, 76, 66, 85, 77, 0,
+      79, 87, 78, 69, 0, 0, 0, 24, 0, 0,
+      3, 69, 85, 82, 49, 50, 46, 53, 48, 0,
+      50, 48, 50, 48, 48, 51, 50, 52,
+      83, 69, 76, 76, 69, 82,
+      79, 87, 78, 69, 0, 0, 0, 24, 0, 0,
+      3, 69, 85, 82, 49, 50, 46, 53, 48, 0,
+      50, 48, 50, 48, 48, 51, 50, 52,
+      83, 69, 76, 76, 69, 82,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      255, 251, 176, 0, 0
+    ])
+
+    assert.deepStrictEqual(actual, expected)
+  })
 })
