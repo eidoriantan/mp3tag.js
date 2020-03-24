@@ -37,6 +37,7 @@ export default class ID3v2 {
 
     let offset = 10
     let limit = this.size
+
     while (offset < this.size) {
       const frameBytes = mediaView.getUint8(offset, limit)
       const frame = decodeFrame.call(this, frameBytes)
@@ -52,6 +53,10 @@ export default class ID3v2 {
   }
 
   validate () {
+    if (this.major !== 3 && this.major !== 4) {
+      throw new TagError(201, this.major)
+    }
+
     const framesObj = this.parse()
     for (const id in framesObj) {
       const frameDesc = frames[id]

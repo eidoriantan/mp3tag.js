@@ -31,9 +31,13 @@ export function textFrame (frame, version) {
   validateID(frame.id)
 
   const array = mergeAsArray(frame.value)
-  array.forEach(function (elem) {
-    if (typeof elem !== 'string') {
+  array.forEach(function (string) {
+    if (typeof string !== 'string') {
       throw new TagError(203, `${frame.id} value is not a string`)
+    }
+
+    if (!string.match('.+')) {
+      throw new TagError(203, `${frame.id} value, newlines are not allowed`)
     }
   })
 
@@ -47,8 +51,8 @@ export function arrayFrame (frame, version) {
     throw new TagError(203, `${frame.id} value is not an array`)
   }
 
-  frame.value.forEach(function (text) {
-    if (typeof text !== 'string') {
+  frame.value.forEach(function (string) {
+    if (typeof string !== 'string') {
       throw new TagError(203, `${frame.id} value is not a string`)
     }
   })
@@ -60,8 +64,8 @@ export function numberFrame (frame, version) {
   validateID(frame.id)
 
   const array = mergeAsArray(frame.value)
-  array.forEach(function (elem) {
-    if (typeof elem !== 'number') {
+  array.forEach(function (number) {
+    if (typeof number !== 'number') {
       throw new TagError(203, `${frame.id} value is not a number`)
     }
   })
@@ -109,9 +113,6 @@ export function timeFrame (frame, version) {
             'Time Frames should follow ISO 8601')
         }
         break
-
-      default:
-        throw new TagError(201, version)
     }
   })
 
@@ -183,12 +184,12 @@ export function tkeyFrame (frame, version) {
   validateID(frame.id)
 
   const array = mergeAsArray(frame.value)
-  array.forEach(function (elem) {
-    if (typeof elem !== 'string') {
+  array.forEach(function (string) {
+    if (typeof string !== 'string') {
       throw new TagError(203, 'TKEY is not a string')
     }
 
-    if (!elem.match(/^([A-Gb#mo]{3})$/)) {
+    if (!string.match(/^([A-Gb#mo]{3})$/)) {
       throw new TagError(203, 'Invalid TKEY Format (e.g. Cbm)')
     }
   })
@@ -200,12 +201,12 @@ export function tlanFrame (frame, version) {
   validateID(frame.id)
 
   const array = mergeAsArray(frame.value)
-  array.forEach(function (elem) {
-    if (typeof elem !== 'string') {
+  array.forEach(function (string) {
+    if (typeof string !== 'string') {
       throw new TagError(203, 'TLAN is not a string')
     }
 
-    if (!elem.match(langRegex)) {
+    if (!string.match(langRegex)) {
       throw new TagError(203, 'Language does not follow ISO 639-2')
     }
   })
@@ -217,12 +218,12 @@ export function tsrcFrame (frame, version) {
   validateID(frame.id)
 
   const array = mergeAsArray(frame.value)
-  array.forEach(function (elem) {
-    if (typeof elem !== 'string') {
+  array.forEach(function (string) {
+    if (typeof string !== 'string') {
       throw new TagError(203, 'TSRC is not a string')
     }
 
-    if (!elem.match(/^([a-zA-Z0-9]{12})$/)) {
+    if (!string.match(/^([a-zA-Z0-9]{12})$/)) {
       throw new TagError(203, 'Invalid ISRC format')
     }
   })
@@ -237,6 +238,9 @@ export function langDescFrame (frame, version) {
   const descriptors = []
 
   array.forEach(function (elem) {
+    elem.language = elem.language || 'eng'
+    elem.descriptor = elem.descriptor || ''
+
     if (typeof elem.language !== 'string' ||
       typeof elem.descriptor !== 'string' ||
       typeof elem.text !== 'string') {
@@ -275,14 +279,14 @@ export function apicFrame (frame, version) {
       throw new TagError(203, 'Image data should be ArrayBuffer or an array')
     }
 
+    if (elem.description.length > 64) {
+      throw new TagError(203, 'Description should not exceed 64')
+    }
+
     if (descriptions.includes(elem.description)) {
       throw new TagError(203, 'Cover description should not duplicate')
     } else {
       descriptions.push(elem.description)
-    }
-
-    if (elem.description.length > 64) {
-      throw new TagError(203, 'Description should not exceed 64')
     }
 
     if (!elem.format.match(/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/)) {
@@ -363,6 +367,8 @@ export function userFrame (frame, version) {
 
   const array = mergeAsArray(frame.value)
   array.forEach(function (elem) {
+    elem.language = elem.language || 'eng'
+
     if (typeof elem.language !== 'string' || typeof elem.text !== 'string') {
       throw new TagError(203, 'USER language/text is not a string')
     }
