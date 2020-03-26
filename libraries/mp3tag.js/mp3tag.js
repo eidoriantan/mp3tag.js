@@ -409,8 +409,9 @@
     }, {
       key: "getUint16",
       value: function getUint16(offset) {
-        var length = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+        var length = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
         var le = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+        if (length % 2 !== 0) length -= 1;
         var limit = offset + length;
         var bytes = [];
         if (this.byteLength - limit < 0) return false;
@@ -2229,7 +2230,7 @@
       }
 
       this.name = 'MP3Tag';
-      this.version = '0.5.0';
+      this.version = '0.5.1';
       this.buffer = buffer;
       this.options = options || {};
       this.tagger = {};
