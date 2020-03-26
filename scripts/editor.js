@@ -233,14 +233,14 @@ async function writeData (data) {
     })
 
     if (mp3tag.tagger.major === 3) {
-      if (date.day && date.month) {
+      if (date.day && date.day !== '00' && date.month && date.month !== '00') {
         mp3tag.frames.push({
           id: 'TDAT',
           value: date.day + date.month
         })
       }
 
-      if (date.year) {
+      if (date.year && date.year !== '') {
         mp3tag.frames.push({
           id: 'TYER',
           value: date.year
@@ -248,9 +248,11 @@ async function writeData (data) {
       }
     } else if (mp3tag.tagger.major === 4) {
       let dateStr = ''
-      if (date.year) dateStr += date.year
-      if (date.year && date.month && date.day)
+      if (date.year && date.year !== '') dateStr += date.year
+      if (date.year && date.year !== '' && date.month && date.month !== '00' &&
+        date.day && date.day !== '00') {
         dateStr += '-' + date.month + '-' + date.day
+      }
 
       if (dateStr !== '') {
         mp3tag.frames.push({
