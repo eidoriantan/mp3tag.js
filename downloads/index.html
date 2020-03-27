@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
   <meta name="author" content="Adriane Justine Tan <eidoriantan@gmail.com>">
   <meta name="description" content="Edit your audio files easily with this mp3tagger!">
-  <meta name="keywords" content="mp3, id3, audio, tag, edit, write">
+  <meta name="keywords" content="mp3, id3, audio, tag, edit, write, mp3tag.js, documentations">
   <meta name="theme-color" content="#2b5797">
 
   <link href="/LICENSE" rel="license">
@@ -21,6 +21,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha256-/ijcOLwFf26xEYAjW75FizKVo5tnTYiQddPZoLUHHZ8=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha256-WqU1JavFxSAMcLP2WIOI+GB2zWmShMI82mTpLDcqFUg=" crossorigin="anonymous"></script>
+  <script src="/scripts/docs.js"></script>
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-161214318-3"></script>
   <script>
@@ -31,7 +32,7 @@
     gtag('config', 'UA-161214318-3')
   </script>
 
-  <title>mp3tag.js</title>
+  <title>Documentations | mp3tag.js</title>
 </head>
 
 <body>
@@ -44,7 +45,7 @@
     <nav id="header-nav" class="collapse navbar-collapse" aria-label="Main Navigator">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a href="/" class="nav-link active">
+          <a href="/" class="nav-link">
             <i class="fas fa-home" aria-hidden="true"></i> Home
           </a>
         </li>
@@ -62,7 +63,7 @@
         </li>
 
         <li class="nav-item">
-          <a href="/downloads/" class="nav-link">
+          <a href="/downloads/" class="nav-link active">
             <i class="fas fa-download" aria-hidden="true"></i> Downloads
           </a>
         </li>
@@ -70,63 +71,60 @@
     </nav>
   </header>
 
-  <main>
-    <div class="jumbotron">
-      <div class="container">
-        <h1 class="display-3">mp3tag.js</h1>
-        <p class="lead">
-          <a href="https://github.com/eidoriantan/mp3tag.js">mp3tag.js</a> is an open sourced JavaScript library used to edit the metadata of audio files.
-          It can add, edit, and remove tags of a file and save it! It is licensed under the <a href="https://opensource.org/licenses/MIT">MIT License</a>.
-        </p>
+  <main class="py-5">
+    <div class="container">
+      <h3>mp3tag.js Releases</h3>
+      <p class="lead">Visit the release page for details</p>
 
-        <a href="https://github.com/eidoriantan/mp3tag.js" class="btn btn-lg btn-secondary" role="button">
-          <i class="fab fa-github" aria-hidden="true"></i> Source Codes
-        </a>
+      <div class="container mt-4">
+        <h5>Latest Version (v0.5.1)</h5>
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/download/v0.5.1/mp3tag.js-0.5.1.zip">Distributable</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/archive/v0.5.1.zip">Source Codes (zip)</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/tag/v0.5.1">Release page</a>
       </div>
-    </div>
 
-    <div class="container my-5 text-center">
-      <h1 class="display-4 mb-3">Editor</h1>
-      <p class="lead w-50 mx-auto">Wanted to use or try the library without uploading your audio files and wanted to work offline? Try out this editor!</p>
-      <a href="/editor/" class="btn btn-lg btn-primary" role="button">
-        <i class="fas fa-edit" aria-hidden="true"></i> Editor
-      </a>
-      <hr class="my-5">
-    </div>
-
-    <div class="container my-5 text-center">
-      <h1 class="display-4 mb-3">Features</h1>
-      <div class="row">
-        <div class="col-md-4 mt-3">
-          <h2>Open Source and Free</h2>
-          <p>It is an open source project and free for everyone to use! You can view the source codes at <a href="https://github.com/eidoriantan/mp3tag.js">GitHub</a></p>
-        </div>
-
-        <div class="col-md-4 mt-3">
-          <h2>Easy to use</h2>
-          <p>It is very easy to use and build. It can do basic tags modification such as reading, writing and removing tags!</p>
-        </div>
-
-        <div class="col-md-4 mt-3">
-          <h2>Standards Compliant</h2>
-          <p>It strictly follows the <a href="http://id3.org">ID3 Specifications</a>, and validates your input to comply with the standards.</p>
-        </div>
+      <div class="container mt-4">
+        <h5>v0.5.0</h5>
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/download/v0.5.0/mp3tag.js-0.5.0.zip">Distributable</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/archive/v0.5.0.zip">Source Codes (zip)</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/tag/v0.5.0">Release page</a>
       </div>
-      <hr class="my-5">
-    </div>
 
-    <div class="container my-5 text-center">
-      <h1 class="display-4 mb-3">Author and Contributors</h1>
-      <div class="d-flex flex-row justify-content-center flex-wrap mt-5">
-        <a href="https://github.com/eidoriantan">
-          <img src="https://avatars1.githubusercontent.com/u/22261916?s=128" alt="Adriane Justine Tan" title="Adriane Justine Tan" class="rounded-circle mx-3">
-        </a>
+      <div class="container mt-4">
+        <h5>v0.4.2</h5>
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/download/v0.4.2/mp3tag.js-0.4.2.zip">Distributable</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/archive/v0.4.2.zip">Source Codes (zip)</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/tag/v0.4.2">Release page</a>
+      </div>
+
+      <div class="container mt-4">
+        <h5>v0.4.0</h5>
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/download/v0.4.0/mp3tag.js-0.4.0.zip">Distributable</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/archive/v0.4.0.zip">Source Codes (zip)</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/tag/v0.4.0">Release page</a>
+      </div>
+
+      <div class="container mt-4">
+        <h5>v0.3.0</h5>
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/download/v0.3.0/mp3tag.js-0.3.0.zip">Distributable</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/archive/v0.3.0.zip">Source Codes (zip)</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/tag/v0.3.0">Release page</a>
+      </div>
+
+      <div class="container mt-4">
+        <h5>v0.2.0</h5>
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/download/v0.2.0/mp3tag.js-0.2.0.zip">Distributable</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/archive/v0.2.0.zip">Source Codes (zip)</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/tag/v0.2.0">Release page</a>
+      </div>
+
+      <div class="container mt-4">
+        <h5>v0.1.0</h5>
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/download/v0.1.0/mp3tag.js-0.1.0.zip">Distributable</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/archive/v0.1.0.zip">Source Codes (zip)</a> |
+        <a href="https://github.com/eidoriantan/mp3tag.js/releases/tag/v0.1.0">Release page</a>
       </div>
     </div>
   </main>
-
-  <footer class="bg-dark text-center text-white py-3 px-3">
-    <div class="text-muted">Copyright &copy; 2020, <a href="https://github.com/eidoriantan" class="text-white">@eidoriantan</a></div>
-  </footer>
 </body>
 </html>
