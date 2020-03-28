@@ -22,6 +22,8 @@ describe('mp3tag.js Usage', function () {
       }
     }
 
-    if (success) require('./taggers/id3v2')
+    if (success) {
+      require('./taggers/id3v2')
+    }
   })
 })
