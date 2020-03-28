@@ -104,7 +104,7 @@ export const TDOR = {
 export const TDRC = {
   parse: parsers.textFrame,
   validate: validators.timeFrame,
-  write: writers.textFrame,
+  write: writers.asciiFrame,
   version: [4]
 }
 
