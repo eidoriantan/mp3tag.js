@@ -198,3 +198,13 @@ export function owneFrame (view, version) {
     seller: seller.string
   }
 }
+
+export function privFrame (view, version) {
+  const ownerId = view.getCString(0, 'ascii')
+  const data = view.getUint8(ownerId.length, view.byteLength - ownerId.length)
+
+  return {
+    ownerId: ownerId.string,
+    data: data
+  }
+}

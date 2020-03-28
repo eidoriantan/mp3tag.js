@@ -426,3 +426,33 @@ export function owneFrame (frame, version) {
     }
   })
 }
+
+export function privFrame (frame, version) {
+  validateID(frame.id)
+
+  const array = mergeAsArray(frame.value)
+  const contents = []
+
+  array.forEach(function (elem) {
+    if (typeof elem.ownerId !== 'string') {
+      throw new TagError(203, 'PRIV ownerId is not a string')
+    }
+
+    if (!elem.ownerId.match(urlRegex)) {
+      throw new TagError(203, 'PRIV ownerId is an invalid URL')
+    }
+
+    if (!(elem.data instanceof ArrayBuffer) && !Array.isArray(elem.data) &&
+      !ArrayBuffer.isView(elem.data)) {
+      throw new TagError(203, 'PRIV data should be an ArrayBuffer or array')
+    }
+
+    if (includesArray(contents, elem.data)) {
+      throw new TagError(203, 'PRIV data should not duplicate')
+    } else {
+      contents.push(elem.data)
+    }
+  })
+
+  return true
+}

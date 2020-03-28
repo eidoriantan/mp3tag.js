@@ -371,3 +371,19 @@ export function owneFrame (frame, version) {
 
   return bytes
 }
+
+export function privFrame (frame, version) {
+  const bytes = []
+  const array = mergeAsArray(frame.value)
+
+  array.forEach(function (elem) {
+    const ownerIdBytes = encodeString(elem.ownerId, 'ascii')
+    const data = new Uint8Array(elem.data)
+    const size = ownerIdBytes.length + data.length
+    const header = getHeaderBytes(frame.id, size, version)
+    const merged = mergeBytes(header, ownerIdBytes, data)
+    merged.forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}

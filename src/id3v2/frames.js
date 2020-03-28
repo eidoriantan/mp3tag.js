@@ -38,6 +38,13 @@ export const OWNE = {
   version: [3, 4]
 }
 
+export const PRIV = {
+  parse: parsers.privFrame,
+  validate: validators.privFrame,
+  write: writers.privFrame,
+  version: [3, 4]
+}
+
 export const TALB = {
   parse: parsers.textFrame,
   validate: validators.textFrame,
