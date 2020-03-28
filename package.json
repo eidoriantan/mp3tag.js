@@ -22,7 +22,8 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
-    "test": "eslint -c .eslintrc **/*.js --quiet --max-warnings 2 && mocha"
+    "lint": "eslint -c .eslintrc **/*.js --quiet --max-warnings 2",
+    "test": "npm run lint && mocha --colors"
   },
   "repository": {
     "type": "git",
