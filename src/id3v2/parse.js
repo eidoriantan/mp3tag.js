@@ -34,44 +34,44 @@ export function textFrame (view, version) {
 }
 
 export function arrayFrame (view, version) {
-  const text = textFrame(view, version)
-  let value = []
+  const value = textFrame(view, version)
+  let array = []
 
   switch (version) {
     case 3:
-      value = text.split('/')
+      array = value.split('/')
       break
 
     case 4:
-      value = Array.isArray(text) ? text : [text]
+      array = Array.isArray(value) ? value : [value]
       break
 
     default:
       throw new TagError(201, version)
   }
 
-  return value
+  return array
 }
 
 export function numberFrame (view, version) {
-  const text = textFrame(view, version)
-  return text.match(/^(\d+)$/) ? parseInt(text) : text
+  const value = textFrame(view, version)
+  return value.match && value.match(/^(\d+)$/) ? parseInt(value) : value
 }
 
 export function setFrame (view, version) {
-  const text = textFrame(view, version)
-  const array = mergeAsArray(text)
-  const value = []
+  const value = textFrame(view, version)
+  const mergedValue = mergeAsArray(value)
+  const array = []
 
-  array.forEach(function (elem) {
+  mergedValue.forEach(function (elem) {
     const splitted = elem.split('/')
-    value.push(elem.match(/^(\d+)\/(\d+)/) ? {
+    array.push(elem.match(/^(\d+)\/(\d+)/) ? {
       position: parseInt(splitted[0]),
       total: parseInt(splitted[1])
     } : elem)
   })
 
-  return value.length === 1 ? value[0] : value
+  return array.length === 1 ? array[0] : array
 }
 
 export function urlFrame (view, version) {
