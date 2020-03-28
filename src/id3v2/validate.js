@@ -4,14 +4,17 @@ import TagError from '../error'
 
 const urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/
 const langRegex = /^([a-z]{3}|XXX)$/
+const stringRegex = /^(.+)$/
+
 const year = '(\\d{4})'
 const month = '(0[1-9]|1[0-2])'
 const day = '(0[1-9]|1\\d|2\\d|3[0-1])'
 const hour = '(0\\d|1\\d|2[0-3])'
 const minute = '(0\\d|1\\d|2\\d|3\\d|4\\d|5\\d)'
 const second = minute
-const timeRegex =
+const timeRegex = new RegExp(
   `^(${year}(-${month}(-${day}(T${hour}(:${minute}(:${second})?)?)?)?)?)$`
+)
 
 function validateID (id) {
   if (!id.match(/^([a-zA-Z0-9]{4})$/)) {
@@ -36,7 +39,7 @@ export function textFrame (frame, version) {
       throw new TagError(203, `${frame.id} value is not a string`)
     }
 
-    if (!string.match('.+')) {
+    if (!string.match(stringRegex)) {
       throw new TagError(203, `${frame.id} value, newlines are not allowed`)
     }
   })
@@ -54,6 +57,10 @@ export function arrayFrame (frame, version) {
   frame.value.forEach(function (string) {
     if (typeof string !== 'string') {
       throw new TagError(203, `${frame.id} value is not a string`)
+    }
+
+    if (!string.match(stringRegex)) {
+      throw new TagError(203, `${frame.id} value, newlines are not allowed`)
     }
   })
 
@@ -109,8 +116,7 @@ export function timeFrame (frame, version) {
         }
 
         if (!elem.match(timeRegex)) {
-          throw new TagError(203,
-            'Time Frames should follow ISO 8601')
+          throw new TagError(203, 'Time frames should follow ISO 8601')
         }
         break
     }
@@ -127,7 +133,7 @@ export function urlFrame (frame, version) {
   }
 
   if (!frame.value.match(urlRegex)) {
-    throw new TagError(203, 'URL is not a valid URL')
+    throw new TagError(203, `${frame.id} value is not a valid URL`)
   }
 
   return true
@@ -376,7 +382,6 @@ export function userFrame (frame, version) {
     }
 
     elem.language = elem.language || 'eng'
-
     if (typeof elem.language !== 'string' || typeof elem.text !== 'string') {
       throw new TagError(203, 'USER language/text is not a string')
     }
