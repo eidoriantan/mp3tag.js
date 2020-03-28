@@ -6,7 +6,7 @@ export const ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8']
 
 /**
  *  Frame Parsers
- *  @param {BufferView} view - View of the entire frame excluding the header
+ *  @param {BufferView} view - View of the frame excluding the header
  *  @param {number} version - Frame will be parsed with this version
  */
 
@@ -43,8 +43,7 @@ export function arrayFrame (view, version) {
       break
 
     case 4:
-      if (!Array.isArray(text)) value = [text]
-      else value = text
+      value = Array.isArray(text) ? text : [text]
       break
 
     default:
