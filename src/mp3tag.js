@@ -7,8 +7,9 @@ export default class MP3Tag {
   set frames (value) { this.tagger.frames = value }
 
   constructor (buffer, options) {
-    if (buffer instanceof ArrayBuffer === false ||
-      (typeof Buffer !== 'undefined' && buffer instanceof Buffer === false)) {
+    if (buffer instanceof ArrayBuffer === false &&
+      (typeof Buffer !== 'undefined' ? buffer instanceof Buffer === false
+        : true)) {
       throw new TypeError('buffer is not an instance of ArrayBuffer or Buffer')
     }
 
