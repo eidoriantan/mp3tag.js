@@ -1,5 +1,5 @@
 
-import { mergeAsArray } from '../utils/array'
+import { toArray } from '../utils/object'
 import TagError from '../error'
 
 export const ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8']
@@ -60,10 +60,10 @@ export function numberFrame (view, version) {
 
 export function setFrame (view, version) {
   const value = textFrame(view, version)
-  const mergedValue = mergeAsArray(value)
+  const arrayValue = toArray(value)
   const array = []
 
-  mergedValue.forEach(function (elem) {
+  arrayValue.forEach(function (elem) {
     const splitted = elem.split('/')
     array.push(elem.match(/^(\d+)\/(\d+)/) ? {
       position: parseInt(splitted[0]),

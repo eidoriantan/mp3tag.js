@@ -1,5 +1,5 @@
 
-import { mergeAsArray, includesArray } from '../utils/array'
+import { includes, toArray } from '../utils/object'
 import TagError from '../error'
 
 const urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/
@@ -31,7 +31,7 @@ export function validateID (id) {
  */
 
 export function textFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   array.forEach(function (string) {
     if (typeof string !== 'string') {
       throw new TagError(203, 'Value is not a string')
@@ -64,7 +64,7 @@ export function arrayFrame (value, version) {
 }
 
 export function numberFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   array.forEach(function (number) {
     if (typeof number !== 'number') {
       throw new TagError(203, 'Value is not a number')
@@ -75,7 +75,7 @@ export function numberFrame (value, version) {
 }
 
 export function setFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   array.forEach(function (elem) {
     if (typeof elem.position !== 'number' ||
       typeof elem.total !== 'number') {
@@ -91,7 +91,7 @@ export function setFrame (value, version) {
 }
 
 export function timeFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   array.forEach(function (elem) {
     switch (version) {
       case 3:
@@ -128,7 +128,7 @@ export function urlFrame (value, version) {
 }
 
 export function txxxFrame (value, verion) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   const descriptions = []
 
   array.forEach(function (elem) {
@@ -148,7 +148,7 @@ export function txxxFrame (value, verion) {
 }
 
 export function wxxxFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   const descriptions = []
 
   array.forEach(function (elem) {
@@ -171,7 +171,7 @@ export function wxxxFrame (value, version) {
 }
 
 export function tkeyFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   array.forEach(function (string) {
     if (typeof string !== 'string') {
       throw new TagError(203, 'Value is not a string')
@@ -186,7 +186,7 @@ export function tkeyFrame (value, version) {
 }
 
 export function tlanFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   array.forEach(function (string) {
     if (typeof string !== 'string') {
       throw new TagError(203, 'Value is not a string')
@@ -201,7 +201,7 @@ export function tlanFrame (value, version) {
 }
 
 export function tsrcFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   array.forEach(function (string) {
     if (typeof string !== 'string') {
       throw new TagError(203, 'Value is not a string')
@@ -216,7 +216,7 @@ export function tsrcFrame (value, version) {
 }
 
 export function langDescFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   const descriptors = []
 
   array.forEach(function (elem) {
@@ -248,7 +248,7 @@ export function langDescFrame (value, version) {
 }
 
 export function apicFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   const descriptions = []
 
   array.forEach(function (elem) {
@@ -282,7 +282,7 @@ export function apicFrame (value, version) {
 }
 
 export function geobFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   const descriptions = []
   const objects = []
 
@@ -303,7 +303,7 @@ export function geobFrame (value, version) {
       descriptions.push(elem.description)
     }
 
-    if (includesArray(objects, elem.object)) {
+    if (includes(objects, elem.object)) {
       throw new TagError(203, 'GEOB object should not duplicate')
     } else {
       objects.push(elem.object)
@@ -314,7 +314,7 @@ export function geobFrame (value, version) {
 }
 
 export function ufidFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   const ownerIds = []
 
   array.forEach(function (elem) {
@@ -343,7 +343,7 @@ export function ufidFrame (value, version) {
 }
 
 export function userFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   array.forEach(function (elem) {
     if (typeof elem !== 'object') {
       throw new TagError(203, 'Value is not an object')
@@ -363,7 +363,7 @@ export function userFrame (value, version) {
 }
 
 export function owneFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   array.forEach(function (elem) {
     if (typeof elem !== 'object') {
       throw new TagError(203, 'Value is not an object')
@@ -394,7 +394,7 @@ export function owneFrame (value, version) {
 }
 
 export function privFrame (value, version) {
-  const array = mergeAsArray(value)
+  const array = toArray(value)
   const contents = []
 
   array.forEach(function (elem) {
@@ -411,7 +411,7 @@ export function privFrame (value, version) {
       throw new TagError(203, 'Data should be an ArrayBuffer or array')
     }
 
-    if (includesArray(contents, elem.data)) {
+    if (includes(contents, elem.data)) {
       throw new TagError(203, 'Data should not duplicate')
     } else {
       contents.push(elem.data)
@@ -422,8 +422,8 @@ export function privFrame (value, version) {
 }
 
 export function signFrame (value, version) {
-  const array = mergeAsArray(value)
-  // const signs = []
+  const array = toArray(value)
+  const signs = []
 
   array.forEach(function (elem) {
     if (typeof elem.group !== 'number') {
@@ -440,14 +440,11 @@ export function signFrame (value, version) {
       throw new TagError(203, 'Signature should be an ArrayBuffer or array')
     }
 
-    /**
-     * @TODO: Define includesObject
-     */
-    // if (includesObject(signs, elem)) {
-    //   throw new TagError(203, 'SIGN contents should be identical to others')
-    // } else {
-    //   signs.push(elem)
-    // }
+    if (includes(signs, elem)) {
+      throw new TagError(203, 'SIGN contents should be identical to others')
+    } else {
+      signs.push(elem)
+    }
   })
 
   return true

@@ -1,5 +1,5 @@
 
-import { mergeAsArray } from '../utils/array'
+import { toArray } from '../utils/object'
 import { encodeSynch, mergeBytes } from '../utils/bytes'
 import { encodeString } from '../utils/strings'
 import BufferView from '../utils/viewer'
@@ -39,7 +39,7 @@ export function textFrame (frame, version) {
 
     case 4: {
       encoding = 3
-      const array = mergeAsArray(frame.value)
+      const array = toArray(frame.value)
 
       array.forEach(function (elem) {
         const encoded = encodeString(elem + '\0', 'utf-8')
@@ -72,7 +72,7 @@ export function asciiFrame (frame, version) {
       break
 
     case 4: {
-      const array = mergeAsArray(frame.value)
+      const array = toArray(frame.value)
       array.forEach(function (elem) {
         const encoded = encodeString(elem.toString() + '\0', 'ascii')
         encoded.forEach(byte => strBytes.push(byte))
@@ -92,7 +92,7 @@ export function setFrame (frame, version) {
       break
 
     case 4: {
-      const array = mergeAsArray(frame.value)
+      const array = toArray(frame.value)
       frame.value = []
 
       array.forEach(function (elem) {
@@ -114,7 +114,7 @@ export function urlFrame (frame, version) {
 
 export function txxxFrame (frame, version) {
   const bytes = []
-  const array = mergeAsArray(frame.value)
+  const array = toArray(frame.value)
 
   array.forEach(function (elem) {
     let encoding = 0
@@ -145,7 +145,7 @@ export function txxxFrame (frame, version) {
 
 export function wxxxFrame (frame, version) {
   const bytes = []
-  const array = mergeAsArray(frame.value)
+  const array = toArray(frame.value)
 
   array.forEach(function (elem) {
     let encoding = 0
@@ -194,7 +194,7 @@ export function iplsFrame (frame, version) {
 
 export function langDescFrame (frame, version) {
   const bytes = []
-  const array = mergeAsArray(frame.value)
+  const array = toArray(frame.value)
 
   array.forEach(function (elem) {
     let encoding = 0
@@ -226,7 +226,7 @@ export function langDescFrame (frame, version) {
 
 export function apicFrame (frame, version) {
   const bytes = []
-  const array = mergeAsArray(frame.value)
+  const array = toArray(frame.value)
 
   array.forEach(function (elem) {
     let encoding = 0
@@ -260,7 +260,7 @@ export function apicFrame (frame, version) {
 
 export function geobFrame (frame, version) {
   const bytes = []
-  const array = mergeAsArray(frame.value)
+  const array = toArray(frame.value)
 
   array.forEach(function (elem) {
     const mime = encodeString(elem.format + '\0', 'ascii')
@@ -295,7 +295,7 @@ export function geobFrame (frame, version) {
 
 export function ufidFrame (frame, version) {
   const bytes = []
-  const array = mergeAsArray(frame.value)
+  const array = toArray(frame.value)
 
   array.forEach(function (elem) {
     const ownerBytes = encodeString(elem.ownerId + '\0', 'ascii')
@@ -311,7 +311,7 @@ export function ufidFrame (frame, version) {
 
 export function userFrame (frame, version) {
   const bytes = []
-  const array = mergeAsArray(frame.value)
+  const array = toArray(frame.value)
 
   array.forEach(function (elem) {
     let encoding = 0
@@ -340,7 +340,7 @@ export function userFrame (frame, version) {
 
 export function owneFrame (frame, version) {
   const bytes = []
-  const array = mergeAsArray(frame.value)
+  const array = toArray(frame.value)
 
   array.forEach(function (elem) {
     let encoding = 0
@@ -374,7 +374,7 @@ export function owneFrame (frame, version) {
 
 export function privFrame (frame, version) {
   const bytes = []
-  const array = mergeAsArray(frame.value)
+  const array = toArray(frame.value)
 
   array.forEach(function (elem) {
     const ownerIdBytes = encodeString(elem.ownerId, 'ascii')
@@ -390,7 +390,7 @@ export function privFrame (frame, version) {
 
 export function signFrame (frame, version) {
   const bytes = []
-  const array = mergeAsArray(frame.value)
+  const array = toArray(frame.value)
 
   array.forEach(function (elem) {
     const signature = new Uint8Array(elem.signature)
