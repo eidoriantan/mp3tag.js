@@ -1,5 +1,4 @@
 
-import BufferView from './utils/viewer'
 import ID3v2 from './id3v2'
 import TagError from './error'
 
@@ -21,9 +20,7 @@ export default class MP3Tag {
   }
 
   read () {
-    const mediaView = new BufferView(this.buffer)
-
-    if (mediaView.getUint8String(0, 3) === 'ID3') {
+    if (ID3v2.isID3v2(this.buffer)) {
       this.tagger = new ID3v2(this.buffer, this.options)
       this.tagger.read()
     } else {

@@ -7,6 +7,11 @@ import BufferView from './utils/viewer'
 import TagError from './error'
 
 export default class ID3v2 {
+  static isID3v2 (buffer) {
+    const view = new BufferView(buffer)
+    return view.getString(0, 3, 'ascii').string === 'ID3'
+  }
+
   constructor (buffer, options = {}) {
     this.buffer = buffer
     this.options = {
