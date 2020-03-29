@@ -8,7 +8,7 @@ export default class MP3Tag {
 
   constructor (buffer, options) {
     if (buffer instanceof ArrayBuffer === false ||
-      buffer instanceof Buffer === false) {
+      (typeof Buffer !== 'undefined' && buffer instanceof Buffer === false)) {
       throw new TypeError('buffer is not an instance of ArrayBuffer or Buffer')
     }
 
