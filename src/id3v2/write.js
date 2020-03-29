@@ -387,3 +387,18 @@ export function privFrame (frame, version) {
 
   return bytes
 }
+
+export function signFrame (frame, version) {
+  const bytes = []
+  const array = mergeAsArray(frame.value)
+
+  array.forEach(function (elem) {
+    const signature = new Uint8Array(elem.signature)
+    const size = signature.length + 1
+    const header = getHeaderBytes(frame.id, size, version)
+    const merged = mergeBytes(header, elem.group, signature)
+    merged.forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}

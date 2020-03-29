@@ -49,6 +49,13 @@ export const PRIV = {
   version: [3, 4]
 }
 
+export const SIGN = {
+  parse: parsers.signFrame,
+  validate: validators.signFrame,
+  write: writers.signFrame,
+  version: [4]
+}
+
 export const TALB = {
   parse: parsers.textFrame,
   validate: validators.textFrame,

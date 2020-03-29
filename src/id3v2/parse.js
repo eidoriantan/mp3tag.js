@@ -208,3 +208,13 @@ export function privFrame (view, version) {
     data: data
   }
 }
+
+export function signFrame (view, version) {
+  const groupId = view.getUint8(0)
+  const sign = view.getUint8(1, view.byteLength - 1)
+
+  return {
+    group: groupId,
+    signature: sign
+  }
+}

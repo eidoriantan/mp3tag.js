@@ -420,3 +420,36 @@ export function privFrame (value, version) {
 
   return true
 }
+
+export function signFrame (value, version) {
+  const array = mergeAsArray(value)
+  const signs = []
+
+  array.forEach(function (elem) {
+    if (typeof elem.group !== 'number') {
+      throw new TagError(203, 'Group ID is not a number')
+    }
+
+    if (elem.group < 0 || elem.group > 255) {
+      throw new TagError(203, 'Group ID should be in the range of 0 - 255')
+    }
+
+    if (!(elem.signature instanceof ArrayBuffer) &&
+      !Array.isArray(elem.signature) &&
+      !ArrayBuffer.isView(elem.signature)) {
+      throw new TagError(203, 'Signature should be an ArrayBuffer or array')
+    }
+
+    /**
+     * @TODO: Define includesObject
+     */
+    // if (includesObject(signs, elem)) {
+    //   throw new TagError(203, 'SIGN contents should be identical to others')
+    // } else {
+    //   signs.push(elem)
+    // }
+  }
+  })
+
+  return true
+}
