@@ -65,11 +65,15 @@ export default class ID3v2 {
     const framesObj = this.parse()
     for (const id in framesObj) {
       const frameDesc = frames[id]
-      const frame = { id: id, value: framesObj[id] }
-
       if (frameDesc) {
         if (frameDesc.version.includes(this.major)) {
-          frameDesc.validate(frame, this.major)
+          frames.validateID(id)
+
+          try {
+            frameDesc.validate(framesObj[id], this.major)
+          } catch (e) {
+            throw new TagError(203, `${id} validation error: ${e.message}`)
+          }
         } else {
           throw new TagError(204, id)
         }

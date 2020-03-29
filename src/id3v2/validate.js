@@ -16,7 +16,7 @@ const timeRegex = new RegExp(
   `^(${year}(-${month}(-${day}(T${hour}(:${minute}(:${second})?)?)?)?)?)$`
 )
 
-function validateID (id) {
+export function validateID (id) {
   if (!id.match(/^([a-zA-Z0-9]{4})$/)) {
     throw new TagError(203, 'ID is invalid')
   }
@@ -26,93 +26,83 @@ function validateID (id) {
 
 /**
  *  Validators
- *  @param {Object} frame - Frame to be validated
+ *  @param {*} frameValue - Value of a frame
  *  @param {number} version - Frame will be validated with this version
  */
 
-export function textFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function textFrame (value, version) {
+  const array = mergeAsArray(value)
   array.forEach(function (string) {
     if (typeof string !== 'string') {
-      throw new TagError(203, `${frame.id} value is not a string`)
+      throw new TagError(203, 'Value is not a string')
     }
 
     if (!string.match(stringRegex)) {
-      throw new TagError(203, `${frame.id} value, newlines are not allowed`)
+      throw new TagError(203, 'Newlines are not allowed')
     }
   })
 
   return true
 }
 
-export function arrayFrame (frame, version) {
-  validateID(frame.id)
-
-  if (!Array.isArray(frame.value)) {
-    throw new TagError(203, `${frame.id} value is not an array`)
+export function arrayFrame (value, version) {
+  if (!Array.isArray(value)) {
+    throw new TagError(203, 'Value is not an array')
   }
 
-  frame.value.forEach(function (string) {
+  value.forEach(function (string) {
     if (typeof string !== 'string') {
-      throw new TagError(203, `${frame.id} value is not a string`)
+      throw new TagError(203, 'Value is not a string')
     }
 
     if (!string.match(stringRegex)) {
-      throw new TagError(203, `${frame.id} value, newlines are not allowed`)
+      throw new TagError(203, 'Newlines are not allowed')
     }
   })
 
   return true
 }
 
-export function numberFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function numberFrame (value, version) {
+  const array = mergeAsArray(value)
   array.forEach(function (number) {
     if (typeof number !== 'number') {
-      throw new TagError(203, `${frame.id} value is not a number`)
+      throw new TagError(203, 'Value is not a number')
     }
   })
 
   return true
 }
 
-export function setFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function setFrame (value, version) {
+  const array = mergeAsArray(value)
   array.forEach(function (elem) {
     if (typeof elem.position !== 'number' ||
       typeof elem.total !== 'number') {
-      throw new TagError(203, `${frame.id} position/total is not a number`)
+      throw new TagError(203, 'Value position/total is not a number')
     }
 
     if (elem.position > elem.total) {
-      throw new TagError(203, `${frame.id} position is greater than total`)
+      throw new TagError(203, 'Position is greater than total')
     }
   })
 
   return true
 }
 
-export function timeFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function timeFrame (value, version) {
+  const array = mergeAsArray(value)
   array.forEach(function (elem) {
     switch (version) {
       case 3:
         if (!elem.toString().match(/^(\d{4})$/)) {
-          throw new TagError(203, `${frame.id} is not 4 numeric characters`)
+          throw new TagError(203, 'Value is not 4 numeric characters')
         }
         break
 
       case 4:
         if (typeof elem !== 'string') {
-          throw new TagError(203, `${frame.id} value is not a string`)
+          throw new TagError(203, 'Value is not a string')
         }
 
         if (!elem.match(timeRegex)) {
@@ -125,34 +115,30 @@ export function timeFrame (frame, version) {
   return true
 }
 
-export function urlFrame (frame, version) {
-  validateID(frame.id)
-
-  if (typeof frame.value !== 'string') {
-    throw new TagError(203, `${frame.id} value is not a string`)
+export function urlFrame (value, version) {
+  if (typeof value !== 'string') {
+    throw new TagError(203, 'Value is not a string')
   }
 
-  if (!frame.value.match(urlRegex)) {
-    throw new TagError(203, `${frame.id} value is not a valid URL`)
+  if (!value.match(urlRegex)) {
+    throw new TagError(203, 'Value is not a valid URL')
   }
 
   return true
 }
 
-export function txxxFrame (frame) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function txxxFrame (value, verion) {
+  const array = mergeAsArray(value)
   const descriptions = []
 
   array.forEach(function (elem) {
     if (typeof elem.description !== 'string' ||
       typeof elem.text !== 'string') {
-      throw new TagError(203, 'User-defined text/description is not a string')
+      throw new TagError(203, 'Text/description is not a string')
     }
 
     if (descriptions.includes(elem.description)) {
-      throw new TagError(203, 'User-defined description should not duplicate')
+      throw new TagError(203, 'Description should not duplicate')
     } else {
       descriptions.push(elem.description)
     }
@@ -161,23 +147,21 @@ export function txxxFrame (frame) {
   return true
 }
 
-export function wxxxFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function wxxxFrame (value, version) {
+  const array = mergeAsArray(value)
   const descriptions = []
 
   array.forEach(function (elem) {
     if (typeof elem.description !== 'string' || typeof elem.url !== 'string') {
-      throw new TagError(203, 'User-defined text/description is not a string')
+      throw new TagError(203, 'Text/description is not a string')
     }
 
     if (!elem.url.match(urlRegex)) {
-      throw new TagError(203, 'User-defined URL is an invalid URL')
+      throw new TagError(203, 'URL is an invalid URL')
     }
 
     if (descriptions.includes(elem.description)) {
-      throw new TagError(203, 'User-defined description should not duplicate')
+      throw new TagError(203, 'Description should not duplicate')
     } else {
       descriptions.push(elem.description)
     }
@@ -186,13 +170,11 @@ export function wxxxFrame (frame, version) {
   return true
 }
 
-export function tkeyFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function tkeyFrame (value, version) {
+  const array = mergeAsArray(value)
   array.forEach(function (string) {
     if (typeof string !== 'string') {
-      throw new TagError(203, 'TKEY is not a string')
+      throw new TagError(203, 'Value is not a string')
     }
 
     if (!string.match(/^([A-Gb#mo]{3})$/)) {
@@ -203,13 +185,11 @@ export function tkeyFrame (frame, version) {
   return true
 }
 
-export function tlanFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function tlanFrame (value, version) {
+  const array = mergeAsArray(value)
   array.forEach(function (string) {
     if (typeof string !== 'string') {
-      throw new TagError(203, 'TLAN is not a string')
+      throw new TagError(203, 'Value is not a string')
     }
 
     if (!string.match(langRegex)) {
@@ -220,13 +200,11 @@ export function tlanFrame (frame, version) {
   return true
 }
 
-export function tsrcFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function tsrcFrame (value, version) {
+  const array = mergeAsArray(value)
   array.forEach(function (string) {
     if (typeof string !== 'string') {
-      throw new TagError(203, 'TSRC is not a string')
+      throw new TagError(203, 'Value is not a string')
     }
 
     if (!string.match(/^([a-zA-Z0-9]{12})$/)) {
@@ -237,15 +215,13 @@ export function tsrcFrame (frame, version) {
   return true
 }
 
-export function langDescFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function langDescFrame (value, version) {
+  const array = mergeAsArray(value)
   const descriptors = []
 
   array.forEach(function (elem) {
     if (typeof elem !== 'object') {
-      throw new TagError(203, `${frame.id} is not an object`)
+      throw new TagError(203, 'Value is not an object')
     }
 
     elem.language = elem.language || 'eng'
@@ -271,10 +247,8 @@ export function langDescFrame (frame, version) {
   return true
 }
 
-export function apicFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function apicFrame (value, version) {
+  const array = mergeAsArray(value)
   const descriptions = []
 
   array.forEach(function (elem) {
@@ -307,10 +281,8 @@ export function apicFrame (frame, version) {
   return true
 }
 
-export function geobFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function geobFrame (value, version) {
+  const array = mergeAsArray(value)
   const descriptions = []
   const objects = []
 
@@ -341,29 +313,27 @@ export function geobFrame (frame, version) {
   return true
 }
 
-export function ufidFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function ufidFrame (value, version) {
+  const array = mergeAsArray(value)
   const ownerIds = []
 
   array.forEach(function (elem) {
     if (typeof elem.ownerId !== 'string') {
-      throw new TagError(203, 'UFID ownerId is not a string')
+      throw new TagError(203, 'ownerId is not a string')
     }
 
     if (!(elem.id instanceof ArrayBuffer) && !Array.isArray(elem.id) &&
       !ArrayBuffer.isView(elem.id)) {
-      throw new TagError(203, 'UFID id should be ArrayBuffer or an array')
+      throw new TagError(203, 'id should be ArrayBuffer or an array')
     }
 
     const idLength = elem.id.byteLength || elem.id.length || 0
     if (idLength > 64) {
-      throw new TagError(203, 'UFID id exceeds 64 bytes')
+      throw new TagError(203, 'id should not exceed 64 bytes')
     }
 
     if (ownerIds.includes(elem.ownerId)) {
-      throw new TagError(203, 'UFID ownerId should not duplicate')
+      throw new TagError(203, 'ownerId should not duplicate')
     } else {
       ownerIds.push(elem.ownerId)
     }
@@ -372,18 +342,16 @@ export function ufidFrame (frame, version) {
   return true
 }
 
-export function userFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function userFrame (value, version) {
+  const array = mergeAsArray(value)
   array.forEach(function (elem) {
     if (typeof elem !== 'object') {
-      throw new TagError(203, 'USER value is not an object')
+      throw new TagError(203, 'Value is not an object')
     }
 
     elem.language = elem.language || 'eng'
     if (typeof elem.language !== 'string' || typeof elem.text !== 'string') {
-      throw new TagError(203, 'USER language/text is not a string')
+      throw new TagError(203, 'Language/text is not a string')
     }
 
     if (!elem.language.match(langRegex)) {
@@ -394,61 +362,57 @@ export function userFrame (frame, version) {
   return true
 }
 
-export function owneFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function owneFrame (value, version) {
+  const array = mergeAsArray(value)
   array.forEach(function (elem) {
     if (typeof elem !== 'object') {
-      throw new TagError(203, 'OWNE value is not an object')
+      throw new TagError(203, 'Value is not an object')
     }
 
     if (typeof elem.currency !== 'object' || typeof elem.date !== 'string' ||
       typeof elem.seller !== 'string') {
-      throw new TagError(203, 'OWNE value is not valid')
+      throw new TagError(203, 'Value is not valid')
     }
 
     if (typeof elem.currency.code !== 'string' ||
       typeof elem.currency.price !== 'string') {
-      throw new TagError(203, 'OWNE currency values are not valid')
+      throw new TagError(203, 'Currency values are not valid')
     }
 
     if (!elem.currency.code.match(/^([A-Z]{3})$/)) {
-      throw new TagError(203, 'OWNE currency code is not valid')
+      throw new TagError(203, 'Currency code is not valid')
     }
 
     if (!elem.currency.price.match(/^(\d*)\.(\d+)$/)) {
-      throw new TagError(203, 'OWNE currency price is not valid')
+      throw new TagError(203, 'Currency price is not valid')
     }
 
     if (!elem.date.match(`${year}${month}${day}`)) {
-      throw new TagError(203, 'OWNE date must follow this format: YYYYMMDD')
+      throw new TagError(203, 'Date must follow this format: YYYYMMDD')
     }
   })
 }
 
-export function privFrame (frame, version) {
-  validateID(frame.id)
-
-  const array = mergeAsArray(frame.value)
+export function privFrame (value, version) {
+  const array = mergeAsArray(value)
   const contents = []
 
   array.forEach(function (elem) {
     if (typeof elem.ownerId !== 'string') {
-      throw new TagError(203, 'PRIV ownerId is not a string')
+      throw new TagError(203, 'ownerId is not a string')
     }
 
     if (!elem.ownerId.match(urlRegex)) {
-      throw new TagError(203, 'PRIV ownerId is an invalid URL')
+      throw new TagError(203, 'ownerId is an invalid URL')
     }
 
     if (!(elem.data instanceof ArrayBuffer) && !Array.isArray(elem.data) &&
       !ArrayBuffer.isView(elem.data)) {
-      throw new TagError(203, 'PRIV data should be an ArrayBuffer or array')
+      throw new TagError(203, 'Data should be an ArrayBuffer or array')
     }
 
     if (includesArray(contents, elem.data)) {
-      throw new TagError(203, 'PRIV data should not duplicate')
+      throw new TagError(203, 'Data should not duplicate')
     } else {
       contents.push(elem.data)
     }

@@ -3,6 +3,10 @@ import * as parsers from './parse'
 import * as validators from './validate'
 import * as writers from './write'
 
+export function validateID (id) {
+  return validators.validateID(id)
+}
+
 export const APIC = {
   parse: parsers.apicFrame,
   validate: validators.apicFrame,
