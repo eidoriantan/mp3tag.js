@@ -174,6 +174,809 @@
     };
   }
 
+  function isBitSet(_byte, bit) {
+    return (_byte & 1 << bit) > 0;
+  }
+  function decodeSynch(synch) {
+    var out = 0;
+    var mask = 0x7F000000;
+
+    while (mask) {
+      out >>= 1;
+      out |= synch & mask;
+      mask >>= 8;
+    }
+
+    return out;
+  }
+  function encodeSynch(size) {
+    var out = 0;
+    var mask = 0x7F;
+
+    while (mask ^ 0x7FFFFFFF) {
+      out = size & ~mask;
+      out <<= 1;
+      out |= size & mask;
+      mask = (mask + 1 << 8) - 1;
+      size = out;
+    }
+
+    return out;
+  }
+  function mergeBytes() {
+    var merged = [];
+
+    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+      params[_key] = arguments[_key];
+    }
+
+    params.forEach(function (param) {
+      if (param.forEach) param.forEach(function (_byte2) {
+        return merged.push(_byte2);
+      });else merged.push(param);
+    });
+    return new Uint8Array(merged);
+  }
+  function unsynch(array) {
+    var bytes = [];
+    var i = 0;
+
+    while (i < array.length) {
+      bytes.push(array[i]);
+      if (array[i] === 0xff && array[i + 1] === 0x00) i++;
+      i++;
+    }
+
+    return bytes;
+  }
+
+  var E_CODES = {
+    0: 'Unknown error',
+    1: 'This format is not yet supported',
+    // 100 - Reserved for ID3v1
+    200: 'This file is not an ID3v2',
+    201: 'Unsupported ID3v2 major version',
+    202: 'Unsupported frame',
+    203: 'Frame validation failed',
+    204: 'Frame is not supported in this version of ID3v2'
+  };
+
+  var TagError = /*#__PURE__*/function (_Error) {
+    _inherits(TagError, _Error);
+
+    var _super = _createSuper(TagError);
+
+    function TagError(code) {
+      var _this;
+
+      _classCallCheck(this, TagError);
+
+      _this = _super.call(this, E_CODES[code]);
+      _this.name = 'TagError';
+      _this.code = code;
+      _this.errorId = arguments.length <= 1 ? undefined : arguments[1];
+      _this.message = _this.parseMessage();
+      return _this;
+    }
+
+    _createClass(TagError, [{
+      key: "parseMessage",
+      value: function parseMessage() {
+        var string = '';
+
+        switch (this.code) {
+          case 200:
+            string = "ID3v2 Error: ".concat(E_CODES[this.code]);
+            break;
+
+          case 201:
+          case 202:
+          case 203:
+          case 204:
+            string = "ID3v2 Error: ".concat(E_CODES[this.code], " \"").concat(this.errorId, "\"");
+            break;
+
+          default:
+            string = "".concat(E_CODES[this.code]);
+        }
+
+        return string;
+      }
+    }]);
+
+    return TagError;
+  }( /*#__PURE__*/_wrapNativeSuper(Error));
+
+  function getHeaderFlags(_byte, version) {
+    var flags = {};
+
+    switch (version) {
+      case 3:
+        flags.unsynchronisation = isBitSet(_byte, 7);
+        flags.extendedHeader = isBitSet(_byte, 6);
+        flags.experimentalIndicator = isBitSet(_byte, 5);
+        break;
+
+      case 4:
+        flags.unsynchronisation = isBitSet(_byte, 7);
+        flags.extendedHeader = isBitSet(_byte, 6);
+        flags.experimentalIndicator = isBitSet(_byte, 5);
+        flags.footerPresent = isBitSet(_byte, 4);
+        break;
+
+      default:
+        throw new TagError(201, version);
+    }
+
+    return flags;
+  }
+  function getFrameFlags(bytes, version) {
+    var flags = {};
+
+    switch (version) {
+      case 3:
+        flags.tagAlterPreservation = isBitSet(bytes[0], 7);
+        flags.fileAlterPreservation = isBitSet(bytes[0], 6);
+        flags.readOnly = isBitSet(bytes[0], 5);
+        flags.compression = isBitSet(bytes[1], 7);
+        flags.encryption = isBitSet(bytes[1], 6);
+        flags.groupingIdentity = isBitSet(bytes[1], 5);
+        break;
+
+      case 4:
+        flags.tagAlterPreservation = isBitSet(bytes[0], 6);
+        flags.fileAlterPreservation = isBitSet(bytes[0], 5);
+        flags.readOnly = isBitSet(bytes[0], 4);
+        flags.groupingIdentity = isBitSet(bytes[1], 6);
+        flags.compression = isBitSet(bytes[1], 3);
+        flags.encryption = isBitSet(bytes[1], 2);
+        flags.unsynchronisation = isBitSet(bytes[1], 1);
+        flags.dataLengthIndicator = isBitSet(bytes[1], 0);
+        break;
+
+      default:
+        throw new TagError(201, version);
+    }
+
+    return flags;
+  }
+
+  function includes(array, object) {
+    var included = false;
+    var i = 0;
+
+    while (i < array.length && !included) {
+      if (objectEqual(array[i], object)) {
+        included = true;
+        break;
+      }
+
+      i++;
+    }
+
+    return included;
+  }
+  function objectEqual(obj1, obj2) {
+    for (var prop in obj1) {
+      if (_typeof(obj1[prop]) !== _typeof(obj2[prop])) return false;
+
+      switch (_typeof(obj1[prop])) {
+        case 'object':
+          if (!objectEqual(obj1[prop], obj2[prop])) return false;
+          break;
+
+        case 'function':
+          if (typeof obj2[prop] === 'undefined' || obj1[prop].toString() !== obj2[prop].toString()) return false;
+          break;
+
+        default:
+          if (obj1[prop] !== obj2[prop]) return false;
+      }
+    }
+
+    for (var _prop in obj2) {
+      if (typeof obj1[_prop] === 'undefined') return false;
+    }
+
+    return true;
+  }
+  function toArray() {
+    var array = [];
+
+    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+      params[_key] = arguments[_key];
+    }
+
+    params.forEach(function (param) {
+      if (Array.isArray(param)) param.forEach(function (elem) {
+        return array.push(elem);
+      });else array.push(param);
+    });
+    return array;
+  }
+
+  var ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8'];
+  /**
+   *  Frame Parsers
+   *  @param {BufferView} view - View of the frame excluding the header
+   *  @param {number} version - Frame will be parsed with this version
+   */
+
+  function textFrame(view, version) {
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var value;
+
+    switch (version) {
+      case 3:
+        value = view.getCString(1, encoding).string;
+        break;
+
+      case 4:
+        value = view.getString(1, view.byteLength - 1, encoding).string.split('\0');
+        if (value.length === 1) value = value[0];
+        break;
+
+      default:
+        throw new TagError(201, version);
+    }
+
+    return value;
+  }
+  function arrayFrame(view, version) {
+    var value = textFrame(view, version);
+    var array = [];
+
+    switch (version) {
+      case 3:
+        array = value.split('/');
+        break;
+
+      case 4:
+        array = Array.isArray(value) ? value : [value];
+        break;
+
+      default:
+        throw new TagError(201, version);
+    }
+
+    return array;
+  }
+  function numberFrame(view, version) {
+    var value = textFrame(view, version);
+    return value.match && value.match(/^(\d+)$/) ? parseInt(value) : value;
+  }
+  function setFrame(view, version) {
+    var value = textFrame(view, version);
+    var arrayValue = toArray(value);
+    var array = [];
+    arrayValue.forEach(function (elem) {
+      var splitted = elem.split('/');
+      array.push(elem.match(/^(\d+)\/(\d+)/) ? {
+        position: parseInt(splitted[0]),
+        total: parseInt(splitted[1])
+      } : elem);
+    });
+    return array.length === 1 ? array[0] : array;
+  }
+  function urlFrame(view, version) {
+    return view.getCString(0, 'ascii').string;
+  }
+  function txxxFrame(view, version) {
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var description = view.getCString(1, encoding);
+    var valueOffset = description.length + 1;
+    var valueLength = view.byteLength - valueOffset;
+    var value = view.getString(valueOffset, valueLength, encoding);
+    return {
+      description: description.string,
+      text: value.string
+    };
+  }
+  function wxxxFrame(view, version) {
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var description = view.getCString(1, encoding);
+    var urlOffset = description.length + 1;
+    var urlLength = view.byteLength - urlOffset;
+    var url = view.getString(urlOffset, urlLength, 'ascii');
+    return {
+      description: description.string,
+      url: url.string
+    };
+  }
+  function iplsFrame(view, version) {
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var people = [];
+    var length = 1;
+
+    while (length < view.byteLength) {
+      var person = view.getCString(length, encoding);
+      people.push(person.string);
+      length += person.length;
+    }
+
+    return people;
+  }
+  function langDescFrame(view, version) {
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var descriptor = view.getCString(4, encoding);
+    var textOffset = descriptor.length + 4;
+    var textLength = view.byteLength - textOffset;
+    var text = view.getString(textOffset, textLength, encoding);
+    return {
+      language: view.getString(1, 3, 'ascii').string,
+      descriptor: descriptor.string,
+      text: text.string
+    };
+  }
+  function apicFrame(view, version) {
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var mime = view.getCString(1, 'ascii');
+    var type = view.getUint8(mime.length + 1);
+    var desc = view.getCString(mime.length + 2, encoding);
+    var imgOffset = mime.length + desc.length + 2;
+    var imgLength = view.byteLength - imgOffset;
+    var img = view.getUint8(imgOffset, imgLength);
+    return {
+      format: mime.string,
+      type: type,
+      description: desc.string,
+      data: img
+    };
+  }
+  function geobFrame(view, version) {
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var mime = view.getCString(1, 'ascii');
+    var fname = view.getCString(mime.length + 1, encoding);
+    var desc = view.getCString(fname.length + mime.length + 1, encoding);
+    var binOffset = mime.length + fname.length + desc.length + 1;
+    var binLength = view.byteLength - binOffset;
+    var binObject = view.getUint8(binOffset, binLength);
+    return {
+      format: mime.string,
+      filename: fname.string,
+      description: desc.string,
+      object: binObject
+    };
+  }
+  function ufidFrame(view, version) {
+    var ownerId = view.getCString(0, 'ascii');
+    var id = view.getUint8(ownerId.length, view.byteLength - ownerId.length);
+    return {
+      ownerId: ownerId.string,
+      id: id
+    };
+  }
+  function userFrame(view, version) {
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var text = view.getString(4, view.byteLength - 4, encoding);
+    return {
+      language: view.getString(1, 3, 'ascii').string,
+      text: text.string
+    };
+  }
+  function owneFrame(view, version) {
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var currencyCode = view.getString(1, 3, 'ascii');
+    var currency = view.getCString(4, 'ascii');
+    var date = view.getString(currency.length + 4, 8, 'ascii');
+    var sellerOffset = currency.length + date.length + 4;
+    var sellerLength = view.byteLength - sellerOffset;
+    var seller = view.getString(sellerOffset, sellerLength, encoding);
+    return {
+      currency: {
+        code: currencyCode.string,
+        price: currency.string
+      },
+      date: date.string,
+      seller: seller.string
+    };
+  }
+  function privFrame(view, version) {
+    var ownerId = view.getCString(0, 'ascii');
+    var data = view.getUint8(ownerId.length, view.byteLength - ownerId.length);
+    return {
+      ownerId: ownerId.string,
+      data: data
+    };
+  }
+  function signFrame(view, version) {
+    var groupId = view.getUint8(0);
+    var sign = view.getUint8(1, view.byteLength - 1);
+    return {
+      group: groupId,
+      signature: sign
+    };
+  }
+
+  var urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/;
+  var langRegex = /^([a-z]{3}|XXX)$/;
+  var stringRegex = /^(.+)$/;
+  var year = '(\\d{4})';
+  var month = '(0[1-9]|1[0-2])';
+  var day = '(0[1-9]|1\\d|2\\d|3[0-1])';
+  var hour = '(0\\d|1\\d|2[0-3])';
+  var minute = '(0\\d|1\\d|2\\d|3\\d|4\\d|5\\d)';
+  var second = minute;
+  var timeRegex = new RegExp("^(".concat(year, "(-").concat(month, "(-").concat(day, "(T").concat(hour, "(:").concat(minute, "(:").concat(second, ")?)?)?)?)?)$"));
+  function validateID(id) {
+    if (!id.match(/^([a-zA-Z0-9]{4})$/)) {
+      throw new TagError(203, 'ID is invalid');
+    }
+
+    return true;
+  }
+  /**
+   *  Validators
+   *  @param {*} frameValue - Value of a frame
+   *  @param {number} version - Frame will be validated with this version
+   */
+
+  function textFrame$1(value, version) {
+    var array = toArray(value);
+    array.forEach(function (string) {
+      if (typeof string !== 'string') {
+        throw new TagError(203, 'Value is not a string');
+      }
+
+      if (!string.match(stringRegex)) {
+        throw new TagError(203, 'Newlines are not allowed');
+      }
+    });
+    return true;
+  }
+  function arrayFrame$1(value, version) {
+    if (!Array.isArray(value)) {
+      throw new TagError(203, 'Value is not an array');
+    }
+
+    value.forEach(function (string) {
+      if (typeof string !== 'string') {
+        throw new TagError(203, 'Value is not a string');
+      }
+
+      if (!string.match(stringRegex)) {
+        throw new TagError(203, 'Newlines are not allowed');
+      }
+    });
+    return true;
+  }
+  function numberFrame$1(value, version) {
+    var array = toArray(value);
+    array.forEach(function (number) {
+      if (typeof number !== 'number') {
+        throw new TagError(203, 'Value is not a number');
+      }
+    });
+    return true;
+  }
+  function setFrame$1(value, version) {
+    var array = toArray(value);
+    array.forEach(function (elem) {
+      if (typeof elem.position !== 'number' || typeof elem.total !== 'number') {
+        throw new TagError(203, 'Value position/total is not a number');
+      }
+
+      if (elem.position > elem.total) {
+        throw new TagError(203, 'Position is greater than total');
+      }
+    });
+    return true;
+  }
+  function timeFrame(value, version) {
+    var array = toArray(value);
+    array.forEach(function (elem) {
+      switch (version) {
+        case 3:
+          if (!elem.toString().match(/^(\d{4})$/)) {
+            throw new TagError(203, 'Value is not 4 numeric characters');
+          }
+
+          break;
+
+        case 4:
+          if (typeof elem !== 'string') {
+            throw new TagError(203, 'Value is not a string');
+          }
+
+          if (!elem.match(timeRegex)) {
+            throw new TagError(203, 'Time frames should follow ISO 8601');
+          }
+
+          break;
+      }
+    });
+    return true;
+  }
+  function urlFrame$1(value, version) {
+    if (typeof value !== 'string') {
+      throw new TagError(203, 'Value is not a string');
+    }
+
+    if (!value.match(urlRegex)) {
+      throw new TagError(203, 'Value is not a valid URL');
+    }
+
+    return true;
+  }
+  function txxxFrame$1(value, verion) {
+    var array = toArray(value);
+    var descriptions = [];
+    array.forEach(function (elem) {
+      if (typeof elem.description !== 'string' || typeof elem.text !== 'string') {
+        throw new TagError(203, 'Text/description is not a string');
+      }
+
+      if (descriptions.includes(elem.description)) {
+        throw new TagError(203, 'Description should not duplicate');
+      } else {
+        descriptions.push(elem.description);
+      }
+    });
+    return true;
+  }
+  function wxxxFrame$1(value, version) {
+    var array = toArray(value);
+    var descriptions = [];
+    array.forEach(function (elem) {
+      if (typeof elem.description !== 'string' || typeof elem.url !== 'string') {
+        throw new TagError(203, 'Text/description is not a string');
+      }
+
+      if (!elem.url.match(urlRegex)) {
+        throw new TagError(203, 'URL is an invalid URL');
+      }
+
+      if (descriptions.includes(elem.description)) {
+        throw new TagError(203, 'Description should not duplicate');
+      } else {
+        descriptions.push(elem.description);
+      }
+    });
+    return true;
+  }
+  function tkeyFrame(value, version) {
+    var array = toArray(value);
+    array.forEach(function (string) {
+      if (typeof string !== 'string') {
+        throw new TagError(203, 'Value is not a string');
+      }
+
+      if (!string.match(/^([A-Gb#mo]{3})$/)) {
+        throw new TagError(203, 'Invalid TKEY Format (e.g. Cbm)');
+      }
+    });
+    return true;
+  }
+  function tlanFrame(value, version) {
+    var array = toArray(value);
+    array.forEach(function (string) {
+      if (typeof string !== 'string') {
+        throw new TagError(203, 'Value is not a string');
+      }
+
+      if (!string.match(langRegex)) {
+        throw new TagError(203, 'Language does not follow ISO 639-2');
+      }
+    });
+    return true;
+  }
+  function tsrcFrame(value, version) {
+    var array = toArray(value);
+    array.forEach(function (string) {
+      if (typeof string !== 'string') {
+        throw new TagError(203, 'Value is not a string');
+      }
+
+      if (!string.match(/^([a-zA-Z0-9]{12})$/)) {
+        throw new TagError(203, 'Invalid ISRC format');
+      }
+    });
+    return true;
+  }
+  function langDescFrame$1(value, version) {
+    var array = toArray(value);
+    var descriptors = [];
+    array.forEach(function (elem) {
+      if (_typeof(elem) !== 'object') {
+        throw new TagError(203, 'Value is not an object');
+      }
+
+      elem.language = elem.language || 'eng';
+      elem.descriptor = elem.descriptor || '';
+
+      if (typeof elem.language !== 'string' || typeof elem.descriptor !== 'string' || typeof elem.text !== 'string') {
+        throw new TagError(203, 'Language/descriptor/text is not a string');
+      }
+
+      if (!elem.language.match(langRegex)) {
+        throw new TagError(203, 'Language does not follow ISO 639-2');
+      }
+
+      if (descriptors.includes(elem.descriptor)) {
+        throw new TagError(203, 'Language/descriptor/text should not duplicate');
+      } else {
+        descriptors.push(elem.descriptor);
+      }
+    });
+    return true;
+  }
+  function apicFrame$1(value, version) {
+    var array = toArray(value);
+    var descriptions = [];
+    array.forEach(function (elem) {
+      if (typeof elem.format !== 'string' || typeof elem.description !== 'string' || typeof elem.type !== 'number') {
+        throw new TagError(203, 'MIME, type, or description is invalid');
+      }
+
+      if (!(elem.data instanceof ArrayBuffer) && !Array.isArray(elem.data) && !ArrayBuffer.isView(elem.data)) {
+        throw new TagError(203, 'Image data should be ArrayBuffer or an array');
+      }
+
+      if (elem.description.length > 64) {
+        throw new TagError(203, 'Description should not exceed 64');
+      }
+
+      if (descriptions.includes(elem.description)) {
+        throw new TagError(203, 'Cover description should not duplicate');
+      } else {
+        descriptions.push(elem.description);
+      }
+
+      if (!elem.format.match(/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/)) {
+        throw new TagError(203, 'MIME type should be an image');
+      }
+    });
+    return true;
+  }
+  function geobFrame$1(value, version) {
+    var array = toArray(value);
+    var descriptions = [];
+    var objects = [];
+    array.forEach(function (elem) {
+      if (typeof elem.format !== 'string' || typeof elem.filename !== 'string' || typeof elem.description !== 'string') {
+        throw new TagError(203, 'GEOB MIME/Filename/description is not a string');
+      }
+
+      if (!(elem.object instanceof ArrayBuffer) && !Array.isArray(elem.object) && !ArrayBuffer.isView(elem.object)) {
+        throw new TagError(203, 'Object data should be ArrayBuffer or an array');
+      }
+
+      if (descriptions.includes(elem.description)) {
+        throw new TagError(203, 'GEOB description should not duplicate');
+      } else {
+        descriptions.push(elem.description);
+      }
+
+      if (includes(objects, elem.object)) {
+        throw new TagError(203, 'GEOB object should not duplicate');
+      } else {
+        objects.push(elem.object);
+      }
+    });
+    return true;
+  }
+  function ufidFrame$1(value, version) {
+    var array = toArray(value);
+    var ownerIds = [];
+    array.forEach(function (elem) {
+      if (typeof elem.ownerId !== 'string') {
+        throw new TagError(203, 'ownerId is not a string');
+      }
+
+      if (!(elem.id instanceof ArrayBuffer) && !Array.isArray(elem.id) && !ArrayBuffer.isView(elem.id)) {
+        throw new TagError(203, 'id should be ArrayBuffer or an array');
+      }
+
+      var idLength = elem.id.byteLength || elem.id.length || 0;
+
+      if (idLength > 64) {
+        throw new TagError(203, 'id should not exceed 64 bytes');
+      }
+
+      if (ownerIds.includes(elem.ownerId)) {
+        throw new TagError(203, 'ownerId should not duplicate');
+      } else {
+        ownerIds.push(elem.ownerId);
+      }
+    });
+    return true;
+  }
+  function userFrame$1(value, version) {
+    var array = toArray(value);
+    array.forEach(function (elem) {
+      if (_typeof(elem) !== 'object') {
+        throw new TagError(203, 'Value is not an object');
+      }
+
+      elem.language = elem.language || 'eng';
+
+      if (typeof elem.language !== 'string' || typeof elem.text !== 'string') {
+        throw new TagError(203, 'Language/text is not a string');
+      }
+
+      if (!elem.language.match(langRegex)) {
+        throw new TagError(203, 'Language does not follow ISO 639-2');
+      }
+    });
+    return true;
+  }
+  function owneFrame$1(value, version) {
+    var array = toArray(value);
+    array.forEach(function (elem) {
+      if (_typeof(elem) !== 'object') {
+        throw new TagError(203, 'Value is not an object');
+      }
+
+      if (_typeof(elem.currency) !== 'object' || typeof elem.date !== 'string' || typeof elem.seller !== 'string') {
+        throw new TagError(203, 'Value is not valid');
+      }
+
+      if (typeof elem.currency.code !== 'string' || typeof elem.currency.price !== 'string') {
+        throw new TagError(203, 'Currency values are not valid');
+      }
+
+      if (!elem.currency.code.match(/^([A-Z]{3})$/)) {
+        throw new TagError(203, 'Currency code is not valid');
+      }
+
+      if (!elem.currency.price.match(/^(\d*)\.(\d+)$/)) {
+        throw new TagError(203, 'Currency price is not valid');
+      }
+
+      if (!elem.date.match("".concat(year).concat(month).concat(day))) {
+        throw new TagError(203, 'Date must follow this format: YYYYMMDD');
+      }
+    });
+  }
+  function privFrame$1(value, version) {
+    var array = toArray(value);
+    var contents = [];
+    array.forEach(function (elem) {
+      if (typeof elem.ownerId !== 'string') {
+        throw new TagError(203, 'ownerId is not a string');
+      }
+
+      if (!elem.ownerId.match(urlRegex)) {
+        throw new TagError(203, 'ownerId is an invalid URL');
+      }
+
+      if (!(elem.data instanceof ArrayBuffer) && !Array.isArray(elem.data) && !ArrayBuffer.isView(elem.data)) {
+        throw new TagError(203, 'Data should be an ArrayBuffer or array');
+      }
+
+      if (includes(contents, elem.data)) {
+        throw new TagError(203, 'Data should not duplicate');
+      } else {
+        contents.push(elem.data);
+      }
+    });
+    return true;
+  }
+  function signFrame$1(value, version) {
+    var array = toArray(value);
+    var signs = [];
+    array.forEach(function (elem) {
+      if (typeof elem.group !== 'number') {
+        throw new TagError(203, 'Group ID is not a number');
+      }
+
+      if (elem.group < 0 || elem.group > 255) {
+        throw new TagError(203, 'Group ID should be in the range of 0 - 255');
+      }
+
+      if (!(elem.signature instanceof ArrayBuffer) && !Array.isArray(elem.signature) && !ArrayBuffer.isView(elem.signature)) {
+        throw new TagError(203, 'Signature should be an ArrayBuffer or array');
+      }
+
+      if (includes(signs, elem)) {
+        throw new TagError(203, 'SIGN contents should be identical to others');
+      } else {
+        signs.push(elem);
+      }
+    });
+    return true;
+  }
+
   function decodeUTF8(bytes) {
     var string = '';
     var i = 0;
@@ -429,745 +1232,6 @@
     return BufferView;
   }( /*#__PURE__*/_wrapNativeSuper(DataView));
 
-  function isBitSet(_byte, bit) {
-    return (_byte & 1 << bit) > 0;
-  }
-  function decodeSynch(synch) {
-    var out = 0;
-    var mask = 0x7F000000;
-
-    while (mask) {
-      out >>= 1;
-      out |= synch & mask;
-      mask >>= 8;
-    }
-
-    return out;
-  }
-  function encodeSynch(size) {
-    var out = 0;
-    var mask = 0x7F;
-
-    while (mask ^ 0x7FFFFFFF) {
-      out = size & ~mask;
-      out <<= 1;
-      out |= size & mask;
-      mask = (mask + 1 << 8) - 1;
-      size = out;
-    }
-
-    return out;
-  }
-  function mergeBytes() {
-    var merged = [];
-
-    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
-      params[_key] = arguments[_key];
-    }
-
-    params.forEach(function (param) {
-      if (param.forEach) param.forEach(function (_byte2) {
-        return merged.push(_byte2);
-      });else merged.push(param);
-    });
-    return new Uint8Array(merged);
-  }
-  function unsynch(array) {
-    var bytes = [];
-    var i = 0;
-
-    while (i < array.length) {
-      bytes.push(array[i]);
-      if (array[i] === 0xff && array[i + 1] === 0x00) i++;
-      i++;
-    }
-
-    return bytes;
-  }
-
-  var E_CODES = {
-    0: 'Unknown error',
-    1: 'This format is not yet supported',
-    // 100 - Reserved for ID3v1
-    200: 'This file is not an ID3v2',
-    201: 'Unsupported ID3v2 major version',
-    202: 'Unsupported frame',
-    203: 'Frame validation failed',
-    204: 'Frame is not supported in this version of ID3v2'
-  };
-
-  var TagError = /*#__PURE__*/function (_Error) {
-    _inherits(TagError, _Error);
-
-    var _super = _createSuper(TagError);
-
-    function TagError(code) {
-      var _this;
-
-      _classCallCheck(this, TagError);
-
-      _this = _super.call(this, E_CODES[code]);
-      _this.name = 'TagError';
-      _this.code = code;
-      _this.errorId = arguments.length <= 1 ? undefined : arguments[1];
-      _this.message = _this.parseMessage();
-      return _this;
-    }
-
-    _createClass(TagError, [{
-      key: "parseMessage",
-      value: function parseMessage() {
-        var string = '';
-
-        switch (this.code) {
-          case 200:
-            string = "ID3v2 Error: ".concat(E_CODES[this.code]);
-            break;
-
-          case 201:
-          case 202:
-          case 203:
-          case 204:
-            string = "ID3v2 Error: ".concat(E_CODES[this.code], " \"").concat(this.errorId, "\"");
-            break;
-
-          default:
-            string = "".concat(E_CODES[this.code]);
-        }
-
-        return string;
-      }
-    }]);
-
-    return TagError;
-  }( /*#__PURE__*/_wrapNativeSuper(Error));
-
-  function getHeaderFlags(_byte, version) {
-    var flags = {};
-
-    switch (version) {
-      case 3:
-        flags.unsynchronisation = isBitSet(_byte, 7);
-        flags.extendedHeader = isBitSet(_byte, 6);
-        flags.experimentalIndicator = isBitSet(_byte, 5);
-        break;
-
-      case 4:
-        flags.unsynchronisation = isBitSet(_byte, 7);
-        flags.extendedHeader = isBitSet(_byte, 6);
-        flags.experimentalIndicator = isBitSet(_byte, 5);
-        flags.footerPresent = isBitSet(_byte, 4);
-        break;
-
-      default:
-        throw new TagError(201, version);
-    }
-
-    return flags;
-  }
-  function getFrameFlags(bytes, version) {
-    var flags = {};
-
-    switch (version) {
-      case 3:
-        flags.tagAlterPreservation = isBitSet(bytes[0], 7);
-        flags.fileAlterPreservation = isBitSet(bytes[0], 6);
-        flags.readOnly = isBitSet(bytes[0], 5);
-        flags.compression = isBitSet(bytes[1], 7);
-        flags.encryption = isBitSet(bytes[1], 6);
-        flags.groupingIdentity = isBitSet(bytes[1], 5);
-        break;
-
-      case 4:
-        flags.tagAlterPreservation = isBitSet(bytes[0], 6);
-        flags.fileAlterPreservation = isBitSet(bytes[0], 5);
-        flags.readOnly = isBitSet(bytes[0], 4);
-        flags.groupingIdentity = isBitSet(bytes[1], 6);
-        flags.compression = isBitSet(bytes[1], 3);
-        flags.encryption = isBitSet(bytes[1], 2);
-        flags.unsynchronisation = isBitSet(bytes[1], 1);
-        flags.dataLengthIndicator = isBitSet(bytes[1], 0);
-        break;
-
-      default:
-        throw new TagError(201, version);
-    }
-
-    return flags;
-  }
-
-  function includesArray(array, element) {
-    var included = false;
-    var i = 0;
-
-    while (i < array.length && !included) {
-      if (array[i].length === element.length) {
-        var same = true;
-
-        for (var index = 0; index < element.length; index++) {
-          if (element[index] !== array[i][index]) {
-            same = false;
-            break;
-          }
-        }
-
-        if (same) included = true;
-      }
-
-      i++;
-    }
-
-    return included;
-  }
-  function mergeAsArray() {
-    var array = [];
-
-    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
-      params[_key] = arguments[_key];
-    }
-
-    params.forEach(function (param) {
-      if (Array.isArray(param)) param.forEach(function (elem) {
-        return array.push(elem);
-      });else array.push(param);
-    });
-    return array;
-  }
-
-  var ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8'];
-  /**
-   *  Frame Parsers
-   *  @param {BufferView} view - View of the entire frame excluding the header
-   *  @param {number} version - Frame will be parsed with this version
-   */
-
-  function textFrame(view, version) {
-    var encoding = ENCODINGS[view.getUint8(0)];
-    var value;
-
-    switch (version) {
-      case 3:
-        value = view.getCString(1, encoding).string;
-        break;
-
-      case 4:
-        value = view.getString(1, view.byteLength - 1, encoding).string.split('\0');
-        if (value.length === 1) value = value[0];
-        break;
-
-      default:
-        throw new TagError(201, version);
-    }
-
-    return value;
-  }
-  function arrayFrame(view, version) {
-    var text = textFrame(view, version);
-    var value = [];
-
-    switch (version) {
-      case 3:
-        value = text.split('/');
-        break;
-
-      case 4:
-        if (!Array.isArray(text)) value = [text];else value = text;
-        break;
-
-      default:
-        throw new TagError(201, version);
-    }
-
-    return value;
-  }
-  function numberFrame(view, version) {
-    var text = textFrame(view, version);
-    return text.match(/^(\d+)$/) ? parseInt(text) : text;
-  }
-  function setFrame(view, version) {
-    var text = textFrame(view, version);
-    var array = mergeAsArray(text);
-    var value = [];
-    array.forEach(function (elem) {
-      var splitted = elem.split('/');
-      value.push(elem.match(/^(\d+)\/(\d+)/) ? {
-        position: parseInt(splitted[0]),
-        total: parseInt(splitted[1])
-      } : elem);
-    });
-    return value.length === 1 ? value[0] : value;
-  }
-  function urlFrame(view, version) {
-    return view.getCString(0, 'ascii').string;
-  }
-  function txxxFrame(view, version) {
-    var encoding = ENCODINGS[view.getUint8(0)];
-    var description = view.getCString(1, encoding);
-    var valueOffset = description.length + 1;
-    var valueLength = view.byteLength - valueOffset;
-    var value = view.getString(valueOffset, valueLength, encoding);
-    return {
-      description: description.string,
-      text: value.string
-    };
-  }
-  function wxxxFrame(view, version) {
-    var encoding = ENCODINGS[view.getUint8(0)];
-    var description = view.getCString(1, encoding);
-    var urlOffset = description.length + 1;
-    var urlLength = view.byteLength - urlOffset;
-    var url = view.getString(urlOffset, urlLength, 'ascii');
-    return {
-      description: description.string,
-      url: url.string
-    };
-  }
-  function iplsFrame(view, version) {
-    var encoding = ENCODINGS[view.getUint8(0)];
-    var people = [];
-    var length = 1;
-
-    while (length < view.byteLength) {
-      var person = view.getCString(length, encoding);
-      people.push(person.string);
-      length += person.length;
-    }
-
-    return people;
-  }
-  function langDescFrame(view, version) {
-    var encoding = ENCODINGS[view.getUint8(0)];
-    var descriptor = view.getCString(4, encoding);
-    var textOffset = descriptor.length + 4;
-    var textLength = view.byteLength - textOffset;
-    var text = view.getString(textOffset, textLength, encoding);
-    return {
-      language: view.getString(1, 3, 'ascii').string,
-      descriptor: descriptor.string,
-      text: text.string
-    };
-  }
-  function apicFrame(view, version) {
-    var encoding = ENCODINGS[view.getUint8(0)];
-    var mime = view.getCString(1, 'ascii');
-    var type = view.getUint8(mime.length + 1);
-    var desc = view.getCString(mime.length + 2, encoding);
-    var imgOffset = mime.length + desc.length + 2;
-    var imgLength = view.byteLength - imgOffset;
-    var img = view.getUint8(imgOffset, imgLength);
-    return {
-      format: mime.string,
-      type: type,
-      description: desc.string,
-      data: img
-    };
-  }
-  function geobFrame(view, version) {
-    var encoding = ENCODINGS[view.getUint8(0)];
-    var mime = view.getCString(1, 'ascii');
-    var fname = view.getCString(mime.length + 1, encoding);
-    var desc = view.getCString(fname.length + mime.length + 1, encoding);
-    var binOffset = mime.length + fname.length + desc.length + 1;
-    var binLength = view.byteLength - binOffset;
-    var binObject = view.getUint8(binOffset, binLength);
-    return {
-      format: mime.string,
-      filename: fname.string,
-      description: desc.string,
-      object: binObject
-    };
-  }
-  function ufidFrame(view, version) {
-    var ownerId = view.getCString(0, 'ascii');
-    var id = view.getUint8(ownerId.length, view.byteLength - ownerId.length);
-    return {
-      ownerId: ownerId.string,
-      id: id
-    };
-  }
-  function userFrame(view, version) {
-    var encoding = ENCODINGS[view.getUint8(0)];
-    var text = view.getString(4, view.byteLength - 4, encoding);
-    return {
-      language: view.getString(1, 3, 'ascii').string,
-      text: text.string
-    };
-  }
-  function owneFrame(view, version) {
-    var encoding = ENCODINGS[view.getUint8(0)];
-    var currencyCode = view.getString(1, 3, 'ascii');
-    var currency = view.getCString(4, 'ascii');
-    var date = view.getString(currency.length + 4, 8, 'ascii');
-    var sellerOffset = currency.length + date.length + 4;
-    var sellerLength = view.byteLength - sellerOffset;
-    var seller = view.getString(sellerOffset, sellerLength, encoding);
-    return {
-      currency: {
-        code: currencyCode.string,
-        price: currency.string
-      },
-      date: date.string,
-      seller: seller.string
-    };
-  }
-
-  var urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/;
-  var langRegex = /^([a-z]{3}|XXX)$/;
-  var year = '(\\d{4})';
-  var month = '(0[1-9]|1[0-2])';
-  var day = '(0[1-9]|1\\d|2\\d|3[0-1])';
-  var hour = '(0\\d|1\\d|2[0-3])';
-  var minute = '(0\\d|1\\d|2\\d|3\\d|4\\d|5\\d)';
-  var second = minute;
-  var timeRegex = "^(".concat(year, "(-").concat(month, "(-").concat(day, "(T").concat(hour, "(:").concat(minute, "(:").concat(second, ")?)?)?)?)?)$");
-
-  function validateID(id) {
-    if (!id.match(/^([a-zA-Z0-9]{4})$/)) {
-      throw new TagError(203, 'ID is invalid');
-    }
-
-    return true;
-  }
-  /**
-   *  Validators
-   *  @param {Object} frame - Frame to be validated
-   *  @param {number} version - Frame will be validated with this version
-   */
-
-
-  function textFrame$1(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    array.forEach(function (string) {
-      if (typeof string !== 'string') {
-        throw new TagError(203, "".concat(frame.id, " value is not a string"));
-      }
-
-      if (!string.match('.+')) {
-        throw new TagError(203, "".concat(frame.id, " value, newlines are not allowed"));
-      }
-    });
-    return true;
-  }
-  function arrayFrame$1(frame, version) {
-    validateID(frame.id);
-
-    if (!Array.isArray(frame.value)) {
-      throw new TagError(203, "".concat(frame.id, " value is not an array"));
-    }
-
-    frame.value.forEach(function (string) {
-      if (typeof string !== 'string') {
-        throw new TagError(203, "".concat(frame.id, " value is not a string"));
-      }
-    });
-    return true;
-  }
-  function numberFrame$1(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    array.forEach(function (number) {
-      if (typeof number !== 'number') {
-        throw new TagError(203, "".concat(frame.id, " value is not a number"));
-      }
-    });
-    return true;
-  }
-  function setFrame$1(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    array.forEach(function (elem) {
-      if (typeof elem.position !== 'number' || typeof elem.total !== 'number') {
-        throw new TagError(203, "".concat(frame.id, " position/total is not a number"));
-      }
-
-      if (elem.position > elem.total) {
-        throw new TagError(203, "".concat(frame.id, " position is greater than total"));
-      }
-    });
-    return true;
-  }
-  function timeFrame(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    array.forEach(function (elem) {
-      switch (version) {
-        case 3:
-          if (!elem.toString().match(/^(\d{4})$/)) {
-            throw new TagError(203, "".concat(frame.id, " is not 4 numeric characters"));
-          }
-
-          break;
-
-        case 4:
-          if (typeof elem !== 'string') {
-            throw new TagError(203, "".concat(frame.id, " value is not a string"));
-          }
-
-          if (!elem.match(timeRegex)) {
-            throw new TagError(203, 'Time Frames should follow ISO 8601');
-          }
-
-          break;
-      }
-    });
-    return true;
-  }
-  function urlFrame$1(frame, version) {
-    validateID(frame.id);
-
-    if (typeof frame.value !== 'string') {
-      throw new TagError(203, "".concat(frame.id, " value is not a string"));
-    }
-
-    if (!frame.value.match(urlRegex)) {
-      throw new TagError(203, 'URL is not a valid URL');
-    }
-
-    return true;
-  }
-  function txxxFrame$1(frame) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    var descriptions = [];
-    array.forEach(function (elem) {
-      if (typeof elem.description !== 'string' || typeof elem.text !== 'string') {
-        throw new TagError(203, 'User-defined text/description is not a string');
-      }
-
-      if (descriptions.includes(elem.description)) {
-        throw new TagError(203, 'User-defined description should not duplicate');
-      } else {
-        descriptions.push(elem.description);
-      }
-    });
-    return true;
-  }
-  function wxxxFrame$1(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    var descriptions = [];
-    array.forEach(function (elem) {
-      if (typeof elem.description !== 'string' || typeof elem.url !== 'string') {
-        throw new TagError(203, 'User-defined text/description is not a string');
-      }
-
-      if (!elem.url.match(urlRegex)) {
-        throw new TagError(203, 'User-defined URL is an invalid URL');
-      }
-
-      if (descriptions.includes(elem.description)) {
-        throw new TagError(203, 'User-defined description should not duplicate');
-      } else {
-        descriptions.push(elem.description);
-      }
-    });
-    return true;
-  }
-  function tkeyFrame(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    array.forEach(function (string) {
-      if (typeof string !== 'string') {
-        throw new TagError(203, 'TKEY is not a string');
-      }
-
-      if (!string.match(/^([A-Gb#mo]{3})$/)) {
-        throw new TagError(203, 'Invalid TKEY Format (e.g. Cbm)');
-      }
-    });
-    return true;
-  }
-  function tlanFrame(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    array.forEach(function (string) {
-      if (typeof string !== 'string') {
-        throw new TagError(203, 'TLAN is not a string');
-      }
-
-      if (!string.match(langRegex)) {
-        throw new TagError(203, 'Language does not follow ISO 639-2');
-      }
-    });
-    return true;
-  }
-  function tsrcFrame(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    array.forEach(function (string) {
-      if (typeof string !== 'string') {
-        throw new TagError(203, 'TSRC is not a string');
-      }
-
-      if (!string.match(/^([a-zA-Z0-9]{12})$/)) {
-        throw new TagError(203, 'Invalid ISRC format');
-      }
-    });
-    return true;
-  }
-  function langDescFrame$1(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    var descriptors = [];
-    array.forEach(function (elem) {
-      if (_typeof(elem) !== 'object') {
-        throw new TagError(203, "".concat(frame.id, " is not an object"));
-      }
-
-      elem.language = elem.language || 'eng';
-      elem.descriptor = elem.descriptor || '';
-
-      if (typeof elem.language !== 'string' || typeof elem.descriptor !== 'string' || typeof elem.text !== 'string') {
-        throw new TagError(203, 'Language/descriptor/text is not a string');
-      }
-
-      if (!elem.language.match(langRegex)) {
-        throw new TagError(203, 'Language does not follow ISO 639-2');
-      }
-
-      if (descriptors.includes(elem.descriptor)) {
-        throw new TagError(203, 'Language/descriptor/text should not duplicate');
-      } else {
-        descriptors.push(elem.descriptor);
-      }
-    });
-    return true;
-  }
-  function apicFrame$1(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    var descriptions = [];
-    array.forEach(function (elem) {
-      if (typeof elem.format !== 'string' || typeof elem.description !== 'string' || typeof elem.type !== 'number') {
-        throw new TagError(203, 'MIME, type, or description is invalid');
-      }
-
-      if (!(elem.data instanceof ArrayBuffer) && !Array.isArray(elem.data) && !ArrayBuffer.isView(elem.data)) {
-        throw new TagError(203, 'Image data should be ArrayBuffer or an array');
-      }
-
-      if (elem.description.length > 64) {
-        throw new TagError(203, 'Description should not exceed 64');
-      }
-
-      if (descriptions.includes(elem.description)) {
-        throw new TagError(203, 'Cover description should not duplicate');
-      } else {
-        descriptions.push(elem.description);
-      }
-
-      if (!elem.format.match(/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/)) {
-        throw new TagError(203, 'MIME type should be an image');
-      }
-    });
-    return true;
-  }
-  function geobFrame$1(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    var descriptions = [];
-    var objects = [];
-    array.forEach(function (elem) {
-      if (typeof elem.format !== 'string' || typeof elem.filename !== 'string' || typeof elem.description !== 'string') {
-        throw new TagError(203, 'GEOB MIME/Filename/description is not a string');
-      }
-
-      if (!(elem.object instanceof ArrayBuffer) && !Array.isArray(elem.object) && !ArrayBuffer.isView(elem.object)) {
-        throw new TagError(203, 'Object data should be ArrayBuffer or an array');
-      }
-
-      if (descriptions.includes(elem.description)) {
-        throw new TagError(203, 'GEOB description should not duplicate');
-      } else {
-        descriptions.push(elem.description);
-      }
-
-      if (includesArray(objects, elem.object)) {
-        throw new TagError(203, 'GEOB object should not duplicate');
-      } else {
-        objects.push(elem.object);
-      }
-    });
-    return true;
-  }
-  function ufidFrame$1(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    var ownerIds = [];
-    array.forEach(function (elem) {
-      if (typeof elem.ownerId !== 'string') {
-        throw new TagError(203, 'UFID ownerId is not a string');
-      }
-
-      if (!(elem.id instanceof ArrayBuffer) && !Array.isArray(elem.id) && !ArrayBuffer.isView(elem.id)) {
-        throw new TagError(203, 'UFID id should be ArrayBuffer or an array');
-      }
-
-      var idLength = elem.id.byteLength || elem.id.length || 0;
-
-      if (idLength > 64) {
-        throw new TagError(203, 'UFID id exceeds 64 bytes');
-      }
-
-      if (ownerIds.includes(elem.ownerId)) {
-        throw new TagError(203, 'UFID ownerId should not duplicate');
-      } else {
-        ownerIds.push(elem.ownerId);
-      }
-    });
-    return true;
-  }
-  function userFrame$1(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    array.forEach(function (elem) {
-      if (_typeof(elem) !== 'object') {
-        throw new TagError(203, 'USER value is not an object');
-      }
-
-      elem.language = elem.language || 'eng';
-
-      if (typeof elem.language !== 'string' || typeof elem.text !== 'string') {
-        throw new TagError(203, 'USER language/text is not a string');
-      }
-
-      if (!elem.language.match(langRegex)) {
-        throw new TagError(203, 'Language does not follow ISO 639-2');
-      }
-    });
-    return true;
-  }
-  function owneFrame$1(frame, version) {
-    validateID(frame.id);
-    var array = mergeAsArray(frame.value);
-    array.forEach(function (elem) {
-      if (_typeof(elem) !== 'object') {
-        throw new TagError(203, 'OWNE value is not an object');
-      }
-
-      if (_typeof(elem.currency) !== 'object' || typeof elem.date !== 'string' || typeof elem.seller !== 'string') {
-        throw new TagError(203, 'OWNE value is not valid');
-      }
-
-      if (typeof elem.currency.code !== 'string' || typeof elem.currency.price !== 'string') {
-        throw new TagError(203, 'OWNE currency values are not valid');
-      }
-
-      if (!elem.currency.code.match(/^([A-Z]{3})$/)) {
-        throw new TagError(203, 'OWNE currency code is not valid');
-      }
-
-      if (!elem.currency.price.match(/^(\d*)\.(\d+)$/)) {
-        throw new TagError(203, 'OWNE currency price is not valid');
-      }
-
-      if (!elem.date.match("".concat(year).concat(month).concat(day))) {
-        throw new TagError(203, 'OWNE date must follow this format: YYYYMMDD');
-      }
-    });
-  }
-
   function getHeaderBytes(id, size, version) {
     var idBytes = encodeString(id, 'ascii');
     var sizeView = new BufferView(4);
@@ -1204,7 +1268,7 @@
       case 4:
         {
           encoding = 3;
-          var array = mergeAsArray(frame.value);
+          var array = toArray(frame.value);
           array.forEach(function (elem) {
             var encoded = encodeString(elem + '\0', 'utf-8');
             encoded.forEach(function (_byte) {
@@ -1237,7 +1301,7 @@
 
       case 4:
         {
-          var array = mergeAsArray(frame.value);
+          var array = toArray(frame.value);
           array.forEach(function (elem) {
             var encoded = encodeString(elem.toString() + '\0', 'ascii');
             encoded.forEach(function (_byte2) {
@@ -1259,7 +1323,7 @@
 
       case 4:
         {
-          var array = mergeAsArray(frame.value);
+          var array = toArray(frame.value);
           frame.value = [];
           array.forEach(function (elem) {
             frame.value.push(elem.position + '/' + elem.total);
@@ -1277,7 +1341,7 @@
   }
   function txxxFrame$2(frame, version) {
     var bytes = [];
-    var array = mergeAsArray(frame.value);
+    var array = toArray(frame.value);
     array.forEach(function (elem) {
       var encoding = 0;
       var descBytes, strBytes;
@@ -1307,7 +1371,7 @@
   }
   function wxxxFrame$2(frame, version) {
     var bytes = [];
-    var array = mergeAsArray(frame.value);
+    var array = toArray(frame.value);
     array.forEach(function (elem) {
       var encoding = 0;
       var descBytes, strBytes;
@@ -1356,7 +1420,7 @@
   }
   function langDescFrame$2(frame, version) {
     var bytes = [];
-    var array = mergeAsArray(frame.value);
+    var array = toArray(frame.value);
     array.forEach(function (elem) {
       var encoding = 0;
       var langBytes = encodeString(elem.language, 'ascii');
@@ -1387,7 +1451,7 @@
   }
   function apicFrame$2(frame, version) {
     var bytes = [];
-    var array = mergeAsArray(frame.value);
+    var array = toArray(frame.value);
     array.forEach(function (elem) {
       var encoding = 0;
       var mimeBytes = encodeString(elem.format + '\0', 'ascii');
@@ -1417,7 +1481,7 @@
   }
   function geobFrame$2(frame, version) {
     var bytes = [];
-    var array = mergeAsArray(frame.value);
+    var array = toArray(frame.value);
     array.forEach(function (elem) {
       var mime = encodeString(elem.format + '\0', 'ascii');
       var object = new Uint8Array(elem.object);
@@ -1448,7 +1512,7 @@
   }
   function ufidFrame$2(frame, version) {
     var bytes = [];
-    var array = mergeAsArray(frame.value);
+    var array = toArray(frame.value);
     array.forEach(function (elem) {
       var ownerBytes = encodeString(elem.ownerId + '\0', 'ascii');
       var idBytes = new Uint8Array(elem.id);
@@ -1462,7 +1526,7 @@
   }
   function userFrame$2(frame, version) {
     var bytes = [];
-    var array = mergeAsArray(frame.value);
+    var array = toArray(frame.value);
     array.forEach(function (elem) {
       var encoding = 0;
       var langBytes = encodeString(elem.language, 'ascii');
@@ -1490,7 +1554,7 @@
   }
   function owneFrame$2(frame, version) {
     var bytes = [];
-    var array = mergeAsArray(frame.value);
+    var array = toArray(frame.value);
     array.forEach(function (elem) {
       var encoding = 0;
       var codeBytes = encodeString(elem.currency.code, 'ascii');
@@ -1519,7 +1583,39 @@
     });
     return bytes;
   }
+  function privFrame$2(frame, version) {
+    var bytes = [];
+    var array = toArray(frame.value);
+    array.forEach(function (elem) {
+      var ownerIdBytes = encodeString(elem.ownerId, 'ascii');
+      var data = new Uint8Array(elem.data);
+      var size = ownerIdBytes.length + data.length;
+      var header = getHeaderBytes(frame.id, size, version);
+      var merged = mergeBytes(header, ownerIdBytes, data);
+      merged.forEach(function (_byte12) {
+        return bytes.push(_byte12);
+      });
+    });
+    return bytes;
+  }
+  function signFrame$2(frame, version) {
+    var bytes = [];
+    var array = toArray(frame.value);
+    array.forEach(function (elem) {
+      var signature = new Uint8Array(elem.signature);
+      var size = signature.length + 1;
+      var header = getHeaderBytes(frame.id, size, version);
+      var merged = mergeBytes(header, elem.group, signature);
+      merged.forEach(function (_byte13) {
+        return bytes.push(_byte13);
+      });
+    });
+    return bytes;
+  }
 
+  function validateID$1(id) {
+    return validateID(id);
+  }
   var APIC = {
     parse: apicFrame,
     validate: apicFrame$1,
@@ -1549,6 +1645,18 @@
     validate: owneFrame$1,
     write: owneFrame$2,
     version: [3, 4]
+  };
+  var PRIV = {
+    parse: privFrame,
+    validate: privFrame$1,
+    write: privFrame$2,
+    version: [3, 4]
+  };
+  var SIGN = {
+    parse: signFrame,
+    validate: signFrame$1,
+    write: signFrame$2,
+    version: [4]
   };
   var TALB = {
     parse: textFrame,
@@ -1607,7 +1715,7 @@
   var TDRC = {
     parse: textFrame,
     validate: timeFrame,
-    write: textFrame$2,
+    write: asciiFrame,
     version: [4]
   };
   var TDRL = {
@@ -1619,7 +1727,7 @@
   var TDTG = {
     parse: textFrame,
     validate: timeFrame,
-    write: textFrame$2,
+    write: asciiFrame,
     version: [4]
   };
   var TENC = {
@@ -1649,7 +1757,7 @@
   var TIPL = {
     parse: arrayFrame,
     validate: arrayFrame$1,
-    write: textFrame$2,
+    write: arrayFrame$2,
     version: [4]
   };
   var TIT1 = {
@@ -1691,7 +1799,7 @@
   var TMCL = {
     parse: arrayFrame,
     validate: arrayFrame$1,
-    write: textFrame$2,
+    write: arrayFrame$2,
     version: [4]
   };
   var TMED = {
@@ -1943,11 +2051,14 @@
 
   var frames = /*#__PURE__*/Object.freeze({
     __proto__: null,
+    validateID: validateID$1,
     APIC: APIC,
     COMM: COMM,
     GEOB: GEOB,
     IPLS: IPLS,
     OWNE: OWNE,
+    PRIV: PRIV,
+    SIGN: SIGN,
     TALB: TALB,
     TBPM: TBPM,
     TCOM: TCOM,
@@ -2016,6 +2127,14 @@
   });
 
   var ID3v2 = /*#__PURE__*/function () {
+    _createClass(ID3v2, null, [{
+      key: "isID3v2",
+      value: function isID3v2(buffer) {
+        var view = new BufferView(buffer);
+        return view.getString(0, 3, 'ascii').string === 'ID3';
+      }
+    }]);
+
     function ID3v2(buffer) {
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
@@ -2077,14 +2196,16 @@
 
         for (var id in framesObj) {
           var frameDesc = frames[id];
-          var frame = {
-            id: id,
-            value: framesObj[id]
-          };
 
           if (frameDesc) {
             if (frameDesc.version.includes(this.major)) {
-              frameDesc.validate(frame, this.major);
+              validateID$1(id);
+
+              try {
+                frameDesc.validate(framesObj[id], this.major);
+              } catch (e) {
+                throw new TagError(203, "".concat(id, " validation error: ").concat(e.message));
+              }
             } else {
               throw new TagError(204, id);
             }
@@ -2225,12 +2346,12 @@
     function MP3Tag(buffer, options) {
       _classCallCheck(this, MP3Tag);
 
-      if (buffer instanceof ArrayBuffer === false) {
-        throw new TypeError('buffer is not an instance of ArrayBuffer');
+      if (buffer instanceof ArrayBuffer === false && (typeof Buffer !== 'undefined' ? buffer instanceof Buffer === false : true)) {
+        throw new TypeError('buffer is not an instance of ArrayBuffer or Buffer');
       }
 
       this.name = 'MP3Tag';
-      this.version = '0.5.1';
+      this.version = '0.6.0';
       this.buffer = buffer;
       this.options = options || {};
       this.tagger = {};
@@ -2239,9 +2360,7 @@
     _createClass(MP3Tag, [{
       key: "read",
       value: function read() {
-        var mediaView = new BufferView(this.buffer);
-
-        if (mediaView.getUint8String(0, 3) === 'ID3') {
+        if (ID3v2.isID3v2(this.buffer)) {
           this.tagger = new ID3v2(this.buffer, this.options);
           this.tagger.read();
         } else {
