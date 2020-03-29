@@ -423,7 +423,7 @@ export function privFrame (value, version) {
 
 export function signFrame (value, version) {
   const array = mergeAsArray(value)
-  const signs = []
+  // const signs = []
 
   array.forEach(function (elem) {
     if (typeof elem.group !== 'number') {
@@ -448,7 +448,6 @@ export function signFrame (value, version) {
     // } else {
     //   signs.push(elem)
     // }
-  }
   })
 
   return true
