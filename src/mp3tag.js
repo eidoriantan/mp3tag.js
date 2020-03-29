@@ -8,8 +8,8 @@ export default class MP3Tag {
   set frames (value) { this.tagger.frames = value }
 
   constructor (buffer, options) {
-    if (buffer instanceof ArrayBuffer === false) {
-      throw new TypeError('buffer is not an instance of ArrayBuffer')
+    if (buffer instanceof ArrayBuffer === false || buffer instanceof Buffer) {
+      throw new TypeError('buffer is not an instance of ArrayBuffer or Buffer')
     }
 
     this.name = 'MP3Tag'
