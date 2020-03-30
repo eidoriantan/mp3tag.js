@@ -3,6 +3,7 @@ import * as flags from './id3v2/flags'
 import * as frames from './id3v2/frames'
 
 import { decodeSynch, encodeSynch, mergeBytes, unsynch } from './utils/bytes'
+import { toArray } from './utils/object'
 import TagError from './error'
 import BufferView from './viewer'
 
@@ -117,21 +118,16 @@ export default class ID3v2 {
   }
 
   parse () {
-    const framesObj = {}
-
+    const object = {}
     this.frames.forEach(function (frame) {
-      if (typeof framesObj[frame.id] !== 'undefined') {
-        if (Array.isArray(framesObj[frame.id])) {
-          framesObj[frame.id].push(frame.value)
-        } else {
-          framesObj[frame.id] = [framesObj[frame.id], frame.value]
-        }
+      if (typeof object[frame.id] !== 'undefined') {
+        object[frame.id] = toArray(object[frame.id], frame.value)
       } else {
-        framesObj[frame.id] = frame.value
+        object[frame.id] = frame.value
       }
     })
 
-    return framesObj
+    return object
   }
 
   getAudio () {
