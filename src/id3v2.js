@@ -120,7 +120,7 @@ export default class ID3v2 {
     const framesObj = {}
 
     this.frames.forEach(function (frame) {
-      if (framesObj[frame.id]) {
+      if (typeof framesObj[frame.id] !== 'undefined') {
         if (Array.isArray(framesObj[frame.id])) {
           framesObj[frame.id].push(frame.value)
         } else {
