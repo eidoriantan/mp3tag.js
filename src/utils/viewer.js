@@ -4,7 +4,7 @@ import { decodeUTF8 } from './strings'
 export default class BufferView extends DataView {
   constructor (buffer) {
     if (typeof buffer === 'number') { buffer = new Uint8Array(buffer) }
-    if (Array.isArray(buffer)) { buffer = new Uint8Array(buffer).buffer }
+    if (Array.isArray(buffer)) { buffer = new Uint8Array(buffer) }
     if (ArrayBuffer.isView(buffer)) { buffer = buffer.buffer }
     super(buffer)
   }
