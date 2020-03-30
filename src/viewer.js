@@ -2,11 +2,11 @@
 import { decodeUTF8 } from './utils/strings'
 
 export default class BufferView extends DataView {
-  constructor (buffer) {
-    if (typeof buffer === 'number') { buffer = new Uint8Array(buffer) }
-    if (Array.isArray(buffer)) { buffer = new Uint8Array(buffer) }
-    if (ArrayBuffer.isView(buffer)) { buffer = buffer.buffer }
-    super(buffer)
+  constructor (param) {
+    if (typeof param === 'number') { param = new Uint8Array(param) }
+    if (Array.isArray(param)) { param = new Uint8Array(param) }
+    if (ArrayBuffer.isView(param)) { param = param.buffer }
+    super(param)
   }
 
   getString (offset, maxlength, format) {
