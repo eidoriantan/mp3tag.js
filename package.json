@@ -13,6 +13,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "esm": "^3.2.25",
     "mocha": "^7.1.1",
     "rollup": "^1.32.1",
     "rollup-plugin-babel": "^4.4.0",
@@ -23,7 +24,7 @@
     "build": "rollup -c",
     "watch": "rollup -c -w",
     "lint": "eslint -c .eslintrc **/*.js --quiet --max-warnings 2",
-    "test": "npm run lint && mocha --colors"
+    "test": "npm run lint && mocha --colors --require esm"
   },
   "repository": {
     "type": "git",

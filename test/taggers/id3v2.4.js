@@ -1,6 +1,6 @@
 
-const MP3Tag = require('../../dist/mp3tag')
-const assert = require('assert')
+import MP3Tag from '../../src/mp3tag'
+import assert from 'assert'
 
 describe('ID3v2.4', function () {
   beforeEach(function () {

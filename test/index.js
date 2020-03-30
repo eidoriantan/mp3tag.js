@@ -1,6 +1,6 @@
 
-const MP3Tag = require('../dist/mp3tag.js')
-const assert = require('assert')
+import MP3Tag from '../src/mp3tag'
+import assert from 'assert'
 
 describe('mp3tag.js Usage', function () {
   it('Throws if not an audio file', function () {
