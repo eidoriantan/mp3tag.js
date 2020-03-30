@@ -63,7 +63,7 @@ export default class ID3v2 {
       throw new TagError(201, this.major)
     }
 
-    const framesObj = this.parse()
+    const framesObj = this.getFrames()
     for (const id in framesObj) {
       const frameDesc = frames[id]
       if (frameDesc) {
@@ -93,7 +93,7 @@ export default class ID3v2 {
     this.minor = 0
 
     if (!this.validate()) return false
-    const framesObj = this.parse()
+    const framesObj = this.getFrames()
     const headerBytes = [0x49, 0x44, 0x33, this.major, this.minor, 0b00100000]
     const sizeView = new BufferView(4)
     const paddingBytes = new Uint8Array(this.options.padding)
@@ -118,6 +118,11 @@ export default class ID3v2 {
   }
 
   parse () {
+    console.warn('`parse()` is deprecated. Please use `getFrames()` instead')
+    return this.getFrames()
+  }
+
+  getFrames () {
     const object = {}
     this.frames.forEach(function (frame) {
       if (typeof object[frame.id] !== 'undefined') {

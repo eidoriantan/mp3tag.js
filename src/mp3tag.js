@@ -7,9 +7,8 @@ export default class MP3Tag {
   set frames (value) { this.tagger.frames = value }
 
   constructor (buffer, options) {
-    if (buffer instanceof ArrayBuffer === false &&
-      (typeof Buffer !== 'undefined' ? buffer instanceof Buffer === false
-        : true)) {
+    if (!(buffer instanceof ArrayBuffer) && (typeof Buffer !== 'undefined'
+      ? !(buffer instanceof Buffer) : true)) {
       throw new TypeError('buffer is not an instance of ArrayBuffer or Buffer')
     }
 
@@ -33,6 +32,8 @@ export default class MP3Tag {
   }
 
   save () { this.buffer = this.tagger.save() }
+
+  getFrames () { return this.tagger.getFrames() }
 
   getBlob (type = 'audio/mpeg') {
     return new Blob([this.buffer], { type: type })
