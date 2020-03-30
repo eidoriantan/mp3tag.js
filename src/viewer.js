@@ -1,5 +1,5 @@
 
-import { decodeUTF8 } from './strings'
+import { decodeUTF8 } from './utils/strings'
 
 export default class BufferView extends DataView {
   constructor (buffer) {
