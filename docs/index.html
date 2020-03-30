@@ -87,51 +87,168 @@
     </div>
 
     <div id="mp3tag" class="container mb-5">
-      <h3>MP3Tag</h3>
-      <code>const mp3tag = new MP3Tag(buffer, [options])</code>
+      <h2>MP3Tag</h2>
+      <code>const mp3tag = new MP3Tag(buffer[, <a href="#options">options</a>])</code>
 
       <div class="container mt-4">
-        <h5>Options</h5>
-        <ul>
-          <li><b>version&lt;number&gt;</b>: Saves audio with this ID3v2 major version (<b>valid</b>: 3, 4, <b>default</b>: Current version, if none, then 3)</li>
-          <li><b>padding&lt;number&gt;</b>: Number of null paddings (<b>default</b>: 4096)</li>
-        </ul>
+        <h3>Properties</h3>
+        <div class="m-4">
+          <h4>name</h4>
+          <i class="text-muted">Type: string</i>
+          <p class="lead">Name of the library 'MP3Tag'</p>
+        </div>
+
+        <div class="m-4">
+          <h4>version</h4>
+          <i class="text-muted">Type: string</i>
+          <p class="lead">Current version of the library. (eg. "0.6.1")</p>
+        </div>
+
+        <div class="m-4">
+          <h4>frames</h4>
+          <i class="text-muted">Type: <a href="#frame-object">FrameObject</a>[]</i>
+          <p class="lead">Array of frames decoded from the buffer.</p>
+        </div>
+
+        <div class="m-4">
+          <h4>buffer</h4>
+          <i class="text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></i>
+          <p class="lead">Buffer</p>
+        </div>
+
+        <div class="m-4">
+          <h4>options</h4>
+          <i class="text-muted">Type: <a href="#options">Options</a></i>
+          <p class="lead">Options passed</p>
+        </div>
       </div>
 
       <div class="container mt-4">
-        <h5>Properties</h5>
-        <ul>
-          <li><b>name&lt;string&gt;</b>: Always return 'MP3Tag'</li>
-          <li><b>version&lt;string&gt;</b>: Current version of the library (eg. "0.5.1")</li>
-          <li><b>frames&lt;<a href="#frames">FrameObject</a>[]&gt;</b>: Array of frame objects</li>
-          <li><b>buffer&lt;ArrayBuffer&gt;</b>: Buffer</li>
-          <li><b>options&lt;object&gt;</b>: Options passed</li>
-        </ul>
-      </div>
+        <h3>Methods</h3>
+        <div class="m-4">
+          <h4>constructor(buffer[, <a href="#options">options</a>])</h4>
+          <p class="lead">Validates buffer type. This sets the <code>MP3Tag.buffer</code> and <code>MP3Tag.options</code></p>
+        </div>
 
-      <div class="container mt-4">
-        <h5>Methods</h5>
-        <ul>
-          <li><b>read()</b>: Read the buffer then sets <code>mp3tag.frames</code></li>
-          <li><b>save()</b>: Validates the <code>mp3tag.frames</code> for errors, then writing them to the buffer</li>
-          <li><b>getBlob()</b>: Returns the <code>Blob</code> object of the buffer</li>
-        </ul>
+        <div class="m-4">
+          <h4>read()</h4>
+          <i class="text-muted">Type: void</i>
+          <p class="lead">Reads the buffer. This sets the <code>MP3Tag.frames</code> property</p>
+        </div>
+
+        <div class="m-4">
+          <h4>save()</h4>
+          <i class="text-muted">Type: void</i>
+          <p class="lead">Validates the <code>MP3Tag.frames</code>, then writes them to the buffer</p>
+        </div>
+
+        <div class="m-4">
+          <h4>getBlob()</h4>
+          <i class="text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/API/Blob">Blob</a></i>
+          <p class="lead">Returns the <code>Blob</code> object of the buffer</p>
+        </div>
       </div>
 
       <hr class="my-5">
     </div>
 
-    <div id="frames" class="container">
-      <h3>Frames</h3>
-
+    <div id="options" class="container mb-5">
+      <h2>Options</h2>
       <div class="container mt-4">
-        <h5>Properties</h5>
-        <ul>
-          <li><b>id</b>: ID of the frame</li>
-          <li><b>size</b>: Size of the frame (excluding the frame header of 10 bytes)</li>
-          <li><b>flags</b>: Flags set in this frame</li>
-          <li><b>value</b>: Value of the frame (the type depends on the frame)</li>
-        </ul>
+        <h3>Properties</h3>
+        <div class="m-4">
+          <h4>version</h4>
+          <i class="text-muted">Type: number</i><br>
+          <i class="text-muted">Default: Current version otherwise 3</i>
+          <p class="lead">Save buffer with this ID3v2 major version. Valid major versions are 3, 4.</p>
+        </div>
+
+        <div class="m-4">
+          <h4>padding</h4>
+          <i class="text-muted">Type: number</i><br>
+          <i class="text-muted">Default: 4096</i>
+          <p class="lead">Number of padding</p>
+        </div>
+      </div>
+
+      <hr class="my-5">
+    </div>
+
+    <div id="frame-object" class="container">
+      <h2>Frame Object</h2>
+      <div class="container mt-4">
+        <h3>Properties</h3>
+        <div class="m-4">
+          <h4>id</h4>
+          <i class="text-muted">Type: string</i>
+          <p class="lead">ID of the frame</p>
+        </div>
+
+        <div class="m-4">
+          <h4>size</h4>
+          <i class="text-muted">Type: number</i>
+          <p class="lead">Size of the frame (excluding the frame header of 10 bytes)</p>
+        </div>
+
+        <div class="m-4">
+          <h4>flags</h4>
+          <i class="text-muted">Type: <a href="#frame-flag">FrameFlags</a></i>
+          <p class="lead">Flags set in this frame</p>
+        </div>
+
+        <div class="m-4">
+          <h4>value</h4>
+          <i class="text-muted">Type: any</i>
+          <p class="lead">Value of the frame (type depends on the frame specs)</p>
+        </div>
+      </div>
+
+      <hr class="my-5">
+    </div>
+
+    <div id="frame-flag" class="container">
+      <h2>Frame Flags</h2>
+      <div class="container mt-4">
+        <h3>Properties</h3>
+        <div class="m-4">
+          <h4>tagAlterPreservation</h4>
+          <i class="text-muted">Type: boolean</i>
+        </div>
+
+        <div class="m-4">
+          <h4>fileAlterPreservation</h4>
+          <i class="text-muted">Type: boolean</i>
+        </div>
+
+        <div class="m-4">
+          <h4>readOnly</h4>
+          <i class="text-muted">Type: boolean</i>
+        </div>
+
+        <div class="m-4">
+          <h4>compression</h4>
+          <i class="text-muted">Type: boolean</i>
+        </div>
+
+        <div class="m-4">
+          <h4>encryption</h4>
+          <i class="text-muted">Type: boolean</i>
+        </div>
+
+        <div class="m-4">
+          <h4>groupingIdentity</h4>
+          <i class="text-muted">Type: boolean</i>
+        </div>
+
+        <div class="m-4">
+          <h4>unsynchronisation (ID3v2.4 only)</h4>
+          <i class="text-muted">Type: boolean</i>
+        </div>
+
+        <div class="m-4">
+          <h4>dataLengthIndicator (ID3v2.4 only)</h4>
+          <i class="text-muted">Type: boolean</i>
+        </div>
       </div>
     </div>
   </main>
