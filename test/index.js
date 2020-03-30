@@ -11,6 +11,17 @@ describe('mp3tag.js Usage', function () {
     }, /This format is not yet supported/)
   })
 
+  it('Get the MP3 audio file by getting its file signature', function () {
+    const uint8 = new Uint8Array([1, 2, 3, 0, 0, 0, 0, 255, 251, 176, 0, 0])
+    const mp3tag = new MP3Tag(uint8.buffer)
+    mp3tag.read()
+
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([255, 251, 176, 0, 0])
+
+    assert.deepStrictEqual(actual, expected)
+  })
+
   after(function () {
     const tests = this.test.parent.tests
     let success = true
