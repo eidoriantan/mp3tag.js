@@ -12,14 +12,10 @@ export default {
   }, {
     file: 'dist/mp3tag.min.js',
     format: 'umd',
-    name: 'MP3Tag'
+    name: 'MP3Tag',
+    plugins: terser()
   }],
-  plugins: [
-    babel(),
-    terser({
-      include: [/^.+\.min\.js$/]
-    })
-  ],
+  plugins: [babel()],
   watch: {
     include: ['src/**/*.js']
   }
