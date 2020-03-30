@@ -1,8 +1,8 @@
 
-import { toArray } from '../utils/object'
 import { encodeSynch, mergeBytes } from '../utils/bytes'
+import { toArray } from '../utils/object'
 import { encodeString } from '../utils/strings'
-import BufferView from '../utils/viewer'
+import BufferView from '../viewer'
 
 function getHeaderBytes (id, size, version) {
   const idBytes = encodeString(id, 'ascii')
