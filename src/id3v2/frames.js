@@ -49,6 +49,10 @@ export const PRIV = {
   version: [3, 4]
 }
 
+export const SEEK = {
+  parse: parsers.seekFrame
+}
+
 export const SIGN = {
   parse: parsers.signFrame,
   validate: validators.signFrame,

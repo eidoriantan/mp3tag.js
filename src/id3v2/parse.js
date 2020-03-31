@@ -218,3 +218,8 @@ export function signFrame (view, version) {
     signature: sign
   }
 }
+
+export function seekFrame (view, version) {
+  const offset = view.getUint32(0)
+  return offset
+}
