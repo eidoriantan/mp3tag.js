@@ -15,11 +15,13 @@
   <link href="https://kit.fontawesome.com/" rel="preconnect" crossorigin="anonymous">
   <link href="https://kit.fontawesome.com/" rel="dns-prefetch">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/default.min.css" rel="stylesheet" integrity="sha256-zcunqSn1llgADaIPFyzrQ8USIjX2VpuxHzUwYisOwo8=" crossorigin="anonymous">
 
   <script src="https://kit.fontawesome.com/9cb9988aa5.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha256-/ijcOLwFf26xEYAjW75FizKVo5tnTYiQddPZoLUHHZ8=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha256-WqU1JavFxSAMcLP2WIOI+GB2zWmShMI82mTpLDcqFUg=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-161214318-3"></script>
   <script>
@@ -83,6 +85,31 @@
       </p>
 
       <hr class="my-5">
+    </div>
+
+    <div id="examples" class="container mb-5">
+      <h2>Examples</h2>
+      <h3>Browser</h3>
+      <pre>
+        <code>
+          &lt;input type="file" id="file"&gt;
+          &lt;script&gt;
+          const input = document.getElementById('file')
+          input.addEventListener('change', function () {
+            const reader = new FileReader()
+            reader.onload = function () {
+              const mp3tag = new MP3Tag(this.result)
+              mp3tag.read()
+              console.log(mp3tag.frames)
+            }
+
+            if (this.files.length > 0) {
+              reader.readAsArrayBuffer(this.files[0])
+            }
+          })
+          &lt;/script&gt;
+        </code>
+      </pre>
     </div>
 
     <div id="mp3tag" class="container mb-5">
@@ -191,7 +218,7 @@
 
         <div class="m-4">
           <h4>flags</h4>
-          <i class="text-muted">Type: <a href="#frame-flag">FrameFlags</a></i>
+          <i class="text-muted">Type: object</i>
           <p class="lead">Flags set in this frame</p>
         </div>
 
@@ -204,52 +231,8 @@
 
       <hr class="my-5">
     </div>
-
-    <div id="frame-flag" class="container">
-      <h2>Frame Flags</h2>
-      <div class="container mt-4">
-        <h3>Properties</h3>
-        <div class="m-4">
-          <h4>tagAlterPreservation</h4>
-          <i class="text-muted">Type: boolean</i>
-        </div>
-
-        <div class="m-4">
-          <h4>fileAlterPreservation</h4>
-          <i class="text-muted">Type: boolean</i>
-        </div>
-
-        <div class="m-4">
-          <h4>readOnly</h4>
-          <i class="text-muted">Type: boolean</i>
-        </div>
-
-        <div class="m-4">
-          <h4>compression</h4>
-          <i class="text-muted">Type: boolean</i>
-        </div>
-
-        <div class="m-4">
-          <h4>encryption</h4>
-          <i class="text-muted">Type: boolean</i>
-        </div>
-
-        <div class="m-4">
-          <h4>groupingIdentity</h4>
-          <i class="text-muted">Type: boolean</i>
-        </div>
-
-        <div class="m-4">
-          <h4>unsynchronisation (ID3v2.4 only)</h4>
-          <i class="text-muted">Type: boolean</i>
-        </div>
-
-        <div class="m-4">
-          <h4>dataLengthIndicator (ID3v2.4 only)</h4>
-          <i class="text-muted">Type: boolean</i>
-        </div>
-      </div>
-    </div>
   </main>
+
+  <script>hljs.initHighlightingOnLoad();</script>
 </body>
 </html>
