@@ -31,7 +31,11 @@ export default class MP3Tag {
     }
   }
 
-  save () { this.buffer = this.tagger.save() }
+  save () {
+    const old = this.buffer
+    this.buffer = this.tagger.save()
+    return old
+  }
 
   getFrames () { return this.tagger.getFrames() }
 
