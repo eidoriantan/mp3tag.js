@@ -1,5 +1,5 @@
 
-# mp3tag.js
+![mp3tag.js Banner](./assets/mp3tag-banner.png)
 [![Build Status](https://travis-ci.com/eidoriantan/mp3tag.js.svg?branch=master)](https://travis-ci.com/eidoriantan/mp3tag.js)
 [![npm](https://img.shields.io/npm/v/mp3tag.js/latest?registry_uri=https%3A%2F%2Fregistry.npmjs.com%2Fmp3tag.js)](https://npmjs.com/mp3tag.js)
 
