@@ -31,16 +31,17 @@ export function validateID (id) {
  */
 
 export function textFrame (value, version) {
-  const array = toArray(value)
-  array.forEach(function (string) {
-    if (typeof string !== 'string') {
-      throw new TagError(203, 'Value is not a string')
-    }
+  if (Array.isArray(value)) {
+    throw new TagError(203, 'Text frame should not duplicate')
+  }
 
-    if (!string.match(stringRegex)) {
-      throw new TagError(203, 'Newlines are not allowed')
-    }
-  })
+  if (typeof value !== 'string') {
+    throw new TagError(203, 'Value is not a string')
+  }
+
+  if (!value.match(stringRegex)) {
+    throw new TagError(203, 'Newlines are not allowed')
+  }
 
   return true
 }
