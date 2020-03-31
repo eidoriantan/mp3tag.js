@@ -39,6 +39,14 @@ export default class MP3Tag {
 
   getFrames () { return this.tagger.getFrames() }
 
+  addFrame (id, value) { return this.tagger.addFrame(id, value) }
+
+  editFrame (id, value, index = 0, replace = true) {
+    return this.tagger.editFrame(id, value, index, replace)
+  }
+
+  existsFrame (id) { return this.tagger.existsFrame(id) }
+
   getBlob (type = 'audio/mpeg') {
     return new Blob([this.buffer], { type: type })
   }

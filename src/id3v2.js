@@ -135,6 +135,33 @@ export default class ID3v2 {
     return object
   }
 
+  addFrame (id, value) { this.frames.push({ id: id, value: value }) }
+
+  editFrame (id, value, index, replace) {
+    const array = this.frames
+    let counts = 0
+
+    this.frames.forEach(function (frame, i) {
+      if (frame.id === id) {
+        if (counts === index) {
+          if (Array.isArray(array[i])) array[i].push(value)
+          else if (replace) array[i] = { id: id, value: value }
+        } else counts++
+      }
+    })
+
+    this.frames = array
+  }
+
+  existsFrame (id) {
+    let found = false
+    this.frames.forEach(function (frame) {
+      if (frame.id === id) found = true
+    })
+
+    return found
+  }
+
   getAudio () {
     const audioData = new Uint8Array(this.buffer)
 
