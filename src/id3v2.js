@@ -151,7 +151,9 @@ export default class ID3v2 {
         if (counts === index) {
           if (Array.isArray(array[i])) array[i].push(value)
           else if (replace) array[i] = { id: id, value: value }
-        } else counts++
+        }
+
+        counts++
       }
     })
 
