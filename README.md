@@ -1,7 +1,10 @@
 
 ![mp3tag.js Banner](./assets/mp3tag-banner.png)
-[![Build Status](https://travis-ci.com/eidoriantan/mp3tag.js.svg?branch=master)](https://travis-ci.com/eidoriantan/mp3tag.js)
-[![npm](https://img.shields.io/npm/v/mp3tag.js/latest?registry_uri=https%3A%2F%2Fregistry.npmjs.com%2Fmp3tag.js)](https://npmjs.com/mp3tag.js)
+
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/eidoriantan/mp3tag.js/Node.js%20CI?label=GitHub%20Workflow)](https://github.com/eidoriantan/mp3tag.js/actions?query=workflow%3A%22Node.js+CI%22)
+[![Build Status](https://img.shields.io/travis/com/eidoriantan/mp3tag.js/master?label=Travis%20CI)](https://travis-ci.com/eidoriantan/mp3tag.js)
+![David](https://img.shields.io/david/dev/eidoriantan/mp3tag.js)
+[![npm](https://img.shields.io/npm/v/mp3tag.js/latest?registry_uri=https%3A%2F%2Fregistry.npmjs.com%2Fmp3tag.js&label=mp3tag.js@latest)](https://npmjs.com/mp3tag.js)
 
 **mp3tag.js** is an open sourced JavaScript library used to edit the metadata of
 audio files. It currently can read both ID3v2.3 and ID3v2.4 tags, write tags and
