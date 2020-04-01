@@ -30,7 +30,7 @@ export const GEOB = {
 
 export const IPLS = {
   parse: parsers.iplsFrame,
-  validate: validators.arrayFrame,
+  validate: validators.textFrame,
   write: writers.iplsFrame,
   version: [3]
 }
@@ -75,9 +75,9 @@ export const TBPM = {
 }
 
 export const TCOM = {
-  parse: parsers.arrayFrame,
-  validate: validators.arrayFrame,
-  write: writers.arrayFrame,
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
   version: [3, 4]
 }
 
@@ -152,9 +152,9 @@ export const TENC = {
 }
 
 export const TEXT = {
-  parse: parsers.arrayFrame,
-  validate: validators.arrayFrame,
-  write: writers.arrayFrame,
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
   version: [3, 4]
 }
 
@@ -173,9 +173,9 @@ export const TIME = {
 }
 
 export const TIPL = {
-  parse: parsers.arrayFrame,
-  validate: validators.arrayFrame,
-  write: writers.arrayFrame,
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
   version: [4]
 }
 
@@ -222,9 +222,9 @@ export const TLEN = {
 }
 
 export const TMCL = {
-  parse: parsers.arrayFrame,
-  validate: validators.arrayFrame,
-  write: writers.arrayFrame,
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
   version: [4]
 }
 
@@ -257,16 +257,16 @@ export const TOFN = {
 }
 
 export const TOLY = {
-  parse: parsers.arrayFrame,
-  validate: validators.arrayFrame,
-  write: writers.arrayFrame,
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
   version: [3, 4]
 }
 
 export const TOPE = {
-  parse: parsers.arrayFrame,
-  validate: validators.arrayFrame,
-  write: writers.arrayFrame,
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
   version: [3, 4]
 }
 
@@ -285,9 +285,9 @@ export const TOWN = {
 }
 
 export const TPE1 = {
-  parse: parsers.arrayFrame,
-  validate: validators.arrayFrame,
-  write: writers.arrayFrame,
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
   version: [3, 4]
 }
 

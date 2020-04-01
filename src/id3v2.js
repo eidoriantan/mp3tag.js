@@ -3,7 +3,6 @@ import * as flags from './id3v2/flags'
 import * as frames from './id3v2/frames'
 
 import { decodeSynch, encodeSynch, mergeBytes, unsynch } from './utils/bytes'
-import { toArray } from './utils/object'
 import TagError from './error'
 import BufferView from './viewer'
 
@@ -78,7 +77,7 @@ export default class ID3v2 {
           try {
             frameDesc.validate(framesObj[id], this.major)
           } catch (e) {
-            throw new TagError(203, `${id} validation error: ${e.message}`)
+            throw new TagError(203, `ID: ${id}, Message: ${e.message}`)
           }
         } else {
           throw new TagError(204, id)
@@ -107,8 +106,7 @@ export default class ID3v2 {
 
     for (const id in framesObj) {
       const frameDesc = frames[id]
-      const frame = { id: id, value: framesObj[id] }
-      const bytes = frameDesc.write(frame, this.major)
+      const bytes = frameDesc.write(framesObj[id], id, this.major)
       bytes.forEach(byte => framesBytes.push(byte))
     }
 
@@ -122,18 +120,13 @@ export default class ID3v2 {
     return this.buffer
   }
 
-  parse () {
-    console.warn('`parse()` is deprecated. Please use `getFrames()` instead')
-    return this.getFrames()
-  }
-
   getFrames () {
     const object = {}
     this.frames.forEach(function (frame) {
       if (typeof object[frame.id] !== 'undefined') {
-        object[frame.id] = toArray(object[frame.id], frame.value)
+        object[frame.id].push(frame.value)
       } else {
-        object[frame.id] = frame.value
+        object[frame.id] = [frame.value]
       }
     })
 
