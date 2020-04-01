@@ -587,6 +587,10 @@
       signature: sign
     };
   }
+  function seekFrame(view, version) {
+    var offset = view.getUint32(0);
+    return offset;
+  }
 
   var urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/;
   var langRegex = /^([a-z]{3}|XXX)$/;
@@ -612,16 +616,18 @@
    */
 
   function textFrame$1(value, version) {
-    var array = toArray(value);
-    array.forEach(function (string) {
-      if (typeof string !== 'string') {
-        throw new TagError(203, 'Value is not a string');
-      }
+    if (Array.isArray(value)) {
+      throw new TagError(203, 'Text frame should not duplicate');
+    }
 
-      if (!string.match(stringRegex)) {
-        throw new TagError(203, 'Newlines are not allowed');
-      }
-    });
+    if (typeof value !== 'string') {
+      throw new TagError(203, 'Value is not a string');
+    }
+
+    if (!value.match(stringRegex)) {
+      throw new TagError(203, 'Newlines are not allowed');
+    }
+
     return true;
   }
   function arrayFrame$1(value, version) {
@@ -1081,22 +1087,26 @@
 
     var _super = _createSuper(BufferView);
 
-    function BufferView(buffer) {
+    function BufferView() {
       _classCallCheck(this, BufferView);
 
-      if (typeof buffer === 'number') {
-        buffer = new Uint8Array(buffer);
+      for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+        params[_key] = arguments[_key];
       }
 
-      if (Array.isArray(buffer)) {
-        buffer = new Uint8Array(buffer).buffer;
+      if (typeof params[0] === 'number') {
+        params[0] = new Uint8Array(params[0]);
       }
 
-      if (ArrayBuffer.isView(buffer)) {
-        buffer = buffer.buffer;
+      if (Array.isArray(params[0])) {
+        params[0] = new Uint8Array(params[0]);
       }
 
-      return _super.call(this, buffer);
+      if (ArrayBuffer.isView(params[0])) {
+        params[0] = params[0].buffer;
+      }
+
+      return _super.call.apply(_super, [this].concat(params));
     }
 
     _createClass(BufferView, [{
@@ -1652,6 +1662,9 @@
     write: privFrame$2,
     version: [3, 4]
   };
+  var SEEK = {
+    parse: seekFrame
+  };
   var SIGN = {
     parse: signFrame,
     validate: signFrame$1,
@@ -2058,6 +2071,7 @@
     IPLS: IPLS,
     OWNE: OWNE,
     PRIV: PRIV,
+    SEEK: SEEK,
     SIGN: SIGN,
     TALB: TALB,
     TBPM: TBPM,
@@ -2151,7 +2165,8 @@
     _createClass(ID3v2, [{
       key: "read",
       value: function read() {
-        var mediaView = new BufferView(this.buffer);
+        var tagOffset = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var mediaView = new BufferView(this.buffer, tagOffset);
         if (mediaView.getUint8String(0, 3) !== 'ID3') throw new TagError(200);
         var version = mediaView.getUint8(3, 2);
 
@@ -2177,9 +2192,14 @@
           var frame = decodeFrame.call(this, frameBytes);
 
           if (frame) {
-            this.frames.push(frame);
             offset += frame.size + 10;
             limit -= frame.size + 10;
+
+            if (frame.id === 'SEEK') {
+              this.read(offset + frame.value);
+            } else {
+              this.frames.push(frame);
+            }
           } else break;
         }
 
@@ -2192,7 +2212,7 @@
           throw new TagError(201, this.major);
         }
 
-        var framesObj = this.parse();
+        var framesObj = this.getFrames();
 
         for (var id in framesObj) {
           var frameDesc = frames[id];
@@ -2223,7 +2243,7 @@
         this.major = this.options.version || this.major || 3;
         this.minor = 0;
         if (!this.validate()) return false;
-        var framesObj = this.parse();
+        var framesObj = this.getFrames();
         var headerBytes = [0x49, 0x44, 0x33, this.major, this.minor, 32];
         var sizeView = new BufferView(4);
         var paddingBytes = new Uint8Array(this.options.padding);
@@ -2250,19 +2270,55 @@
     }, {
       key: "parse",
       value: function parse() {
-        var framesObj = {};
+        console.warn('`parse()` is deprecated. Please use `getFrames()` instead');
+        return this.getFrames();
+      }
+    }, {
+      key: "getFrames",
+      value: function getFrames() {
+        var object = {};
         this.frames.forEach(function (frame) {
-          if (framesObj[frame.id]) {
-            if (Array.isArray(framesObj[frame.id])) {
-              framesObj[frame.id].push(frame.value);
-            } else {
-              framesObj[frame.id] = [framesObj[frame.id], frame.value];
-            }
+          if (typeof object[frame.id] !== 'undefined') {
+            object[frame.id] = toArray(object[frame.id], frame.value);
           } else {
-            framesObj[frame.id] = frame.value;
+            object[frame.id] = frame.value;
           }
         });
-        return framesObj;
+        return object;
+      }
+    }, {
+      key: "addFrame",
+      value: function addFrame(id, value) {
+        this.frames.push({
+          id: id,
+          value: value
+        });
+      }
+    }, {
+      key: "editFrame",
+      value: function editFrame(id, value, index, replace) {
+        var array = this.frames;
+        var counts = 0;
+        this.frames.forEach(function (frame, i) {
+          if (frame.id === id) {
+            if (counts === index) {
+              if (Array.isArray(array[i])) array[i].push(value);else if (replace) array[i] = {
+                id: id,
+                value: value
+              };
+            } else counts++;
+          }
+        });
+        this.frames = array;
+      }
+    }, {
+      key: "existsFrame",
+      value: function existsFrame(id) {
+        var found = false;
+        this.frames.forEach(function (frame) {
+          if (frame.id === id) found = true;
+        });
+        return found;
       }
     }, {
       key: "getAudio",
@@ -2346,12 +2402,12 @@
     function MP3Tag(buffer, options) {
       _classCallCheck(this, MP3Tag);
 
-      if (buffer instanceof ArrayBuffer === false && (typeof Buffer !== 'undefined' ? buffer instanceof Buffer === false : true)) {
+      if (!(buffer instanceof ArrayBuffer) && (typeof Buffer !== 'undefined' ? !(buffer instanceof Buffer) : true)) {
         throw new TypeError('buffer is not an instance of ArrayBuffer or Buffer');
       }
 
       this.name = 'MP3Tag';
-      this.version = '0.6.0';
+      this.version = '0.7.0';
       this.buffer = buffer;
       this.options = options || {};
       this.tagger = {};
@@ -2372,7 +2428,31 @@
     }, {
       key: "save",
       value: function save() {
+        var old = this.buffer;
         this.buffer = this.tagger.save();
+        return old;
+      }
+    }, {
+      key: "getFrames",
+      value: function getFrames() {
+        return this.tagger.getFrames();
+      }
+    }, {
+      key: "addFrame",
+      value: function addFrame(id, value) {
+        return this.tagger.addFrame(id, value);
+      }
+    }, {
+      key: "editFrame",
+      value: function editFrame(id, value) {
+        var index = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+        var replace = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+        return this.tagger.editFrame(id, value, index, replace);
+      }
+    }, {
+      key: "existsFrame",
+      value: function existsFrame(id) {
+        return this.tagger.existsFrame(id);
       }
     }, {
       key: "getBlob",
