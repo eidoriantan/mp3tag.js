@@ -22,8 +22,8 @@ export default class ID3v2 {
     this.frames = []
   }
 
-  read () {
-    const mediaView = new BufferView(this.buffer)
+  read (tagOffset = 0) {
+    const mediaView = new BufferView(this.buffer, tagOffset)
     if (mediaView.getUint8String(0, 3) !== 'ID3') throw new TagError(200)
 
     const version = mediaView.getUint8(3, 2)
@@ -49,9 +49,14 @@ export default class ID3v2 {
       const frame = decodeFrame.call(this, frameBytes)
 
       if (frame) {
-        this.frames.push(frame)
         offset += frame.size + 10
         limit -= frame.size + 10
+
+        if (frame.id === 'SEEK') {
+          this.read(offset + frame.value)
+        } else {
+          this.frames.push(frame)
+        }
       } else break
     }
 
