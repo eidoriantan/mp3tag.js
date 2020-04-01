@@ -98,7 +98,7 @@ export default class ID3v2 {
 
     if (!this.validate()) return false
     const framesObj = this.getFrames()
-    const headerBytes = [0x49, 0x44, 0x33, this.major, this.minor, 0b00100000]
+    const headerBytes = [0x49, 0x44, 0x33, this.major, this.minor, 0]
     const sizeView = new BufferView(4)
     const paddingBytes = new Uint8Array(this.options.padding)
     const audioBytes = this.getAudio()

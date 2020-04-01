@@ -28,7 +28,7 @@ describe('ID3v2.3', function () {
 
     const actual = new Uint8Array(this.mp3tag.buffer)
     const expected = new Uint8Array([
-      73, 68, 51, 3, 0, 0b00100000, 0, 0, 0, 54,
+      73, 68, 51, 3, 0, 0, 0, 0, 0, 54,
       84, 65, 76, 66, 0, 0, 0, 15, 0, 0,
       1, 255, 254, 65, 0, 76, 0, 66, 0, 85, 0, 77, 0, 0, 0,
       84, 80, 69, 49, 0, 0, 0, 19, 0, 0,
