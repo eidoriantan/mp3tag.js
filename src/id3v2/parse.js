@@ -1,13 +1,12 @@
 
-import { toArray } from '../utils/object'
 import TagError from '../error'
 
-export const ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8']
+const ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8']
 
 /**
  *  Frame Parsers
  *  @param {BufferView} view - View of the frame excluding the header
- *  @param {number} version - Frame will be parsed with this version
+ *  @param {number} version - Frame will be parsed according to this version
  */
 
 export function textFrame (view, version) {
@@ -16,60 +15,44 @@ export function textFrame (view, version) {
 
   switch (version) {
     case 3:
-      value = view.getCString(1, encoding).string
+      value = view.getCString(1, encoding).string.split('/')
       break
 
     case 4:
-      value = view.getString(1, view.byteLength - 1, encoding)
-        .string.split('\0')
-
-      if (value.length === 1) value = value[0]
+      value = view.getString(1, view.byteLength - 1, encoding).string
+        .split('\0')
       break
 
     default:
       throw new TagError(201, version)
   }
+
+  return value.length === 1 ? value[0] : value
+}
+
+export function numberFrame (view, version) {
+  let value = textFrame(view, version)
+  const toNumber = function (string) {
+    return string.match(/^(\d+)$/) !== null ? parseInt(string) : string
+  }
+
+  value = Array.isArray(value) ? value.map(elem => toNumber(elem))
+    : toNumber(value)
 
   return value
 }
 
-export function arrayFrame (view, version) {
-  const value = textFrame(view, version)
-  let array = []
-
-  switch (version) {
-    case 3:
-      array = value.split('/')
-      break
-
-    case 4:
-      array = Array.isArray(value) ? value : [value]
-      break
-
-    default:
-      throw new TagError(201, version)
-  }
-
-  return array
-}
-
-export function numberFrame (view, version) {
-  const value = textFrame(view, version)
-  return value.match && value.match(/^(\d+)$/) ? parseInt(value) : value
-}
-
 export function setFrame (view, version) {
-  const value = textFrame(view, version)
-  const arrayValue = toArray(value)
+  let value = textFrame(view, version)
   const array = []
 
-  arrayValue.forEach(function (elem) {
-    const splitted = elem.split('/')
-    array.push(elem.match(/^(\d+)\/(\d+)/) ? {
-      position: parseInt(splitted[0]),
-      total: parseInt(splitted[1])
-    } : elem)
-  })
+  if (!Array.isArray(value)) value = [value]
+  for (let i = 0; i < value.length; i += 2) {
+    const set = {}
+    if (value[i]) set.position = parseInt(value[i])
+    if (value[i + 1]) set.total = parseInt(value[i + 1])
+    array.push(set)
+  }
 
   return array.length === 1 ? array[0] : array
 }

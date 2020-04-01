@@ -40,13 +40,3 @@ export function objectEqual (obj1, obj2) {
 
   return true
 }
-
-export function toArray (...params) {
-  const array = []
-  params.forEach(function (param) {
-    if (Array.isArray(param)) param.forEach(elem => array.push(elem))
-    else array.push(param)
-  })
-
-  return array
-}

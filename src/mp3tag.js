@@ -6,16 +6,16 @@ export default class MP3Tag {
   get frames () { return this.tagger.frames }
   set frames (value) { this.tagger.frames = value }
 
-  constructor (buffer, options) {
+  constructor (buffer, options = {}) {
     if (!(buffer instanceof ArrayBuffer) && (typeof Buffer !== 'undefined'
       ? !(buffer instanceof Buffer) : true)) {
       throw new TypeError('buffer is not an instance of ArrayBuffer or Buffer')
     }
 
     this.name = 'MP3Tag'
-    this.version = '0.7.0'
+    this.version = '1.0.0'
     this.buffer = buffer
-    this.options = options || {}
+    this.options = options
     this.tagger = {}
   }
 
