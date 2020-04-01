@@ -186,9 +186,21 @@
         </div>
 
         <div class="m-4">
+          <h4>getFrames()</h4>
+          <i class="text-muted">Type: object</i>
+          <p class="lead">Returns object containing the id and an array of its values from each of its frames</p>
+        </div>
+
+        <div class="m-4">
           <h4>addFrame(id, value)</h4>
           <i class="text-muted">Type: void</i>
           <p class="lead">Simply pushes a frame</p>
+        </div>
+
+        <div class="m-4">
+          <h4>editFrame(id, value[, index = 0, replace = true])</h4>
+          <i class="text-muted">Type: void</i>
+          <p class="lead">Edits the first found (`index=0`) frame found on the tag with the ID. If the old value is an array, this pushes the new value. Otherwise, replaces the old value (`replace=true`)</p>
         </div>
 
         <div class="m-4">
