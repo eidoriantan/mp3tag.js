@@ -10,5 +10,6 @@
     "mocha": true
   },
   "extends": "standard",
+  "noInlineConfig": true,
   "ignorePatterns": ["dist", "node_modules"]
 }
