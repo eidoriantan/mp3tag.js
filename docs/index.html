@@ -20,13 +20,13 @@
   <link href="https://kit.fontawesome.com/" rel="preconnect" crossorigin="anonymous">
   <link href="https://kit.fontawesome.com/" rel="dns-prefetch">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/default.min.css" rel="stylesheet" integrity="sha256-zcunqSn1llgADaIPFyzrQ8USIjX2VpuxHzUwYisOwo8=" crossorigin="anonymous">
+  <link href="/libraries/prismjs/prism.css" rel="stylesheet">
 
   <script src="https://kit.fontawesome.com/9cb9988aa5.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha256-/ijcOLwFf26xEYAjW75FizKVo5tnTYiQddPZoLUHHZ8=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha256-WqU1JavFxSAMcLP2WIOI+GB2zWmShMI82mTpLDcqFUg=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+  <script src="/libraries/prismjs/prism.js"></script>
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-161214318-3"></script>
   <script>
@@ -84,42 +84,56 @@
 
       <p class="lead">
         If you have <a href="https://www.npmjs.com/get-npm">npm</a>, you can also install the library by running the code:
-        <code class="bg-secondary text-white rounded-sm px-3 py-2">npm install --save mp3tag.js@latest</code>
       </p>
 
+      <code class="bg-secondary text-white rounded-sm px-3 py-2">npm install --save mp3tag.js@latest</code>
       <hr class="my-5">
     </div>
 
-    <div id="examples" class="container mb-5">
-      <h2>Examples</h2>
-      <h3>Browser</h3>
-      <pre>
-        <code>
-          &lt;input type="file" id="file"&gt;
-          &lt;script&gt;
-          const input = document.getElementById('file')
-          input.addEventListener('change', function () {
-            const reader = new FileReader()
-            reader.onload = function () {
-              const mp3tag = new MP3Tag(this.result)
-              mp3tag.read()
-              console.log(mp3tag.frames)
-            }
+    <div id="usage" class="container mb-5">
+      <h2>Usage</h2>
+      <div class="m-3 mb-5">
+        <h3>Browser</h3>
+        <pre>
+          <code class="language-javascript">
+            const input = document.getElementById('file')
+            input.addEventListener('change', function () {
+              const reader = new FileReader()
+              reader.onload = function () {
+                const mp3tag = new MP3Tag(this.result)
+                mp3tag.read()
+                console.log(mp3tag.frames)
+              }
 
-            if (this.files.length > 0) {
-              reader.readAsArrayBuffer(this.files[0])
-            }
-          })
-          &lt;/script&gt;
-        </code>
-      </pre>
+              if (this.files.length > 0) {
+                reader.readAsArrayBuffer(this.files[0])
+              }
+            })
+          </code>
+        </pre>
+      </div>
+
+      <div class="m-3 mb-5">
+        <h3>Node.js</h3>
+        <pre>
+          <code class="language-javascript">
+            const MP3Tag = require('mp3tag.js')
+            const fs = require('fs')
+
+            const buffer = fs.readFileSync('/path/to/mp3')
+            const mp3tag = new MP3Tag(buffer)
+            mp3tag.read()
+            console.log(mp3tag.frames)
+          </code>
+        </pre>
+      </div>
     </div>
 
     <div id="mp3tag" class="container mb-5">
       <h2>MP3Tag</h2>
       <code>const mp3tag = new MP3Tag(buffer[, <a href="#options">options</a>])</code>
 
-      <div class="container mt-4">
+      <div class="mt-4">
         <h3>Properties</h3>
         <div class="m-4">
           <h4>name</h4>
@@ -152,7 +166,7 @@
         </div>
       </div>
 
-      <div class="container mt-4">
+      <div class="mt-4">
         <h3>Methods</h3>
         <div class="m-4">
           <h4>constructor(buffer[, <a href="#options">options</a>])</h4>
@@ -167,8 +181,20 @@
 
         <div class="m-4">
           <h4>save()</h4>
+          <i class="text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></i>
+          <p class="lead">Validates the <code>MP3Tag.frames</code>, then writes them to the buffer. Returns the old buffer</p>
+        </div>
+
+        <div class="m-4">
+          <h4>addFrame(id, value)</h4>
           <i class="text-muted">Type: void</i>
-          <p class="lead">Validates the <code>MP3Tag.frames</code>, then writes them to the buffer</p>
+          <p class="lead">Simply pushes a frame</p>
+        </div>
+
+        <div class="m-4">
+          <h4>existsFrame(id)</h4>
+          <i class="text-muted">Type: boolean</i>
+          <p class="lead">Checks if a frame with this ID exists</p>
         </div>
 
         <div class="m-4">
@@ -183,7 +209,7 @@
 
     <div id="options" class="container mb-5">
       <h2>Options</h2>
-      <div class="container mt-4">
+      <div class="mt-4">
         <h3>Properties</h3>
         <div class="m-4">
           <h4>version</h4>
@@ -205,7 +231,7 @@
 
     <div id="frame-object" class="container">
       <h2>Frame Object</h2>
-      <div class="container mt-4">
+      <div class="mt-4">
         <h3>Properties</h3>
         <div class="m-4">
           <h4>id</h4>
@@ -231,10 +257,12 @@
           <p class="lead">Value of the frame (type depends on the frame specs)</p>
         </div>
       </div>
-
-      <hr class="my-5">
     </div>
   </main>
+
+  <footer class="bg-dark text-center text-white py-3 px-3">
+    <div class="text-muted">Copyright &copy; 2020, <a href="https://github.com/eidoriantan" class="text-white">@eidoriantan</a></div>
+  </footer>
 
   <script>hljs.initHighlightingOnLoad();</script>
 </body>
