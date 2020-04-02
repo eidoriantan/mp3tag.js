@@ -4,7 +4,7 @@ import TagError from '../error'
 
 const urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/
 const langRegex = /^([a-z]{3}|XXX)$/
-const stringRegex = /^(.+)$/
+const stringRegex = /^(.*)$/
 
 const year = '(\\d{4})'
 const month = '(0[1-9]|1[0-2])'
