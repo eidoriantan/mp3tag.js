@@ -569,7 +569,7 @@
 
   var urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/;
   var langRegex = /^([a-z]{3}|XXX)$/;
-  var stringRegex = /^(.+)$/;
+  var stringRegex = /^(.*)$/;
   var year = '(\\d{4})';
   var month = '(0[1-9]|1[0-2])';
   var day = '(0[1-9]|1\\d|2\\d|3[0-1])';
@@ -2355,7 +2355,7 @@
       }
 
       this.name = 'MP3Tag';
-      this.version = '1.0.0';
+      this.version = '1.0.1';
       this.buffer = buffer;
       this.options = options;
       this.tagger = {};
