@@ -200,7 +200,10 @@
         <div class="m-4">
           <h4>editFrame(id, value[, index = 0, replace = true])</h4>
           <i class="text-muted">Type: void</i>
-          <p class="lead">Edits the first found (`index=0`) frame found on the tag with the ID. If the old value is an array, this pushes the new value. Otherwise, replaces the old value (`replace=true`)</p>
+          <p class="lead">
+            Edits a frame found in a tag. By default, the first frame found on a tag will be edited, unless index is set other than 0.
+            If the old value is an array, the value is pushed. Otherwise, if replace is true, the old value will be overwritten.
+          </p>
         </div>
 
         <div class="m-4">
