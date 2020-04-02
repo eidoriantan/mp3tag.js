@@ -82,43 +82,55 @@ async function audioView (event) {
     mp3tag.frames.forEach(function (frame) {
       switch (frame.id) {
         case 'APIC':
+          if (Array.isArray(frame.value)) frame.value = frame.value[0]
           imageBuffer = frame.value.data
           imageType = frame.value.format
 
           $('#cover-preview').attr({
-            src: imageDataURL(imageBuffer, frame.value.format)
+            src: imageDataURL(imageBuffer, imageType)
           })
           break
 
         case 'TIT2':
-          $('#title').val(frame.value)
+          $('#title').val(Array.isArray(frame.value)
+            ? frame.value.join(SEPARATOR) : frame.value)
           break
 
         case 'TPE1':
-          $('#artist').val(frame.value.join(SEPARATOR))
+          $('#artist').val(Array.isArray(frame.value)
+            ? frame.value.join('SEPARATOR') : frame.value)
           break
 
         case 'TALB':
-          $('#album').val(frame.value)
+          $('#artist').val(Array.isArray(frame.value)
+            ? frame.value.join('SEPARATOR') : frame.value)
           break
 
         case 'TLAN':
-          $('#language').val(frame.value)
+          $('#language').val(Array.isArray(frame.value)
+            ? frame.value.join(SEPARATOR) : frame.value)
           break
 
-        case 'TRCK':
-          $('#track').val(frame.value.position + '/' + frame.value.total)
+        case 'TRCK': {
+          if (Array.isArray(frame.value)) frame.value = frame.value[0]
+          let string = frame.value.position
+          if (frame.value.total) string += '/' + frame.value.total
+          $('#track').val(string)
           break
+        }
 
         case 'TCON':
-          $('#genre').val(frame.value)
+          $('#genre').val(Array.isArray(frame.value)
+            ? frame.value.join(SEPARATOR) : frame.value)
           break
 
         case 'TSRC':
-          $('#isrc').val(frame.value)
+          $('#isrc').val(Array.isArray(frame.value)
+            ? frame.value.join(SEPARATOR) : frame.value)
           break
 
         case 'TDRC': {
+          if (Array.isArray(frame.value)) frame.value = frame.value[0]
           const result = timeRegex.exec(frame.value)
           if (frame.value[2]) $('#year').val(result[2])
           if (frame.value[4]) $('#month').val(result[4])
@@ -127,19 +139,23 @@ async function audioView (event) {
         }
 
         case 'TYER':
-          $('#year').val(frame.value)
+          $('#year').val(Array.isArray(frame.value)
+            ? frame.value.join(SEPARATOR) : frame.value)
           break
 
         case 'TDAT':
+          if (Array.isArray(frame.value)) frame.value = frame.value[0]
           $('#month').val(frame.value.substr(2, 2))
           $('#day').val(frame.value.substr(0, 2))
           break
 
         case 'TCOM':
-          $('#composer').val(frame.value.join(SEPARATOR))
+          $('#composer').val(Array.isArray(frame.value)
+            ? frame.value.join(SEPARATOR) : frame.value)
           break
 
         case 'USLT':
+          if (Array.isArray(frame.value)) frame.value = frame.value[0]
           $('#lyrics').val(frame.value.language + '|' +
             frame.value.descriptor + '|' + frame.value.text)
           break
