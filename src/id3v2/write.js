@@ -142,18 +142,7 @@ export function wxxxFrame (values, id, version) {
 }
 
 export function iplsFrame (values, id, version) {
-  const encoding = 1
-  const strBytes = []
-
-  values = Array.isArray(values[0]) ? values[0] : [values[0]]
-  values.forEach(function (value) {
-    const encoded = encodeString(value + '\0', 'utf-16')
-    encoded.forEach(byte => strBytes.push(byte))
-  })
-
-  const size = strBytes.length + 1
-  const header = getHeaderBytes(id, size, version)
-  return mergeBytes(header, encoding, strBytes)
+  return textFrame(values, id, 4)
 }
 
 export function langDescFrame (values, id, version) {
