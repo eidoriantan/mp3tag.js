@@ -245,8 +245,8 @@ export function ufidFrame (values, id, version) {
   values.forEach(function (value) {
     const ownerBytes = encodeString(value.ownerId + '\0', 'ascii')
     const idBytes = new Uint8Array(value.id)
-    const header = getHeaderBytes(id, ownerBytes.length + idBytes.length,
-      version)
+    const size = ownerBytes.length + idBytes.length
+    const header = getHeaderBytes(id, size, version)
     const merged = mergeBytes(header, ownerBytes, idBytes)
     merged.forEach(byte => bytes.push(byte))
   })
