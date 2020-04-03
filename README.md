@@ -1,5 +1,5 @@
 
-![mp3tag.js Banner](./assets/mp3tag-banner.png)
+[![mp3tag.js Banner](./assets/mp3tag-banner.png)](https://mp3tag.js.org)
 
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/eidoriantan/mp3tag.js/Node.js%20CI?label=GitHub%20Workflow)](https://github.com/eidoriantan/mp3tag.js/actions?query=workflow%3A%22Node.js+CI%22)
 [![Build Status](https://img.shields.io/travis/com/eidoriantan/mp3tag.js/master?label=Travis%20CI)](https://travis-ci.com/eidoriantan/mp3tag.js)
@@ -17,30 +17,28 @@ library and view it in action through an editor.
  * Read ID3v2.3 and ID3v2.4 tags
  * Write ID3v2.3 and ID3v2.4 tags
  * Remove tags
- * Write multiple frames with the same kind
  * Supports reading unsynchronization flag
- * Input validation following the standards
+ * Input validation according to the standards
 
 ## Installation
-
-You can clone this repository by using `git`
+You can download the built library at
+[GitHub releases](https://github.com/eidoriantan/mp3tag.js/releases) or you can
+build your own by cloning this repository using `git` then build it.
 
 ```shell
 git clone https://github.com/eidoriantan/mp3tag.js
+
+npm install
+npm run build
 ```
 
-You can also install this package by using `npm` to your projects by running
-this command:
+You can also install this package by using `npm`:
 
 ```shell
 npm install --save mp3tag.js
 ```
 
 ## Usage
-You should get the `ArrayBuffer` of the audio file you would like to modify.
-You can achieve this by using `FileReader` on your scripts.
-
-For example,
 ```html
 <input type="file" id="input-file" accept="audio/mpeg">
 <script>
@@ -58,8 +56,12 @@ inputFile.onchange = function () {
 </script>
 ```
 
-Please refer to [mp3tag.js.org](https://mp3tag.js.org) for documentations!
+Please refer to [mp3tag.js.org](https://mp3tag.js.org) for more documentations!
 
 ### Support
 If you had found a bug or any unexpected behavior, you can submit an issue
 through [GitHub issues](https://github.com/eidoriantan/mp3tag.js/issues).
+
+You can also show your support by becoming a patron!
+
+![Patreon](https://c5.patreon.com/external/logo/become_a_patron_button.png)
