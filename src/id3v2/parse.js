@@ -115,15 +115,15 @@ export function apicFrame (view, version) {
   const mime = view.getCString(1, 'ascii')
   const type = view.getUint8(mime.length + 1)
   const desc = view.getCString(mime.length + 2, encoding)
-  const imgOffset = mime.length + desc.length + 2
-  const imgLength = view.byteLength - imgOffset
-  const img = view.getUint8(imgOffset, imgLength)
+  const dataOffset = mime.length + desc.length + 2
+  const dataLength = view.byteLength - dataOffset
+  const data = view.getUint8(dataOffset, dataLength)
 
   return {
     format: mime.string,
-    type: type,
+    type,
     description: desc.string,
-    data: img
+    data
   }
 }
 
@@ -134,13 +134,13 @@ export function geobFrame (view, version) {
   const desc = view.getCString(fname.length + mime.length + 1, encoding)
   const binOffset = mime.length + fname.length + desc.length + 1
   const binLength = view.byteLength - binOffset
-  const binObject = view.getUint8(binOffset, binLength)
+  const object = view.getUint8(binOffset, binLength)
 
   return {
     format: mime.string,
     filename: fname.string,
     description: desc.string,
-    object: binObject
+    object
   }
 }
 
@@ -148,10 +148,7 @@ export function ufidFrame (view, version) {
   const ownerId = view.getCString(0, 'ascii')
   const id = view.getUint8(ownerId.length, view.byteLength - ownerId.length)
 
-  return {
-    ownerId: ownerId.string,
-    id: id
-  }
+  return { ownerId: ownerId.string, id }
 }
 
 export function userFrame (view, version) {
@@ -187,25 +184,18 @@ export function privFrame (view, version) {
   const ownerId = view.getCString(0, 'ascii')
   const data = view.getUint8(ownerId.length, view.byteLength - ownerId.length)
 
-  return {
-    ownerId: ownerId.string,
-    data: data
-  }
+  return { ownerId: ownerId.string, data }
 }
 
 export function signFrame (view, version) {
-  const groupId = view.getUint8(0)
-  const sign = view.getUint8(1, view.byteLength - 1)
+  const group = view.getUint8(0)
+  const signature = view.getUint8(1, view.byteLength - 1)
 
-  return {
-    group: groupId,
-    signature: sign
-  }
+  return { group, signature }
 }
 
 export function seekFrame (view, version) {
-  const offset = view.getUint32(0)
-  return offset
+  return view.getUint32(0)
 }
 
 export function syltFrame (view, version) {
@@ -233,9 +223,9 @@ export function syltFrame (view, version) {
   }
 
   return {
-    language: language,
-    format: format,
-    type: type,
+    language,
+    format,
+    type,
     descriptor: descriptor.string,
     lyrics: text
   }
