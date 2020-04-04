@@ -295,6 +295,10 @@ export function apicFrame (values, version) {
       throw new TagError(203, 'Format should be an image')
     }
 
+    if (value.type > 21 || value.type < 0) {
+      throw new TagError(203, 'Type should be in the range of 0 - 21')
+    }
+
     if (value.description.length > 64) {
       throw new TagError(203, 'Description should not exceed 64')
     }
