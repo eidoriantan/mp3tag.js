@@ -102,7 +102,7 @@ async function audioView (event) {
           break
 
         case 'TALB':
-          $('#artist').val(Array.isArray(frame.value)
+          $('#album').val(Array.isArray(frame.value)
             ? frame.value.join('SEPARATOR') : frame.value)
           break
 
