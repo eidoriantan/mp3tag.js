@@ -148,6 +148,9 @@ export function iplsFrame (values, id, version) {
 export function langDescFrame (values, id, version) {
   const bytes = []
   values.forEach(function (value) {
+    value.language = value.language || 'eng'
+    value.descriptor = value.descriptor || ''
+
     let encoding = 0
     const langBytes = encodeString(value.language, 'ascii')
     let descBytes, textBytes
@@ -178,6 +181,8 @@ export function langDescFrame (values, id, version) {
 export function apicFrame (values, id, version) {
   const bytes = []
   values.forEach(function (value) {
+    value.type = value.type || 3
+
     let encoding = 0
     const mimeBytes = encodeString(value.format + '\0', 'ascii')
     const imageBytes = new Uint8Array(value.data)
@@ -257,6 +262,7 @@ export function ufidFrame (values, id, version) {
 export function userFrame (values, id, version) {
   const bytes = []
   values.forEach(function (value) {
+    value.language = value.language || 'eng'
     let encoding = 0
     const langBytes = encodeString(value.language, 'ascii')
     let textBytes
@@ -343,6 +349,10 @@ export function signFrame (values, id, version) {
 export function syltFrame (values, id, version) {
   const bytes = []
   values.forEach(function (value) {
+    value.language = value.language || 'eng'
+    value.descriptor = value.descriptor || ''
+    value.type = value.type || 1
+
     let encoding = 0
     const langBytes = encodeString(value.language, 'ascii')
     let descBytes = []
@@ -362,12 +372,14 @@ export function syltFrame (values, id, version) {
     const regex = /^(\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)/
     let lyricsBytes = []
     value.lyrics.replace(/\r\n/, '\n').split('\n').forEach(function (line) {
-      const result = regex.exec(line)
-      const time = parseInt(result[1].replace(/[^0-9]/g, ''))
-      const string = encodeString((result[2] || '') + '\n\0', 'ascii')
-      const timeBytes = new BufferView(4)
-      timeBytes.setUint32(0, time)
-      lyricsBytes = mergeBytes(lyricsBytes, string, timeBytes.getUint8(0, 4))
+      if (line !== '') {
+        const result = regex.exec(line)
+        const time = parseInt(result[1].replace(/[^0-9]/g, ''))
+        const string = encodeString((result[2] || '') + '\n\0', 'ascii')
+        const timeBytes = new BufferView(4)
+        timeBytes.setUint32(0, time)
+        lyricsBytes = mergeBytes(lyricsBytes, string, timeBytes.getUint8(0, 4))
+      }
     })
 
     const size = descBytes.length + lyricsBytes.length + 6

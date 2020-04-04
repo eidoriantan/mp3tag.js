@@ -248,6 +248,7 @@ export function langDescFrame (values, version) {
     }
 
     value.language = value.language || 'eng'
+    value.descriptor = value.descriptor || ''
     if (typeof value.language !== 'string' ||
       typeof value.descriptor !== 'string' ||
       typeof value.text !== 'string') {
@@ -280,6 +281,7 @@ export function langDescFrame (values, version) {
 export function apicFrame (values, version) {
   const descriptions = []
   values.forEach(function (value) {
+    value.type = value.type || 3
     if (typeof value.format !== 'string' ||
       typeof value.description !== 'string' ||
       typeof value.type !== 'number') {
@@ -484,6 +486,10 @@ export function syltFrame (values, version) {
       throw new TagError('Value is not an object')
     }
 
+    value.language = value.language || 'eng'
+    value.descriptor = value.descriptor || ''
+    value.type = value.type || 1
+
     if (typeof value.language !== 'string' ||
       typeof value.type !== 'number' ||
       typeof value.descriptor !== 'string' ||
@@ -495,7 +501,7 @@ export function syltFrame (values, version) {
       throw new TagError(203, 'Language does not follow ISO 639-2')
     }
 
-    const regex = /^(\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)/
+    const regex = /^((\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)|)/
     const valid = value.lyrics.split('\n').every(entry => regex.test(entry))
 
     if (!valid) {
