@@ -472,3 +472,43 @@ export function signFrame (values, version) {
 
   return true
 }
+
+export function syltFrame (values, version) {
+  const sylts = []
+  values.forEach(function (value) {
+    if (typeof value !== 'object') {
+      throw new TagError('Value is not an object')
+    }
+
+    if (typeof value.language !== 'string' ||
+      typeof value.type !== 'number' ||
+      typeof value.descriptor !== 'string' ||
+      typeof value.lyrics !== 'string') {
+      throw new TagError('Language/Type/Descriptor is invalid')
+    }
+
+    if (!value.language.match(langRegex)) {
+      throw new TagError(203, 'Language does not follow ISO 639-2')
+    }
+
+    const regex = /^(\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)/
+    const valid = value.lyrics.split('\n').every(entry => regex.test(entry))
+
+    if (!valid) {
+      throw new TagError(203, 'Lyrics do not follow format: [mm:ss.xxx] string')
+    }
+
+    const checkObj = {
+      language: value.language,
+      descriptor: value.descriptor
+    }
+
+    if (includes(sylts, checkObj)) {
+      throw new TagError('1 SYLT with the same language and descriptor only')
+    } else {
+      sylts.push(checkObj)
+    }
+  })
+
+  return true
+}

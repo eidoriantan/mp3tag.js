@@ -60,6 +60,13 @@ export const SIGN = {
   version: [4]
 }
 
+export const SYLT = {
+  parse: parsers.syltFrame,
+  validate: validators.syltFrame,
+  write: writers.syltFrame,
+  version: [3, 4]
+}
+
 export const TALB = {
   parse: parsers.textFrame,
   validate: validators.textFrame,

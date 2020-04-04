@@ -339,3 +339,46 @@ export function signFrame (values, id, version) {
 
   return bytes
 }
+
+export function syltFrame (values, id, version) {
+  const bytes = []
+  values.forEach(function (value) {
+    let encoding = 0
+    const langBytes = encodeString(value.language, 'ascii')
+    let descBytes = []
+
+    switch (version) {
+      case 3:
+        encoding = 1
+        descBytes = encodeString(value.descriptor + '\0', 'utf-16')
+        break
+
+      case 4:
+        encoding = 3
+        descBytes = encodeString(value.descriptor + '\0', 'utf-8')
+        break
+    }
+
+    const regex = /^(\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)/
+    let lyricsBytes = []
+    value.lyrics.replace(/\r\n/, '\n').split('\n').forEach(function (line) {
+      const result = regex.exec(line)
+      const time = parseInt(result[1].replace(/[^0-9]/g, ''))
+      const string = encodeString((result[2] || '') + '\n\0', 'ascii')
+      const timeBytes = new BufferView(4)
+      timeBytes.setUint32(0, time)
+      lyricsBytes = mergeBytes(lyricsBytes, string, timeBytes.getUint8(0, 4))
+    })
+
+    const size = descBytes.length + lyricsBytes.length + 6
+    const header = getHeaderBytes(id, size, version)
+    const merged = mergeBytes(
+      header, encoding, langBytes, value.format, value.type,
+      descBytes, lyricsBytes
+    )
+
+    merged.forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}

@@ -1,4 +1,5 @@
 
+import BufferView from '../viewer'
 import TagError from '../error'
 
 const ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8']
@@ -205,4 +206,37 @@ export function signFrame (view, version) {
 export function seekFrame (view, version) {
   const offset = view.getUint32(0)
   return offset
+}
+
+export function syltFrame (view, version) {
+  const encoding = ENCODINGS[view.getUint8(0)]
+  const language = view.getString(1, 3, 'ascii').string
+  const format = view.getUint8(4)
+  const type = view.getUint8(5)
+  const descriptor = view.getCString(6, encoding)
+  const lyricsOffset = descriptor.length + 6
+  const lyricsLength = view.byteLength - lyricsOffset
+  const lyrics = view.getUint8(lyricsOffset, lyricsLength)
+  let text = ''
+
+  for (let i = 0; i < lyrics.length; i += 4) {
+    const lyricsView = new BufferView(lyrics)
+    const line = lyricsView.getCString(i, 'ascii')
+    const time = lyricsView.getUint32(i + line.length)
+    const minutes = Math.floor(time / 60000).toString()
+    let seconds = Math.floor(time % 60000 / 1000).toString()
+    seconds = seconds.length === 1 ? '0' + seconds.length : seconds
+    let ms = (time % 1000).toString()
+    while (ms.length < 3) ms = '0' + ms
+    text += `[${minutes}:${seconds}.${ms}] ${line.string}`
+    i += line.length
+  }
+
+  return {
+    language: language,
+    format: format,
+    type: type,
+    descriptor: descriptor.string,
+    lyrics: text
+  }
 }
