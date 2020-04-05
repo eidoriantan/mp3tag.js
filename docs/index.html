@@ -184,13 +184,19 @@
         <div class="m-4">
           <h4>save()</h4>
           <i class="text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></i>
-          <p class="lead">Validates the <code>MP3Tag.frames</code>, then writes them to the buffer. Returns the old buffer</p>
+          <p class="lead">
+            Validates the <code>MP3Tag.frames</code>, then writes them to the
+            buffer. Returns the old buffer
+          </p>
         </div>
 
         <div class="m-4">
           <h4>getFrames()</h4>
           <i class="text-muted">Type: object</i>
-          <p class="lead">Returns object containing the id and an array of its values from each of its frames</p>
+          <p class="lead">
+            Returns object containing the id and an array of its
+            values from each of its frames
+          </p>
         </div>
 
         <div class="m-4">
@@ -200,11 +206,23 @@
         </div>
 
         <div class="m-4">
+          <h4>removeFrame(id[, index = null])</h4>
+          <i class="text-muted">Type: void</i>
+          <p class="lead">
+            Removes the frame found in a tag. By default, this removes all the
+            frames with the ID. If the index was set, the indexed frame will be
+            removed.
+          </p>
+        </div>
+
+        <div class="m-4">
           <h4>editFrame(id, value[, index = 0, replace = true])</h4>
           <i class="text-muted">Type: void</i>
           <p class="lead">
-            Edits a frame found in a tag. By default, the first frame found on a tag will be edited, unless index is set other than 0.
-            If the old value is an array, the value is pushed. Otherwise, if replace is true, the old value will be overwritten.
+            Edits a frame found in a tag. By default, the first frame found on
+            a tag will be edited, unless index is set other than 0. If the old
+            value is an array, the value is pushed. Otherwise, if replace is
+            true, the old value will be overwritten.
           </p>
         </div>
 
