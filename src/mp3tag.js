@@ -41,6 +41,8 @@ export default class MP3Tag {
 
   addFrame (id, value) { return this.tagger.addFrame(id, value) }
 
+  removeFrame (id, index = null) { return this.tagger.removeFrame(id, index) }
+
   editFrame (id, value, index = 0, replace = true) {
     return this.tagger.editFrame(id, value, index, replace)
   }

@@ -135,6 +135,24 @@ export default class ID3v2 {
 
   addFrame (id, value) { this.frames.push({ id: id, value: value }) }
 
+  removeFrame (id, index) {
+    let array = this.frames
+    let counts = 0
+
+    this.frames.forEach(function (frame, i) {
+      if (frame.id === id) {
+        if (index === null) array[i] = undefined
+        else {
+          if (counts === index) array[i] = undefined
+          counts++
+        }
+      }
+    })
+
+    array = array.filter(elem => elem !== undefined)
+    this.frames = array
+  }
+
   editFrame (id, value, index, replace) {
     const array = this.frames
     let counts = 0
