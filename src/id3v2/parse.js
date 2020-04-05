@@ -230,3 +230,7 @@ export function syltFrame (view, version) {
     lyrics: text
   }
 }
+
+export function mcdiFrame (view, version) {
+  return view.getUint8(0, view.byteLength)
+}

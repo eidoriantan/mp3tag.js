@@ -522,3 +522,18 @@ export function syltFrame (values, version) {
 
   return true
 }
+
+export function mcdiFrame (values, version) {
+  if (values.length > 1) {
+    throw new TagError(203, 'Multiple `MCDI` frame are not allowed')
+  }
+
+  values.forEach(function (value) {
+    if (!(value instanceof ArrayBuffer) && !Array.isArray(value) &&
+      !ArrayBuffer.isView(value)) {
+      throw new TagError(203, 'Value should be an ArrayBuffer or array')
+    }
+  })
+
+  return true
+}

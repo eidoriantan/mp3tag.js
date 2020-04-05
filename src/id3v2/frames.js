@@ -35,6 +35,13 @@ export const IPLS = {
   version: [3]
 }
 
+export const MCDI = {
+  parse: parsers.mcdiFrame,
+  validate: validators.mcdiFrame,
+  write: writers.mcdiFrame,
+  version: [3, 4]
+}
+
 export const OWNE = {
   parse: parsers.owneFrame,
   validate: validators.owneFrame,
