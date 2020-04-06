@@ -3,9 +3,14 @@ import { decodeUTF8 } from './utils/strings'
 
 export default class BufferView extends DataView {
   constructor (...params) {
-    if (typeof params[0] === 'number') { params[0] = new Uint8Array(params[0]) }
-    if (Array.isArray(params[0])) { params[0] = new Uint8Array(params[0]) }
-    if (ArrayBuffer.isView(params[0])) { params[0] = params[0].buffer }
+    if (typeof params[0] === 'number' || Array.isArray(params[0])) {
+      params[0] = new Uint8Array(params[0])
+    }
+
+    if (ArrayBuffer.isView(params[0])) {
+      params[0] = params[0].buffer
+    }
+
     super(...params)
   }
 
