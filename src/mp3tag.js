@@ -2,14 +2,15 @@
 import ID3v2 from './id3v2'
 import TagError from './error'
 
+import { isBuffer } from './utils/types'
+
 export default class MP3Tag {
   get frames () { return this.tagger.frames }
   set frames (value) { this.tagger.frames = value }
 
   constructor (buffer, options = {}) {
-    if (!(buffer instanceof ArrayBuffer) && (typeof Buffer !== 'undefined'
-      ? !(buffer instanceof Buffer) : true)) {
-      throw new TypeError('buffer is not an instance of ArrayBuffer or Buffer')
+    if (!isBuffer(buffer)) {
+      throw new TypeError('buffer is not an instance of Buffer')
     }
 
     this.name = 'MP3Tag'

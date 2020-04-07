@@ -1,7 +1,16 @@
 
 import { decodeUTF8 } from './utils/strings'
+import { isBuffer } from './utils/types'
 
 export default class BufferView extends DataView {
+  static isViewable (param) {
+    if (isBuffer(param) || Array.isArray(param) || ArrayBuffer.isView(param)) {
+      return true
+    }
+
+    return false
+  }
+
   constructor (...params) {
     if (typeof params[0] === 'number' || Array.isArray(params[0])) {
       params[0] = new Uint8Array(params[0])

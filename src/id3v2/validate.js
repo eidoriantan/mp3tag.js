@@ -1,5 +1,6 @@
 
 import { includes } from '../utils/object'
+import BufferView from '../viewer'
 import TagError from '../error'
 
 const urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/
@@ -288,9 +289,8 @@ export function apicFrame (values, version) {
       throw new TagError(203, 'Format/type/description is invalid')
     }
 
-    if (!(value.data instanceof ArrayBuffer) && !Array.isArray(value.data) &&
-      !ArrayBuffer.isView(value.data)) {
-      throw new TagError(203, 'Image data should be ArrayBuffer or an array')
+    if (!BufferView.isViewable(value.data)) {
+      throw new TagError(203, 'Image data should be viewable')
     }
 
     if (!value.format.match(/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/)) {
@@ -324,10 +324,8 @@ export function geobFrame (values, version) {
       throw new TagError(203, 'Format/filename/description is not a string')
     }
 
-    if (!(value.object instanceof ArrayBuffer) &&
-      !Array.isArray(value.object) &&
-      !ArrayBuffer.isView(value.object)) {
-      throw new TagError(203, 'Object data should be ArrayBuffer or an array')
+    if (!BufferView.isViewable(value.object)) {
+      throw new TagError(203, 'Object data should be viewable')
     }
 
     if (descriptions.includes(value.description)) {
@@ -351,9 +349,8 @@ export function ufidFrame (values, version) {
       throw new TagError(203, 'ownerId should not be blank')
     }
 
-    if (!(value.id instanceof ArrayBuffer) && !Array.isArray(value.id) &&
-      !ArrayBuffer.isView(value.id)) {
-      throw new TagError(203, 'id should be ArrayBuffer or an array')
+    if (!BufferView.isViewable(value.id)) {
+      throw new TagError(203, 'id should be viewable')
     }
 
     const idLength = value.id.byteLength || value.id.length || 0
@@ -437,9 +434,8 @@ export function privFrame (values, version) {
       throw new TagError(203, 'ownerId is an invalid URL')
     }
 
-    if (!(value.data instanceof ArrayBuffer) && !Array.isArray(value.data) &&
-      !ArrayBuffer.isView(value.data)) {
-      throw new TagError(203, 'Data should be an ArrayBuffer or array')
+    if (!BufferView.isViewable(value.data)) {
+      throw new TagError(203, 'Data should be viewable')
     }
 
     if (includes(contents, value.data)) {
@@ -463,10 +459,8 @@ export function signFrame (values, version) {
       throw new TagError(203, 'Group ID should be in the range of 0 - 255')
     }
 
-    if (!(value.signature instanceof ArrayBuffer) &&
-      !Array.isArray(value.signature) &&
-      !ArrayBuffer.isView(value.signature)) {
-      throw new TagError(203, 'Signature should be an ArrayBuffer or array')
+    if (!BufferView.isViewable(value.signature)) {
+      throw new TagError(203, 'Signature should be viewable')
     }
 
     if (includes(signs, value)) {
@@ -529,9 +523,8 @@ export function mcdiFrame (values, version) {
   }
 
   values.forEach(function (value) {
-    if (!(value instanceof ArrayBuffer) && !Array.isArray(value) &&
-      !ArrayBuffer.isView(value)) {
-      throw new TagError(203, 'Value should be an ArrayBuffer or array')
+    if (!BufferView.isViewable(value)) {
+      throw new TagError(203, 'Value should be viewable')
     }
   })
 
