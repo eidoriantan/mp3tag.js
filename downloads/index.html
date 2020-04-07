@@ -37,6 +37,7 @@
     })
   </script>
 
+  <script src="/scripts/downloads.js"></script>
   <title>Downloads | mp3tag.js</title>
 </head>
 
@@ -87,36 +88,30 @@
           </tr>
         </thead>
 
-        <tbody>
-          <tr class="table-primary">
-            <td>v1.0.1 (<a href="https://github.com/eidoriantan/mp3tag.js/releases/tag/v1.0.1">Release page</a>)</td>
-            <td>
-              <a href="https://github.com/eidoriantan/mp3tag.js/archive/v1.0.1.zip" class="btn btn-primary" role="button">
-                <i class="fas fa-code" aria-hidden="true"></i> Source Codes
-              </a>
-
-              <a href="https://github.com/eidoriantan/mp3tag.js/releases/download/v1.0.1/mp3tag.js-1.0.1.zip" class="btn btn-secondary" role="button">
-                <i class="fas fa-download" aria-hidden="true"></i> Distributable
-              </a>
-            </td>
-          </tr>
-
-          <tr>
-            <td>v1.0.0 (<a href="https://github.com/eidoriantan/mp3tag.js/releases/tag/v1.0.0">Release page</a>)</td>
-            <td>
-              <a href="https://github.com/eidoriantan/mp3tag.js/archive/v1.0.0.zip" class="btn btn-primary" role="button">
-                <i class="fas fa-code" aria-hidden="true"></i> Source Codes
-              </a>
-
-              <a href="https://github.com/eidoriantan/mp3tag.js/releases/download/v1.0.0/mp3tag.js-1.0.0.zip" class="btn btn-secondary" role="button">
-                <i class="fas fa-download" aria-hidden="true"></i> Distributable
-              </a>
-            </td>
-          </tr>
+        <tbody id="tbody">
         </tbody>
       </table>
     </div>
   </main>
+
+  <template id="release-item-template">
+    <tr data-temp="row">
+      <td>
+        <span data-temp="name"></span>
+        (<a href="" data-temp="page">Release page</a>)
+      </td>
+
+      <td>
+        <a href="" class="btn btn-primary" role="button" data-temp="source-download">
+          <i class="fas fa-code" aria-hidden="true"></i> Source Codes
+        </a>
+
+        <a href="" class="btn btn-secondary" role="button" data-temp="distributable-download">
+          <i class="fas fa-download" aria-hidden="true"></i> Distributable
+        </a>
+      </td>
+    </tr>
+  </template>
 
   <footer class="bg-dark text-center text-white py-3 px-3">
     <div class="text-muted">Copyright &copy; 2020, <a href="https://github.com/eidoriantan" class="text-white">@eidoriantan</a></div>
