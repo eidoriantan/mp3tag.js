@@ -27,7 +27,7 @@ build your own by cloning this repository using `git` then build it.
 
 ```shell
 git clone https://github.com/eidoriantan/mp3tag.js
-
+cd ./mp3tag.js
 npm install
 npm run build
 ```
