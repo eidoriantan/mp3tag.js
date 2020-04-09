@@ -27,6 +27,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha256-/ijcOLwFf26xEYAjW75FizKVo5tnTYiQddPZoLUHHZ8=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha256-WqU1JavFxSAMcLP2WIOI+GB2zWmShMI82mTpLDcqFUg=" crossorigin="anonymous"></script>
+  <script src="/scripts/contributors.js"></script>
 
   <script src="https://www.googletagmanager.com/gtag/js?id=UA-161214318-3" async></script>
   <script>
@@ -130,14 +131,16 @@
     </div>
 
     <div class="text-center">
-      <h1 class="display-4 mb-3">Author and Contributors</h1>
-      <div class="d-flex flex-row justify-content-center flex-wrap mt-5">
-        <a href="https://github.com/eidoriantan">
-          <img src="https://avatars1.githubusercontent.com/u/22261916?s=128" alt="Adriane Justine Tan" title="Adriane Justine Tan" class="rounded-circle mx-3">
-        </a>
-      </div>
+      <h1 class="display-4 mb-3">Contributors</h1>
+      <div id="contributors" class="d-flex flex-row flex-wrap justify-content-center"></div>
     </div>
   </main>
+
+  <template id="contributor-template">
+    <a href="" data-temp="user-link">
+      <img src="" alt="" title="" width="128" height="128" class="rounded-circle mx-3" data-temp="user-image">
+    </a>
+  </template>
 
   <footer class="footer bg-dark text-center text-white py-3 px-3">
     <div class="text-muted">Copyright &copy; 2020, <a href="https://github.com/eidoriantan" class="text-white">@eidoriantan</a></div>
