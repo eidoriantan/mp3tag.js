@@ -18,11 +18,13 @@
   overflow-y: scroll;
 }
 
-.footer {
-  position: absolute;
-  width: 100%;
-  bottom: 0;
+.main {
+  padding-top: 32px;
+  padding-bottom: 32px;
+  min-height: calc(100vh - 112px);
 }
+
+.footer { height: 56px; }
 
 .pointer { cursor: pointer !important; }
 .user-select-none { user-select: none !important; }

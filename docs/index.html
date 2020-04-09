@@ -78,8 +78,8 @@
     </nav>
   </header>
 
-  <main class="py-5">
-    <div id="installation" class="container mb-5">
+  <main class="main container">
+    <div id="installation">
       <h3>Installation</h3>
       <p class="lead">
         You can install the library by downloading the distributed package and including them on your scripts.
@@ -94,46 +94,43 @@
       <hr class="my-5">
     </div>
 
-    <div id="usage" class="container mb-5">
+    <div id="usage">
       <h2>Usage</h2>
-      <div class="m-3 mb-5">
-        <h3>Browser</h3>
-        <pre>
-          <code class="language-javascript">
-            const input = document.getElementById('file')
-            input.addEventListener('change', function () {
-              const reader = new FileReader()
-              reader.onload = function () {
-                const mp3tag = new MP3Tag(this.result)
-                mp3tag.read()
-                console.log(mp3tag.frames)
-              }
+      <h3>Browser</h3>
+      <pre class="mb-5">
+        <code class="language-javascript">
+          const input = document.getElementById('file')
+          input.addEventListener('change', function () {
+            const reader = new FileReader()
+            reader.onload = function () {
+              const mp3tag = new MP3Tag(this.result)
+              mp3tag.read()
+              console.log(mp3tag.frames)
+            }
 
-              if (this.files.length > 0) {
-                reader.readAsArrayBuffer(this.files[0])
-              }
-            })
-          </code>
-        </pre>
-      </div>
+            if (this.files.length > 0) {
+              reader.readAsArrayBuffer(this.files[0])
+            }
+          })
+        </code>
+      </pre>
 
-      <div class="m-3 mb-5">
-        <h3>Node.js</h3>
-        <pre>
-          <code class="language-javascript">
-            const MP3Tag = require('mp3tag.js')
-            const fs = require('fs')
+      <h3>Node.js</h3>
+      <pre>
+        <code class="language-javascript">
+          const MP3Tag = require('mp3tag.js')
+          const fs = require('fs')
 
-            const buffer = fs.readFileSync('/path/to/mp3')
-            const mp3tag = new MP3Tag(buffer)
-            mp3tag.read()
-            console.log(mp3tag.frames)
-          </code>
-        </pre>
-      </div>
+          const buffer = fs.readFileSync('/path/to/mp3')
+          const mp3tag = new MP3Tag(buffer)
+          mp3tag.read()
+          console.log(mp3tag.frames)
+        </code>
+      </pre>
+      <hr class="my-5">
     </div>
 
-    <div id="mp3tag" class="container mb-5">
+    <div id="mp3tag">
       <h2>MP3Tag</h2>
       <code>const mp3tag = new MP3Tag(buffer[, <a href="#options">options</a>])</code>
 
