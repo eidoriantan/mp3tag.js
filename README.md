@@ -7,18 +7,20 @@
 [![npm](https://img.shields.io/npm/v/mp3tag.js/latest?registry_uri=https%3A%2F%2Fregistry.npmjs.com%2Fmp3tag.js&label=mp3tag.js@latest)](https://npmjs.com/mp3tag.js)
 
 **mp3tag.js** is an open sourced JavaScript library used to edit the metadata of
-audio files. It currently can read both ID3v2.3 and ID3v2.4 tags, write tags and
-remove tags.
+audio files. It currently supports ID3v2.3 and ID3v2.4 tags.
 
 Visit [https://mp3tag.js.org](https://mp3tag.js.org) to learn more about the
-library and view it in action through an editor.
+library and view it in action through an [editor](https://mp3tag.js.org/editor).
+
+The website is also open sourced and can be viewed at the
+[gh-pages](https://github.com/eidoriantan/mp3tag.js/tree/gh-pages) branch.
 
 ### Features
  * Read ID3v2.3 and ID3v2.4 tags
  * Write ID3v2.3 and ID3v2.4 tags
  * Remove tags
  * Supports reading unsynchronization flag
- * Input validation according to the standards
+ * Input validation according to [id3.org](http://id3.org) standards
 
 ## Installation
 You can download the built library at
@@ -56,11 +58,15 @@ inputFile.onchange = function () {
 </script>
 ```
 
-Please refer to [mp3tag.js.org](https://mp3tag.js.org) for more documentations!
+If you want a details documentations, please visit the site
+[mp3tag.js.org](https://mp3tag.js.org/docs).
 
 ### Support
 If you had found a bug or any unexpected behavior, you can submit an issue
 through [GitHub issues](https://github.com/eidoriantan/mp3tag.js/issues).
+
+If you wanted to contribute to this repository, refer to
+[CONTRIBUTING.md](./CONTRIBUTING.md).
 
 You can also show your support by becoming a patron!
 
