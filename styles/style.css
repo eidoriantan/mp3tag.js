@@ -18,6 +18,12 @@
   overflow-y: scroll;
 }
 
+.footer {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+}
+
 .pointer { cursor: pointer !important; }
 .user-select-none { user-select: none !important; }
 
