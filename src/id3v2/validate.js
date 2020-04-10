@@ -530,3 +530,21 @@ export function mcdiFrame (values, version) {
 
   return true
 }
+
+export function sytcFrame (values, version) {
+  if (values.length > 1) {
+    throw new TagError(203, 'Multiple `SYTC` frame are not allowed')
+  }
+
+  values.forEach(function (value) {
+    if (value.format > 2 || value.format < 1) {
+      throw new TagError(203, 'Invalid timestamp format')
+    }
+
+    if (!BufferView.isViewable(value.data)) {
+      throw new TagError(203, 'Value data should be viewable')
+    }
+  })
+
+  return true
+}

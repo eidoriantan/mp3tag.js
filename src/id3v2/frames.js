@@ -74,6 +74,13 @@ export const SYLT = {
   version: [3, 4]
 }
 
+export const SYTC = {
+  parse: parsers.sytcFrame,
+  validate: validators.sytcFrame,
+  write: writers.sytcFrame,
+  version: [3, 4]
+}
+
 export const TALB = {
   parse: parsers.textFrame,
   validate: validators.textFrame,

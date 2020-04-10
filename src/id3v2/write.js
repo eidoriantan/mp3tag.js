@@ -405,3 +405,14 @@ export function mcdiFrame (values, id, version) {
 
   return bytes
 }
+
+export function sytcFrame (values, id, version) {
+  const bytes = []
+  values.forEach(function (value) {
+    const header = getHeaderBytes(id, value.data.length + 1, version)
+    const merged = mergeBytes(header, value.format, value.data)
+    merged.forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}

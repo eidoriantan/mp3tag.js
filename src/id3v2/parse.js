@@ -233,3 +233,10 @@ export function syltFrame (view, version) {
 export function mcdiFrame (view, version) {
   return view.getUint8(0, view.byteLength)
 }
+
+export function sytcFrame (view, version) {
+  return {
+    format: view.getUint8(0),
+    data: view.getUint8(1, view.byteLength - 1)
+  }
+}
