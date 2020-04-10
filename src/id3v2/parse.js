@@ -153,11 +153,10 @@ export function ufidFrame (view, version) {
 
 export function userFrame (view, version) {
   const encoding = ENCODINGS[view.getUint8(0)]
-  const text = view.getString(4, view.byteLength - 4, encoding)
 
   return {
     language: view.getString(1, 3, 'ascii').string,
-    text: text.string
+    text: view.getString(4, view.byteLength - 4, encoding).string
   }
 }
 
@@ -188,10 +187,10 @@ export function privFrame (view, version) {
 }
 
 export function signFrame (view, version) {
-  const group = view.getUint8(0)
-  const signature = view.getUint8(1, view.byteLength - 1)
-
-  return { group, signature }
+  return {
+    group: view.getUint8,
+    signature: view.getUint8(1, view.byteLength - 1)
+  }
 }
 
 export function seekFrame (view, version) {
