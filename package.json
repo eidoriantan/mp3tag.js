@@ -1,15 +1,15 @@
 {
   "name": "mp3tag.js",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "MP3 tagging written in pure JavaScript",
   "main": "dist/mp3tag.js",
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.9.0",
-    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
     "@rollup/plugin-commonjs": "^11.0.2",
     "@rollup/plugin-node-resolve": "^7.1.1",
-    "core-js": "^3.6.4",
+    "core-js": "^3.6.5",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.20.2",
