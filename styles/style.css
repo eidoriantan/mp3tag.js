@@ -42,3 +42,19 @@
 .zindex-modal { z-index: 1050 !important; }
 .zindex-popover { z-index: 1060 !important; }
 .zindex-tooltip { z-index: 1070 !important; }
+
+@media (min-width: 576px) {
+  .position-sm-fixed { position: fixed !important; }
+}
+
+@media (min-width: 768px) {
+  .position-md-fixed { position: fixed !important; }
+}
+
+@media (min-width: 992px) {
+  .position-lg-fixed { position: fixed !important; }
+}
+
+@media (min-width: 1200px) {
+  .position-xl-fixed { position: fixed !important; }
+}
