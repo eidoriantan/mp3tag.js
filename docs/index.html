@@ -45,7 +45,7 @@
 </head>
 
 <body>
-  <header class="navbar navbar-expand-md navbar-dark bg-dark">
+  <header class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
     <a href="https://mp3tag.js.org" class="navbar-brand">
       <img src="/images/logo.png" class="d-inline-block align-top" alt="mp3tag.js Logo">
       mp3tag.js
@@ -78,217 +78,219 @@
     </nav>
   </header>
 
-  <main class="main container">
-    <div id="installation">
-      <h3>Installation</h3>
-      <p class="lead">
-        You can install the library by downloading the distributed package and including them on your scripts.
-        This library does not require any more dependencies. <a href="/downloads/">Go to Downloads page</a>
-      </p>
+  <main class="main container row no-gutters">
+    <aside class="col-3 position-fixed">
+      <div class="list-group">
+        <a href="#installation" class="list-group-item list-group-item-action">Installation</a>
+        <a href="#usage" class="list-group-item list-group-item-action">Usage</a>
+        <a href="#mp3tag" class="list-group-item list-group-item-action">MP3Tag</a>
+        <a href="#options" class="list-group-item list-group-item-action">Options</a>
+        <a href="#frame-object" class="list-group-item list-group-item-action">Frame</a>
+      </div>
+    </aside>
 
-      <p class="lead">
-        If you have <a href="https://www.npmjs.com/get-npm">npm</a>, you can also install the library by running the code:
-      </p>
+    <div class="col offset-4">
+      <div id="installation" class="nav-anchored">
+        <h4>Installation</h4>
+        <p class="lead">
+          You can install the library by downloading the distributed package and including them on your scripts.
+          This library does not require any more dependencies. <a href="/downloads/">Go to Downloads page</a>
+        </p>
 
-      <code class="bg-secondary text-white rounded-sm px-3 py-2">npm install --save mp3tag.js@latest</code>
-      <hr class="my-5">
-    </div>
+        <p class="lead">
+          If you have <a href="https://www.npmjs.com/get-npm">npm</a>, you can also install the library by running the code:
+        </p>
 
-    <div id="usage">
-      <h2>Usage</h2>
-      <h3>Browser</h3>
-      <pre class="mb-5">
-        <code class="language-javascript">
-          const input = document.getElementById('file')
-          input.addEventListener('change', function () {
-            const reader = new FileReader()
-            reader.onload = function () {
-              const mp3tag = new MP3Tag(this.result)
-              mp3tag.read()
-              console.log(mp3tag.frames)
-            }
-
-            if (this.files.length > 0) {
-              reader.readAsArrayBuffer(this.files[0])
-            }
-          })
-        </code>
-      </pre>
-
-      <h3>Node.js</h3>
-      <pre>
-        <code class="language-javascript">
-          const MP3Tag = require('mp3tag.js')
-          const fs = require('fs')
-
-          const buffer = fs.readFileSync('/path/to/mp3')
-          const mp3tag = new MP3Tag(buffer)
-          mp3tag.read()
-          console.log(mp3tag.frames)
-        </code>
-      </pre>
-      <hr class="my-5">
-    </div>
-
-    <div id="mp3tag">
-      <h2>MP3Tag</h2>
-      <code>const mp3tag = new MP3Tag(buffer[, <a href="#options">options</a>])</code>
-
-      <div class="mt-4">
-        <h3>Properties</h3>
-        <div class="m-4">
-          <h4>name</h4>
-          <i class="text-muted">Type: string</i>
-          <p class="lead">Name of the library 'MP3Tag'</p>
-        </div>
-
-        <div class="m-4">
-          <h4>version</h4>
-          <i class="text-muted">Type: string</i>
-          <p class="lead">Current version of the library. (eg. "0.6.1")</p>
-        </div>
-
-        <div class="m-4">
-          <h4>frames</h4>
-          <i class="text-muted">Type: <a href="#frame-object">FrameObject</a>[]</i>
-          <p class="lead">Array of frames decoded from the buffer.</p>
-        </div>
-
-        <div class="m-4">
-          <h4>buffer</h4>
-          <i class="text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></i>
-          <p class="lead">Buffer</p>
-        </div>
-
-        <div class="m-4">
-          <h4>options</h4>
-          <i class="text-muted">Type: <a href="#options">Options</a></i>
-          <p class="lead">Options passed</p>
-        </div>
+        <code class="bg-secondary text-white rounded-sm px-3 py-2">npm install --save mp3tag.js@latest</code>
+        <hr class="my-5">
       </div>
 
-      <div class="mt-4">
-        <h3>Methods</h3>
-        <div class="m-4">
-          <h4>constructor(buffer[, <a href="#options">options</a>])</h4>
-          <p class="lead">Validates buffer type. This sets the <code>MP3Tag.buffer</code> and <code>MP3Tag.options</code></p>
-        </div>
+      <div id="usage" class="nav-anchored">
+        <h4>Usage</h4>
+        <h5>Browser</h5>
+        <pre class="mb-5">
+          <code class="language-javascript">
+            const input = document.getElementById('file')
+            input.addEventListener('change', function () {
+              const reader = new FileReader()
+              reader.onload = function () {
+                const mp3tag = new MP3Tag(this.result)
+                mp3tag.read()
+                console.log(mp3tag.frames)
+              }
 
-        <div class="m-4">
-          <h4>read()</h4>
-          <i class="text-muted">Type: void</i>
-          <p class="lead">Reads the buffer. This sets the <code>MP3Tag.frames</code> property</p>
-        </div>
+              if (this.files.length > 0) {
+                reader.readAsArrayBuffer(this.files[0])
+              }
+            })
+          </code>
+        </pre>
 
-        <div class="m-4">
-          <h4>save()</h4>
-          <i class="text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></i>
-          <p class="lead">
-            Validates the <code>MP3Tag.frames</code>, then writes them to the
-            buffer. Returns the old buffer
-          </p>
-        </div>
+        <h5>Node.js</h5>
+        <pre>
+          <code class="language-javascript">
+            const MP3Tag = require('mp3tag.js')
+            const fs = require('fs')
 
-        <div class="m-4">
-          <h4>getFrames()</h4>
-          <i class="text-muted">Type: object</i>
-          <p class="lead">
-            Returns object containing the id and an array of its
-            values from each of its frames
-          </p>
-        </div>
-
-        <div class="m-4">
-          <h4>addFrame(id, value)</h4>
-          <i class="text-muted">Type: void</i>
-          <p class="lead">Simply pushes a frame</p>
-        </div>
-
-        <div class="m-4">
-          <h4>removeFrame(id[, index = null])</h4>
-          <i class="text-muted">Type: void</i>
-          <p class="lead">
-            Removes the frame found in a tag. By default, this removes all the
-            frames with the ID. If the index was set, the indexed frame will be
-            removed.
-          </p>
-        </div>
-
-        <div class="m-4">
-          <h4>editFrame(id, value[, index = 0, replace = true])</h4>
-          <i class="text-muted">Type: void</i>
-          <p class="lead">
-            Edits a frame found in a tag. By default, the first frame found on
-            a tag will be edited, unless index is set other than 0. If the old
-            value is an array, the value is pushed. Otherwise, if replace is
-            true, the old value will be overwritten.
-          </p>
-        </div>
-
-        <div class="m-4">
-          <h4>existsFrame(id)</h4>
-          <i class="text-muted">Type: boolean</i>
-          <p class="lead">Checks if a frame with this ID exists</p>
-        </div>
-
-        <div class="m-4">
-          <h4>getBlob()</h4>
-          <i class="text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/API/Blob">Blob</a></i>
-          <p class="lead">Returns the <code>Blob</code> object of the buffer</p>
-        </div>
+            const buffer = fs.readFileSync('/path/to/mp3')
+            const mp3tag = new MP3Tag(buffer)
+            mp3tag.read()
+            console.log(mp3tag.frames)
+          </code>
+        </pre>
+        <hr class="my-5">
       </div>
 
-      <hr class="my-5">
-    </div>
+      <div id="mp3tag" class="nav-anchored">
+        <h4>MP3Tag</h4>
+        <div>
+          <h4>Properties</h4>
+          <div class="mx-4 my-3">
+            <h5>name</h5>
+            <i class="text-muted">Type: string</i>
+            <p class="lead">Name of the library 'MP3Tag'</p>
+          </div>
 
-    <div id="options" class="container mb-5">
-      <h2>Options</h2>
-      <div class="mt-4">
-        <h3>Properties</h3>
-        <div class="m-4">
-          <h4>version</h4>
-          <i class="text-muted">Type: number</i><br>
-          <i class="text-muted">Default: Current version otherwise 3</i>
-          <p class="lead">Save buffer with this ID3v2 major version. Valid major versions are 3, 4.</p>
+          <div class="mx-4 my-3">
+            <h5>version</h5>
+            <i class="text-muted">Type: string</i>
+            <p class="lead">Current version of the library. (eg. "0.6.1")</p>
+          </div>
+
+          <div class="mx-4 my-3">
+            <h5>frames</h5>
+            <i class="text-muted">Type: <a href="#frame-object">FrameObject</a>[]</i>
+            <p class="lead">Array of frames decoded from the buffer.</p>
+          </div>
+
+          <div class="mx-4 my-3">
+            <h5>buffer</h5>
+            <i class="text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></i>
+            <p class="lead">Buffer</p>
+          </div>
+
+          <div class="mx-4 my-3">
+            <h5>options</h5>
+            <i class="text-muted">Type: <a href="#options">Options</a></i>
+            <p class="lead">Options passed</p>
+          </div>
         </div>
 
-        <div class="m-4">
-          <h4>padding</h4>
-          <i class="text-muted">Type: number</i><br>
-          <i class="text-muted">Default: 4096</i>
-          <p class="lead">Number of padding</p>
+        <div>
+          <h4>Methods</h4>
+          <div class="mx-4 my-3">
+            <h5>constructor(buffer[, <a href="#options">options</a>])</h5>
+            <p class="lead">Validates buffer type. This sets the <code>MP3Tag.buffer</code> and <code>MP3Tag.options</code></p>
+          </div>
+
+          <div class="mx-4 my-3">
+            <h5>read()</h5>
+            <i class="text-muted">Type: void</i>
+            <p class="lead">Reads the buffer. This sets the <code>MP3Tag.frames</code> property</p>
+          </div>
+
+          <div class="mx-4 my-3">
+            <h5>save()</h5>
+            <i class="text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></i>
+            <p class="lead">Validates the <code>MP3Tag.frames</code>, then writes them to the buffer. Returns the old buffer</p>
+          </div>
+
+          <div class="mx-4 my-3">
+            <h5>getFrames()</h5>
+            <i class="text-muted">Type: object</i>
+            <p class="lead">Returns object containing the id and an array of its values from each of its frames</p>
+          </div>
+
+          <div class="mx-4 my-3">
+            <h5>addFrame(id, value)</h5>
+            <i class="text-muted">Type: void</i>
+            <p class="lead">Simply pushes a frame</p>
+          </div>
+
+          <div class="mx-4 my-3">
+            <h5>removeFrame(id[, index = null])</h5>
+            <i class="text-muted">Type: void</i>
+            <p class="lead">
+              Removes the frame found in a tag. By default, this removes all the
+              frames with the ID. If the index was set, the indexed frame will be
+              removed.
+            </p>
+          </div>
+
+          <div class="mx-4 my-3">
+            <h5>editFrame(id, value[, index = 0, replace = true])</h5>
+            <i class="text-muted">Type: void</i>
+            <p class="lead">
+              Edits a frame found in a tag. By default, the first frame found on
+              a tag will be edited, unless index is set other than 0. If the old
+              value is an array, the value is pushed. Otherwise, if replace is
+              true, the old value will be overwritten.
+            </p>
+          </div>
+
+          <div class="mx-4 my-3">
+            <h5>existsFrame(id)</h5>
+            <i class="text-muted">Type: boolean</i>
+            <p class="lead">Checks if a frame with this ID exists</p>
+          </div>
+
+          <div class="mx-4 my-3">
+            <h5>getBlob()</h5>
+            <i class="text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/API/Blob">Blob</a></i>
+            <p class="lead">Returns the <code>Blob</code> object of the buffer</p>
+          </div>
         </div>
+        <hr class="my-5">
       </div>
 
-      <hr class="my-5">
-    </div>
+      <div id="options" class="nav-anchored">
+        <h4>Options</h4>
+        <div>
+          <h4>Properties</h4>
+          <div class="mx-4 my-3">
+            <h5>version</h5>
+            <i class="text-muted">Type: number</i><br>
+            <i class="text-muted">Default: Current version otherwise 3</i>
+            <p class="lead">Save buffer with this ID3v2 major version. Valid major versions are 3, 4.</p>
+          </div>
 
-    <div id="frame-object" class="container">
-      <h2>Frame Object</h2>
-      <div class="mt-4">
-        <h3>Properties</h3>
-        <div class="m-4">
-          <h4>id</h4>
-          <i class="text-muted">Type: string</i>
-          <p class="lead">ID of the frame</p>
+          <div class="mx-4 my-3">
+            <h5>padding</h5>
+            <i class="text-muted">Type: number</i><br>
+            <i class="text-muted">Default: 4096</i>
+            <p class="lead">Number of padding</p>
+          </div>
         </div>
+        <hr class="my-5">
+      </div>
 
-        <div class="m-4">
-          <h4>size</h4>
-          <i class="text-muted">Type: number</i>
-          <p class="lead">Size of the frame (excluding the frame header of 10 bytes)</p>
-        </div>
+      <div id="frame-object" class="nav-anchored">
+        <h4>Frame</h4>
+        <div>
+          <h4>Properties</h4>
+          <div class="mx-4 my-3">
+            <h5>id</h5>
+            <i class="text-muted">Type: string</i>
+            <p class="lead">ID of the frame</p>
+          </div>
 
-        <div class="m-4">
-          <h4>flags</h4>
-          <i class="text-muted">Type: object</i>
-          <p class="lead">Flags set in this frame</p>
-        </div>
+          <div class="mx-4 my-3">
+            <h5>size</h5>
+            <i class="text-muted">Type: number</i>
+            <p class="lead">Size of the frame (excluding the frame header of 10 bytes)</p>
+          </div>
 
-        <div class="m-4">
-          <h4>value</h4>
-          <i class="text-muted">Type: any</i>
-          <p class="lead">Value of the frame (type depends on the frame specs)</p>
+          <div class="mx-4 my-3">
+            <h5>flags</h5>
+            <i class="text-muted">Type: object</i>
+            <p class="lead">Flags set in this frame</p>
+          </div>
+
+          <div class="mx-4 my-3">
+            <h5>value</h5>
+            <i class="text-muted">Type: any</i>
+            <p class="lead">Value of the frame (type depends on the frame specs)</p>
+          </div>
         </div>
       </div>
     </div>

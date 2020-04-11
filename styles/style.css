@@ -12,19 +12,25 @@
   min-width: 200px;
 }
 
-.fill {
-  height: calc(100vh - 56px);
-  max-height: calc(100vh - 56px);
-  overflow-y: scroll;
-}
-
 .main {
+  margin-top: 56px;
   padding-top: 32px;
   padding-bottom: 32px;
   min-height: calc(100vh - 112px);
 }
 
 .footer { height: 56px; }
+
+.fill {
+  height: calc(100vh - 56px);
+  max-height: calc(100vh - 56px);
+  overflow-y: scroll;
+}
+
+.nav-anchored {
+  margin-top: -78px;
+  padding-top: 78px;
+}
 
 .pointer { cursor: pointer !important; }
 .user-select-none { user-select: none !important; }
