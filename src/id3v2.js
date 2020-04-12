@@ -23,7 +23,9 @@ export default class ID3v2 {
 
   read (tagOffset = 0) {
     const mediaView = new BufferView(this.buffer, tagOffset)
-    if (mediaView.getUint8String(0, 3) !== 'ID3') throw new TagError(200)
+    if (mediaView.getString(0, 3, 'ascii').string !== 'ID3') {
+      throw new TagError(200)
+    }
 
     const version = mediaView.getUint8(3, 2)
     switch (version[0]) {
