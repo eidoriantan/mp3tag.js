@@ -133,7 +133,17 @@ export default class ID3v2 {
     return object
   }
 
-  addFrame (id, value) { this.frames.push({ id: id, value: value }) }
+  addFrame (id, value) {
+    const oldFrames = [...this.frames]
+    this.frames.push({ id, value })
+
+    try {
+      this.validate()
+    } catch (e) {
+      this.frames = oldFrames
+      throw new TagError(203, e.message)
+    }
+  }
 
   removeFrame (id, index) {
     const array = this.frames
