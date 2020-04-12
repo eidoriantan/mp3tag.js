@@ -22,12 +22,10 @@ export default class ID3v2 {
   }
 
   read (tagOffset = 0) {
-    const mediaView = new BufferView(this.buffer, tagOffset)
-    if (mediaView.getString(0, 3, 'ascii').string !== 'ID3') {
-      throw new TagError(200)
-    }
+    const view = new BufferView(this.buffer, tagOffset)
+    if (view.getString(0, 3, 'ascii').string !== 'ID3') throw new TagError(200)
 
-    const version = mediaView.getUint8(3, 2)
+    const version = view.getUint8(3, 2)
     switch (version[0]) {
       case 3: case 4:
         this.major = version[0]
@@ -38,15 +36,15 @@ export default class ID3v2 {
         throw new TagError(201, version[0])
     }
 
-    this.size = decodeSynch(mediaView.getUint32(6))
-    this.flags = flags.getHeaderFlags(mediaView.getUint8(5), this.major)
+    this.size = decodeSynch(view.getUint32(6))
+    this.flags = flags.getHeaderFlags(view.getUint8(5), this.major)
     this.frames = []
 
     let offset = 10
     let limit = this.size
 
     while (offset < this.size) {
-      const frameBytes = mediaView.getUint8(offset, limit)
+      const frameBytes = view.getUint8(offset, limit)
       const frame = decodeFrame.call(this, frameBytes)
 
       if (frame) {
