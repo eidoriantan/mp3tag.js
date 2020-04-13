@@ -1,4 +1,7 @@
 
+import { mergeBytes } from './utils/bytes'
+import { encodeString } from './utils/strings'
+
 import TagError from './error'
 import BufferView from './viewer'
 
@@ -86,5 +89,51 @@ export default class ID3v1 {
     }
 
     return true
+  }
+
+  save () {
+    if (!this.validate()) return false
+
+    const audio = this.getAudio()
+
+    let title = this.title
+    let artist = this.artist
+    let album = this.album
+    let year = this.year
+    let comment = this.comment
+    const track = this.track
+    const genre = this.genre
+
+    while (title.length < 30) title += '\0'
+    while (artist.length < 30) artist += '\0'
+    while (album.length < 30) album += '\0'
+    while (year.length < 4) year += '\0'
+
+    if (typeof track !== 'undefined') {
+      while (comment.length < 28) comment += '\0'
+      comment += '\0' + String.fromCharCode(track)
+    } else {
+      while (comment.length < 30) comment += '\0'
+    }
+
+    this.buffer = mergeBytes(
+      audio, 0x54, 0x41, 0x47,
+      encodeString(title, 'utf-8'),
+      encodeString(artist, 'utf-8'),
+      encodeString(album, 'utf-8'),
+      encodeString(year, 'utf-8'),
+      encodeString(comment, 'utf-8'),
+      genre
+    ).buffer
+
+    this.read()
+    return this.buffer
+  }
+
+  getAudio () {
+    if (!ID3v1.isID3v1(this.buffer)) throw new TagError(100)
+    const audioData = new Uint8Array(this.buffer)
+
+    return new Uint8Array(this.buffer.slice(0, audioData.length - 128))
   }
 }
