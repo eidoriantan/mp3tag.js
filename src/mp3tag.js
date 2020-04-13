@@ -1,4 +1,5 @@
 
+import ID3v1 from './id3v1'
 import ID3v2 from './id3v2'
 import TagError from './error'
 
@@ -30,6 +31,9 @@ export default class MP3Tag {
   read () {
     if (ID3v2.isID3v2(this.buffer)) {
       this.tagger = new ID3v2(this.buffer, this.options)
+      this.tagger.read()
+    } else if (ID3v1.isID3v1(this.buffer)) {
+      this.tagger = new ID3v1(this.buffer)
       this.tagger.read()
     } else {
       this.tagger = new ID3v2(this.buffer, this.options)
