@@ -146,7 +146,7 @@ export default class ID3v2 {
     }
   }
 
-  removeFrame (id, index) {
+  removeFrame (id, index = null) {
     const array = this.frames
     let counts = 0
 
@@ -163,7 +163,7 @@ export default class ID3v2 {
     this.frames = array.filter(elem => elem !== undefined)
   }
 
-  editFrame (id, value, index, replace) {
+  editFrame (id, value, index = 0, replace = true) {
     const array = this.frames
     let counts = 0
 
