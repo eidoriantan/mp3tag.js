@@ -25,11 +25,12 @@ export default class MP3Tag {
       this.tagger = new ID3v2(this.buffer, this.options)
       this.tagger.read()
     } else {
-      // Default to id3v2 and get the raw audio data for writing
       this.tagger = new ID3v2(this.buffer, this.options)
       if (this.tagger.getAudio().length > 0) this.save()
       else throw new TagError(1)
     }
+
+    return this.tagger
   }
 
   save () {
