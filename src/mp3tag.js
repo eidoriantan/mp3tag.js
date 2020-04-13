@@ -5,8 +5,15 @@ import TagError from './error'
 import { isBuffer } from './utils/types'
 
 export default class MP3Tag {
-  get frames () { return this.tagger.frames }
-  set frames (value) { this.tagger.frames = value }
+  get frames () {
+    console.warn('frames are deprecated. Please use the tagger\'s instead')
+    return this.tagger.frames
+  }
+
+  set frames (value) {
+    console.warn('frames are deprecated. Please use the tagger\'s instead')
+    this.tagger.frames = value
+  }
 
   constructor (buffer, options = {}) {
     if (!isBuffer(buffer)) {
