@@ -8,7 +8,7 @@
 ![npm bundle size](https://img.shields.io/bundlephobia/min/mp3tag.js)
 
 **mp3tag.js** is an open sourced JavaScript library used to edit the metadata of
-audio files. It currently supports ID3v2.3 and ID3v2.4 tags.
+audio files. It currently supports ID3v1, ID3v2.3, and ID3v2.4 tags.
 
 Visit [https://mp3tag.js.org](https://mp3tag.js.org) to learn more about the
 library and view it in action through an [editor](https://mp3tag.js.org/editor).
@@ -17,10 +17,9 @@ The website is also open sourced and can be viewed at the
 [gh-pages](https://github.com/eidoriantan/mp3tag.js/tree/gh-pages) branch.
 
 ### Features
- * Read ID3v2.3 and ID3v2.4 tags
- * Write ID3v2.3 and ID3v2.4 tags
- * Remove tags
- * Supports reading unsynchronization flag
+ * Read ID3v1, ID3v2.3, and ID3v2.4 tags
+ * Write ID3v1, ID3v2.3, and ID3v2.4 tags
+ * Supports unsynchronisation
  * Input validation according to [id3.org](http://id3.org) standards
 
 ## Installation
@@ -51,22 +50,33 @@ inputFile.onchange = function () {
   reader.onload = function () {
     const buffer = this.result
     const mp3tag = new MP3Tag(buffer)
-    mp3tag.read()
+    const tagger = mp3tag.read()
+
+    if (tagger.name === 'ID3v2') {
+      console.debug(tagger.getFrames())
+    } else if (tagger.name === 'ID3v1') {
+      console.debug(tagger.title)
+      console.debug(tagger.artist)
+      console.debug(tagger.album)
+      console.debug(tagger.year)
+      console.debug(tagger.comment)
+    }
   }
 
-  reader.readAsArrayBuffer(this.files[0])
+  if (this.files.length > 0) {
+    reader.readAsArrayBuffer(this.files[0])
+  }
 }
 </script>
 ```
 
-If you want a details documentations, please visit the site
+If you want a detailed documentations, please visit the documentations page at
 [mp3tag.js.org](https://mp3tag.js.org/docs).
 
 ### Support
 If you had found a bug or any unexpected behavior, you can submit an issue
-through [GitHub issues](https://github.com/eidoriantan/mp3tag.js/issues).
-
-If you wanted to contribute to this repository, refer to
+through [GitHub issues](https://github.com/eidoriantan/mp3tag.js/issues). If you
+wanted to contribute to this repository, refer to
 [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 You can also show your support by becoming a patron!
