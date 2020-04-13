@@ -39,17 +39,30 @@ export default class MP3Tag {
     return old
   }
 
-  getFrames () { return this.tagger.getFrames() }
+  getFrames () {
+    console.warn('getFrames is deprecated. Please use the tagger\'s instead')
+    return this.tagger.getFrames()
+  }
 
-  addFrame (id, value) { return this.tagger.addFrame(id, value) }
+  addFrame (id, value) {
+    console.warn('addFrame is deprecated. Please use the tagger\'s instead')
+    return this.tagger.addFrame(id, value)
+  }
 
-  removeFrame (id, index = null) { return this.tagger.removeFrame(id, index) }
+  removeFrame (id, index = null) {
+    console.warn('removeFrame is deprecated. Please use the tagger\'s instead')
+    return this.tagger.removeFrame(id, index)
+  }
 
   editFrame (id, value, index = 0, replace = true) {
+    console.warn('editFrame is deprecated. Please use the tagger\'s instead')
     return this.tagger.editFrame(id, value, index, replace)
   }
 
-  existsFrame (id) { return this.tagger.existsFrame(id) }
+  existsFrame (id) {
+    console.warn('existsFrame is deprecated. Please use the tagger\'s instead')
+    return this.tagger.existsFrame(id)
+  }
 
   getAudio () { return this.tagger.getAudio() }
 
