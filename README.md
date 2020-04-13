@@ -70,4 +70,5 @@ If you wanted to contribute to this repository, refer to
 [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 You can also show your support by becoming a patron!
+
 [![Patreon](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/eidoriantan)
