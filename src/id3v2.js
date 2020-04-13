@@ -13,6 +13,7 @@ export default class ID3v2 {
   }
 
   constructor (buffer, options = {}) {
+    this.name = 'ID3v2'
     this.buffer = buffer
     this.options = {
       padding: options.padding !== undefined ? options.padding : 4096,
