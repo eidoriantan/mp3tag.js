@@ -41,4 +41,50 @@ export default class ID3v1 {
 
     this.genre = view.getUint8(127)
   }
+
+  validate () {
+    if (typeof this.title !== 'string' || typeof this.artist !== 'string' ||
+      typeof this.album !== 'string' || typeof this.year !== 'string' ||
+      typeof this.comment !== 'string') {
+      throw new TagError(103, 'Title/Artist/Album/Year/Comment is not a string')
+    }
+
+    if (this.title.length > 30) {
+      throw new TagError(103, 'Title length exceeds 30')
+    }
+
+    if (this.artist.length > 30) {
+      throw new TagError(103, 'Artist length exceeds 30')
+    }
+
+    if (this.album.length > 30) {
+      throw new TagError(103, 'Album length exceeds 30')
+    }
+
+    if (this.year.length > 4) {
+      throw new TagError(103, 'Year length exceeds 4')
+    }
+
+    if (typeof this.track !== 'undefined') {
+      if (typeof this.track !== 'number') {
+        throw new TagError(103, 'Track is not a number')
+      } else if (this.track > 255 || this.track < 1) {
+        throw new TagError(103, 'Track should be in range of 1 - 255')
+      }
+
+      if (this.comment.length > 28) {
+        throw new TagError(103, 'Comment length exceeds 28')
+      }
+    } else if (this.comment.length > 30) {
+      throw new TagError(103, 'Comment length exceeds 30')
+    }
+
+    if (typeof this.genre !== 'number') {
+      throw new TagError(103, 'Genre is not a number')
+    } else if (this.genre > 255 || this.genre < 0) {
+      throw new TagError(103, 'Genre should be in range of 0 - 255')
+    }
+
+    return true
+  }
 }
