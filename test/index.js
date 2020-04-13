@@ -116,7 +116,7 @@ describe('mp3tag.js Usage', function () {
       }
     }
 
-    const taggers = ['id3v2']
+    const taggers = ['id3v1', 'id3v2']
     if (success) taggers.forEach(tagger => require(`./taggers/${tagger}`))
   })
 })
