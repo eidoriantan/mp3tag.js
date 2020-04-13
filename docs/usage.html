@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
   <meta name="author" content="Adriane Justine Tan <eidoriantan@gmail.com>">
   <meta name="description" content="mp3tag.js JavaScript library documentations">
-  <meta name="keywords" content="mp3, id3, audio, tag, edit, write, mp3tag.js, documentations, docs, install, installation">
+  <meta name="keywords" content="mp3, id3, audio, tag, edit, write, mp3tag.js, documentations, docs, usage">
   <meta name="theme-color" content="#2b594c">
   <meta name="msapplication-TileColor" content="#2b594c">
 
@@ -19,14 +19,16 @@
   <link href="https://cdnjs.cloudflare.com/" rel="dns-prefetch">
   <link href="https://kit.fontawesome.com/" rel="preconnect" crossorigin="anonymous">
   <link href="https://kit.fontawesome.com/" rel="dns-prefetch">
-  <link href="https://mp3tag.js.org/docs/" rel="canonical">
+  <link href="https://mp3tag.js.org/docs/usage.html" rel="canonical">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous">
   <link href="/styles/style.css" rel="stylesheet">
+  <link href="/libraries/prismjs/prism.css" rel="stylesheet">
 
   <script src="https://kit.fontawesome.com/9cb9988aa5.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha256-/ijcOLwFf26xEYAjW75FizKVo5tnTYiQddPZoLUHHZ8=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha256-WqU1JavFxSAMcLP2WIOI+GB2zWmShMI82mTpLDcqFUg=" crossorigin="anonymous"></script>
+  <script src="/libraries/prismjs/prism.js"></script>
 
   <script src="https://www.googletagmanager.com/gtag/js?id=UA-161214318-3" async></script>
   <script>
@@ -39,7 +41,7 @@
     })
   </script>
 
-  <title>Installation | mp3tag.js</title>
+  <title>Usage | mp3tag.js</title>
 </head>
 
 <body>
@@ -79,8 +81,8 @@
   <main class="main row no-gutters mx-5">
     <aside class="col-12 col-md-3 position-md-fixed">
       <div class="list-group">
-        <a href="/docs/" class="list-group-item list-group-item-action active">Installation</a>
-        <a href="/docs/usage.html" class="list-group-item list-group-item-action">Usage</a>
+        <a href="/docs/" class="list-group-item list-group-item-action">Installation</a>
+        <a href="/docs/usage.html" class="list-group-item list-group-item-action active">Usage</a>
         <a href="/docs/mp3tag.html" class="list-group-item list-group-item-action">MP3Tag</a>
         <a href="/docs/id3v1.html" class="list-group-item list-group-item-action">ID3v1</a>
         <a href="/docs/id3v2.html" class="list-group-item list-group-item-action">ID3v2</a>
@@ -90,17 +92,60 @@
     </aside>
 
     <div class="col offset-12 offset-md-4">
-      <h4 class="display-4">Installation</h4>
-      <p class="lead">
-        You can install the library by downloading the distributed package and including them on your scripts.
-        This library does not require any more dependencies. <a href="/downloads/">Go to Downloads page</a>
-      </p>
+      <h4 class="display-4">Usage</h4>
+      <p class="lead">Simple usage of the library</p>
 
-      <p class="lead">
-        If you have <a href="https://www.npmjs.com/get-npm">npm</a>, you can also install the library by running the code:
-      </p>
+      <h5>Browser</h5>
+      <pre class="mb-4">
+        <code class="language-javascript">
+          const inputFile = document.getElementById('input-file')
+          inputFile.onchange = function () {
+            const reader = new FileReader()
+            reader.onload = function () {
+              const buffer = this.result
+              const mp3tag = new MP3Tag(buffer)
+              const tagger = mp3tag.read()
 
-      <code class="bg-secondary text-white rounded-sm px-3 py-2">npm install --save mp3tag.js@latest</code>
+              if (tagger.name === 'ID3v2') {
+                console.debug(tagger.getFrames())
+              } else if (tagger.name === 'ID3v1') {
+                console.debug(tagger.title)
+                console.debug(tagger.artist)
+                console.debug(tagger.album)
+                console.debug(tagger.year)
+                console.debug(tagger.comment)
+              }
+            }
+
+            if (this.files.length > 0) {
+              reader.readAsArrayBuffer(this.files[0])
+            }
+          }
+        </code>
+      </pre>
+
+      <h5>Node.js</h5>
+      <pre>
+        <code class="language-javascript">
+          const MP3Tag = require('mp3tag.js')
+          const fs = require('fs')
+
+          const buffer = fs.readFileSync('/path/to/mp3')
+          const mp3tag = new MP3Tag(buffer)
+          const tagger = mp3tag.read()
+
+          if (tagger.name === 'ID3v2') {
+            console.debug(tagger.getFrames())
+          } else if (tagger.name === 'ID3v1') {
+            console.debug(tagger.title)
+            console.debug(tagger.artist)
+            console.debug(tagger.album)
+            console.debug(tagger.year)
+            console.debug(tagger.comment)
+          }
+        </code>
+      </pre>
+      <hr class="my-5">
     </div>
   </main>
 

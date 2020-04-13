@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <meta name="author" content="Adriane Justine Tan <eidoriantan@gmail.com>">
+  <meta name="description" content="mp3tag.js JavaScript library documentations">
+  <meta name="keywords" content="mp3, id3, audio, tag, edit, write, mp3tag.js, documentations, docs, mp3tag">
+  <meta name="theme-color" content="#2b594c">
+  <meta name="msapplication-TileColor" content="#2b594c">
+
+  <link href="/LICENSE" rel="license">
+  <link href="/site.webmanifest" rel="manifest">
+  <link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180">
+  <link href="/favicon-32x32.png" rel="icon" type="image/png" sizes="32x32">
+  <link href="/favicon-16x16.png" rel="icon" type="image/png" sizes="16x16">
+  <link href="/safari-pinned-tab.svg" rel="mask-icon" color="#2b594c">
+  <link href="https://cdnjs.cloudflare.com/" rel="preconnect" crossorigin="anonymous">
+  <link href="https://cdnjs.cloudflare.com/" rel="dns-prefetch">
+  <link href="https://kit.fontawesome.com/" rel="preconnect" crossorigin="anonymous">
+  <link href="https://kit.fontawesome.com/" rel="dns-prefetch">
+  <link href="https://mp3tag.js.org/docs/mp3tag.html" rel="canonical">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous">
+  <link href="/styles/style.css" rel="stylesheet">
+
+  <script src="https://kit.fontawesome.com/9cb9988aa5.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha256-/ijcOLwFf26xEYAjW75FizKVo5tnTYiQddPZoLUHHZ8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha256-WqU1JavFxSAMcLP2WIOI+GB2zWmShMI82mTpLDcqFUg=" crossorigin="anonymous"></script>
+
+  <script src="https://www.googletagmanager.com/gtag/js?id=UA-161214318-3" async></script>
+  <script>
+    window.dataLayer = window.dataLayer || []
+    function gtag () { dataLayer.push(arguments) }
+
+    gtag('js', new Date())
+    gtag('config', 'UA-161214318-3', {
+      'anonymize_ip': true
+    })
+  </script>
+
+  <title>MP3Tag | mp3tag.js</title>
+</head>
+
+<body>
+  <header class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a href="https://mp3tag.js.org" class="navbar-brand">
+      <img src="/images/logo.png" class="d-inline-block align-top" alt="mp3tag.js Logo">
+      mp3tag.js
+    </a>
+
+    <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#header-nav" aria-controls="header-nav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <nav id="header-nav" class="collapse navbar-collapse" aria-label="Main Navigator">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a href="/" class="nav-link">
+            <i class="fas fa-home" aria-hidden="true" aria-hidden="true"></i> Home
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="/docs/" class="nav-link active">
+            <i class="fas fa-book" aria-hidden="true" aria-hidden="true"></i> Documentations
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="/downloads/" class="nav-link">
+            <i class="fas fa-download" aria-hidden="true" aria-hidden="true"></i> Downloads
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="main row no-gutters mx-5">
+    <aside class="col-12 col-md-3 position-md-fixed">
+      <div class="list-group">
+        <a href="/docs/" class="list-group-item list-group-item-action">Installation</a>
+        <a href="/docs/usage.html" class="list-group-item list-group-item-action">Usage</a>
+        <a href="/docs/mp3tag.html" class="list-group-item list-group-item-action active">MP3Tag</a>
+        <a href="/docs/id3v1.html" class="list-group-item list-group-item-action">ID3v1</a>
+        <a href="/docs/id3v2.html" class="list-group-item list-group-item-action">ID3v2</a>
+        <a href="/docs/id3v2.html#options" class="list-group-item list-group-item-action pl-5">ID3v2 &gt; Options</a>
+        <a href="/docs/id3v2.html#frame" class="list-group-item list-group-item-action pl-5">ID3v2 &gt; Frame</a>
+      </div>
+    </aside>
+
+    <div class="col offset-12 offset-md-4">
+      <h4 class="display-4">MP3Tag</h4>
+      <p class="lead">Exported class</p>
+
+      <div class="card mb-3">
+        <header class="card-header">Property</header>
+        <div class="card-body">
+          <h5 class="card-title">name</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: string</h6>
+          <p class="card-text">Name of the library 'MP3Tag'</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Property</header>
+        <div class="card-body">
+          <h5 class="card-title">version</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: string</h6>
+          <p class="card-text">Current version of the library. (eg. "0.6.1")</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Property <span class="text-warning"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Deprecated</span></header>
+        <div class="card-body">
+          <h5 class="card-title">frames</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="/docs/id3v2.html#frame">Frame</a>[]</h6>
+          <p class="card-text">This is only accessible if the tagger used is <a href="/docs/id3v2.html">ID3v2</a>. Please see ID3v2 instead</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Property</header>
+        <div class="card-body">
+          <h5 class="card-title">buffer</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
+          <p class="card-text">Saved buffer</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Property</header>
+        <div class="card-body">
+          <h5 class="card-title">tagger</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="/docs/id3v1.html">ID3v1</a> | <a href="/docs/id3v2.html">ID3v2</a></h6>
+          <p class="card-text">Returns the tagger used</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Property</header>
+        <div class="card-body">
+          <h5 class="card-title">options</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
+          <p class="card-text">Options to be sent to the tagger everytime you call the <code>MP3Tag.read()</code> method</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Method</header>
+        <div class="card-body">
+          <h5 class="card-title">constructor(buffer[, options])</h5>
+          <p class="card-text">This sets the <code>MP3Tag.buffer</code> and <code>MP3Tag.options</code></p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Method</header>
+        <div class="card-body">
+          <h5 class="card-title">read()</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="/docs/id3v1.html">ID3v1</a> | <a href="/docs/id3v2.html">ID3v2</a></h6>
+          <p class="card-text">Automatically detects the ID3 tag version of the buffer then reads it. This returns the tagger used to read the buffer.</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Method</header>
+        <div class="card-body">
+          <h5 class="card-title">save()</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
+          <p class="card-text">Validate by running the <code>validate</code> method of the tagger then writes them to the buffer. This returns the old buffer</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Method <span class="text-warning"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Deprecated</span></header>
+        <div class="card-body">
+          <h5 class="card-title">getFrames()</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
+          <p class="card-text">This is only accessible if the tagger used is ID3v2. Please see ID3v2 instead</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Method <span class="text-warning"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Deprecated</span></header>
+        <div class="card-body">
+          <h5 class="card-title">addFrame(id, value)</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: void</h6>
+          <p class="card-text">This is only accessible if the tagger used is ID3v2. Please see ID3v2 instead</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Method <span class="text-warning"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Deprecated</span></header>
+        <div class="card-body">
+          <h5 class="card-title">removeFrame(id[, index = null])</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: void</h6>
+          <p class="card-text">This is only accessible if the tagger used is ID3v2. Please see ID3v2 instead</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Method <span class="text-warning"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Deprecated</span></header>
+        <div class="card-body">
+          <h5 class="card-title">editFrame(id, value[, index = 0, replace = true])</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: void</h6>
+          <p class="card-text">This is only accessible if the tagger used is ID3v2. Please see ID3v2 instead</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Method <span class="text-warning"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Deprecated</span></header>
+        <div class="card-body">
+          <h5 class="card-title">existsFrame(id)</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: void</h6>
+          <p class="card-text">This is only accessible if the tagger used is ID3v2. Please see ID3v2 instead</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Method</header>
+        <div class="card-body">
+          <h5 class="card-title">getAudio()</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a></h6>
+          <p class="card-text">Returns the raw audio without tags</p>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <header class="card-header">Method</header>
+        <div class="card-body">
+          <h5 class="card-title">getBlob()</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/API/Blob">Blob</a></h6>
+          <p class="card-text">Returns the <code>Blob</code> object of the buffer</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer bg-dark text-center text-white py-3 px-3">
+    <div class="text-muted">Copyright &copy; 2020, <a href="https://github.com/eidoriantan" class="text-white">@eidoriantan</a></div>
+  </footer>
+</body>
+</html>
