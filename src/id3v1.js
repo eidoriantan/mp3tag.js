@@ -1,6 +1,7 @@
 
 import { mergeBytes } from './utils/bytes'
 import { encodeString } from './utils/strings'
+import { isBuffer } from './utils/types'
 
 import TagError from './error'
 import BufferView from './viewer'
@@ -16,6 +17,10 @@ export default class ID3v1 {
   }
 
   constructor (buffer) {
+    if (!isBuffer(buffer)) {
+      throw new TypeError('buffer is not an instance of Buffer')
+    }
+
     this.name = 'ID3v1'
     this.buffer = buffer
     this.title = ''
