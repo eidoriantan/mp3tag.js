@@ -53,17 +53,16 @@ export default class ID3v2 {
     while (offset < this.size) {
       const frameBytes = view.getUint8(offset, limit)
       const frame = decodeFrame.call(this, frameBytes)
+      if (!frame) break
 
-      if (frame) {
-        offset += frame.size + 10
-        limit -= frame.size + 10
+      offset += frame.size + 10
+      limit -= frame.size + 10
 
-        if (frame.id === 'SEEK') {
-          this.read(offset + frame.value)
-        } else {
-          this.frames.push(frame)
-        }
-      } else break
+      if (frame.id === 'SEEK') {
+        this.read(offset + frame.value)
+      } else {
+        this.frames.push(frame)
+      }
     }
 
     return this.frames
@@ -77,20 +76,14 @@ export default class ID3v2 {
     const framesObj = this.getFrames()
     for (const id in framesObj) {
       const frameDesc = frames[id]
-      if (frameDesc) {
-        if (frameDesc.version.includes(this.major)) {
-          frames.validateID(id)
+      if (!frameDesc) throw new TagError(202, id)
+      if (!frameDesc.version.includes(this.major)) throw new TagError(204, id)
 
-          try {
-            frameDesc.validate(framesObj[id], this.major)
-          } catch (e) {
-            throw new TagError(203, `ID: ${id}, Message: ${e.message}`)
-          }
-        } else {
-          throw new TagError(204, id)
-        }
-      } else {
-        throw new TagError(202, id)
+      try {
+        frames.validateID(id)
+        frameDesc.validate(framesObj[id], this.major)
+      } catch (e) {
+        throw new TagError(203, `ID: ${id}, Message: ${e.message}`)
       }
     }
 
@@ -157,13 +150,9 @@ export default class ID3v2 {
     let counts = 0
 
     this.frames.forEach(function (frame, i) {
-      if (frame.id === id) {
-        if (index === null) array[i] = undefined
-        else {
-          if (counts === index) array[i] = undefined
-          counts++
-        }
-      }
+      if (frame.id !== id) return false
+      if (index === null || counts === index) array[i] = undefined
+      counts++
     })
 
     this.frames = array.filter(elem => elem !== undefined)
@@ -174,14 +163,13 @@ export default class ID3v2 {
     let counts = 0
 
     this.frames.forEach(function (frame, i) {
-      if (frame.id === id) {
-        if (counts === index) {
-          if (Array.isArray(array[i])) array[i].push(value)
-          else if (replace) array[i] = { id: id, value: value }
-        }
-
-        counts++
+      if (frame.id !== id) return false
+      if (counts === index) {
+        if (Array.isArray(array[i])) array[i].push(value)
+        else if (replace) array[i] = { id: id, value: value }
       }
+
+      counts++
     })
 
     this.frames = array
