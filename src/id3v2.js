@@ -189,7 +189,8 @@ export default class ID3v2 {
 
     let i = 0
     while (i < audioData.length) {
-      if (audioData[i] === 0xff && audioData[i + 1] >= 0xe0) {
+      if (audioData[i] === 0xff && (audioData[i + 1] === 0xfb ||
+        audioData[i + 1] === 0xfa)) {
         return new Uint8Array(this.buffer.slice(i))
       } else i++
     }
