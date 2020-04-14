@@ -4463,24 +4463,24 @@
       return string.match(/^(\d+)$/) !== null ? parseInt(string) : string;
     };
 
-    value = Array.isArray(value) ? value.map(function (elem) {
+    return Array.isArray(value) ? value.map(function (elem) {
       return toNumber(elem);
     }) : toNumber(value);
-    return value;
   }
   function setFrame(view, version) {
     var value = textFrame(view, version);
-    var array = [];
-    if (!Array.isArray(value)) value = [value];
 
-    for (var i = 0; i < value.length; i += 2) {
+    var toSet = function toSet(object) {
       var set = {};
-      if (value[i]) set.position = parseInt(value[i]);
-      if (value[i + 1]) set.total = parseInt(value[i + 1]);
-      array.push(set);
-    }
+      var splitted = object.split('/');
+      if (splitted[0]) set.position = parseInt(splitted[0]);
+      if (splitted[1]) set.total = parseInt(splitted[1]);
+      return set;
+    };
 
-    return array.length === 1 ? array[0] : array;
+    return Array.isArray(value) ? value.map(function (elem) {
+      return toSet(elem);
+    }) : toSet(value);
   }
   function urlFrame(view, version) {
     return view.getCString(0, 'ascii').string;
@@ -5754,12 +5754,13 @@
   }
   function setFrame$2(values, id, version) {
     var strings = [];
+    values = Array.isArray(values[0]) ? values[0] : [values[0]];
     values.forEach(function (value) {
       var string = value.position.toString();
       if (value.total) string += '/' + value.total.toString();
       strings.push(string);
     });
-    return asciiFrame(strings, id, version);
+    return asciiFrame([strings], id, version);
   }
   function urlFrame$2(values, id, version) {
     var strBytes = encodeString(values[0] + '\0', 'ascii');
@@ -6915,7 +6916,7 @@
       }
 
       this.name = 'MP3Tag';
-      this.version = '1.3.0';
+      this.version = '1.3.1';
       this.buffer = buffer;
       this.options = options;
       this.tagger = {};
