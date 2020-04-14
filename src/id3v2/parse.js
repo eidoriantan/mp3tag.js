@@ -1,8 +1,7 @@
 
 import BufferView from '../viewer'
 import TagError from '../error'
-
-const ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8']
+import { ENCODINGS } from '../globals'
 
 /**
  *  Frame Parsers

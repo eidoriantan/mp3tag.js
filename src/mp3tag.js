@@ -2,12 +2,14 @@
 import ID3v1 from './id3v1'
 import ID3v2 from './id3v2'
 import TagError from './error'
+import { GENRE } from './globals'
 
 import { isBuffer } from './utils/types'
 
 export default class MP3Tag {
   static get ID3v1 () { return ID3v1 }
   static get ID3v2 () { return ID3v2 }
+  static get genre () { return GENRE }
 
   get frames () {
     console.warn('frames are deprecated. Please use the tagger\'s instead')
