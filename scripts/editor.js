@@ -372,25 +372,18 @@ async function writeDetails (tagger, data) {
 
         case 'track': {
           if (this.value !== '') {
-            /**
-             *  const set = this.value.split(SEPARATOR)
-             *  const value = []
-             *
-             *  https://github.com/eidoriantan/mp3tag.js/issues/11
-             *  $.each(set, function (index, track) {
-             *    track = track.split('/')
-             *    value.push({
-             *      position: parseInt(track[0]),
-             *      total: parseInt(track[1])
-             *    })
-             *  })
-             */
+            const set = this.value.split(SEPARATOR)
+            const value = []
 
-            const value = this.value.split('/')
-            tagger.editFrame('TRCK', {
-              position: parseInt(value[0]),
-              total: parseInt(value[1])
+            $.each(set, function (index, track) {
+              track = track.split('/')
+              value.push({
+                position: parseInt(track[0]),
+                total: parseInt(track[1])
+              })
             })
+
+            tagger.editFrame('TRCK', value)
           } else tagger.removeFrame('TRCK')
           break
         }
