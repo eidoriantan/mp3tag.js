@@ -1,5 +1,5 @@
 
-function imageDataURL (buffer, format) {
+function imageURL (buffer, format) {
   let encoded = ''
   for (let i = 0; i < buffer.length; i++) {
     encoded += String.fromCharCode(buffer[i])

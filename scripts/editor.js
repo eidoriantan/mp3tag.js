@@ -17,6 +17,42 @@ const timeRegex = new RegExp(
   `^(${year}(-${month}(-${day}(T${hour}(:${minute}(:${second})?)?)?)?)?)$`
 )
 
+const GENRES = [
+  "Blues", "Classic Rock", "Country", "Dance", "Disco", "Funk", "Grunge",
+  "Hip-Hop", "Jazz", "Metal", "New Age", "Oldies", "Other", "Pop", "R&B", "Rap",
+  "Reggae", "Rock", "Techno", "Industrial", "Alternative", "Ska", "Death Metal",
+  "Pranks", "Soundtrack", "Euro-Techno", "Ambient", "Trip-Hop", "Vocal",
+  "Jazz+Funk", "Fusion", "Trance", "Classical", "Instrumental", "Acid", "House",
+  "Game", "Sound Clip", "Gospel", "Noise", "Alt. Rock", "Bass", "Soul", "Punk",
+  "Space", "Meditative", "Instrumental Pop", "Instrumental Rock", "Ethnic",
+  "Gothic", "Darkwave", "Techno-Industrial", "Electronic", "Pop-Folk",
+  "Eurodance", "Dream", "Southern Rock", "Comedy", "Cult", "Gangsta Rap",
+  "Top 40", "Christian Rap", "Pop/Funk", "Jungle", "Native American", "Cabaret",
+  "New Wave", "Psychedelic", "Rave", "Showtunes", "Trailer", "Lo-Fi", "Tribal",
+  "Acid Punk", "Acid Jazz", "Polka", "Retro", "Musical", "Rock & Roll",
+  "Hard Rock", "Folk", "Folk-Rock", "National Folk", "Swing", "Fast-Fusion",
+  "Bebop", "Latin", "Revival", "Celtic", "Bluegrass", "Avantgarde",
+  "Gothic Rock", "Progressive Rock", "Psychedelic Rock", "Symphonic Rock",
+  "Slow Rock", "Big Band", "Chorus", "Easy Listening", "Acoustic", "Humour",
+  "Speech", "Chanson", "Opera", "Chamber Music", "Sonata", "Symphony",
+  "Booty Bass", "Primus", "Porn Groove", "Satire", "Slow Jam", "Club",
+  "Tango", "Samba", "Folklore", "Ballad", "Power Ballad", "Rhythmic Soul",
+  "Freestyle", "Duet", "Punk Rock", "Drum Solo", "A Cappella", "Euro-House",
+  "Dance Hall", "Goa", "Drum & Bass", "Club-House", "Hardcore", "Terror",
+  "Indie", "BritPop", "Afro-Punk", "Polsk Punk", "Beat",
+  "Christian Gangsta Rap", "Heavy Metal", "Black Metal", "Crossover",
+  "Contemporary Christian", "Christian Rock", "Merengue", "Salsa",
+  "Thrash Metal", "Anime", "JPop", "Synthpop", "Abstract", "Art Rock",
+  "Baroque", "Bhangra", "Big Beat", "Breakbeat", "Chillout", "Downtempo", "Dub",
+  "EBM", "Eclectic", "Electro", "Electroclash", "Emo", "Experimental", "Garage",
+  "Global", "IDM", "Illbient", "Industro-Goth", "Jam Band", "Krautrock",
+  "Leftfield", "Lounge", "Math Rock", "New Romantic", "Nu-Breakz", "Post-Punk",
+  "Post-Rock", "Psytrance", "Shoegaze", "Space Rock", "Trop Rock",
+  "World Music", "Neoclassical", "Audiobook", "Audio Theatre",
+  "Neue Deutsche Welle", "Podcast", "Indie Rock", "G-Funk", "Dubstep",
+  "Garage Rock", "Psybient"
+]
+
 $(document).ready(function () {
   $('#list-wrapper').on('dragenter', function (event) {
     event.preventDefault()
@@ -47,7 +83,7 @@ $(document).ready(function () {
     const file = $(this).prop('files')[0]
     loadFile(file, function (buffer) {
       const uint8array = new Uint8Array(buffer)
-      const url = imageDataURL(uint8array, file.type)
+      const url = imageURL(uint8array, file.type)
       $('#cover-preview').attr('src', url)
     })
   })
@@ -57,7 +93,7 @@ $(document).ready(function () {
     const month = $(this).val()
     const year = parseInt($('#year').val())
     const removeDays = function (...days) {
-      days.forEach(function (day) {
+      $.each(days, function (index, day) {
         $('#day').find(`option[value='${day}']`).attr('disabled', true)
       })
     }
@@ -135,207 +171,107 @@ async function audioView (event) {
   try {
     toast('Reading file', 'Reading file and tags. Please wait...', TOAST_INFO)
     mp3tag = new MP3Tag(await loadFile(file))
-    mp3tag.read()
-
-    mp3tag.frames.forEach(function (frame) {
-      switch (frame.id) {
-        case 'APIC':
-          if (Array.isArray(frame.value)) frame.value = frame.value[0]
-          imageBuffer = frame.value.data
-          imageType = frame.value.format
-
-          $('#cover-preview').attr({
-            src: imageDataURL(imageBuffer, imageType)
-          })
-          break
-
-        case 'TIT2':
-          $('#title').val(Array.isArray(frame.value)
-            ? frame.value.join(SEPARATOR) : frame.value)
-          break
-
-        case 'TPE1':
-          $('#artist').val(Array.isArray(frame.value)
-            ? frame.value.join('SEPARATOR') : frame.value)
-          break
-
-        case 'TALB':
-          $('#album').val(Array.isArray(frame.value)
-            ? frame.value.join('SEPARATOR') : frame.value)
-          break
-
-        case 'TLAN':
-          $('#language').val(Array.isArray(frame.value)
-            ? frame.value.join(SEPARATOR) : frame.value)
-          break
-
-        case 'TRCK': {
-          if (Array.isArray(frame.value)) frame.value = frame.value[0]
-          let string = frame.value.position
-          if (frame.value.total) string += '/' + frame.value.total
-          $('#track').val(string)
-          break
-        }
-
-        case 'TCON':
-          $('#genre').val(Array.isArray(frame.value)
-            ? frame.value.join(SEPARATOR) : frame.value)
-          break
-
-        case 'TSRC':
-          $('#isrc').val(Array.isArray(frame.value)
-            ? frame.value.join(SEPARATOR) : frame.value)
-          break
-
-        case 'TDRC': {
-          if (Array.isArray(frame.value)) frame.value = frame.value[0]
-          const result = timeRegex.exec(frame.value)
-          if (frame.value[2]) $('#year').val(result[2])
-          if (frame.value[4]) $('#month').val(result[4])
-          if (frame.value[6]) $('#day').val(result[6])
-          break
-        }
-
-        case 'TYER':
-          $('#year').val(Array.isArray(frame.value)
-            ? frame.value.join(SEPARATOR) : frame.value)
-          break
-
-        case 'TDAT':
-          if (Array.isArray(frame.value)) frame.value = frame.value[0]
-          $('#month').val(frame.value.substr(2, 2))
-          $('#day').val(frame.value.substr(0, 2))
-          break
-
-        case 'TCOM':
-          $('#composer').val(Array.isArray(frame.value)
-            ? frame.value.join(SEPARATOR) : frame.value)
-          break
-
-        case 'USLT':
-          if (Array.isArray(frame.value)) frame.value = frame.value[0]
-          $('#lyrics').val(frame.value.language + '|' +
-            frame.value.descriptor + '|' + frame.value.text)
-          break
-      }
-    })
-
+    displayDetails(mp3tag.read())
     toast('Read Successfully', 'Details was displayed', TOAST_SUCCESS)
   } catch (e) {
     toast('Reading Error', e.message, TOAST_DANGER)
   }
 }
 
+function displayDetails (tagger) {
+  if (tagger.name === 'ID3v1') {
+    $('#title').val(tagger.title)
+    $('#artist').val(tagger.artist)
+    $('#album').val(tagger.album)
+    $('#year').val(tagger.year)
+    $('#comment').val(tagger.comment)
+    if (tagger.track) $('#track').val(tagger.track)
+    $('#genre').val(GENRES[tagger.genre])
+  } else if (tagger.name === 'ID3v2') {
+    const frames = tagger.getFrames()
+    for (const id in frames) {
+      switch (id) {
+        case 'APIC':
+          imageBuffer = frames[id][0].data
+          imageType = frames[id][0].format
+
+          $('#cover-preview').attr({ src: imageURL(imageBuffer, imageType) })
+          break
+
+        case 'TIT2':
+          $('#title').val(frames[id].join(SEPARATOR))
+          break
+
+        case 'TPE1':
+          $('#artist').val(frames[id].join(SEPARATOR))
+          break
+
+        case 'TALB':
+          $('#album').val(frames[id].join(SEPARATOR))
+          break
+
+        case 'TLAN':
+          $('#language').val(frames[id].join(SEPARATOR))
+          break
+
+        case 'TRCK': {
+          const tracks = []
+          $.each(frames[id], function (index, value) {
+            let string = value.position
+            if (typeof value.total !== 'undefined') string += '/' + value.total
+            tracks.push(string)
+          })
+
+          $('#track').val(tracks.join(SEPARATOR))
+          break
+        }
+
+        case 'TCON':
+          $('#genre').val(frames[id].join(SEPARATOR))
+          break
+
+        case 'TSRC':
+          $('#isrc').val(frames[id].join(SEPARATOR))
+          break
+
+        case 'TDRC': {
+          const result = timeRegex.exec(frames[id][0])
+          if (result[2]) $('#year').val(result[2])
+          if (result[4]) $('#month').val(result[4])
+          if (result[6]) $('#day').val(result[6])
+          break
+        }
+
+        case 'TYER':
+          $('#year').val(frames[id].join(SEPARATOR))
+          break
+
+        case 'TDAT':
+          $('#month').val(frames[id][0].substr(2, 2))
+          $('#day').val(frames[id][0].substr(0, 2))
+          break
+
+        case 'TCOM':
+          $('#composer').val(frames[id].join(SEPARATOR))
+          break
+
+        case 'USLT':
+          $('#lyrics').val(
+            frames[id][0].language + '|' +
+            frames[id][0].descriptor + '|' +
+            frames[id][0].text
+          )
+          break
+      }
+    }
+  }
+}
+
 async function writeData (data) {
   try {
     toast('Writing', 'Writing the tags to file', TOAST_INFO)
-    mp3tag.frames = []
-
-    const cover = $('#cover').prop('files')
-    if (cover.length > 0) {
-      const imageFile = cover[0]
-      imageBuffer = await loadFile(imageFile)
-      imageType = imageFile.type
-    }
-
-    if (imageBuffer !== null) {
-      mp3tag.frames.push({
-        id: 'APIC',
-        value: {
-          format: imageType,
-          type: 3,
-          description: '',
-          data: imageBuffer
-        }
-      })
-    }
-
-    const date = {}
-    $.each(data, function () {
-      if (this.value === '') return true
-      switch (this.name) {
-        case 'album':
-        case 'genre':
-        case 'isrc':
-        case 'language':
-        case 'title':
-          mp3tag.frames.push({
-            id: getID(this.name),
-            value: this.value
-          })
-          break
-
-        case 'year':
-        case 'month':
-        case 'day':
-          date[this.name] = this.value
-          break
-
-        case 'artist':
-        case 'composer':
-          mp3tag.frames.push({
-            id: getID(this.name),
-            value: this.value.split(SEPARATOR)
-          })
-          break
-
-        case 'track': {
-          const set = this.value.split('/')
-          mp3tag.frames.push({
-            id: getID(this.name),
-            value: {
-              position: parseInt(set[0]),
-              total: parseInt(set[1])
-            }
-          })
-          break
-        }
-
-        case 'lyrics': {
-          const lyrics = this.value.split('|')
-          mp3tag.frames.push({
-            id: getID(this.name),
-            value: {
-              language: lyrics[0],
-              descriptor: lyrics[1],
-              text: lyrics[2]
-            }
-          })
-          break
-        }
-      }
-    })
-
-    if (mp3tag.tagger.major === 3) {
-      if (date.day && date.day !== '00' && date.month && date.month !== '00') {
-        mp3tag.frames.push({
-          id: 'TDAT',
-          value: date.day + date.month
-        })
-      }
-
-      if (date.year && date.year !== '') {
-        mp3tag.frames.push({
-          id: 'TYER',
-          value: date.year
-        })
-      }
-    } else if (mp3tag.tagger.major === 4) {
-      let dateStr = ''
-      if (date.year && date.year !== '') dateStr += date.year
-      if (date.year && date.year !== '' && date.month && date.month !== '00' &&
-        date.day && date.day !== '00') {
-        dateStr += '-' + date.month + '-' + date.day
-      }
-
-      if (dateStr !== '') {
-        mp3tag.frames.push({
-          id: 'TDRC',
-          value: dateStr
-        })
-      }
-    }
-
+    const tagger = mp3tag.tagger
+    writeDetails(tagger, data)
     mp3tag.save()
   } catch (e) {
     toast('Writing Error', e.message, TOAST_DANGER)
@@ -356,47 +292,142 @@ async function writeData (data) {
   toast('Saved!', 'Modified MP3 was saved and ready to download', TOAST_SUCCESS)
 }
 
-function getID (name) {
-  let id = ''
-  switch (name) {
-    case 'title':
-      id = 'TIT2'
-      break
+async function writeDetails (tagger, data) {
+  if (tagger.name === 'ID3v1') {
+    tagger.title = $('#title').val()
+    tagger.artist = $('#artist').val()
+    tagger.album = $('#album').val()
+    tagger.year = $('#year').val()
+    tagger.comment = ''
+    tagger.track = $('#track').val()
+    tagger.genre = GENRES.indexOf($('#genre').val())
+  } else if (tagger.name === 'ID3v2') {
+    const cover = $('#cover').prop('files')
+    const date = {}
 
-    case 'artist':
-      id = 'TPE1'
-      break
+    if (cover.length > 0) {
+      const imageFile = cover[0]
+      imageBuffer = await loadFile(imageFile)
+      imageType = imageFile.type
+    }
 
-    case 'album':
-      id = 'TALB'
-      break
+    if (imageBuffer !== null) {
+      tagger.editFrame('APIC', {
+        format: imageType,
+        type: 3,
+        description: '',
+        data: imageBuffer
+      })
+    }
 
-    case 'language':
-      id = 'TLAN'
-      break
+    $.each(data, function () {
+      switch (this.name) {
+        case 'album':
+          if (this.value !== '') {
+            tagger.editFrame('TALB', this.value.split(SEPARATOR))
+          } else tagger.removeFrame('TALB')
+          break
 
-    case 'track':
-      id = 'TRCK'
-      break
+        case 'genre':
+          if (this.value !== '') {
+            tagger.editFrame('TCON', this.value.split(SEPARATOR))
+          } else tagger.removeFrame('TCON')
+          break
 
-    case 'genre':
-      id = 'TCON'
-      break
+        case 'isrc':
+          if (this.value !== '') {
+            tagger.editFrame('TSRC', this.value.split(SEPARATOR))
+          } else tagger.removeFrame('TSRC')
+          break
 
-    case 'isrc':
-      id = 'TSRC'
-      break
+        case 'language':
+          if (this.value !== '') {
+            tagger.editFrame('TLAN', this.value.split(SEPARATOR))
+          } else tagger.removeFrame('TLAN')
+          break
 
-    case 'composer':
-      id = 'TCOM'
-      break
+        case 'title':
+          if (this.value !== '') {
+            tagger.editFrame('TIT2', this.value.split(SEPARATOR))
+          } else tagger.removeFrame('TIT2')
+          break
 
-    case 'lyrics':
-      id = 'USLT'
-      break
+        case 'artist':
+          if (this.value !== '') {
+            tagger.editFrame('TPE1', this.value.split(SEPARATOR))
+          } else tagger.removeFrame('TPE1')
+          break
+
+        case 'composer':
+          if (this.value !== '') {
+            tagger.editFrame('TCOM', this.value.split(SEPARATOR))
+          } else tagger.removeFrame('TCOM')
+          break
+
+        case 'year':
+        case 'month':
+        case 'day':
+          date[this.name] = this.value
+          break
+
+        case 'track': {
+          if (this.value !== '') {
+            /**
+             *  const set = this.value.split(SEPARATOR)
+             *  const value = []
+             *
+             *  https://github.com/eidoriantan/mp3tag.js/issues/11
+             *  $.each(set, function (index, track) {
+             *    track = track.split('/')
+             *    value.push({
+             *      position: parseInt(track[0]),
+             *      total: parseInt(track[1])
+             *    })
+             *  })
+             */
+
+            const value = this.value.split('/')
+            tagger.editFrame('TRCK', {
+              position: parseInt(value[0]),
+              total: parseInt(value[1])
+            })
+          } else tagger.removeFrame('TRCK')
+          break
+        }
+
+        case 'lyrics': {
+          if (this.value !== '') {
+            const lyrics = this.value.split('|')
+            tagger.editFrame('USLT', {
+              language: lyrics[0],
+              descriptor: lyrics[1],
+              text: lyrics[2]
+            })
+          } else tagger.removeFrame('USLT')
+          break
+        }
+      }
+    })
+
+    if (tagger.major === 3) {
+      if (date.day !== '00' && date.month !== '00') {
+        tagger.editFrame('TDAT', date.day + date.month)
+      }
+
+      if (date.year && date.year !== '') {
+        tagger.editFrame('TYER', date.year)
+      }
+    } else if (tagger.major === 4) {
+      if (date.year === '') return false
+
+      let dateStr = date.year
+      if (date.month !== '00' && date.day !== '00') {
+        dateStr += '-' + date.month + '-' + date.day
+      }
+
+      tagger.editFrame('TDRC', dateStr)
+    }
   }
-
-  return id
 }
 
 function resetForm () {
