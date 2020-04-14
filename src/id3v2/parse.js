@@ -50,8 +50,9 @@ export function setFrame (view, version) {
   if (!Array.isArray(value)) value = [value]
   for (let i = 0; i < value.length; i += 2) {
     const set = {}
-    if (value[i]) set.position = parseInt(value[i])
-    if (value[i + 1]) set.total = parseInt(value[i + 1])
+    const splitted = value[i].split('/')
+    if (splitted[0]) set.position = parseInt(splitted[0])
+    if (splitted[1]) set.total = parseInt(splitted[1])
     array.push(set)
   }
 
