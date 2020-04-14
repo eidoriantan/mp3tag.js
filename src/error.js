@@ -12,11 +12,11 @@ const E_CODES = {
 }
 
 export default class TagError extends Error {
-  constructor (code, ...params) {
+  constructor (code, param) {
     super(E_CODES[code])
     this.name = 'TagError'
     this.code = code
-    this.errorId = params[0]
+    this.error = param
     this.message = this.parseMessage()
   }
 
@@ -28,7 +28,7 @@ export default class TagError extends Error {
         break
 
       case 103:
-        string = `ID3v1 Error: ${E_CODES[this.code]} "${this.errorId}"`
+        string = `ID3v1 Error: ${E_CODES[this.code]} "${this.error}"`
         break
 
       case 200:
@@ -36,7 +36,7 @@ export default class TagError extends Error {
         break
 
       case 201: case 202: case 203: case 204:
-        string = `ID3v2 Error: ${E_CODES[this.code]} "${this.errorId}"`
+        string = `ID3v2 Error: ${E_CODES[this.code]} "${this.error}"`
         break
 
       default:
