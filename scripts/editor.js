@@ -18,6 +18,64 @@ const timeRegex = new RegExp(
 )
 
 $(document).ready(function () {
+  $('#list-wrapper').on('dragenter', function (event) {
+    event.preventDefault()
+  })
+
+  $('#list-wrapper').on('dragleave', function (event) {
+    event.preventDefault()
+  })
+
+  $('#list-wrapper').on('dragover', function (event) {
+    event.preventDefault()
+  })
+
+  $('#list-wrapper').on('drop', function (event) {
+    event.preventDefault()
+    importFiles(event.originalEvent.dataTransfer.files)
+  })
+
+  $('#file-audios').on('change', function () {
+    const files = $(this).prop('files')
+    importFiles(files)
+    $(this).val('')
+  })
+
+  $('#list-wrapper').click(resetForm)
+
+  $('#cover').on('change', function () {
+    const file = $(this).prop('files')[0]
+    loadFile(file, function (buffer) {
+      const uint8array = new Uint8Array(buffer)
+      const url = imageDataURL(uint8array, file.type)
+      $('#cover-preview').attr('src', url)
+    })
+  })
+
+  $('#month').on('change', function () {
+    $('#day').find('option').attr('disabled', null)
+    const month = $(this).val()
+    const year = parseInt($('#year').val())
+    const removeDays = function (...days) {
+      days.forEach(function (day) {
+        $('#day').find(`option[value='${day}']`).attr('disabled', true)
+      })
+    }
+
+    switch (month) {
+      case '04': case '06': case '09': case '11':
+        removeDays(31)
+        break
+
+      case '02':
+        removeDays(30, 31)
+        if ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) {
+          removeDays(29)
+        }
+        break
+    }
+  })
+
   $('#edit-form').submit(function (event) {
     event.preventDefault()
     if (currentIndex < 0) return false
