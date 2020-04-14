@@ -6,13 +6,8 @@ import TagError from './error'
 import { isBuffer } from './utils/types'
 
 export default class MP3Tag {
-  static ID3v1 (...params) {
-    return new ID3v1(...params)
-  }
-
-  static ID3v2 (...params) {
-    return new ID3v2(...params)
-  }
+  static get ID3v1 () { return ID3v1 }
+  static get ID3v2 () { return ID3v2 }
 
   get frames () {
     console.warn('frames are deprecated. Please use the tagger\'s instead')
