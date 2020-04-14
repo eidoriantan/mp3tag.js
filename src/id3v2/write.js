@@ -67,13 +67,15 @@ export function asciiFrame (values, id, version) {
 
 export function setFrame (values, id, version) {
   const strings = []
+
+  values = Array.isArray(values[0]) ? values[0] : [values[0]]
   values.forEach(function (value) {
     let string = value.position.toString()
     if (value.total) string += '/' + value.total.toString()
     strings.push(string)
   })
 
-  return asciiFrame(strings, id, version)
+  return asciiFrame([strings], id, version)
 }
 
 export function urlFrame (values, id, version) {

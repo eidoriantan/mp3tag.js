@@ -32,31 +32,28 @@ export function textFrame (view, version) {
 }
 
 export function numberFrame (view, version) {
-  let value = textFrame(view, version)
+  const value = textFrame(view, version)
   const toNumber = function (string) {
     return string.match(/^(\d+)$/) !== null ? parseInt(string) : string
   }
 
-  value = Array.isArray(value) ? value.map(elem => toNumber(elem))
+  return Array.isArray(value) ? value.map(elem => toNumber(elem))
     : toNumber(value)
-
-  return value
 }
 
 export function setFrame (view, version) {
-  let value = textFrame(view, version)
-  const array = []
-
-  if (!Array.isArray(value)) value = [value]
-  for (let i = 0; i < value.length; i += 2) {
+  const value = textFrame(view, version)
+  const toSet = function (object) {
     const set = {}
-    const splitted = value[i].split('/')
+    const splitted = object.split('/')
+
     if (splitted[0]) set.position = parseInt(splitted[0])
     if (splitted[1]) set.total = parseInt(splitted[1])
-    array.push(set)
+
+    return set
   }
 
-  return array.length === 1 ? array[0] : array
+  return Array.isArray(value) ? value.map(elem => toSet(elem)) : toSet(value)
 }
 
 export function urlFrame (view, version) {
