@@ -190,35 +190,37 @@ function displayDetails (tagger) {
   } else if (tagger.name === 'ID3v2') {
     const frames = tagger.getFrames()
     for (const id in frames) {
+      const value = frames[id][0]
       switch (id) {
         case 'APIC':
-          imageBuffer = frames[id][0].data
-          imageType = frames[id][0].format
+          imageBuffer = value.data
+          imageType = value.format
 
           $('#cover-preview').attr({ src: imageURL(imageBuffer, imageType) })
           break
 
         case 'TIT2':
-          $('#title').val(frames[id].join(SEPARATOR))
+          $('#title').val(Array.isArray(value) ? value.join(SEPARATOR) : value)
           break
 
         case 'TPE1':
-          $('#artist').val(frames[id].join(SEPARATOR))
+          $('#artist').val(Array.isArray(value) ? value.join(SEPARATOR) : value)
           break
 
         case 'TALB':
-          $('#album').val(frames[id].join(SEPARATOR))
+          $('#album').val(Array.isArray(value) ? value.join(SEPARATOR) : value)
           break
 
         case 'TLAN':
-          $('#language').val(frames[id].join(SEPARATOR))
+          $('#language').val(Array.isArray(value) ? value.join(SEPARATOR)
+            : value)
           break
 
         case 'TRCK': {
           const tracks = []
-          $.each(frames[id], function (index, value) {
-            let string = value.position
-            if (typeof value.total !== 'undefined') string += '/' + value.total
+          $.each(Array.isArray(value) ? value : [value], function () {
+            let string = this.position
+            if (typeof this.total !== 'undefined') string += '/' + this.total
             tracks.push(string)
           })
 
@@ -227,15 +229,15 @@ function displayDetails (tagger) {
         }
 
         case 'TCON':
-          $('#genre').val(frames[id].join(SEPARATOR))
+          $('#genre').val(Array.isArray(value) ? value.join(SEPARATOR) : value)
           break
 
         case 'TSRC':
-          $('#isrc').val(frames[id].join(SEPARATOR))
+          $('#isrc').val(Array.isArray(value) ? value.join(SEPARATOR) : value)
           break
 
         case 'TDRC': {
-          const result = timeRegex.exec(frames[id][0])
+          const result = timeRegex.exec(value)
           if (result[2]) $('#year').val(result[2])
           if (result[4]) $('#month').val(result[4])
           if (result[6]) $('#day').val(result[6])
@@ -243,24 +245,21 @@ function displayDetails (tagger) {
         }
 
         case 'TYER':
-          $('#year').val(frames[id].join(SEPARATOR))
+          $('#year').val(Array.isArray(value) ? value.join(SEPARATOR) : value)
           break
 
         case 'TDAT':
-          $('#month').val(frames[id][0].substr(2, 2))
-          $('#day').val(frames[id][0].substr(0, 2))
+          $('#month').val(value.substr(2, 2))
+          $('#day').val(value.substr(0, 2))
           break
 
         case 'TCOM':
-          $('#composer').val(frames[id].join(SEPARATOR))
+          $('#composer').val(Array.isArray(value) ? value.join(SEPARATOR) : value)
           break
 
         case 'USLT':
-          $('#lyrics').val(
-            frames[id][0].language + '|' +
-            frames[id][0].descriptor + '|' +
-            frames[id][0].text
-          )
+          $('#lyrics').val(value.language + '|' + value.descriptor + '|' +
+            value.text)
           break
       }
     }
@@ -375,8 +374,8 @@ async function writeDetails (tagger, data) {
             const set = this.value.split(SEPARATOR)
             const value = []
 
-            $.each(set, function (index, track) {
-              track = track.split('/')
+            $.each(set, function () {
+              const track = this.split('/')
               value.push({
                 position: parseInt(track[0]),
                 total: parseInt(track[1])
