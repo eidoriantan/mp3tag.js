@@ -54,6 +54,7 @@ export default class MP3Tag {
 
   save () {
     const old = this.buffer
+    this.tagger.options = this.options
     this.buffer = this.tagger.save()
     return old
   }
