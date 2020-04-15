@@ -1,12 +1,12 @@
 
+import TagError from './error'
+import BufferView from './viewer'
+
 import * as flags from './id3v2/flags'
 import * as frames from './id3v2/frames'
 
 import { decodeSynch, encodeSynch, mergeBytes, unsynch } from './utils/bytes'
 import { isBuffer } from './utils/types'
-
-import TagError from './error'
-import BufferView from './viewer'
 
 export default class ID3v2 {
   static isID3v2 (buffer) {

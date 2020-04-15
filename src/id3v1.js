@@ -1,10 +1,10 @@
 
+import TagError from './error'
+import BufferView from './viewer'
+
 import { mergeBytes } from './utils/bytes'
 import { encodeString } from './utils/strings'
 import { isBuffer } from './utils/types'
-
-import TagError from './error'
-import BufferView from './viewer'
 
 export default class ID3v1 {
   static isID3v1 (buffer) {
