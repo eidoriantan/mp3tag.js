@@ -10,8 +10,7 @@ describe('BufferView', function () {
   })
 
   it('getUint8()', function () {
-    const uint8 = new Uint8Array([1, 2, 3, 4, 5])
-    const viewer = new BufferView(uint8)
+    const viewer = new BufferView([1, 2, 3, 4, 5])
 
     assert.deepStrictEqual(viewer.getUint8(0), 1)
     assert.deepStrictEqual(viewer.getUint8(0, 2), [1, 2])
@@ -46,40 +45,32 @@ describe('BufferView', function () {
   })
 
   it('Read ASCII', function () {
-    const uint8 = new Uint8Array([49, 48, 48, 48])
-    const viewer = new BufferView(uint8)
-
+    const viewer = new BufferView([49, 48, 48, 48])
     assert.deepStrictEqual(viewer.getString(0, 4, 'ascii').string, '1000')
   })
 
   it('Read null-terminated string ASCII', function () {
-    const uint8 = new Uint8Array([49, 48, 48, 48, 0, 1, 2])
-    const viewer = new BufferView(uint8)
-
+    const viewer = new BufferView([49, 48, 48, 48, 0, 1, 2])
     const cstring = viewer.getCString(0, 'ascii')
+
     assert.deepStrictEqual(cstring.string, '1000')
     assert.deepStrictEqual(cstring.length, 5)
   })
 
   it('Read UTF-16', function () {
-    const uint8 = new Uint8Array([255, 254, 49, 0, 48, 0, 48, 0, 48, 0])
-    const viewer = new BufferView(uint8)
-
+    const viewer = new BufferView([255, 254, 49, 0, 48, 0, 48, 0, 48, 0])
     assert.deepStrictEqual(viewer.getString(0, 10, 'utf-16').string, '1000')
   })
 
   it('Read UTF-16', function () {
-    const uint8 = new Uint8Array([254, 255, 0, 49, 0, 48, 0, 48, 0, 48])
-    const viewer = new BufferView(uint8)
-
+    const viewer = new BufferView([254, 255, 0, 49, 0, 48, 0, 48, 0, 48])
     assert.deepStrictEqual(viewer.getString(0, 10, 'utf-16').string, '1000')
   })
 
   it('Read null-terminated UTF-16', function () {
-    const uint8 = new Uint8Array([255, 254, 49, 0, 48, 0, 48, 0, 0, 0, 1, 2])
-    const viewer = new BufferView(uint8)
-
+    const viewer = new BufferView([255, 254, 49, 0, 48, 0, 48, 0, 0, 0, 1, 2])
     const cstring = viewer.getCString(0, 'utf-16')
+
     assert.deepStrictEqual(cstring.string, '100')
     assert.deepStrictEqual(cstring.length, 10)
   })
