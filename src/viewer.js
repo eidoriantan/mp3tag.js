@@ -24,10 +24,9 @@ export default class BufferView extends DataView {
   }
 
   getString (offset, maxlength, format) {
+    let string = ''
     let bytes = this.getUint8(offset, maxlength)
     if (!Array.isArray(bytes)) bytes = [bytes]
-
-    let string = ''
 
     switch (format) {
       case 'utf-8':
