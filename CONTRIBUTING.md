@@ -12,4 +12,8 @@ make sure that you are following this guideline:
  * Follow the [Convential Commits](www.conventionalcommits.org/en/v1.0.0/) when
    committing
 
+Please also look at the
+[repository's board](https://github.com/eidoriantan/mp3tag.js/projects) to know
+about the project's future plans.
+
 Any contributions to this project is greatly appreciated.
