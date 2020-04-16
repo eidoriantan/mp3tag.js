@@ -55,8 +55,8 @@ export default class BufferView extends DataView {
     }
 
     return {
-      string: string[string.length - 1] === '\0'
-        ? string.substr(0, string.length - 1) : string,
+      string: string.endsWith('\0') ? string.substr(0, string.length - 1)
+        : string,
       length: bytes.length
     }
   }
