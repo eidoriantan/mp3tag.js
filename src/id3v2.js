@@ -5,6 +5,7 @@ import BufferView from './viewer'
 import * as flags from './id3v2/flags'
 import * as frames from './id3v2/frames'
 
+import { getAudio } from './utils/audio'
 import { decodeSynch, encodeSynch, mergeBytes, unsynch } from './utils/bytes'
 import { isBuffer } from './utils/types'
 
@@ -185,17 +186,7 @@ export default class ID3v2 {
   }
 
   getAudio () {
-    const audioData = new Uint8Array(this.buffer)
-
-    let i = 0
-    while (i < audioData.length) {
-      if (audioData[i] === 0xff && (audioData[i + 1] === 0xfb ||
-        audioData[i + 1] === 0xfa)) {
-        return new Uint8Array(this.buffer.slice(i))
-      } else i++
-    }
-
-    return new Uint8Array(0)
+    return new Uint8Array(getAudio(this.buffer))
   }
 }
 

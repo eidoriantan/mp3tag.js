@@ -4,6 +4,7 @@ import ID3v2 from './id3v2'
 import TagError from './error'
 import { GENRE } from './globals'
 
+import { getAudio } from './utils/audio'
 import { isBuffer } from './utils/types'
 
 export default class MP3Tag {
@@ -81,7 +82,7 @@ export default class MP3Tag {
     return this.tagger.existsFrame(id)
   }
 
-  getAudio () { return this.tagger.getAudio() }
+  getAudio () { return new Uint8Array(getAudio(this.buffer)) }
 
   getBlob (type = 'audio/mpeg') {
     return new Blob([this.buffer], { type: type })

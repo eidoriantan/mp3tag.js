@@ -2,6 +2,7 @@
 import TagError from './error'
 import BufferView from './viewer'
 
+import { getAudio } from './utils/audio'
 import { mergeBytes } from './utils/bytes'
 import { encodeString } from './utils/strings'
 import { isBuffer } from './utils/types'
@@ -136,9 +137,6 @@ export default class ID3v1 {
   }
 
   getAudio () {
-    if (!ID3v1.isID3v1(this.buffer)) throw new TagError(100)
-    const audioData = new Uint8Array(this.buffer)
-
-    return new Uint8Array(this.buffer.slice(0, audioData.length - 128))
+    return new Uint8Array(getAudio(this.buffer))
   }
 }
