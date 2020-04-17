@@ -3,6 +3,10 @@ export function isBitSet (byte, bit) {
   return (byte & (1 << bit)) > 0
 }
 
+export function setBit (byte, bit) {
+  return byte | (1 << bit)
+}
+
 export function decodeSynch (synch) {
   let out = 0
   let mask = 0x7F000000
