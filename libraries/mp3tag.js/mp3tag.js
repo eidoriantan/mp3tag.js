@@ -12,13 +12,32 @@
     }
   };
 
-  var descriptors = !fails(function () {
-    return Object.defineProperty({}, 1, {
-      get: function () {
-        return 7;
-      }
-    })[1] != 7;
-  });
+  var toString = {}.toString;
+
+  var classofRaw = function (it) {
+    return toString.call(it).slice(8, -1);
+  };
+
+  var split = ''.split; // fallback for non-array-like ES3 and non-enumerable old V8 strings
+
+  var indexedObject = fails(function () {
+    // throws an error in rhino, see https://github.com/mozilla/rhino/issues/346
+    // eslint-disable-next-line no-prototype-builtins
+    return !Object('z').propertyIsEnumerable(0);
+  }) ? function (it) {
+    return classofRaw(it) == 'String' ? split.call(it, '') : Object(it);
+  } : Object;
+
+  // `RequireObjectCoercible` abstract operation
+  // https://tc39.github.io/ecma262/#sec-requireobjectcoercible
+  var requireObjectCoercible = function (it) {
+    if (it == undefined) throw TypeError("Can't call method on " + it);
+    return it;
+  };
+
+  var toIndexedObject = function (it) {
+    return indexedObject(requireObjectCoercible(it));
+  };
 
   var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -34,6 +53,14 @@
   var global_1 = // eslint-disable-next-line no-undef
   check(typeof globalThis == 'object' && globalThis) || check(typeof window == 'object' && window) || check(typeof self == 'object' && self) || check(typeof commonjsGlobal == 'object' && commonjsGlobal) || // eslint-disable-next-line no-new-func
   Function('return this')();
+
+  var descriptors = !fails(function () {
+    return Object.defineProperty({}, 1, {
+      get: function () {
+        return 7;
+      }
+    })[1] != 7;
+  });
 
   var isObject = function (it) {
     return typeof it === 'object' ? it !== null : typeof it === 'function';
@@ -94,256 +121,6 @@
   };
   var objectDefineProperty = {
     f: f
-  };
-
-  var defineProperty = objectDefineProperty.f;
-  var FunctionPrototype = Function.prototype;
-  var FunctionPrototypeToString = FunctionPrototype.toString;
-  var nameRE = /^\s*function ([^ (]*)/;
-  var NAME = 'name'; // Function instances `.name` property
-  // https://tc39.github.io/ecma262/#sec-function-instances-name
-
-  if (descriptors && !(NAME in FunctionPrototype)) {
-    defineProperty(FunctionPrototype, NAME, {
-      configurable: true,
-      get: function () {
-        try {
-          return FunctionPrototypeToString.call(this).match(nameRE)[1];
-        } catch (error) {
-          return '';
-        }
-      }
-    });
-  }
-
-  function _typeof(obj) {
-    "@babel/helpers - typeof";
-
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof = function (obj) {
-        return typeof obj;
-      };
-    } else {
-      _typeof = function (obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-      };
-    }
-
-    return _typeof(obj);
-  }
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  function _defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  function _createClass(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties(Constructor, staticProps);
-    return Constructor;
-  }
-
-  function _inherits(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-
-    subClass.prototype = Object.create(superClass && superClass.prototype, {
-      constructor: {
-        value: subClass,
-        writable: true,
-        configurable: true
-      }
-    });
-    if (superClass) _setPrototypeOf(subClass, superClass);
-  }
-
-  function _getPrototypeOf(o) {
-    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
-      return o.__proto__ || Object.getPrototypeOf(o);
-    };
-    return _getPrototypeOf(o);
-  }
-
-  function _setPrototypeOf(o, p) {
-    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
-      o.__proto__ = p;
-      return o;
-    };
-
-    return _setPrototypeOf(o, p);
-  }
-
-  function _isNativeReflectConstruct() {
-    if (typeof Reflect === "undefined" || !Reflect.construct) return false;
-    if (Reflect.construct.sham) return false;
-    if (typeof Proxy === "function") return true;
-
-    try {
-      Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function _construct(Parent, args, Class) {
-    if (_isNativeReflectConstruct()) {
-      _construct = Reflect.construct;
-    } else {
-      _construct = function _construct(Parent, args, Class) {
-        var a = [null];
-        a.push.apply(a, args);
-        var Constructor = Function.bind.apply(Parent, a);
-        var instance = new Constructor();
-        if (Class) _setPrototypeOf(instance, Class.prototype);
-        return instance;
-      };
-    }
-
-    return _construct.apply(null, arguments);
-  }
-
-  function _isNativeFunction(fn) {
-    return Function.toString.call(fn).indexOf("[native code]") !== -1;
-  }
-
-  function _wrapNativeSuper(Class) {
-    var _cache = typeof Map === "function" ? new Map() : undefined;
-
-    _wrapNativeSuper = function _wrapNativeSuper(Class) {
-      if (Class === null || !_isNativeFunction(Class)) return Class;
-
-      if (typeof Class !== "function") {
-        throw new TypeError("Super expression must either be null or a function");
-      }
-
-      if (typeof _cache !== "undefined") {
-        if (_cache.has(Class)) return _cache.get(Class);
-
-        _cache.set(Class, Wrapper);
-      }
-
-      function Wrapper() {
-        return _construct(Class, arguments, _getPrototypeOf(this).constructor);
-      }
-
-      Wrapper.prototype = Object.create(Class.prototype, {
-        constructor: {
-          value: Wrapper,
-          enumerable: false,
-          writable: true,
-          configurable: true
-        }
-      });
-      return _setPrototypeOf(Wrapper, Class);
-    };
-
-    return _wrapNativeSuper(Class);
-  }
-
-  function _assertThisInitialized(self) {
-    if (self === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-
-    return self;
-  }
-
-  function _possibleConstructorReturn(self, call) {
-    if (call && (typeof call === "object" || typeof call === "function")) {
-      return call;
-    }
-
-    return _assertThisInitialized(self);
-  }
-
-  function _createSuper(Derived) {
-    return function () {
-      var Super = _getPrototypeOf(Derived),
-          result;
-
-      if (_isNativeReflectConstruct()) {
-        var NewTarget = _getPrototypeOf(this).constructor;
-
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-
-      return _possibleConstructorReturn(this, result);
-    };
-  }
-
-  function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
-  }
-
-  function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
-  }
-
-  function _iterableToArray(iter) {
-    if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
-  }
-
-  function _unsupportedIterableToArray(o, minLen) {
-    if (!o) return;
-    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
-    var n = Object.prototype.toString.call(o).slice(8, -1);
-    if (n === "Object" && o.constructor) n = o.constructor.name;
-    if (n === "Map" || n === "Set") return Array.from(n);
-    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-  }
-
-  function _arrayLikeToArray(arr, len) {
-    if (len == null || len > arr.length) len = arr.length;
-
-    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-
-    return arr2;
-  }
-
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-
-  var toString = {}.toString;
-
-  var classofRaw = function (it) {
-    return toString.call(it).slice(8, -1);
-  };
-
-  var split = ''.split; // fallback for non-array-like ES3 and non-enumerable old V8 strings
-
-  var indexedObject = fails(function () {
-    // throws an error in rhino, see https://github.com/mozilla/rhino/issues/346
-    // eslint-disable-next-line no-prototype-builtins
-    return !Object('z').propertyIsEnumerable(0);
-  }) ? function (it) {
-    return classofRaw(it) == 'String' ? split.call(it, '') : Object(it);
-  } : Object;
-
-  // `RequireObjectCoercible` abstract operation
-  // https://tc39.github.io/ecma262/#sec-requireobjectcoercible
-  var requireObjectCoercible = function (it) {
-    if (it == undefined) throw TypeError("Can't call method on " + it);
-    return it;
-  };
-
-  var toIndexedObject = function (it) {
-    return indexedObject(requireObjectCoercible(it));
   };
 
   var createPropertyDescriptor = function (bitmap, value) {
@@ -937,12 +714,12 @@
     BUGGY_SAFARI_ITERATORS: BUGGY_SAFARI_ITERATORS
   };
 
-  var defineProperty$1 = objectDefineProperty.f;
+  var defineProperty = objectDefineProperty.f;
   var TO_STRING_TAG = wellKnownSymbol('toStringTag');
 
   var setToStringTag = function (it, TAG, STATIC) {
     if (it && !has(it = STATIC ? it : it.prototype, TO_STRING_TAG)) {
-      defineProperty$1(it, TO_STRING_TAG, {
+      defineProperty(it, TO_STRING_TAG, {
         configurable: true,
         value: TAG
       });
@@ -1160,134 +937,6 @@
   addToUnscopables('values');
   addToUnscopables('entries');
 
-  // https://tc39.github.io/ecma262/#sec-isarray
-
-  var isArray = Array.isArray || function isArray(arg) {
-    return classofRaw(arg) == 'Array';
-  };
-
-  var createProperty = function (object, key, value) {
-    var propertyKey = toPrimitive(key);
-    if (propertyKey in object) objectDefineProperty.f(object, propertyKey, createPropertyDescriptor(0, value));else object[propertyKey] = value;
-  };
-
-  var engineUserAgent = getBuiltIn('navigator', 'userAgent') || '';
-
-  var process = global_1.process;
-  var versions = process && process.versions;
-  var v8 = versions && versions.v8;
-  var match, version;
-
-  if (v8) {
-    match = v8.split('.');
-    version = match[0] + match[1];
-  } else if (engineUserAgent) {
-    match = engineUserAgent.match(/Edge\/(\d+)/);
-
-    if (!match || match[1] >= 74) {
-      match = engineUserAgent.match(/Chrome\/(\d+)/);
-      if (match) version = match[1];
-    }
-  }
-
-  var engineV8Version = version && +version;
-
-  var SPECIES = wellKnownSymbol('species');
-
-  var arrayMethodHasSpeciesSupport = function (METHOD_NAME) {
-    // We can't use this feature detection in V8 since it causes
-    // deoptimization and serious performance degradation
-    // https://github.com/zloirock/core-js/issues/677
-    return engineV8Version >= 51 || !fails(function () {
-      var array = [];
-      var constructor = array.constructor = {};
-
-      constructor[SPECIES] = function () {
-        return {
-          foo: 1
-        };
-      };
-
-      return array[METHOD_NAME](Boolean).foo !== 1;
-    });
-  };
-
-  var defineProperty$2 = Object.defineProperty;
-  var cache = {};
-
-  var thrower = function (it) {
-    throw it;
-  };
-
-  var arrayMethodUsesToLength = function (METHOD_NAME, options) {
-    if (has(cache, METHOD_NAME)) return cache[METHOD_NAME];
-    if (!options) options = {};
-    var method = [][METHOD_NAME];
-    var ACCESSORS = has(options, 'ACCESSORS') ? options.ACCESSORS : false;
-    var argument0 = has(options, 0) ? options[0] : thrower;
-    var argument1 = has(options, 1) ? options[1] : undefined;
-    return cache[METHOD_NAME] = !!method && !fails(function () {
-      if (ACCESSORS && !descriptors) return true;
-      var O = {
-        length: -1
-      };
-      if (ACCESSORS) defineProperty$2(O, 1, {
-        enumerable: true,
-        get: thrower
-      });else O[1] = 1;
-      method.call(O, argument0, argument1);
-    });
-  };
-
-  var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('slice');
-  var USES_TO_LENGTH = arrayMethodUsesToLength('slice', {
-    ACCESSORS: true,
-    0: 0,
-    1: 2
-  });
-  var SPECIES$1 = wellKnownSymbol('species');
-  var nativeSlice = [].slice;
-  var max$1 = Math.max; // `Array.prototype.slice` method
-  // https://tc39.github.io/ecma262/#sec-array.prototype.slice
-  // fallback for not array-like ES3 strings and DOM objects
-
-  _export({
-    target: 'Array',
-    proto: true,
-    forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH
-  }, {
-    slice: function slice(start, end) {
-      var O = toIndexedObject(this);
-      var length = toLength(O.length);
-      var k = toAbsoluteIndex(start, length);
-      var fin = toAbsoluteIndex(end === undefined ? length : end, length); // inline `ArraySpeciesCreate` for usage native `Array#slice` where it's possible
-
-      var Constructor, result, n;
-
-      if (isArray(O)) {
-        Constructor = O.constructor; // cross-realm fallback
-
-        if (typeof Constructor == 'function' && (Constructor === Array || isArray(Constructor.prototype))) {
-          Constructor = undefined;
-        } else if (isObject(Constructor)) {
-          Constructor = Constructor[SPECIES$1];
-          if (Constructor === null) Constructor = undefined;
-        }
-
-        if (Constructor === Array || Constructor === undefined) {
-          return nativeSlice.call(O, k, fin);
-        }
-      }
-
-      result = new (Constructor === undefined ? Array : Constructor)(max$1(fin - k, 0));
-
-      for (n = 0; k < fin; k++, n++) if (k in O) createProperty(result, n, O[k]);
-
-      result.length = n;
-      return result;
-    }
-  });
-
   var arrayBufferNative = typeof ArrayBuffer !== 'undefined' && typeof DataView !== 'undefined';
 
   var redefineAll = function (target, src, options) {
@@ -1436,7 +1085,7 @@
   };
 
   var getOwnPropertyNames = objectGetOwnPropertyNames.f;
-  var defineProperty$3 = objectDefineProperty.f;
+  var defineProperty$1 = objectDefineProperty.f;
   var getInternalState$1 = internalState.get;
   var setInternalState$1 = internalState.set;
   var ARRAY_BUFFER = 'ArrayBuffer';
@@ -1478,7 +1127,7 @@
   };
 
   var addGetter = function (Constructor, key) {
-    defineProperty$3(Constructor[PROTOTYPE$1], key, {
+    defineProperty$1(Constructor[PROTOTYPE$1], key, {
       get: function () {
         return getInternalState$1(this)[key];
       }
@@ -1688,13 +1337,13 @@
     return it;
   };
 
-  var SPECIES$2 = wellKnownSymbol('species'); // `SpeciesConstructor` abstract operation
+  var SPECIES = wellKnownSymbol('species'); // `SpeciesConstructor` abstract operation
   // https://tc39.github.io/ecma262/#sec-speciesconstructor
 
   var speciesConstructor = function (O, defaultConstructor) {
     var C = anObject(O).constructor;
     var S;
-    return C === undefined || (S = anObject(C)[SPECIES$2]) == undefined ? defaultConstructor : aFunction$1(S);
+    return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? defaultConstructor : aFunction$1(S);
   };
 
   var ArrayBuffer$1 = arrayBuffer.ArrayBuffer;
@@ -1731,6 +1380,26 @@
       return result;
     }
   });
+
+  var defineProperty$2 = objectDefineProperty.f;
+  var FunctionPrototype = Function.prototype;
+  var FunctionPrototypeToString = FunctionPrototype.toString;
+  var nameRE = /^\s*function ([^ (]*)/;
+  var NAME = 'name'; // Function instances `.name` property
+  // https://tc39.github.io/ecma262/#sec-function-instances-name
+
+  if (descriptors && !(NAME in FunctionPrototype)) {
+    defineProperty$2(FunctionPrototype, NAME, {
+      configurable: true,
+      get: function () {
+        try {
+          return FunctionPrototypeToString.call(this).match(nameRE)[1];
+        } catch (error) {
+          return '';
+        }
+      }
+    });
+  }
 
   var TO_STRING_TAG$1 = wellKnownSymbol('toStringTag');
   var test = {};
@@ -1773,6 +1442,1332 @@
     redefine(Object.prototype, 'toString', objectToString, {
       unsafe: true
     });
+  }
+
+  var ITERATOR$2 = wellKnownSymbol('iterator');
+  var SAFE_CLOSING = false;
+
+  try {
+    var called = 0;
+    var iteratorWithReturn = {
+      next: function () {
+        return {
+          done: !!called++
+        };
+      },
+      'return': function () {
+        SAFE_CLOSING = true;
+      }
+    };
+
+    iteratorWithReturn[ITERATOR$2] = function () {
+      return this;
+    }; // eslint-disable-next-line no-throw-literal
+
+
+    Array.from(iteratorWithReturn, function () {
+      throw 2;
+    });
+  } catch (error) {
+    /* empty */
+  }
+
+  var checkCorrectnessOfIteration = function (exec, SKIP_CLOSING) {
+    if (!SKIP_CLOSING && !SAFE_CLOSING) return false;
+    var ITERATION_SUPPORT = false;
+
+    try {
+      var object = {};
+
+      object[ITERATOR$2] = function () {
+        return {
+          next: function () {
+            return {
+              done: ITERATION_SUPPORT = true
+            };
+          }
+        };
+      };
+
+      exec(object);
+    } catch (error) {
+      /* empty */
+    }
+
+    return ITERATION_SUPPORT;
+  };
+
+  var defineProperty$3 = objectDefineProperty.f;
+  var Int8Array$1 = global_1.Int8Array;
+  var Int8ArrayPrototype = Int8Array$1 && Int8Array$1.prototype;
+  var Uint8ClampedArray = global_1.Uint8ClampedArray;
+  var Uint8ClampedArrayPrototype = Uint8ClampedArray && Uint8ClampedArray.prototype;
+  var TypedArray = Int8Array$1 && objectGetPrototypeOf(Int8Array$1);
+  var TypedArrayPrototype = Int8ArrayPrototype && objectGetPrototypeOf(Int8ArrayPrototype);
+  var ObjectPrototype$2 = Object.prototype;
+  var isPrototypeOf = ObjectPrototype$2.isPrototypeOf;
+  var TO_STRING_TAG$3 = wellKnownSymbol('toStringTag');
+  var TYPED_ARRAY_TAG = uid('TYPED_ARRAY_TAG'); // Fixing native typed arrays in Opera Presto crashes the browser, see #595
+
+  var NATIVE_ARRAY_BUFFER_VIEWS = arrayBufferNative && !!objectSetPrototypeOf && classof(global_1.opera) !== 'Opera';
+  var TYPED_ARRAY_TAG_REQIRED = false;
+  var NAME$1;
+  var TypedArrayConstructorsList = {
+    Int8Array: 1,
+    Uint8Array: 1,
+    Uint8ClampedArray: 1,
+    Int16Array: 2,
+    Uint16Array: 2,
+    Int32Array: 4,
+    Uint32Array: 4,
+    Float32Array: 4,
+    Float64Array: 8
+  };
+
+  var isView = function isView(it) {
+    var klass = classof(it);
+    return klass === 'DataView' || has(TypedArrayConstructorsList, klass);
+  };
+
+  var isTypedArray = function (it) {
+    return isObject(it) && has(TypedArrayConstructorsList, classof(it));
+  };
+
+  var aTypedArray = function (it) {
+    if (isTypedArray(it)) return it;
+    throw TypeError('Target is not a typed array');
+  };
+
+  var aTypedArrayConstructor = function (C) {
+    if (objectSetPrototypeOf) {
+      if (isPrototypeOf.call(TypedArray, C)) return C;
+    } else for (var ARRAY in TypedArrayConstructorsList) if (has(TypedArrayConstructorsList, NAME$1)) {
+      var TypedArrayConstructor = global_1[ARRAY];
+
+      if (TypedArrayConstructor && (C === TypedArrayConstructor || isPrototypeOf.call(TypedArrayConstructor, C))) {
+        return C;
+      }
+    }
+
+    throw TypeError('Target is not a typed array constructor');
+  };
+
+  var exportTypedArrayMethod = function (KEY, property, forced) {
+    if (!descriptors) return;
+    if (forced) for (var ARRAY in TypedArrayConstructorsList) {
+      var TypedArrayConstructor = global_1[ARRAY];
+
+      if (TypedArrayConstructor && has(TypedArrayConstructor.prototype, KEY)) {
+        delete TypedArrayConstructor.prototype[KEY];
+      }
+    }
+
+    if (!TypedArrayPrototype[KEY] || forced) {
+      redefine(TypedArrayPrototype, KEY, forced ? property : NATIVE_ARRAY_BUFFER_VIEWS && Int8ArrayPrototype[KEY] || property);
+    }
+  };
+
+  var exportTypedArrayStaticMethod = function (KEY, property, forced) {
+    var ARRAY, TypedArrayConstructor;
+    if (!descriptors) return;
+
+    if (objectSetPrototypeOf) {
+      if (forced) for (ARRAY in TypedArrayConstructorsList) {
+        TypedArrayConstructor = global_1[ARRAY];
+
+        if (TypedArrayConstructor && has(TypedArrayConstructor, KEY)) {
+          delete TypedArrayConstructor[KEY];
+        }
+      }
+
+      if (!TypedArray[KEY] || forced) {
+        // V8 ~ Chrome 49-50 `%TypedArray%` methods are non-writable non-configurable
+        try {
+          return redefine(TypedArray, KEY, forced ? property : NATIVE_ARRAY_BUFFER_VIEWS && Int8Array$1[KEY] || property);
+        } catch (error) {
+          /* empty */
+        }
+      } else return;
+    }
+
+    for (ARRAY in TypedArrayConstructorsList) {
+      TypedArrayConstructor = global_1[ARRAY];
+
+      if (TypedArrayConstructor && (!TypedArrayConstructor[KEY] || forced)) {
+        redefine(TypedArrayConstructor, KEY, property);
+      }
+    }
+  };
+
+  for (NAME$1 in TypedArrayConstructorsList) {
+    if (!global_1[NAME$1]) NATIVE_ARRAY_BUFFER_VIEWS = false;
+  } // WebKit bug - typed arrays constructors prototype is Object.prototype
+
+
+  if (!NATIVE_ARRAY_BUFFER_VIEWS || typeof TypedArray != 'function' || TypedArray === Function.prototype) {
+    // eslint-disable-next-line no-shadow
+    TypedArray = function TypedArray() {
+      throw TypeError('Incorrect invocation');
+    };
+
+    if (NATIVE_ARRAY_BUFFER_VIEWS) for (NAME$1 in TypedArrayConstructorsList) {
+      if (global_1[NAME$1]) objectSetPrototypeOf(global_1[NAME$1], TypedArray);
+    }
+  }
+
+  if (!NATIVE_ARRAY_BUFFER_VIEWS || !TypedArrayPrototype || TypedArrayPrototype === ObjectPrototype$2) {
+    TypedArrayPrototype = TypedArray.prototype;
+    if (NATIVE_ARRAY_BUFFER_VIEWS) for (NAME$1 in TypedArrayConstructorsList) {
+      if (global_1[NAME$1]) objectSetPrototypeOf(global_1[NAME$1].prototype, TypedArrayPrototype);
+    }
+  } // WebKit bug - one more object in Uint8ClampedArray prototype chain
+
+
+  if (NATIVE_ARRAY_BUFFER_VIEWS && objectGetPrototypeOf(Uint8ClampedArrayPrototype) !== TypedArrayPrototype) {
+    objectSetPrototypeOf(Uint8ClampedArrayPrototype, TypedArrayPrototype);
+  }
+
+  if (descriptors && !has(TypedArrayPrototype, TO_STRING_TAG$3)) {
+    TYPED_ARRAY_TAG_REQIRED = true;
+    defineProperty$3(TypedArrayPrototype, TO_STRING_TAG$3, {
+      get: function () {
+        return isObject(this) ? this[TYPED_ARRAY_TAG] : undefined;
+      }
+    });
+
+    for (NAME$1 in TypedArrayConstructorsList) if (global_1[NAME$1]) {
+      createNonEnumerableProperty(global_1[NAME$1], TYPED_ARRAY_TAG, NAME$1);
+    }
+  }
+
+  var arrayBufferViewCore = {
+    NATIVE_ARRAY_BUFFER_VIEWS: NATIVE_ARRAY_BUFFER_VIEWS,
+    TYPED_ARRAY_TAG: TYPED_ARRAY_TAG_REQIRED && TYPED_ARRAY_TAG,
+    aTypedArray: aTypedArray,
+    aTypedArrayConstructor: aTypedArrayConstructor,
+    exportTypedArrayMethod: exportTypedArrayMethod,
+    exportTypedArrayStaticMethod: exportTypedArrayStaticMethod,
+    isView: isView,
+    isTypedArray: isTypedArray,
+    TypedArray: TypedArray,
+    TypedArrayPrototype: TypedArrayPrototype
+  };
+
+  /* eslint-disable no-new */
+
+  var NATIVE_ARRAY_BUFFER_VIEWS$1 = arrayBufferViewCore.NATIVE_ARRAY_BUFFER_VIEWS;
+  var ArrayBuffer$2 = global_1.ArrayBuffer;
+  var Int8Array$2 = global_1.Int8Array;
+  var typedArrayConstructorsRequireWrappers = !NATIVE_ARRAY_BUFFER_VIEWS$1 || !fails(function () {
+    Int8Array$2(1);
+  }) || !fails(function () {
+    new Int8Array$2(-1);
+  }) || !checkCorrectnessOfIteration(function (iterable) {
+    new Int8Array$2();
+    new Int8Array$2(null);
+    new Int8Array$2(1.5);
+    new Int8Array$2(iterable);
+  }, true) || fails(function () {
+    // Safari (11+) bug - a reason why even Safari 13 should load a typed array polyfill
+    return new Int8Array$2(new ArrayBuffer$2(2), 1, undefined).length !== 1;
+  });
+
+  var toPositiveInteger = function (it) {
+    var result = toInteger(it);
+    if (result < 0) throw RangeError("The argument can't be less than 0");
+    return result;
+  };
+
+  var toOffset = function (it, BYTES) {
+    var offset = toPositiveInteger(it);
+    if (offset % BYTES) throw RangeError('Wrong offset');
+    return offset;
+  };
+
+  var ITERATOR$3 = wellKnownSymbol('iterator');
+
+  var getIteratorMethod = function (it) {
+    if (it != undefined) return it[ITERATOR$3] || it['@@iterator'] || iterators[classof(it)];
+  };
+
+  var ITERATOR$4 = wellKnownSymbol('iterator');
+  var ArrayPrototype$1 = Array.prototype; // check on default Array iterator
+
+  var isArrayIteratorMethod = function (it) {
+    return it !== undefined && (iterators.Array === it || ArrayPrototype$1[ITERATOR$4] === it);
+  };
+
+  var functionBindContext = function (fn, that, length) {
+    aFunction$1(fn);
+    if (that === undefined) return fn;
+
+    switch (length) {
+      case 0:
+        return function () {
+          return fn.call(that);
+        };
+
+      case 1:
+        return function (a) {
+          return fn.call(that, a);
+        };
+
+      case 2:
+        return function (a, b) {
+          return fn.call(that, a, b);
+        };
+
+      case 3:
+        return function (a, b, c) {
+          return fn.call(that, a, b, c);
+        };
+    }
+
+    return function ()
+    /* ...args */
+    {
+      return fn.apply(that, arguments);
+    };
+  };
+
+  var aTypedArrayConstructor$1 = arrayBufferViewCore.aTypedArrayConstructor;
+
+  var typedArrayFrom = function from(source
+  /* , mapfn, thisArg */
+  ) {
+    var O = toObject(source);
+    var argumentsLength = arguments.length;
+    var mapfn = argumentsLength > 1 ? arguments[1] : undefined;
+    var mapping = mapfn !== undefined;
+    var iteratorMethod = getIteratorMethod(O);
+    var i, length, result, step, iterator, next;
+
+    if (iteratorMethod != undefined && !isArrayIteratorMethod(iteratorMethod)) {
+      iterator = iteratorMethod.call(O);
+      next = iterator.next;
+      O = [];
+
+      while (!(step = next.call(iterator)).done) {
+        O.push(step.value);
+      }
+    }
+
+    if (mapping && argumentsLength > 2) {
+      mapfn = functionBindContext(mapfn, arguments[2], 2);
+    }
+
+    length = toLength(O.length);
+    result = new (aTypedArrayConstructor$1(this))(length);
+
+    for (i = 0; length > i; i++) {
+      result[i] = mapping ? mapfn(O[i], i) : O[i];
+    }
+
+    return result;
+  };
+
+  // https://tc39.github.io/ecma262/#sec-isarray
+
+  var isArray = Array.isArray || function isArray(arg) {
+    return classofRaw(arg) == 'Array';
+  };
+
+  var SPECIES$1 = wellKnownSymbol('species'); // `ArraySpeciesCreate` abstract operation
+  // https://tc39.github.io/ecma262/#sec-arrayspeciescreate
+
+  var arraySpeciesCreate = function (originalArray, length) {
+    var C;
+
+    if (isArray(originalArray)) {
+      C = originalArray.constructor; // cross-realm fallback
+
+      if (typeof C == 'function' && (C === Array || isArray(C.prototype))) C = undefined;else if (isObject(C)) {
+        C = C[SPECIES$1];
+        if (C === null) C = undefined;
+      }
+    }
+
+    return new (C === undefined ? Array : C)(length === 0 ? 0 : length);
+  };
+
+  var push = [].push; // `Array.prototype.{ forEach, map, filter, some, every, find, findIndex }` methods implementation
+
+  var createMethod$1 = function (TYPE) {
+    var IS_MAP = TYPE == 1;
+    var IS_FILTER = TYPE == 2;
+    var IS_SOME = TYPE == 3;
+    var IS_EVERY = TYPE == 4;
+    var IS_FIND_INDEX = TYPE == 6;
+    var NO_HOLES = TYPE == 5 || IS_FIND_INDEX;
+    return function ($this, callbackfn, that, specificCreate) {
+      var O = toObject($this);
+      var self = indexedObject(O);
+      var boundFunction = functionBindContext(callbackfn, that, 3);
+      var length = toLength(self.length);
+      var index = 0;
+      var create = specificCreate || arraySpeciesCreate;
+      var target = IS_MAP ? create($this, length) : IS_FILTER ? create($this, 0) : undefined;
+      var value, result;
+
+      for (; length > index; index++) if (NO_HOLES || index in self) {
+        value = self[index];
+        result = boundFunction(value, index, O);
+
+        if (TYPE) {
+          if (IS_MAP) target[index] = result; // map
+          else if (result) switch (TYPE) {
+              case 3:
+                return true;
+              // some
+
+              case 5:
+                return value;
+              // find
+
+              case 6:
+                return index;
+              // findIndex
+
+              case 2:
+                push.call(target, value);
+              // filter
+            } else if (IS_EVERY) return false; // every
+        }
+      }
+
+      return IS_FIND_INDEX ? -1 : IS_SOME || IS_EVERY ? IS_EVERY : target;
+    };
+  };
+
+  var arrayIteration = {
+    // `Array.prototype.forEach` method
+    // https://tc39.github.io/ecma262/#sec-array.prototype.foreach
+    forEach: createMethod$1(0),
+    // `Array.prototype.map` method
+    // https://tc39.github.io/ecma262/#sec-array.prototype.map
+    map: createMethod$1(1),
+    // `Array.prototype.filter` method
+    // https://tc39.github.io/ecma262/#sec-array.prototype.filter
+    filter: createMethod$1(2),
+    // `Array.prototype.some` method
+    // https://tc39.github.io/ecma262/#sec-array.prototype.some
+    some: createMethod$1(3),
+    // `Array.prototype.every` method
+    // https://tc39.github.io/ecma262/#sec-array.prototype.every
+    every: createMethod$1(4),
+    // `Array.prototype.find` method
+    // https://tc39.github.io/ecma262/#sec-array.prototype.find
+    find: createMethod$1(5),
+    // `Array.prototype.findIndex` method
+    // https://tc39.github.io/ecma262/#sec-array.prototype.findIndex
+    findIndex: createMethod$1(6)
+  };
+
+  var SPECIES$2 = wellKnownSymbol('species');
+
+  var setSpecies = function (CONSTRUCTOR_NAME) {
+    var Constructor = getBuiltIn(CONSTRUCTOR_NAME);
+    var defineProperty = objectDefineProperty.f;
+
+    if (descriptors && Constructor && !Constructor[SPECIES$2]) {
+      defineProperty(Constructor, SPECIES$2, {
+        configurable: true,
+        get: function () {
+          return this;
+        }
+      });
+    }
+  };
+
+  var inheritIfRequired = function ($this, dummy, Wrapper) {
+    var NewTarget, NewTargetPrototype;
+    if ( // it can work only with native `setPrototypeOf`
+    objectSetPrototypeOf && // we haven't completely correct pre-ES6 way for getting `new.target`, so use this
+    typeof (NewTarget = dummy.constructor) == 'function' && NewTarget !== Wrapper && isObject(NewTargetPrototype = NewTarget.prototype) && NewTargetPrototype !== Wrapper.prototype) objectSetPrototypeOf($this, NewTargetPrototype);
+    return $this;
+  };
+
+  var typedArrayConstructor = createCommonjsModule(function (module) {
+
+    var getOwnPropertyNames = objectGetOwnPropertyNames.f;
+    var forEach = arrayIteration.forEach;
+    var getInternalState = internalState.get;
+    var setInternalState = internalState.set;
+    var nativeDefineProperty = objectDefineProperty.f;
+    var nativeGetOwnPropertyDescriptor = objectGetOwnPropertyDescriptor.f;
+    var round = Math.round;
+    var RangeError = global_1.RangeError;
+    var ArrayBuffer = arrayBuffer.ArrayBuffer;
+    var DataView = arrayBuffer.DataView;
+    var NATIVE_ARRAY_BUFFER_VIEWS = arrayBufferViewCore.NATIVE_ARRAY_BUFFER_VIEWS;
+    var TYPED_ARRAY_TAG = arrayBufferViewCore.TYPED_ARRAY_TAG;
+    var TypedArray = arrayBufferViewCore.TypedArray;
+    var TypedArrayPrototype = arrayBufferViewCore.TypedArrayPrototype;
+    var aTypedArrayConstructor = arrayBufferViewCore.aTypedArrayConstructor;
+    var isTypedArray = arrayBufferViewCore.isTypedArray;
+    var BYTES_PER_ELEMENT = 'BYTES_PER_ELEMENT';
+    var WRONG_LENGTH = 'Wrong length';
+
+    var fromList = function (C, list) {
+      var index = 0;
+      var length = list.length;
+      var result = new (aTypedArrayConstructor(C))(length);
+
+      while (length > index) result[index] = list[index++];
+
+      return result;
+    };
+
+    var addGetter = function (it, key) {
+      nativeDefineProperty(it, key, {
+        get: function () {
+          return getInternalState(this)[key];
+        }
+      });
+    };
+
+    var isArrayBuffer = function (it) {
+      var klass;
+      return it instanceof ArrayBuffer || (klass = classof(it)) == 'ArrayBuffer' || klass == 'SharedArrayBuffer';
+    };
+
+    var isTypedArrayIndex = function (target, key) {
+      return isTypedArray(target) && typeof key != 'symbol' && key in target && String(+key) == String(key);
+    };
+
+    var wrappedGetOwnPropertyDescriptor = function getOwnPropertyDescriptor(target, key) {
+      return isTypedArrayIndex(target, key = toPrimitive(key, true)) ? createPropertyDescriptor(2, target[key]) : nativeGetOwnPropertyDescriptor(target, key);
+    };
+
+    var wrappedDefineProperty = function defineProperty(target, key, descriptor) {
+      if (isTypedArrayIndex(target, key = toPrimitive(key, true)) && isObject(descriptor) && has(descriptor, 'value') && !has(descriptor, 'get') && !has(descriptor, 'set') // TODO: add validation descriptor w/o calling accessors
+      && !descriptor.configurable && (!has(descriptor, 'writable') || descriptor.writable) && (!has(descriptor, 'enumerable') || descriptor.enumerable)) {
+        target[key] = descriptor.value;
+        return target;
+      }
+
+      return nativeDefineProperty(target, key, descriptor);
+    };
+
+    if (descriptors) {
+      if (!NATIVE_ARRAY_BUFFER_VIEWS) {
+        objectGetOwnPropertyDescriptor.f = wrappedGetOwnPropertyDescriptor;
+        objectDefineProperty.f = wrappedDefineProperty;
+        addGetter(TypedArrayPrototype, 'buffer');
+        addGetter(TypedArrayPrototype, 'byteOffset');
+        addGetter(TypedArrayPrototype, 'byteLength');
+        addGetter(TypedArrayPrototype, 'length');
+      }
+
+      _export({
+        target: 'Object',
+        stat: true,
+        forced: !NATIVE_ARRAY_BUFFER_VIEWS
+      }, {
+        getOwnPropertyDescriptor: wrappedGetOwnPropertyDescriptor,
+        defineProperty: wrappedDefineProperty
+      });
+
+      module.exports = function (TYPE, wrapper, CLAMPED) {
+        var BYTES = TYPE.match(/\d+$/)[0] / 8;
+        var CONSTRUCTOR_NAME = TYPE + (CLAMPED ? 'Clamped' : '') + 'Array';
+        var GETTER = 'get' + TYPE;
+        var SETTER = 'set' + TYPE;
+        var NativeTypedArrayConstructor = global_1[CONSTRUCTOR_NAME];
+        var TypedArrayConstructor = NativeTypedArrayConstructor;
+        var TypedArrayConstructorPrototype = TypedArrayConstructor && TypedArrayConstructor.prototype;
+        var exported = {};
+
+        var getter = function (that, index) {
+          var data = getInternalState(that);
+          return data.view[GETTER](index * BYTES + data.byteOffset, true);
+        };
+
+        var setter = function (that, index, value) {
+          var data = getInternalState(that);
+          if (CLAMPED) value = (value = round(value)) < 0 ? 0 : value > 0xFF ? 0xFF : value & 0xFF;
+          data.view[SETTER](index * BYTES + data.byteOffset, value, true);
+        };
+
+        var addElement = function (that, index) {
+          nativeDefineProperty(that, index, {
+            get: function () {
+              return getter(this, index);
+            },
+            set: function (value) {
+              return setter(this, index, value);
+            },
+            enumerable: true
+          });
+        };
+
+        if (!NATIVE_ARRAY_BUFFER_VIEWS) {
+          TypedArrayConstructor = wrapper(function (that, data, offset, $length) {
+            anInstance(that, TypedArrayConstructor, CONSTRUCTOR_NAME);
+            var index = 0;
+            var byteOffset = 0;
+            var buffer, byteLength, length;
+
+            if (!isObject(data)) {
+              length = toIndex(data);
+              byteLength = length * BYTES;
+              buffer = new ArrayBuffer(byteLength);
+            } else if (isArrayBuffer(data)) {
+              buffer = data;
+              byteOffset = toOffset(offset, BYTES);
+              var $len = data.byteLength;
+
+              if ($length === undefined) {
+                if ($len % BYTES) throw RangeError(WRONG_LENGTH);
+                byteLength = $len - byteOffset;
+                if (byteLength < 0) throw RangeError(WRONG_LENGTH);
+              } else {
+                byteLength = toLength($length) * BYTES;
+                if (byteLength + byteOffset > $len) throw RangeError(WRONG_LENGTH);
+              }
+
+              length = byteLength / BYTES;
+            } else if (isTypedArray(data)) {
+              return fromList(TypedArrayConstructor, data);
+            } else {
+              return typedArrayFrom.call(TypedArrayConstructor, data);
+            }
+
+            setInternalState(that, {
+              buffer: buffer,
+              byteOffset: byteOffset,
+              byteLength: byteLength,
+              length: length,
+              view: new DataView(buffer)
+            });
+
+            while (index < length) addElement(that, index++);
+          });
+          if (objectSetPrototypeOf) objectSetPrototypeOf(TypedArrayConstructor, TypedArray);
+          TypedArrayConstructorPrototype = TypedArrayConstructor.prototype = objectCreate(TypedArrayPrototype);
+        } else if (typedArrayConstructorsRequireWrappers) {
+          TypedArrayConstructor = wrapper(function (dummy, data, typedArrayOffset, $length) {
+            anInstance(dummy, TypedArrayConstructor, CONSTRUCTOR_NAME);
+            return inheritIfRequired(function () {
+              if (!isObject(data)) return new NativeTypedArrayConstructor(toIndex(data));
+              if (isArrayBuffer(data)) return $length !== undefined ? new NativeTypedArrayConstructor(data, toOffset(typedArrayOffset, BYTES), $length) : typedArrayOffset !== undefined ? new NativeTypedArrayConstructor(data, toOffset(typedArrayOffset, BYTES)) : new NativeTypedArrayConstructor(data);
+              if (isTypedArray(data)) return fromList(TypedArrayConstructor, data);
+              return typedArrayFrom.call(TypedArrayConstructor, data);
+            }(), dummy, TypedArrayConstructor);
+          });
+          if (objectSetPrototypeOf) objectSetPrototypeOf(TypedArrayConstructor, TypedArray);
+          forEach(getOwnPropertyNames(NativeTypedArrayConstructor), function (key) {
+            if (!(key in TypedArrayConstructor)) {
+              createNonEnumerableProperty(TypedArrayConstructor, key, NativeTypedArrayConstructor[key]);
+            }
+          });
+          TypedArrayConstructor.prototype = TypedArrayConstructorPrototype;
+        }
+
+        if (TypedArrayConstructorPrototype.constructor !== TypedArrayConstructor) {
+          createNonEnumerableProperty(TypedArrayConstructorPrototype, 'constructor', TypedArrayConstructor);
+        }
+
+        if (TYPED_ARRAY_TAG) {
+          createNonEnumerableProperty(TypedArrayConstructorPrototype, TYPED_ARRAY_TAG, CONSTRUCTOR_NAME);
+        }
+
+        exported[CONSTRUCTOR_NAME] = TypedArrayConstructor;
+        _export({
+          global: true,
+          forced: TypedArrayConstructor != NativeTypedArrayConstructor,
+          sham: !NATIVE_ARRAY_BUFFER_VIEWS
+        }, exported);
+
+        if (!(BYTES_PER_ELEMENT in TypedArrayConstructor)) {
+          createNonEnumerableProperty(TypedArrayConstructor, BYTES_PER_ELEMENT, BYTES);
+        }
+
+        if (!(BYTES_PER_ELEMENT in TypedArrayConstructorPrototype)) {
+          createNonEnumerableProperty(TypedArrayConstructorPrototype, BYTES_PER_ELEMENT, BYTES);
+        }
+
+        setSpecies(CONSTRUCTOR_NAME);
+      };
+    } else module.exports = function () {
+      /* empty */
+    };
+  });
+
+  // https://tc39.github.io/ecma262/#sec-typedarray-objects
+
+  typedArrayConstructor('Uint8', function (init) {
+    return function Uint8Array(data, byteOffset, length) {
+      return init(this, data, byteOffset, length);
+    };
+  });
+
+  var min$2 = Math.min; // `Array.prototype.copyWithin` method implementation
+  // https://tc39.github.io/ecma262/#sec-array.prototype.copywithin
+
+  var arrayCopyWithin = [].copyWithin || function copyWithin(target
+  /* = 0 */
+  , start
+  /* = 0, end = @length */
+  ) {
+    var O = toObject(this);
+    var len = toLength(O.length);
+    var to = toAbsoluteIndex(target, len);
+    var from = toAbsoluteIndex(start, len);
+    var end = arguments.length > 2 ? arguments[2] : undefined;
+    var count = min$2((end === undefined ? len : toAbsoluteIndex(end, len)) - from, len - to);
+    var inc = 1;
+
+    if (from < to && to < from + count) {
+      inc = -1;
+      from += count - 1;
+      to += count - 1;
+    }
+
+    while (count-- > 0) {
+      if (from in O) O[to] = O[from];else delete O[to];
+      to += inc;
+      from += inc;
+    }
+
+    return O;
+  };
+
+  var aTypedArray$1 = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$1 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.copyWithin` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.copywithin
+
+  exportTypedArrayMethod$1('copyWithin', function copyWithin(target, start
+  /* , end */
+  ) {
+    return arrayCopyWithin.call(aTypedArray$1(this), target, start, arguments.length > 2 ? arguments[2] : undefined);
+  });
+
+  var $every = arrayIteration.every;
+  var aTypedArray$2 = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$2 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.every` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.every
+
+  exportTypedArrayMethod$2('every', function every(callbackfn
+  /* , thisArg */
+  ) {
+    return $every(aTypedArray$2(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+  });
+
+  var aTypedArray$3 = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$3 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.fill` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.fill
+  // eslint-disable-next-line no-unused-vars
+
+  exportTypedArrayMethod$3('fill', function fill(value
+  /* , start, end */
+  ) {
+    return arrayFill.apply(aTypedArray$3(this), arguments);
+  });
+
+  var $filter = arrayIteration.filter;
+  var aTypedArray$4 = arrayBufferViewCore.aTypedArray;
+  var aTypedArrayConstructor$2 = arrayBufferViewCore.aTypedArrayConstructor;
+  var exportTypedArrayMethod$4 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.filter` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.filter
+
+  exportTypedArrayMethod$4('filter', function filter(callbackfn
+  /* , thisArg */
+  ) {
+    var list = $filter(aTypedArray$4(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+    var C = speciesConstructor(this, this.constructor);
+    var index = 0;
+    var length = list.length;
+    var result = new (aTypedArrayConstructor$2(C))(length);
+
+    while (length > index) result[index] = list[index++];
+
+    return result;
+  });
+
+  var $find = arrayIteration.find;
+  var aTypedArray$5 = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$5 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.find` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.find
+
+  exportTypedArrayMethod$5('find', function find(predicate
+  /* , thisArg */
+  ) {
+    return $find(aTypedArray$5(this), predicate, arguments.length > 1 ? arguments[1] : undefined);
+  });
+
+  var $findIndex = arrayIteration.findIndex;
+  var aTypedArray$6 = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$6 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.findIndex` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.findindex
+
+  exportTypedArrayMethod$6('findIndex', function findIndex(predicate
+  /* , thisArg */
+  ) {
+    return $findIndex(aTypedArray$6(this), predicate, arguments.length > 1 ? arguments[1] : undefined);
+  });
+
+  var $forEach = arrayIteration.forEach;
+  var aTypedArray$7 = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$7 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.forEach` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.foreach
+
+  exportTypedArrayMethod$7('forEach', function forEach(callbackfn
+  /* , thisArg */
+  ) {
+    $forEach(aTypedArray$7(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+  });
+
+  var $includes = arrayIncludes.includes;
+  var aTypedArray$8 = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$8 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.includes` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.includes
+
+  exportTypedArrayMethod$8('includes', function includes(searchElement
+  /* , fromIndex */
+  ) {
+    return $includes(aTypedArray$8(this), searchElement, arguments.length > 1 ? arguments[1] : undefined);
+  });
+
+  var $indexOf = arrayIncludes.indexOf;
+  var aTypedArray$9 = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$9 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.indexOf` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.indexof
+
+  exportTypedArrayMethod$9('indexOf', function indexOf(searchElement
+  /* , fromIndex */
+  ) {
+    return $indexOf(aTypedArray$9(this), searchElement, arguments.length > 1 ? arguments[1] : undefined);
+  });
+
+  var ITERATOR$5 = wellKnownSymbol('iterator');
+  var Uint8Array$1 = global_1.Uint8Array;
+  var arrayValues = es_array_iterator.values;
+  var arrayKeys = es_array_iterator.keys;
+  var arrayEntries = es_array_iterator.entries;
+  var aTypedArray$a = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$a = arrayBufferViewCore.exportTypedArrayMethod;
+  var nativeTypedArrayIterator = Uint8Array$1 && Uint8Array$1.prototype[ITERATOR$5];
+  var CORRECT_ITER_NAME = !!nativeTypedArrayIterator && (nativeTypedArrayIterator.name == 'values' || nativeTypedArrayIterator.name == undefined);
+
+  var typedArrayValues = function values() {
+    return arrayValues.call(aTypedArray$a(this));
+  }; // `%TypedArray%.prototype.entries` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.entries
+
+
+  exportTypedArrayMethod$a('entries', function entries() {
+    return arrayEntries.call(aTypedArray$a(this));
+  }); // `%TypedArray%.prototype.keys` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.keys
+
+  exportTypedArrayMethod$a('keys', function keys() {
+    return arrayKeys.call(aTypedArray$a(this));
+  }); // `%TypedArray%.prototype.values` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.values
+
+  exportTypedArrayMethod$a('values', typedArrayValues, !CORRECT_ITER_NAME); // `%TypedArray%.prototype[@@iterator]` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype-@@iterator
+
+  exportTypedArrayMethod$a(ITERATOR$5, typedArrayValues, !CORRECT_ITER_NAME);
+
+  var aTypedArray$b = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$b = arrayBufferViewCore.exportTypedArrayMethod;
+  var $join = [].join; // `%TypedArray%.prototype.join` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.join
+  // eslint-disable-next-line no-unused-vars
+
+  exportTypedArrayMethod$b('join', function join(separator) {
+    return $join.apply(aTypedArray$b(this), arguments);
+  });
+
+  var arrayMethodIsStrict = function (METHOD_NAME, argument) {
+    var method = [][METHOD_NAME];
+    return !!method && fails(function () {
+      // eslint-disable-next-line no-useless-call,no-throw-literal
+      method.call(null, argument || function () {
+        throw 1;
+      }, 1);
+    });
+  };
+
+  var defineProperty$4 = Object.defineProperty;
+  var cache = {};
+
+  var thrower = function (it) {
+    throw it;
+  };
+
+  var arrayMethodUsesToLength = function (METHOD_NAME, options) {
+    if (has(cache, METHOD_NAME)) return cache[METHOD_NAME];
+    if (!options) options = {};
+    var method = [][METHOD_NAME];
+    var ACCESSORS = has(options, 'ACCESSORS') ? options.ACCESSORS : false;
+    var argument0 = has(options, 0) ? options[0] : thrower;
+    var argument1 = has(options, 1) ? options[1] : undefined;
+    return cache[METHOD_NAME] = !!method && !fails(function () {
+      if (ACCESSORS && !descriptors) return true;
+      var O = {
+        length: -1
+      };
+      if (ACCESSORS) defineProperty$4(O, 1, {
+        enumerable: true,
+        get: thrower
+      });else O[1] = 1;
+      method.call(O, argument0, argument1);
+    });
+  };
+
+  var min$3 = Math.min;
+  var nativeLastIndexOf = [].lastIndexOf;
+  var NEGATIVE_ZERO = !!nativeLastIndexOf && 1 / [1].lastIndexOf(1, -0) < 0;
+  var STRICT_METHOD = arrayMethodIsStrict('lastIndexOf'); // For preventing possible almost infinite loop in non-standard implementations, test the forward version of the method
+
+  var USES_TO_LENGTH = arrayMethodUsesToLength('indexOf', {
+    ACCESSORS: true,
+    1: 0
+  });
+  var FORCED = NEGATIVE_ZERO || !STRICT_METHOD || !USES_TO_LENGTH; // `Array.prototype.lastIndexOf` method implementation
+  // https://tc39.github.io/ecma262/#sec-array.prototype.lastindexof
+
+  var arrayLastIndexOf = FORCED ? function lastIndexOf(searchElement
+  /* , fromIndex = @[*-1] */
+  ) {
+    // convert -0 to +0
+    if (NEGATIVE_ZERO) return nativeLastIndexOf.apply(this, arguments) || 0;
+    var O = toIndexedObject(this);
+    var length = toLength(O.length);
+    var index = length - 1;
+    if (arguments.length > 1) index = min$3(index, toInteger(arguments[1]));
+    if (index < 0) index = length + index;
+
+    for (; index >= 0; index--) if (index in O && O[index] === searchElement) return index || 0;
+
+    return -1;
+  } : nativeLastIndexOf;
+
+  var aTypedArray$c = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$c = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.lastIndexOf` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.lastindexof
+  // eslint-disable-next-line no-unused-vars
+
+  exportTypedArrayMethod$c('lastIndexOf', function lastIndexOf(searchElement
+  /* , fromIndex */
+  ) {
+    return arrayLastIndexOf.apply(aTypedArray$c(this), arguments);
+  });
+
+  var $map = arrayIteration.map;
+  var aTypedArray$d = arrayBufferViewCore.aTypedArray;
+  var aTypedArrayConstructor$3 = arrayBufferViewCore.aTypedArrayConstructor;
+  var exportTypedArrayMethod$d = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.map` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.map
+
+  exportTypedArrayMethod$d('map', function map(mapfn
+  /* , thisArg */
+  ) {
+    return $map(aTypedArray$d(this), mapfn, arguments.length > 1 ? arguments[1] : undefined, function (O, length) {
+      return new (aTypedArrayConstructor$3(speciesConstructor(O, O.constructor)))(length);
+    });
+  });
+
+  var createMethod$2 = function (IS_RIGHT) {
+    return function (that, callbackfn, argumentsLength, memo) {
+      aFunction$1(callbackfn);
+      var O = toObject(that);
+      var self = indexedObject(O);
+      var length = toLength(O.length);
+      var index = IS_RIGHT ? length - 1 : 0;
+      var i = IS_RIGHT ? -1 : 1;
+      if (argumentsLength < 2) while (true) {
+        if (index in self) {
+          memo = self[index];
+          index += i;
+          break;
+        }
+
+        index += i;
+
+        if (IS_RIGHT ? index < 0 : length <= index) {
+          throw TypeError('Reduce of empty array with no initial value');
+        }
+      }
+
+      for (; IS_RIGHT ? index >= 0 : length > index; index += i) if (index in self) {
+        memo = callbackfn(memo, self[index], index, O);
+      }
+
+      return memo;
+    };
+  };
+
+  var arrayReduce = {
+    // `Array.prototype.reduce` method
+    // https://tc39.github.io/ecma262/#sec-array.prototype.reduce
+    left: createMethod$2(false),
+    // `Array.prototype.reduceRight` method
+    // https://tc39.github.io/ecma262/#sec-array.prototype.reduceright
+    right: createMethod$2(true)
+  };
+
+  var $reduce = arrayReduce.left;
+  var aTypedArray$e = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$e = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.reduce` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.reduce
+
+  exportTypedArrayMethod$e('reduce', function reduce(callbackfn
+  /* , initialValue */
+  ) {
+    return $reduce(aTypedArray$e(this), callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
+  });
+
+  var $reduceRight = arrayReduce.right;
+  var aTypedArray$f = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$f = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.reduceRicht` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.reduceright
+
+  exportTypedArrayMethod$f('reduceRight', function reduceRight(callbackfn
+  /* , initialValue */
+  ) {
+    return $reduceRight(aTypedArray$f(this), callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
+  });
+
+  var aTypedArray$g = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$g = arrayBufferViewCore.exportTypedArrayMethod;
+  var floor$2 = Math.floor; // `%TypedArray%.prototype.reverse` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.reverse
+
+  exportTypedArrayMethod$g('reverse', function reverse() {
+    var that = this;
+    var length = aTypedArray$g(that).length;
+    var middle = floor$2(length / 2);
+    var index = 0;
+    var value;
+
+    while (index < middle) {
+      value = that[index];
+      that[index++] = that[--length];
+      that[length] = value;
+    }
+
+    return that;
+  });
+
+  var aTypedArray$h = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$h = arrayBufferViewCore.exportTypedArrayMethod;
+  var FORCED$1 = fails(function () {
+    // eslint-disable-next-line no-undef
+    new Int8Array(1).set({});
+  }); // `%TypedArray%.prototype.set` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.set
+
+  exportTypedArrayMethod$h('set', function set(arrayLike
+  /* , offset */
+  ) {
+    aTypedArray$h(this);
+    var offset = toOffset(arguments.length > 1 ? arguments[1] : undefined, 1);
+    var length = this.length;
+    var src = toObject(arrayLike);
+    var len = toLength(src.length);
+    var index = 0;
+    if (len + offset > length) throw RangeError('Wrong length');
+
+    while (index < len) this[offset + index] = src[index++];
+  }, FORCED$1);
+
+  var aTypedArray$i = arrayBufferViewCore.aTypedArray;
+  var aTypedArrayConstructor$4 = arrayBufferViewCore.aTypedArrayConstructor;
+  var exportTypedArrayMethod$i = arrayBufferViewCore.exportTypedArrayMethod;
+  var $slice = [].slice;
+  var FORCED$2 = fails(function () {
+    // eslint-disable-next-line no-undef
+    new Int8Array(1).slice();
+  }); // `%TypedArray%.prototype.slice` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.slice
+
+  exportTypedArrayMethod$i('slice', function slice(start, end) {
+    var list = $slice.call(aTypedArray$i(this), start, end);
+    var C = speciesConstructor(this, this.constructor);
+    var index = 0;
+    var length = list.length;
+    var result = new (aTypedArrayConstructor$4(C))(length);
+
+    while (length > index) result[index] = list[index++];
+
+    return result;
+  }, FORCED$2);
+
+  var $some = arrayIteration.some;
+  var aTypedArray$j = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$j = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.some` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.some
+
+  exportTypedArrayMethod$j('some', function some(callbackfn
+  /* , thisArg */
+  ) {
+    return $some(aTypedArray$j(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+  });
+
+  var aTypedArray$k = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$k = arrayBufferViewCore.exportTypedArrayMethod;
+  var $sort = [].sort; // `%TypedArray%.prototype.sort` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.sort
+
+  exportTypedArrayMethod$k('sort', function sort(comparefn) {
+    return $sort.call(aTypedArray$k(this), comparefn);
+  });
+
+  var aTypedArray$l = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$l = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.subarray` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.subarray
+
+  exportTypedArrayMethod$l('subarray', function subarray(begin, end) {
+    var O = aTypedArray$l(this);
+    var length = O.length;
+    var beginIndex = toAbsoluteIndex(begin, length);
+    return new (speciesConstructor(O, O.constructor))(O.buffer, O.byteOffset + beginIndex * O.BYTES_PER_ELEMENT, toLength((end === undefined ? length : toAbsoluteIndex(end, length)) - beginIndex));
+  });
+
+  var Int8Array$3 = global_1.Int8Array;
+  var aTypedArray$m = arrayBufferViewCore.aTypedArray;
+  var exportTypedArrayMethod$m = arrayBufferViewCore.exportTypedArrayMethod;
+  var $toLocaleString = [].toLocaleString;
+  var $slice$1 = [].slice; // iOS Safari 6.x fails here
+
+  var TO_LOCALE_STRING_BUG = !!Int8Array$3 && fails(function () {
+    $toLocaleString.call(new Int8Array$3(1));
+  });
+  var FORCED$3 = fails(function () {
+    return [1, 2].toLocaleString() != new Int8Array$3([1, 2]).toLocaleString();
+  }) || !fails(function () {
+    Int8Array$3.prototype.toLocaleString.call([1, 2]);
+  }); // `%TypedArray%.prototype.toLocaleString` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.tolocalestring
+
+  exportTypedArrayMethod$m('toLocaleString', function toLocaleString() {
+    return $toLocaleString.apply(TO_LOCALE_STRING_BUG ? $slice$1.call(aTypedArray$m(this)) : aTypedArray$m(this), arguments);
+  }, FORCED$3);
+
+  var exportTypedArrayMethod$n = arrayBufferViewCore.exportTypedArrayMethod;
+  var Uint8Array$2 = global_1.Uint8Array;
+  var Uint8ArrayPrototype = Uint8Array$2 && Uint8Array$2.prototype || {};
+  var arrayToString = [].toString;
+  var arrayJoin = [].join;
+
+  if (fails(function () {
+    arrayToString.call({});
+  })) {
+    arrayToString = function toString() {
+      return arrayJoin.call(this);
+    };
+  }
+
+  var IS_NOT_ARRAY_METHOD = Uint8ArrayPrototype.toString != arrayToString; // `%TypedArray%.prototype.toString` method
+  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.tostring
+
+  exportTypedArrayMethod$n('toString', arrayToString, IS_NOT_ARRAY_METHOD);
+
+  function _typeof(obj) {
+    "@babel/helpers - typeof";
+
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  function _isNativeReflectConstruct() {
+    if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+    if (Reflect.construct.sham) return false;
+    if (typeof Proxy === "function") return true;
+
+    try {
+      Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function _construct(Parent, args, Class) {
+    if (_isNativeReflectConstruct()) {
+      _construct = Reflect.construct;
+    } else {
+      _construct = function _construct(Parent, args, Class) {
+        var a = [null];
+        a.push.apply(a, args);
+        var Constructor = Function.bind.apply(Parent, a);
+        var instance = new Constructor();
+        if (Class) _setPrototypeOf(instance, Class.prototype);
+        return instance;
+      };
+    }
+
+    return _construct.apply(null, arguments);
+  }
+
+  function _isNativeFunction(fn) {
+    return Function.toString.call(fn).indexOf("[native code]") !== -1;
+  }
+
+  function _wrapNativeSuper(Class) {
+    var _cache = typeof Map === "function" ? new Map() : undefined;
+
+    _wrapNativeSuper = function _wrapNativeSuper(Class) {
+      if (Class === null || !_isNativeFunction(Class)) return Class;
+
+      if (typeof Class !== "function") {
+        throw new TypeError("Super expression must either be null or a function");
+      }
+
+      if (typeof _cache !== "undefined") {
+        if (_cache.has(Class)) return _cache.get(Class);
+
+        _cache.set(Class, Wrapper);
+      }
+
+      function Wrapper() {
+        return _construct(Class, arguments, _getPrototypeOf(this).constructor);
+      }
+
+      Wrapper.prototype = Object.create(Class.prototype, {
+        constructor: {
+          value: Wrapper,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        }
+      });
+      return _setPrototypeOf(Wrapper, Class);
+    };
+
+    return _wrapNativeSuper(Class);
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (call && (typeof call === "object" || typeof call === "function")) {
+      return call;
+    }
+
+    return _assertThisInitialized(self);
+  }
+
+  function _createSuper(Derived) {
+    return function () {
+      var Super = _getPrototypeOf(Derived),
+          result;
+
+      if (_isNativeReflectConstruct()) {
+        var NewTarget = _getPrototypeOf(this).constructor;
+
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+
+      return _possibleConstructorReturn(this, result);
+    };
+  }
+
+  function _toConsumableArray(arr) {
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+  }
+
+  function _arrayWithoutHoles(arr) {
+    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+  }
+
+  function _iterableToArray(iter) {
+    if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+  }
+
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(n);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+    return arr2;
+  }
+
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
   // https://tc39.github.io/ecma262/#sec-get-regexp.prototype.flags
@@ -2040,7 +3035,7 @@
     if (sham) createNonEnumerableProperty(RegExp.prototype[SYMBOL], 'sham', true);
   };
 
-  var createMethod$1 = function (CONVERT_TO_STRING) {
+  var createMethod$3 = function (CONVERT_TO_STRING) {
     return function ($this, pos) {
       var S = String(requireObjectCoercible($this));
       var position = toInteger(pos);
@@ -2055,10 +3050,10 @@
   var stringMultibyte = {
     // `String.prototype.codePointAt` method
     // https://tc39.github.io/ecma262/#sec-string.prototype.codepointat
-    codeAt: createMethod$1(false),
+    codeAt: createMethod$3(false),
     // `String.prototype.at` method
     // https://github.com/mathiasbynens/String.prototype.at
-    charAt: createMethod$1(true)
+    charAt: createMethod$3(true)
   };
 
   var charAt = stringMultibyte.charAt; // `AdvanceStringIndex` abstract operation
@@ -2090,9 +3085,9 @@
     return regexpExec.call(R, S);
   };
 
-  var max$2 = Math.max;
-  var min$2 = Math.min;
-  var floor$2 = Math.floor;
+  var max$1 = Math.max;
+  var min$4 = Math.min;
+  var floor$3 = Math.floor;
   var SUBSTITUTION_SYMBOLS = /\$([$&'`]|\d\d?|<[^>]*>)/g;
   var SUBSTITUTION_SYMBOLS_NO_NAMED = /\$([$&'`]|\d\d?)/g;
 
@@ -2147,7 +3142,7 @@
       for (var i = 0; i < results.length; i++) {
         result = results[i];
         var matched = String(result[0]);
-        var position = max$2(min$2(toInteger(result.index), S.length), 0);
+        var position = max$1(min$4(toInteger(result.index), S.length), 0);
         var captures = []; // NOTE: This is equivalent to
         //   captures = result.slice(1).map(maybeToString)
         // but for some reason `nativeSlice.call(result, 1, result.length)` (called in
@@ -2211,7 +3206,7 @@
             if (n === 0) return match;
 
             if (n > m) {
-              var f = floor$2(n / 10);
+              var f = floor$3(n / 10);
               if (f === 0) return match;
               if (f <= m) return captures[f - 1] === undefined ? ch.charAt(1) : captures[f - 1] + ch.charAt(1);
               return match;
@@ -2225,1102 +3220,284 @@
     }
   });
 
-  var ITERATOR$2 = wellKnownSymbol('iterator');
-  var SAFE_CLOSING = false;
+  var createProperty = function (object, key, value) {
+    var propertyKey = toPrimitive(key);
+    if (propertyKey in object) objectDefineProperty.f(object, propertyKey, createPropertyDescriptor(0, value));else object[propertyKey] = value;
+  };
 
-  try {
-    var called = 0;
-    var iteratorWithReturn = {
-      next: function () {
-        return {
-          done: !!called++
-        };
-      },
-      'return': function () {
-        SAFE_CLOSING = true;
-      }
-    };
+  var engineUserAgent = getBuiltIn('navigator', 'userAgent') || '';
 
-    iteratorWithReturn[ITERATOR$2] = function () {
-      return this;
-    }; // eslint-disable-next-line no-throw-literal
+  var process = global_1.process;
+  var versions = process && process.versions;
+  var v8 = versions && versions.v8;
+  var match, version;
 
+  if (v8) {
+    match = v8.split('.');
+    version = match[0] + match[1];
+  } else if (engineUserAgent) {
+    match = engineUserAgent.match(/Edge\/(\d+)/);
 
-    Array.from(iteratorWithReturn, function () {
-      throw 2;
-    });
-  } catch (error) {
-    /* empty */
+    if (!match || match[1] >= 74) {
+      match = engineUserAgent.match(/Chrome\/(\d+)/);
+      if (match) version = match[1];
+    }
   }
 
-  var checkCorrectnessOfIteration = function (exec, SKIP_CLOSING) {
-    if (!SKIP_CLOSING && !SAFE_CLOSING) return false;
-    var ITERATION_SUPPORT = false;
+  var engineV8Version = version && +version;
+
+  var SPECIES$4 = wellKnownSymbol('species');
+
+  var arrayMethodHasSpeciesSupport = function (METHOD_NAME) {
+    // We can't use this feature detection in V8 since it causes
+    // deoptimization and serious performance degradation
+    // https://github.com/zloirock/core-js/issues/677
+    return engineV8Version >= 51 || !fails(function () {
+      var array = [];
+      var constructor = array.constructor = {};
+
+      constructor[SPECIES$4] = function () {
+        return {
+          foo: 1
+        };
+      };
+
+      return array[METHOD_NAME](Boolean).foo !== 1;
+    });
+  };
+
+  var IS_CONCAT_SPREADABLE = wellKnownSymbol('isConcatSpreadable');
+  var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
+  var MAXIMUM_ALLOWED_INDEX_EXCEEDED = 'Maximum allowed index exceeded'; // We can't use this feature detection in V8 since it causes
+  // deoptimization and serious performance degradation
+  // https://github.com/zloirock/core-js/issues/679
+
+  var IS_CONCAT_SPREADABLE_SUPPORT = engineV8Version >= 51 || !fails(function () {
+    var array = [];
+    array[IS_CONCAT_SPREADABLE] = false;
+    return array.concat()[0] !== array;
+  });
+  var SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('concat');
+
+  var isConcatSpreadable = function (O) {
+    if (!isObject(O)) return false;
+    var spreadable = O[IS_CONCAT_SPREADABLE];
+    return spreadable !== undefined ? !!spreadable : isArray(O);
+  };
+
+  var FORCED$4 = !IS_CONCAT_SPREADABLE_SUPPORT || !SPECIES_SUPPORT; // `Array.prototype.concat` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.concat
+  // with adding support of @@isConcatSpreadable and @@species
+
+  _export({
+    target: 'Array',
+    proto: true,
+    forced: FORCED$4
+  }, {
+    concat: function concat(arg) {
+      // eslint-disable-line no-unused-vars
+      var O = toObject(this);
+      var A = arraySpeciesCreate(O, 0);
+      var n = 0;
+      var i, k, length, len, E;
+
+      for (i = -1, length = arguments.length; i < length; i++) {
+        E = i === -1 ? O : arguments[i];
+
+        if (isConcatSpreadable(E)) {
+          len = toLength(E.length);
+          if (n + len > MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
+
+          for (k = 0; k < len; k++, n++) if (k in E) createProperty(A, n, E[k]);
+        } else {
+          if (n >= MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
+          createProperty(A, n++, E);
+        }
+      }
+
+      A.length = n;
+      return A;
+    }
+  });
+
+  var E_CODES = {
+    0: 'Unknown error',
+    1: 'This format is not yet supported',
+    100: 'This file is not an ID3v1',
+    103: 'Frame validation failed',
+    200: 'This file is not an ID3v2',
+    201: 'Unsupported ID3v2 major version',
+    202: 'Unsupported frame',
+    203: 'Frame validation failed',
+    204: 'Frame is not supported in this version of ID3v2'
+  };
+
+  var TagError = /*#__PURE__*/function (_Error) {
+    _inherits(TagError, _Error);
+
+    var _super = _createSuper(TagError);
+
+    function TagError(code, param) {
+      var _this;
+
+      _classCallCheck(this, TagError);
+
+      _this = _super.call(this, E_CODES[code]);
+      _this.name = 'TagError';
+      _this.code = code;
+      _this.error = param;
+      _this.message = _this.parseMessage();
+      return _this;
+    }
+
+    _createClass(TagError, [{
+      key: "parseMessage",
+      value: function parseMessage() {
+        var string = '';
+
+        switch (this.code) {
+          case 100:
+            string = "ID3v1 Error: ".concat(E_CODES[this.code]);
+            break;
+
+          case 103:
+            string = "ID3v1 Error: ".concat(E_CODES[this.code], " \"").concat(this.error, "\"");
+            break;
+
+          case 200:
+            string = "ID3v2 Error: ".concat(E_CODES[this.code]);
+            break;
+
+          case 201:
+          case 202:
+          case 203:
+          case 204:
+            string = "ID3v2 Error: ".concat(E_CODES[this.code], " \"").concat(this.error, "\"");
+            break;
+
+          default:
+            string = "".concat(E_CODES[this.code]);
+        }
+
+        return string;
+      }
+    }]);
+
+    return TagError;
+  }( /*#__PURE__*/_wrapNativeSuper(Error));
+
+  // https://tc39.github.io/ecma262/#sec-array.isarray
+
+  _export({
+    target: 'Array',
+    stat: true
+  }, {
+    isArray: isArray
+  });
+
+  var ARRAY_BUFFER$1 = 'ArrayBuffer';
+  var ArrayBuffer$3 = arrayBuffer[ARRAY_BUFFER$1];
+  var NativeArrayBuffer$1 = global_1[ARRAY_BUFFER$1]; // `ArrayBuffer` constructor
+  // https://tc39.github.io/ecma262/#sec-arraybuffer-constructor
+
+  _export({
+    global: true,
+    forced: NativeArrayBuffer$1 !== ArrayBuffer$3
+  }, {
+    ArrayBuffer: ArrayBuffer$3
+  });
+  setSpecies(ARRAY_BUFFER$1);
+
+  var NATIVE_ARRAY_BUFFER_VIEWS$2 = arrayBufferViewCore.NATIVE_ARRAY_BUFFER_VIEWS; // `ArrayBuffer.isView` method
+  // https://tc39.github.io/ecma262/#sec-arraybuffer.isview
+
+  _export({
+    target: 'ArrayBuffer',
+    stat: true,
+    forced: !NATIVE_ARRAY_BUFFER_VIEWS$2
+  }, {
+    isView: arrayBufferViewCore.isView
+  });
+
+  // https://tc39.github.io/ecma262/#sec-dataview-constructor
+
+  _export({
+    global: true,
+    forced: !arrayBufferNative
+  }, {
+    DataView: arrayBuffer.DataView
+  });
+
+  var MATCH = wellKnownSymbol('match'); // `IsRegExp` abstract operation
+  // https://tc39.github.io/ecma262/#sec-isregexp
+
+  var isRegexp = function (it) {
+    var isRegExp;
+    return isObject(it) && ((isRegExp = it[MATCH]) !== undefined ? !!isRegExp : classofRaw(it) == 'RegExp');
+  };
+
+  var notARegexp = function (it) {
+    if (isRegexp(it)) {
+      throw TypeError("The method doesn't accept regular expressions");
+    }
+
+    return it;
+  };
+
+  var MATCH$1 = wellKnownSymbol('match');
+
+  var correctIsRegexpLogic = function (METHOD_NAME) {
+    var regexp = /./;
 
     try {
-      var object = {};
-
-      object[ITERATOR$2] = function () {
-        return {
-          next: function () {
-            return {
-              done: ITERATION_SUPPORT = true
-            };
-          }
-        };
-      };
-
-      exec(object);
-    } catch (error) {
-      /* empty */
-    }
-
-    return ITERATION_SUPPORT;
-  };
-
-  var defineProperty$4 = objectDefineProperty.f;
-  var Int8Array$1 = global_1.Int8Array;
-  var Int8ArrayPrototype = Int8Array$1 && Int8Array$1.prototype;
-  var Uint8ClampedArray = global_1.Uint8ClampedArray;
-  var Uint8ClampedArrayPrototype = Uint8ClampedArray && Uint8ClampedArray.prototype;
-  var TypedArray = Int8Array$1 && objectGetPrototypeOf(Int8Array$1);
-  var TypedArrayPrototype = Int8ArrayPrototype && objectGetPrototypeOf(Int8ArrayPrototype);
-  var ObjectPrototype$2 = Object.prototype;
-  var isPrototypeOf = ObjectPrototype$2.isPrototypeOf;
-  var TO_STRING_TAG$3 = wellKnownSymbol('toStringTag');
-  var TYPED_ARRAY_TAG = uid('TYPED_ARRAY_TAG'); // Fixing native typed arrays in Opera Presto crashes the browser, see #595
-
-  var NATIVE_ARRAY_BUFFER_VIEWS = arrayBufferNative && !!objectSetPrototypeOf && classof(global_1.opera) !== 'Opera';
-  var TYPED_ARRAY_TAG_REQIRED = false;
-  var NAME$1;
-  var TypedArrayConstructorsList = {
-    Int8Array: 1,
-    Uint8Array: 1,
-    Uint8ClampedArray: 1,
-    Int16Array: 2,
-    Uint16Array: 2,
-    Int32Array: 4,
-    Uint32Array: 4,
-    Float32Array: 4,
-    Float64Array: 8
-  };
-
-  var isView = function isView(it) {
-    var klass = classof(it);
-    return klass === 'DataView' || has(TypedArrayConstructorsList, klass);
-  };
-
-  var isTypedArray = function (it) {
-    return isObject(it) && has(TypedArrayConstructorsList, classof(it));
-  };
-
-  var aTypedArray = function (it) {
-    if (isTypedArray(it)) return it;
-    throw TypeError('Target is not a typed array');
-  };
-
-  var aTypedArrayConstructor = function (C) {
-    if (objectSetPrototypeOf) {
-      if (isPrototypeOf.call(TypedArray, C)) return C;
-    } else for (var ARRAY in TypedArrayConstructorsList) if (has(TypedArrayConstructorsList, NAME$1)) {
-      var TypedArrayConstructor = global_1[ARRAY];
-
-      if (TypedArrayConstructor && (C === TypedArrayConstructor || isPrototypeOf.call(TypedArrayConstructor, C))) {
-        return C;
+      '/./'[METHOD_NAME](regexp);
+    } catch (e) {
+      try {
+        regexp[MATCH$1] = false;
+        return '/./'[METHOD_NAME](regexp);
+      } catch (f) {
+        /* empty */
       }
     }
 
-    throw TypeError('Target is not a typed array constructor');
+    return false;
   };
 
-  var exportTypedArrayMethod = function (KEY, property, forced) {
-    if (!descriptors) return;
-    if (forced) for (var ARRAY in TypedArrayConstructorsList) {
-      var TypedArrayConstructor = global_1[ARRAY];
+  var getOwnPropertyDescriptor$2 = objectGetOwnPropertyDescriptor.f;
+  var nativeEndsWith = ''.endsWith;
+  var min$5 = Math.min;
+  var CORRECT_IS_REGEXP_LOGIC = correctIsRegexpLogic('endsWith'); // https://github.com/zloirock/core-js/pull/702
 
-      if (TypedArrayConstructor && has(TypedArrayConstructor.prototype, KEY)) {
-        delete TypedArrayConstructor.prototype[KEY];
-      }
+  var MDN_POLYFILL_BUG =  !CORRECT_IS_REGEXP_LOGIC && !!function () {
+    var descriptor = getOwnPropertyDescriptor$2(String.prototype, 'endsWith');
+    return descriptor && !descriptor.writable;
+  }(); // `String.prototype.endsWith` method
+  // https://tc39.github.io/ecma262/#sec-string.prototype.endswith
+
+  _export({
+    target: 'String',
+    proto: true,
+    forced: !MDN_POLYFILL_BUG && !CORRECT_IS_REGEXP_LOGIC
+  }, {
+    endsWith: function endsWith(searchString
+    /* , endPosition = @length */
+    ) {
+      var that = String(requireObjectCoercible(this));
+      notARegexp(searchString);
+      var endPosition = arguments.length > 1 ? arguments[1] : undefined;
+      var len = toLength(that.length);
+      var end = endPosition === undefined ? len : min$5(toLength(endPosition), len);
+      var search = String(searchString);
+      return nativeEndsWith ? nativeEndsWith.call(that, search, end) : that.slice(end - search.length, end) === search;
     }
-
-    if (!TypedArrayPrototype[KEY] || forced) {
-      redefine(TypedArrayPrototype, KEY, forced ? property : NATIVE_ARRAY_BUFFER_VIEWS && Int8ArrayPrototype[KEY] || property);
-    }
-  };
-
-  var exportTypedArrayStaticMethod = function (KEY, property, forced) {
-    var ARRAY, TypedArrayConstructor;
-    if (!descriptors) return;
-
-    if (objectSetPrototypeOf) {
-      if (forced) for (ARRAY in TypedArrayConstructorsList) {
-        TypedArrayConstructor = global_1[ARRAY];
-
-        if (TypedArrayConstructor && has(TypedArrayConstructor, KEY)) {
-          delete TypedArrayConstructor[KEY];
-        }
-      }
-
-      if (!TypedArray[KEY] || forced) {
-        // V8 ~ Chrome 49-50 `%TypedArray%` methods are non-writable non-configurable
-        try {
-          return redefine(TypedArray, KEY, forced ? property : NATIVE_ARRAY_BUFFER_VIEWS && Int8Array$1[KEY] || property);
-        } catch (error) {
-          /* empty */
-        }
-      } else return;
-    }
-
-    for (ARRAY in TypedArrayConstructorsList) {
-      TypedArrayConstructor = global_1[ARRAY];
-
-      if (TypedArrayConstructor && (!TypedArrayConstructor[KEY] || forced)) {
-        redefine(TypedArrayConstructor, KEY, property);
-      }
-    }
-  };
-
-  for (NAME$1 in TypedArrayConstructorsList) {
-    if (!global_1[NAME$1]) NATIVE_ARRAY_BUFFER_VIEWS = false;
-  } // WebKit bug - typed arrays constructors prototype is Object.prototype
-
-
-  if (!NATIVE_ARRAY_BUFFER_VIEWS || typeof TypedArray != 'function' || TypedArray === Function.prototype) {
-    // eslint-disable-next-line no-shadow
-    TypedArray = function TypedArray() {
-      throw TypeError('Incorrect invocation');
-    };
-
-    if (NATIVE_ARRAY_BUFFER_VIEWS) for (NAME$1 in TypedArrayConstructorsList) {
-      if (global_1[NAME$1]) objectSetPrototypeOf(global_1[NAME$1], TypedArray);
-    }
-  }
-
-  if (!NATIVE_ARRAY_BUFFER_VIEWS || !TypedArrayPrototype || TypedArrayPrototype === ObjectPrototype$2) {
-    TypedArrayPrototype = TypedArray.prototype;
-    if (NATIVE_ARRAY_BUFFER_VIEWS) for (NAME$1 in TypedArrayConstructorsList) {
-      if (global_1[NAME$1]) objectSetPrototypeOf(global_1[NAME$1].prototype, TypedArrayPrototype);
-    }
-  } // WebKit bug - one more object in Uint8ClampedArray prototype chain
-
-
-  if (NATIVE_ARRAY_BUFFER_VIEWS && objectGetPrototypeOf(Uint8ClampedArrayPrototype) !== TypedArrayPrototype) {
-    objectSetPrototypeOf(Uint8ClampedArrayPrototype, TypedArrayPrototype);
-  }
-
-  if (descriptors && !has(TypedArrayPrototype, TO_STRING_TAG$3)) {
-    TYPED_ARRAY_TAG_REQIRED = true;
-    defineProperty$4(TypedArrayPrototype, TO_STRING_TAG$3, {
-      get: function () {
-        return isObject(this) ? this[TYPED_ARRAY_TAG] : undefined;
-      }
-    });
-
-    for (NAME$1 in TypedArrayConstructorsList) if (global_1[NAME$1]) {
-      createNonEnumerableProperty(global_1[NAME$1], TYPED_ARRAY_TAG, NAME$1);
-    }
-  }
-
-  var arrayBufferViewCore = {
-    NATIVE_ARRAY_BUFFER_VIEWS: NATIVE_ARRAY_BUFFER_VIEWS,
-    TYPED_ARRAY_TAG: TYPED_ARRAY_TAG_REQIRED && TYPED_ARRAY_TAG,
-    aTypedArray: aTypedArray,
-    aTypedArrayConstructor: aTypedArrayConstructor,
-    exportTypedArrayMethod: exportTypedArrayMethod,
-    exportTypedArrayStaticMethod: exportTypedArrayStaticMethod,
-    isView: isView,
-    isTypedArray: isTypedArray,
-    TypedArray: TypedArray,
-    TypedArrayPrototype: TypedArrayPrototype
-  };
-
-  /* eslint-disable no-new */
-
-  var NATIVE_ARRAY_BUFFER_VIEWS$1 = arrayBufferViewCore.NATIVE_ARRAY_BUFFER_VIEWS;
-  var ArrayBuffer$2 = global_1.ArrayBuffer;
-  var Int8Array$2 = global_1.Int8Array;
-  var typedArrayConstructorsRequireWrappers = !NATIVE_ARRAY_BUFFER_VIEWS$1 || !fails(function () {
-    Int8Array$2(1);
-  }) || !fails(function () {
-    new Int8Array$2(-1);
-  }) || !checkCorrectnessOfIteration(function (iterable) {
-    new Int8Array$2();
-    new Int8Array$2(null);
-    new Int8Array$2(1.5);
-    new Int8Array$2(iterable);
-  }, true) || fails(function () {
-    // Safari (11+) bug - a reason why even Safari 13 should load a typed array polyfill
-    return new Int8Array$2(new ArrayBuffer$2(2), 1, undefined).length !== 1;
   });
-
-  var toPositiveInteger = function (it) {
-    var result = toInteger(it);
-    if (result < 0) throw RangeError("The argument can't be less than 0");
-    return result;
-  };
-
-  var toOffset = function (it, BYTES) {
-    var offset = toPositiveInteger(it);
-    if (offset % BYTES) throw RangeError('Wrong offset');
-    return offset;
-  };
-
-  var ITERATOR$3 = wellKnownSymbol('iterator');
-
-  var getIteratorMethod = function (it) {
-    if (it != undefined) return it[ITERATOR$3] || it['@@iterator'] || iterators[classof(it)];
-  };
-
-  var ITERATOR$4 = wellKnownSymbol('iterator');
-  var ArrayPrototype$1 = Array.prototype; // check on default Array iterator
-
-  var isArrayIteratorMethod = function (it) {
-    return it !== undefined && (iterators.Array === it || ArrayPrototype$1[ITERATOR$4] === it);
-  };
-
-  var functionBindContext = function (fn, that, length) {
-    aFunction$1(fn);
-    if (that === undefined) return fn;
-
-    switch (length) {
-      case 0:
-        return function () {
-          return fn.call(that);
-        };
-
-      case 1:
-        return function (a) {
-          return fn.call(that, a);
-        };
-
-      case 2:
-        return function (a, b) {
-          return fn.call(that, a, b);
-        };
-
-      case 3:
-        return function (a, b, c) {
-          return fn.call(that, a, b, c);
-        };
-    }
-
-    return function ()
-    /* ...args */
-    {
-      return fn.apply(that, arguments);
-    };
-  };
-
-  var aTypedArrayConstructor$1 = arrayBufferViewCore.aTypedArrayConstructor;
-
-  var typedArrayFrom = function from(source
-  /* , mapfn, thisArg */
-  ) {
-    var O = toObject(source);
-    var argumentsLength = arguments.length;
-    var mapfn = argumentsLength > 1 ? arguments[1] : undefined;
-    var mapping = mapfn !== undefined;
-    var iteratorMethod = getIteratorMethod(O);
-    var i, length, result, step, iterator, next;
-
-    if (iteratorMethod != undefined && !isArrayIteratorMethod(iteratorMethod)) {
-      iterator = iteratorMethod.call(O);
-      next = iterator.next;
-      O = [];
-
-      while (!(step = next.call(iterator)).done) {
-        O.push(step.value);
-      }
-    }
-
-    if (mapping && argumentsLength > 2) {
-      mapfn = functionBindContext(mapfn, arguments[2], 2);
-    }
-
-    length = toLength(O.length);
-    result = new (aTypedArrayConstructor$1(this))(length);
-
-    for (i = 0; length > i; i++) {
-      result[i] = mapping ? mapfn(O[i], i) : O[i];
-    }
-
-    return result;
-  };
-
-  var SPECIES$4 = wellKnownSymbol('species'); // `ArraySpeciesCreate` abstract operation
-  // https://tc39.github.io/ecma262/#sec-arrayspeciescreate
-
-  var arraySpeciesCreate = function (originalArray, length) {
-    var C;
-
-    if (isArray(originalArray)) {
-      C = originalArray.constructor; // cross-realm fallback
-
-      if (typeof C == 'function' && (C === Array || isArray(C.prototype))) C = undefined;else if (isObject(C)) {
-        C = C[SPECIES$4];
-        if (C === null) C = undefined;
-      }
-    }
-
-    return new (C === undefined ? Array : C)(length === 0 ? 0 : length);
-  };
-
-  var push = [].push; // `Array.prototype.{ forEach, map, filter, some, every, find, findIndex }` methods implementation
-
-  var createMethod$2 = function (TYPE) {
-    var IS_MAP = TYPE == 1;
-    var IS_FILTER = TYPE == 2;
-    var IS_SOME = TYPE == 3;
-    var IS_EVERY = TYPE == 4;
-    var IS_FIND_INDEX = TYPE == 6;
-    var NO_HOLES = TYPE == 5 || IS_FIND_INDEX;
-    return function ($this, callbackfn, that, specificCreate) {
-      var O = toObject($this);
-      var self = indexedObject(O);
-      var boundFunction = functionBindContext(callbackfn, that, 3);
-      var length = toLength(self.length);
-      var index = 0;
-      var create = specificCreate || arraySpeciesCreate;
-      var target = IS_MAP ? create($this, length) : IS_FILTER ? create($this, 0) : undefined;
-      var value, result;
-
-      for (; length > index; index++) if (NO_HOLES || index in self) {
-        value = self[index];
-        result = boundFunction(value, index, O);
-
-        if (TYPE) {
-          if (IS_MAP) target[index] = result; // map
-          else if (result) switch (TYPE) {
-              case 3:
-                return true;
-              // some
-
-              case 5:
-                return value;
-              // find
-
-              case 6:
-                return index;
-              // findIndex
-
-              case 2:
-                push.call(target, value);
-              // filter
-            } else if (IS_EVERY) return false; // every
-        }
-      }
-
-      return IS_FIND_INDEX ? -1 : IS_SOME || IS_EVERY ? IS_EVERY : target;
-    };
-  };
-
-  var arrayIteration = {
-    // `Array.prototype.forEach` method
-    // https://tc39.github.io/ecma262/#sec-array.prototype.foreach
-    forEach: createMethod$2(0),
-    // `Array.prototype.map` method
-    // https://tc39.github.io/ecma262/#sec-array.prototype.map
-    map: createMethod$2(1),
-    // `Array.prototype.filter` method
-    // https://tc39.github.io/ecma262/#sec-array.prototype.filter
-    filter: createMethod$2(2),
-    // `Array.prototype.some` method
-    // https://tc39.github.io/ecma262/#sec-array.prototype.some
-    some: createMethod$2(3),
-    // `Array.prototype.every` method
-    // https://tc39.github.io/ecma262/#sec-array.prototype.every
-    every: createMethod$2(4),
-    // `Array.prototype.find` method
-    // https://tc39.github.io/ecma262/#sec-array.prototype.find
-    find: createMethod$2(5),
-    // `Array.prototype.findIndex` method
-    // https://tc39.github.io/ecma262/#sec-array.prototype.findIndex
-    findIndex: createMethod$2(6)
-  };
-
-  var SPECIES$5 = wellKnownSymbol('species');
-
-  var setSpecies = function (CONSTRUCTOR_NAME) {
-    var Constructor = getBuiltIn(CONSTRUCTOR_NAME);
-    var defineProperty = objectDefineProperty.f;
-
-    if (descriptors && Constructor && !Constructor[SPECIES$5]) {
-      defineProperty(Constructor, SPECIES$5, {
-        configurable: true,
-        get: function () {
-          return this;
-        }
-      });
-    }
-  };
-
-  var inheritIfRequired = function ($this, dummy, Wrapper) {
-    var NewTarget, NewTargetPrototype;
-    if ( // it can work only with native `setPrototypeOf`
-    objectSetPrototypeOf && // we haven't completely correct pre-ES6 way for getting `new.target`, so use this
-    typeof (NewTarget = dummy.constructor) == 'function' && NewTarget !== Wrapper && isObject(NewTargetPrototype = NewTarget.prototype) && NewTargetPrototype !== Wrapper.prototype) objectSetPrototypeOf($this, NewTargetPrototype);
-    return $this;
-  };
-
-  var typedArrayConstructor = createCommonjsModule(function (module) {
-
-    var getOwnPropertyNames = objectGetOwnPropertyNames.f;
-    var forEach = arrayIteration.forEach;
-    var getInternalState = internalState.get;
-    var setInternalState = internalState.set;
-    var nativeDefineProperty = objectDefineProperty.f;
-    var nativeGetOwnPropertyDescriptor = objectGetOwnPropertyDescriptor.f;
-    var round = Math.round;
-    var RangeError = global_1.RangeError;
-    var ArrayBuffer = arrayBuffer.ArrayBuffer;
-    var DataView = arrayBuffer.DataView;
-    var NATIVE_ARRAY_BUFFER_VIEWS = arrayBufferViewCore.NATIVE_ARRAY_BUFFER_VIEWS;
-    var TYPED_ARRAY_TAG = arrayBufferViewCore.TYPED_ARRAY_TAG;
-    var TypedArray = arrayBufferViewCore.TypedArray;
-    var TypedArrayPrototype = arrayBufferViewCore.TypedArrayPrototype;
-    var aTypedArrayConstructor = arrayBufferViewCore.aTypedArrayConstructor;
-    var isTypedArray = arrayBufferViewCore.isTypedArray;
-    var BYTES_PER_ELEMENT = 'BYTES_PER_ELEMENT';
-    var WRONG_LENGTH = 'Wrong length';
-
-    var fromList = function (C, list) {
-      var index = 0;
-      var length = list.length;
-      var result = new (aTypedArrayConstructor(C))(length);
-
-      while (length > index) result[index] = list[index++];
-
-      return result;
-    };
-
-    var addGetter = function (it, key) {
-      nativeDefineProperty(it, key, {
-        get: function () {
-          return getInternalState(this)[key];
-        }
-      });
-    };
-
-    var isArrayBuffer = function (it) {
-      var klass;
-      return it instanceof ArrayBuffer || (klass = classof(it)) == 'ArrayBuffer' || klass == 'SharedArrayBuffer';
-    };
-
-    var isTypedArrayIndex = function (target, key) {
-      return isTypedArray(target) && typeof key != 'symbol' && key in target && String(+key) == String(key);
-    };
-
-    var wrappedGetOwnPropertyDescriptor = function getOwnPropertyDescriptor(target, key) {
-      return isTypedArrayIndex(target, key = toPrimitive(key, true)) ? createPropertyDescriptor(2, target[key]) : nativeGetOwnPropertyDescriptor(target, key);
-    };
-
-    var wrappedDefineProperty = function defineProperty(target, key, descriptor) {
-      if (isTypedArrayIndex(target, key = toPrimitive(key, true)) && isObject(descriptor) && has(descriptor, 'value') && !has(descriptor, 'get') && !has(descriptor, 'set') // TODO: add validation descriptor w/o calling accessors
-      && !descriptor.configurable && (!has(descriptor, 'writable') || descriptor.writable) && (!has(descriptor, 'enumerable') || descriptor.enumerable)) {
-        target[key] = descriptor.value;
-        return target;
-      }
-
-      return nativeDefineProperty(target, key, descriptor);
-    };
-
-    if (descriptors) {
-      if (!NATIVE_ARRAY_BUFFER_VIEWS) {
-        objectGetOwnPropertyDescriptor.f = wrappedGetOwnPropertyDescriptor;
-        objectDefineProperty.f = wrappedDefineProperty;
-        addGetter(TypedArrayPrototype, 'buffer');
-        addGetter(TypedArrayPrototype, 'byteOffset');
-        addGetter(TypedArrayPrototype, 'byteLength');
-        addGetter(TypedArrayPrototype, 'length');
-      }
-
-      _export({
-        target: 'Object',
-        stat: true,
-        forced: !NATIVE_ARRAY_BUFFER_VIEWS
-      }, {
-        getOwnPropertyDescriptor: wrappedGetOwnPropertyDescriptor,
-        defineProperty: wrappedDefineProperty
-      });
-
-      module.exports = function (TYPE, wrapper, CLAMPED) {
-        var BYTES = TYPE.match(/\d+$/)[0] / 8;
-        var CONSTRUCTOR_NAME = TYPE + (CLAMPED ? 'Clamped' : '') + 'Array';
-        var GETTER = 'get' + TYPE;
-        var SETTER = 'set' + TYPE;
-        var NativeTypedArrayConstructor = global_1[CONSTRUCTOR_NAME];
-        var TypedArrayConstructor = NativeTypedArrayConstructor;
-        var TypedArrayConstructorPrototype = TypedArrayConstructor && TypedArrayConstructor.prototype;
-        var exported = {};
-
-        var getter = function (that, index) {
-          var data = getInternalState(that);
-          return data.view[GETTER](index * BYTES + data.byteOffset, true);
-        };
-
-        var setter = function (that, index, value) {
-          var data = getInternalState(that);
-          if (CLAMPED) value = (value = round(value)) < 0 ? 0 : value > 0xFF ? 0xFF : value & 0xFF;
-          data.view[SETTER](index * BYTES + data.byteOffset, value, true);
-        };
-
-        var addElement = function (that, index) {
-          nativeDefineProperty(that, index, {
-            get: function () {
-              return getter(this, index);
-            },
-            set: function (value) {
-              return setter(this, index, value);
-            },
-            enumerable: true
-          });
-        };
-
-        if (!NATIVE_ARRAY_BUFFER_VIEWS) {
-          TypedArrayConstructor = wrapper(function (that, data, offset, $length) {
-            anInstance(that, TypedArrayConstructor, CONSTRUCTOR_NAME);
-            var index = 0;
-            var byteOffset = 0;
-            var buffer, byteLength, length;
-
-            if (!isObject(data)) {
-              length = toIndex(data);
-              byteLength = length * BYTES;
-              buffer = new ArrayBuffer(byteLength);
-            } else if (isArrayBuffer(data)) {
-              buffer = data;
-              byteOffset = toOffset(offset, BYTES);
-              var $len = data.byteLength;
-
-              if ($length === undefined) {
-                if ($len % BYTES) throw RangeError(WRONG_LENGTH);
-                byteLength = $len - byteOffset;
-                if (byteLength < 0) throw RangeError(WRONG_LENGTH);
-              } else {
-                byteLength = toLength($length) * BYTES;
-                if (byteLength + byteOffset > $len) throw RangeError(WRONG_LENGTH);
-              }
-
-              length = byteLength / BYTES;
-            } else if (isTypedArray(data)) {
-              return fromList(TypedArrayConstructor, data);
-            } else {
-              return typedArrayFrom.call(TypedArrayConstructor, data);
-            }
-
-            setInternalState(that, {
-              buffer: buffer,
-              byteOffset: byteOffset,
-              byteLength: byteLength,
-              length: length,
-              view: new DataView(buffer)
-            });
-
-            while (index < length) addElement(that, index++);
-          });
-          if (objectSetPrototypeOf) objectSetPrototypeOf(TypedArrayConstructor, TypedArray);
-          TypedArrayConstructorPrototype = TypedArrayConstructor.prototype = objectCreate(TypedArrayPrototype);
-        } else if (typedArrayConstructorsRequireWrappers) {
-          TypedArrayConstructor = wrapper(function (dummy, data, typedArrayOffset, $length) {
-            anInstance(dummy, TypedArrayConstructor, CONSTRUCTOR_NAME);
-            return inheritIfRequired(function () {
-              if (!isObject(data)) return new NativeTypedArrayConstructor(toIndex(data));
-              if (isArrayBuffer(data)) return $length !== undefined ? new NativeTypedArrayConstructor(data, toOffset(typedArrayOffset, BYTES), $length) : typedArrayOffset !== undefined ? new NativeTypedArrayConstructor(data, toOffset(typedArrayOffset, BYTES)) : new NativeTypedArrayConstructor(data);
-              if (isTypedArray(data)) return fromList(TypedArrayConstructor, data);
-              return typedArrayFrom.call(TypedArrayConstructor, data);
-            }(), dummy, TypedArrayConstructor);
-          });
-          if (objectSetPrototypeOf) objectSetPrototypeOf(TypedArrayConstructor, TypedArray);
-          forEach(getOwnPropertyNames(NativeTypedArrayConstructor), function (key) {
-            if (!(key in TypedArrayConstructor)) {
-              createNonEnumerableProperty(TypedArrayConstructor, key, NativeTypedArrayConstructor[key]);
-            }
-          });
-          TypedArrayConstructor.prototype = TypedArrayConstructorPrototype;
-        }
-
-        if (TypedArrayConstructorPrototype.constructor !== TypedArrayConstructor) {
-          createNonEnumerableProperty(TypedArrayConstructorPrototype, 'constructor', TypedArrayConstructor);
-        }
-
-        if (TYPED_ARRAY_TAG) {
-          createNonEnumerableProperty(TypedArrayConstructorPrototype, TYPED_ARRAY_TAG, CONSTRUCTOR_NAME);
-        }
-
-        exported[CONSTRUCTOR_NAME] = TypedArrayConstructor;
-        _export({
-          global: true,
-          forced: TypedArrayConstructor != NativeTypedArrayConstructor,
-          sham: !NATIVE_ARRAY_BUFFER_VIEWS
-        }, exported);
-
-        if (!(BYTES_PER_ELEMENT in TypedArrayConstructor)) {
-          createNonEnumerableProperty(TypedArrayConstructor, BYTES_PER_ELEMENT, BYTES);
-        }
-
-        if (!(BYTES_PER_ELEMENT in TypedArrayConstructorPrototype)) {
-          createNonEnumerableProperty(TypedArrayConstructorPrototype, BYTES_PER_ELEMENT, BYTES);
-        }
-
-        setSpecies(CONSTRUCTOR_NAME);
-      };
-    } else module.exports = function () {
-      /* empty */
-    };
-  });
-
-  // https://tc39.github.io/ecma262/#sec-typedarray-objects
-
-  typedArrayConstructor('Uint8', function (init) {
-    return function Uint8Array(data, byteOffset, length) {
-      return init(this, data, byteOffset, length);
-    };
-  });
-
-  var min$3 = Math.min; // `Array.prototype.copyWithin` method implementation
-  // https://tc39.github.io/ecma262/#sec-array.prototype.copywithin
-
-  var arrayCopyWithin = [].copyWithin || function copyWithin(target
-  /* = 0 */
-  , start
-  /* = 0, end = @length */
-  ) {
-    var O = toObject(this);
-    var len = toLength(O.length);
-    var to = toAbsoluteIndex(target, len);
-    var from = toAbsoluteIndex(start, len);
-    var end = arguments.length > 2 ? arguments[2] : undefined;
-    var count = min$3((end === undefined ? len : toAbsoluteIndex(end, len)) - from, len - to);
-    var inc = 1;
-
-    if (from < to && to < from + count) {
-      inc = -1;
-      from += count - 1;
-      to += count - 1;
-    }
-
-    while (count-- > 0) {
-      if (from in O) O[to] = O[from];else delete O[to];
-      to += inc;
-      from += inc;
-    }
-
-    return O;
-  };
-
-  var aTypedArray$1 = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$1 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.copyWithin` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.copywithin
-
-  exportTypedArrayMethod$1('copyWithin', function copyWithin(target, start
-  /* , end */
-  ) {
-    return arrayCopyWithin.call(aTypedArray$1(this), target, start, arguments.length > 2 ? arguments[2] : undefined);
-  });
-
-  var $every = arrayIteration.every;
-  var aTypedArray$2 = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$2 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.every` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.every
-
-  exportTypedArrayMethod$2('every', function every(callbackfn
-  /* , thisArg */
-  ) {
-    return $every(aTypedArray$2(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-  });
-
-  var aTypedArray$3 = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$3 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.fill` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.fill
-  // eslint-disable-next-line no-unused-vars
-
-  exportTypedArrayMethod$3('fill', function fill(value
-  /* , start, end */
-  ) {
-    return arrayFill.apply(aTypedArray$3(this), arguments);
-  });
-
-  var $filter = arrayIteration.filter;
-  var aTypedArray$4 = arrayBufferViewCore.aTypedArray;
-  var aTypedArrayConstructor$2 = arrayBufferViewCore.aTypedArrayConstructor;
-  var exportTypedArrayMethod$4 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.filter` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.filter
-
-  exportTypedArrayMethod$4('filter', function filter(callbackfn
-  /* , thisArg */
-  ) {
-    var list = $filter(aTypedArray$4(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-    var C = speciesConstructor(this, this.constructor);
-    var index = 0;
-    var length = list.length;
-    var result = new (aTypedArrayConstructor$2(C))(length);
-
-    while (length > index) result[index] = list[index++];
-
-    return result;
-  });
-
-  var $find = arrayIteration.find;
-  var aTypedArray$5 = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$5 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.find` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.find
-
-  exportTypedArrayMethod$5('find', function find(predicate
-  /* , thisArg */
-  ) {
-    return $find(aTypedArray$5(this), predicate, arguments.length > 1 ? arguments[1] : undefined);
-  });
-
-  var $findIndex = arrayIteration.findIndex;
-  var aTypedArray$6 = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$6 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.findIndex` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.findindex
-
-  exportTypedArrayMethod$6('findIndex', function findIndex(predicate
-  /* , thisArg */
-  ) {
-    return $findIndex(aTypedArray$6(this), predicate, arguments.length > 1 ? arguments[1] : undefined);
-  });
-
-  var $forEach = arrayIteration.forEach;
-  var aTypedArray$7 = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$7 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.forEach` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.foreach
-
-  exportTypedArrayMethod$7('forEach', function forEach(callbackfn
-  /* , thisArg */
-  ) {
-    $forEach(aTypedArray$7(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-  });
-
-  var $includes = arrayIncludes.includes;
-  var aTypedArray$8 = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$8 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.includes` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.includes
-
-  exportTypedArrayMethod$8('includes', function includes(searchElement
-  /* , fromIndex */
-  ) {
-    return $includes(aTypedArray$8(this), searchElement, arguments.length > 1 ? arguments[1] : undefined);
-  });
-
-  var $indexOf = arrayIncludes.indexOf;
-  var aTypedArray$9 = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$9 = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.indexOf` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.indexof
-
-  exportTypedArrayMethod$9('indexOf', function indexOf(searchElement
-  /* , fromIndex */
-  ) {
-    return $indexOf(aTypedArray$9(this), searchElement, arguments.length > 1 ? arguments[1] : undefined);
-  });
-
-  var ITERATOR$5 = wellKnownSymbol('iterator');
-  var Uint8Array$1 = global_1.Uint8Array;
-  var arrayValues = es_array_iterator.values;
-  var arrayKeys = es_array_iterator.keys;
-  var arrayEntries = es_array_iterator.entries;
-  var aTypedArray$a = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$a = arrayBufferViewCore.exportTypedArrayMethod;
-  var nativeTypedArrayIterator = Uint8Array$1 && Uint8Array$1.prototype[ITERATOR$5];
-  var CORRECT_ITER_NAME = !!nativeTypedArrayIterator && (nativeTypedArrayIterator.name == 'values' || nativeTypedArrayIterator.name == undefined);
-
-  var typedArrayValues = function values() {
-    return arrayValues.call(aTypedArray$a(this));
-  }; // `%TypedArray%.prototype.entries` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.entries
-
-
-  exportTypedArrayMethod$a('entries', function entries() {
-    return arrayEntries.call(aTypedArray$a(this));
-  }); // `%TypedArray%.prototype.keys` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.keys
-
-  exportTypedArrayMethod$a('keys', function keys() {
-    return arrayKeys.call(aTypedArray$a(this));
-  }); // `%TypedArray%.prototype.values` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.values
-
-  exportTypedArrayMethod$a('values', typedArrayValues, !CORRECT_ITER_NAME); // `%TypedArray%.prototype[@@iterator]` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype-@@iterator
-
-  exportTypedArrayMethod$a(ITERATOR$5, typedArrayValues, !CORRECT_ITER_NAME);
-
-  var aTypedArray$b = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$b = arrayBufferViewCore.exportTypedArrayMethod;
-  var $join = [].join; // `%TypedArray%.prototype.join` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.join
-  // eslint-disable-next-line no-unused-vars
-
-  exportTypedArrayMethod$b('join', function join(separator) {
-    return $join.apply(aTypedArray$b(this), arguments);
-  });
-
-  var arrayMethodIsStrict = function (METHOD_NAME, argument) {
-    var method = [][METHOD_NAME];
-    return !!method && fails(function () {
-      // eslint-disable-next-line no-useless-call,no-throw-literal
-      method.call(null, argument || function () {
-        throw 1;
-      }, 1);
-    });
-  };
-
-  var min$4 = Math.min;
-  var nativeLastIndexOf = [].lastIndexOf;
-  var NEGATIVE_ZERO = !!nativeLastIndexOf && 1 / [1].lastIndexOf(1, -0) < 0;
-  var STRICT_METHOD = arrayMethodIsStrict('lastIndexOf'); // For preventing possible almost infinite loop in non-standard implementations, test the forward version of the method
-
-  var USES_TO_LENGTH$1 = arrayMethodUsesToLength('indexOf', {
-    ACCESSORS: true,
-    1: 0
-  });
-  var FORCED = NEGATIVE_ZERO || !STRICT_METHOD || !USES_TO_LENGTH$1; // `Array.prototype.lastIndexOf` method implementation
-  // https://tc39.github.io/ecma262/#sec-array.prototype.lastindexof
-
-  var arrayLastIndexOf = FORCED ? function lastIndexOf(searchElement
-  /* , fromIndex = @[*-1] */
-  ) {
-    // convert -0 to +0
-    if (NEGATIVE_ZERO) return nativeLastIndexOf.apply(this, arguments) || 0;
-    var O = toIndexedObject(this);
-    var length = toLength(O.length);
-    var index = length - 1;
-    if (arguments.length > 1) index = min$4(index, toInteger(arguments[1]));
-    if (index < 0) index = length + index;
-
-    for (; index >= 0; index--) if (index in O && O[index] === searchElement) return index || 0;
-
-    return -1;
-  } : nativeLastIndexOf;
-
-  var aTypedArray$c = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$c = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.lastIndexOf` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.lastindexof
-  // eslint-disable-next-line no-unused-vars
-
-  exportTypedArrayMethod$c('lastIndexOf', function lastIndexOf(searchElement
-  /* , fromIndex */
-  ) {
-    return arrayLastIndexOf.apply(aTypedArray$c(this), arguments);
-  });
-
-  var $map = arrayIteration.map;
-  var aTypedArray$d = arrayBufferViewCore.aTypedArray;
-  var aTypedArrayConstructor$3 = arrayBufferViewCore.aTypedArrayConstructor;
-  var exportTypedArrayMethod$d = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.map` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.map
-
-  exportTypedArrayMethod$d('map', function map(mapfn
-  /* , thisArg */
-  ) {
-    return $map(aTypedArray$d(this), mapfn, arguments.length > 1 ? arguments[1] : undefined, function (O, length) {
-      return new (aTypedArrayConstructor$3(speciesConstructor(O, O.constructor)))(length);
-    });
-  });
-
-  var createMethod$3 = function (IS_RIGHT) {
-    return function (that, callbackfn, argumentsLength, memo) {
-      aFunction$1(callbackfn);
-      var O = toObject(that);
-      var self = indexedObject(O);
-      var length = toLength(O.length);
-      var index = IS_RIGHT ? length - 1 : 0;
-      var i = IS_RIGHT ? -1 : 1;
-      if (argumentsLength < 2) while (true) {
-        if (index in self) {
-          memo = self[index];
-          index += i;
-          break;
-        }
-
-        index += i;
-
-        if (IS_RIGHT ? index < 0 : length <= index) {
-          throw TypeError('Reduce of empty array with no initial value');
-        }
-      }
-
-      for (; IS_RIGHT ? index >= 0 : length > index; index += i) if (index in self) {
-        memo = callbackfn(memo, self[index], index, O);
-      }
-
-      return memo;
-    };
-  };
-
-  var arrayReduce = {
-    // `Array.prototype.reduce` method
-    // https://tc39.github.io/ecma262/#sec-array.prototype.reduce
-    left: createMethod$3(false),
-    // `Array.prototype.reduceRight` method
-    // https://tc39.github.io/ecma262/#sec-array.prototype.reduceright
-    right: createMethod$3(true)
-  };
-
-  var $reduce = arrayReduce.left;
-  var aTypedArray$e = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$e = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.reduce` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.reduce
-
-  exportTypedArrayMethod$e('reduce', function reduce(callbackfn
-  /* , initialValue */
-  ) {
-    return $reduce(aTypedArray$e(this), callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
-  });
-
-  var $reduceRight = arrayReduce.right;
-  var aTypedArray$f = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$f = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.reduceRicht` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.reduceright
-
-  exportTypedArrayMethod$f('reduceRight', function reduceRight(callbackfn
-  /* , initialValue */
-  ) {
-    return $reduceRight(aTypedArray$f(this), callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
-  });
-
-  var aTypedArray$g = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$g = arrayBufferViewCore.exportTypedArrayMethod;
-  var floor$3 = Math.floor; // `%TypedArray%.prototype.reverse` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.reverse
-
-  exportTypedArrayMethod$g('reverse', function reverse() {
-    var that = this;
-    var length = aTypedArray$g(that).length;
-    var middle = floor$3(length / 2);
-    var index = 0;
-    var value;
-
-    while (index < middle) {
-      value = that[index];
-      that[index++] = that[--length];
-      that[length] = value;
-    }
-
-    return that;
-  });
-
-  var aTypedArray$h = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$h = arrayBufferViewCore.exportTypedArrayMethod;
-  var FORCED$1 = fails(function () {
-    // eslint-disable-next-line no-undef
-    new Int8Array(1).set({});
-  }); // `%TypedArray%.prototype.set` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.set
-
-  exportTypedArrayMethod$h('set', function set(arrayLike
-  /* , offset */
-  ) {
-    aTypedArray$h(this);
-    var offset = toOffset(arguments.length > 1 ? arguments[1] : undefined, 1);
-    var length = this.length;
-    var src = toObject(arrayLike);
-    var len = toLength(src.length);
-    var index = 0;
-    if (len + offset > length) throw RangeError('Wrong length');
-
-    while (index < len) this[offset + index] = src[index++];
-  }, FORCED$1);
-
-  var aTypedArray$i = arrayBufferViewCore.aTypedArray;
-  var aTypedArrayConstructor$4 = arrayBufferViewCore.aTypedArrayConstructor;
-  var exportTypedArrayMethod$i = arrayBufferViewCore.exportTypedArrayMethod;
-  var $slice = [].slice;
-  var FORCED$2 = fails(function () {
-    // eslint-disable-next-line no-undef
-    new Int8Array(1).slice();
-  }); // `%TypedArray%.prototype.slice` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.slice
-
-  exportTypedArrayMethod$i('slice', function slice(start, end) {
-    var list = $slice.call(aTypedArray$i(this), start, end);
-    var C = speciesConstructor(this, this.constructor);
-    var index = 0;
-    var length = list.length;
-    var result = new (aTypedArrayConstructor$4(C))(length);
-
-    while (length > index) result[index] = list[index++];
-
-    return result;
-  }, FORCED$2);
-
-  var $some = arrayIteration.some;
-  var aTypedArray$j = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$j = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.some` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.some
-
-  exportTypedArrayMethod$j('some', function some(callbackfn
-  /* , thisArg */
-  ) {
-    return $some(aTypedArray$j(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-  });
-
-  var aTypedArray$k = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$k = arrayBufferViewCore.exportTypedArrayMethod;
-  var $sort = [].sort; // `%TypedArray%.prototype.sort` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.sort
-
-  exportTypedArrayMethod$k('sort', function sort(comparefn) {
-    return $sort.call(aTypedArray$k(this), comparefn);
-  });
-
-  var aTypedArray$l = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$l = arrayBufferViewCore.exportTypedArrayMethod; // `%TypedArray%.prototype.subarray` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.subarray
-
-  exportTypedArrayMethod$l('subarray', function subarray(begin, end) {
-    var O = aTypedArray$l(this);
-    var length = O.length;
-    var beginIndex = toAbsoluteIndex(begin, length);
-    return new (speciesConstructor(O, O.constructor))(O.buffer, O.byteOffset + beginIndex * O.BYTES_PER_ELEMENT, toLength((end === undefined ? length : toAbsoluteIndex(end, length)) - beginIndex));
-  });
-
-  var Int8Array$3 = global_1.Int8Array;
-  var aTypedArray$m = arrayBufferViewCore.aTypedArray;
-  var exportTypedArrayMethod$m = arrayBufferViewCore.exportTypedArrayMethod;
-  var $toLocaleString = [].toLocaleString;
-  var $slice$1 = [].slice; // iOS Safari 6.x fails here
-
-  var TO_LOCALE_STRING_BUG = !!Int8Array$3 && fails(function () {
-    $toLocaleString.call(new Int8Array$3(1));
-  });
-  var FORCED$3 = fails(function () {
-    return [1, 2].toLocaleString() != new Int8Array$3([1, 2]).toLocaleString();
-  }) || !fails(function () {
-    Int8Array$3.prototype.toLocaleString.call([1, 2]);
-  }); // `%TypedArray%.prototype.toLocaleString` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.tolocalestring
-
-  exportTypedArrayMethod$m('toLocaleString', function toLocaleString() {
-    return $toLocaleString.apply(TO_LOCALE_STRING_BUG ? $slice$1.call(aTypedArray$m(this)) : aTypedArray$m(this), arguments);
-  }, FORCED$3);
-
-  var exportTypedArrayMethod$n = arrayBufferViewCore.exportTypedArrayMethod;
-  var Uint8Array$2 = global_1.Uint8Array;
-  var Uint8ArrayPrototype = Uint8Array$2 && Uint8Array$2.prototype || {};
-  var arrayToString = [].toString;
-  var arrayJoin = [].join;
-
-  if (fails(function () {
-    arrayToString.call({});
-  })) {
-    arrayToString = function toString() {
-      return arrayJoin.call(this);
-    };
-  }
-
-  var IS_NOT_ARRAY_METHOD = Uint8ArrayPrototype.toString != arrayToString; // `%TypedArray%.prototype.toString` method
-  // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.tostring
-
-  exportTypedArrayMethod$n('toString', arrayToString, IS_NOT_ARRAY_METHOD);
 
   var $forEach$1 = arrayIteration.forEach;
   var STRICT_METHOD$1 = arrayMethodIsStrict('forEach');
-  var USES_TO_LENGTH$2 = arrayMethodUsesToLength('forEach'); // `Array.prototype.forEach` method implementation
+  var USES_TO_LENGTH$1 = arrayMethodUsesToLength('forEach'); // `Array.prototype.forEach` method implementation
   // https://tc39.github.io/ecma262/#sec-array.prototype.foreach
 
-  var arrayForEach = !STRICT_METHOD$1 || !USES_TO_LENGTH$2 ? function forEach(callbackfn
+  var arrayForEach = !STRICT_METHOD$1 || !USES_TO_LENGTH$1 ? function forEach(callbackfn
   /* , thisArg */
   ) {
     return $forEach$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
@@ -3335,6 +3512,14 @@
     forced: [].forEach != arrayForEach
   }, {
     forEach: arrayForEach
+  });
+
+  // https://tc39.github.io/ecma262/#sec-typedarray-objects
+
+  typedArrayConstructor('Uint16', function (init) {
+    return function Uint16Array(data, byteOffset, length) {
+      return init(this, data, byteOffset, length);
+    };
   });
 
   // iterable DOM collections
@@ -3383,83 +3568,6 @@
       CollectionPrototype.forEach = arrayForEach;
     }
   }
-
-  function isBitSet(_byte, bit) {
-    return (_byte & 1 << bit) > 0;
-  }
-  function decodeSynch(synch) {
-    var out = 0;
-    var mask = 0x7F000000;
-
-    while (mask) {
-      out >>= 1;
-      out |= synch & mask;
-      mask >>= 8;
-    }
-
-    return out;
-  }
-  function encodeSynch(size) {
-    var out = 0;
-    var mask = 0x7F;
-
-    while (mask ^ 0x7FFFFFFF) {
-      out = size & ~mask;
-      out <<= 1;
-      out |= size & mask;
-      mask = (mask + 1 << 8) - 1;
-      size = out;
-    }
-
-    return out;
-  }
-  function mergeBytes() {
-    var merged = [];
-
-    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
-      params[_key] = arguments[_key];
-    }
-
-    params.forEach(function (param) {
-      if (param.forEach) param.forEach(function (_byte2) {
-        return merged.push(_byte2);
-      });else merged.push(param);
-    });
-    return new Uint8Array(merged);
-  }
-  function unsynch(array) {
-    var bytes = [];
-    var i = 0;
-
-    while (i < array.length) {
-      bytes.push(array[i]);
-      if (array[i] === 0xff && array[i + 1] === 0x00) i++;
-      i++;
-    }
-
-    return bytes;
-  }
-
-  var ARRAY_BUFFER$1 = 'ArrayBuffer';
-  var ArrayBuffer$3 = arrayBuffer[ARRAY_BUFFER$1];
-  var NativeArrayBuffer$1 = global_1[ARRAY_BUFFER$1]; // `ArrayBuffer` constructor
-  // https://tc39.github.io/ecma262/#sec-arraybuffer-constructor
-
-  _export({
-    global: true,
-    forced: NativeArrayBuffer$1 !== ArrayBuffer$3
-  }, {
-    ArrayBuffer: ArrayBuffer$3
-  });
-  setSpecies(ARRAY_BUFFER$1);
-
-  // https://tc39.github.io/ecma262/#sec-typedarray-objects
-
-  typedArrayConstructor('Uint16', function (init) {
-    return function Uint16Array(data, byteOffset, length) {
-      return init(this, data, byteOffset, length);
-    };
-  });
 
   function decodeUTF8(bytes) {
     var string = '';
@@ -3560,155 +3668,6 @@
     return bytes;
   }
 
-  var IS_CONCAT_SPREADABLE = wellKnownSymbol('isConcatSpreadable');
-  var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
-  var MAXIMUM_ALLOWED_INDEX_EXCEEDED = 'Maximum allowed index exceeded'; // We can't use this feature detection in V8 since it causes
-  // deoptimization and serious performance degradation
-  // https://github.com/zloirock/core-js/issues/679
-
-  var IS_CONCAT_SPREADABLE_SUPPORT = engineV8Version >= 51 || !fails(function () {
-    var array = [];
-    array[IS_CONCAT_SPREADABLE] = false;
-    return array.concat()[0] !== array;
-  });
-  var SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('concat');
-
-  var isConcatSpreadable = function (O) {
-    if (!isObject(O)) return false;
-    var spreadable = O[IS_CONCAT_SPREADABLE];
-    return spreadable !== undefined ? !!spreadable : isArray(O);
-  };
-
-  var FORCED$4 = !IS_CONCAT_SPREADABLE_SUPPORT || !SPECIES_SUPPORT; // `Array.prototype.concat` method
-  // https://tc39.github.io/ecma262/#sec-array.prototype.concat
-  // with adding support of @@isConcatSpreadable and @@species
-
-  _export({
-    target: 'Array',
-    proto: true,
-    forced: FORCED$4
-  }, {
-    concat: function concat(arg) {
-      // eslint-disable-line no-unused-vars
-      var O = toObject(this);
-      var A = arraySpeciesCreate(O, 0);
-      var n = 0;
-      var i, k, length, len, E;
-
-      for (i = -1, length = arguments.length; i < length; i++) {
-        E = i === -1 ? O : arguments[i];
-
-        if (isConcatSpreadable(E)) {
-          len = toLength(E.length);
-          if (n + len > MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
-
-          for (k = 0; k < len; k++, n++) if (k in E) createProperty(A, n, E[k]);
-        } else {
-          if (n >= MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
-          createProperty(A, n++, E);
-        }
-      }
-
-      A.length = n;
-      return A;
-    }
-  });
-
-  var E_CODES = {
-    0: 'Unknown error',
-    1: 'This format is not yet supported',
-    100: 'This file is not an ID3v1',
-    103: 'Frame validation failed',
-    200: 'This file is not an ID3v2',
-    201: 'Unsupported ID3v2 major version',
-    202: 'Unsupported frame',
-    203: 'Frame validation failed',
-    204: 'Frame is not supported in this version of ID3v2'
-  };
-
-  var TagError = /*#__PURE__*/function (_Error) {
-    _inherits(TagError, _Error);
-
-    var _super = _createSuper(TagError);
-
-    function TagError(code) {
-      var _this;
-
-      _classCallCheck(this, TagError);
-
-      _this = _super.call(this, E_CODES[code]);
-      _this.name = 'TagError';
-      _this.code = code;
-      _this.errorId = arguments.length <= 1 ? undefined : arguments[1];
-      _this.message = _this.parseMessage();
-      return _this;
-    }
-
-    _createClass(TagError, [{
-      key: "parseMessage",
-      value: function parseMessage() {
-        var string = '';
-
-        switch (this.code) {
-          case 100:
-            string = "ID3v1 Error: ".concat(E_CODES[this.code]);
-            break;
-
-          case 103:
-            string = "ID3v1 Error: ".concat(E_CODES[this.code], " \"").concat(this.errorId, "\"");
-            break;
-
-          case 200:
-            string = "ID3v2 Error: ".concat(E_CODES[this.code]);
-            break;
-
-          case 201:
-          case 202:
-          case 203:
-          case 204:
-            string = "ID3v2 Error: ".concat(E_CODES[this.code], " \"").concat(this.errorId, "\"");
-            break;
-
-          default:
-            string = "".concat(E_CODES[this.code]);
-        }
-
-        return string;
-      }
-    }]);
-
-    return TagError;
-  }( /*#__PURE__*/_wrapNativeSuper(Error));
-
-  // https://tc39.github.io/ecma262/#sec-array.isarray
-
-  _export({
-    target: 'Array',
-    stat: true
-  }, {
-    isArray: isArray
-  });
-
-  var NATIVE_ARRAY_BUFFER_VIEWS$2 = arrayBufferViewCore.NATIVE_ARRAY_BUFFER_VIEWS; // `ArrayBuffer.isView` method
-  // https://tc39.github.io/ecma262/#sec-arraybuffer.isview
-
-  _export({
-    target: 'ArrayBuffer',
-    stat: true,
-    forced: !NATIVE_ARRAY_BUFFER_VIEWS$2
-  }, {
-    isView: arrayBufferViewCore.isView
-  });
-
-  // https://tc39.github.io/ecma262/#sec-dataview-constructor
-
-  _export({
-    global: true,
-    forced: !arrayBufferNative
-  }, {
-    DataView: arrayBuffer.DataView
-  });
-
   function isBuffer(param) {
     if (param instanceof ArrayBuffer) return true;
     if (typeof Buffer !== 'undefined' && param instanceof Buffer) return true;
@@ -3752,9 +3711,9 @@
     _createClass(BufferView, [{
       key: "getString",
       value: function getString(offset, maxlength, format) {
+        var string = '';
         var bytes = this.getUint8(offset, maxlength);
         if (!Array.isArray(bytes)) bytes = [bytes];
-        var string = '';
 
         switch (format) {
           case 'utf-8':
@@ -3781,7 +3740,7 @@
         }
 
         return {
-          string: string[string.length - 1] === '\0' ? string.substr(0, string.length - 1) : string,
+          string: string.endsWith('\0') ? string.substr(0, string.length - 1) : string,
           length: bytes.length
         };
       }
@@ -3882,6 +3841,156 @@
     return BufferView;
   }( /*#__PURE__*/_wrapNativeSuper(DataView));
 
+  var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('slice');
+  var USES_TO_LENGTH$2 = arrayMethodUsesToLength('slice', {
+    ACCESSORS: true,
+    0: 0,
+    1: 2
+  });
+  var SPECIES$5 = wellKnownSymbol('species');
+  var nativeSlice = [].slice;
+  var max$2 = Math.max; // `Array.prototype.slice` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.slice
+  // fallback for not array-like ES3 strings and DOM objects
+
+  _export({
+    target: 'Array',
+    proto: true,
+    forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH$2
+  }, {
+    slice: function slice(start, end) {
+      var O = toIndexedObject(this);
+      var length = toLength(O.length);
+      var k = toAbsoluteIndex(start, length);
+      var fin = toAbsoluteIndex(end === undefined ? length : end, length); // inline `ArraySpeciesCreate` for usage native `Array#slice` where it's possible
+
+      var Constructor, result, n;
+
+      if (isArray(O)) {
+        Constructor = O.constructor; // cross-realm fallback
+
+        if (typeof Constructor == 'function' && (Constructor === Array || isArray(Constructor.prototype))) {
+          Constructor = undefined;
+        } else if (isObject(Constructor)) {
+          Constructor = Constructor[SPECIES$5];
+          if (Constructor === null) Constructor = undefined;
+        }
+
+        if (Constructor === Array || Constructor === undefined) {
+          return nativeSlice.call(O, k, fin);
+        }
+      }
+
+      result = new (Constructor === undefined ? Array : Constructor)(max$2(fin - k, 0));
+
+      for (n = 0; k < fin; k++, n++) if (k in O) createProperty(result, n, O[k]);
+
+      result.length = n;
+      return result;
+    }
+  });
+
+  function getAudio(buffer) {
+    if (!BufferView.isViewable(buffer)) {
+      throw new TypeError('buffer is not viewable');
+    }
+
+    var view = new BufferView(buffer);
+    var start = null;
+    var end = view.byteLength;
+    var i = 0;
+
+    while (i < view.byteLength) {
+      if (view.getUint8(i) === 0xff && view.getUint8(i + 1) === 0xfb) {
+        start = i;
+        break;
+      } else i++;
+    }
+
+    var tag = end - 128;
+
+    if (tag > -1 && view.getString(tag, 3, 'ascii').string === 'TAG') {
+      end -= 128;
+    }
+
+    return start !== null ? view.buffer.slice(start, end) : new ArrayBuffer(0);
+  }
+
+  function isBitSet(_byte, bit) {
+    return (_byte & 1 << bit) > 0;
+  }
+  function setBit(_byte2, bit) {
+    return _byte2 | 1 << bit;
+  }
+  function decodeSynch(synch) {
+    var out = 0;
+    var mask = 0x7F000000;
+
+    while (mask) {
+      out >>= 1;
+      out |= synch & mask;
+      mask >>= 8;
+    }
+
+    return out;
+  }
+  function encodeSynch(size) {
+    var out = 0;
+    var mask = 0x7F;
+
+    while (mask ^ 0x7FFFFFFF) {
+      out = size & ~mask;
+      out <<= 1;
+      out |= size & mask;
+      mask = (mask + 1 << 8) - 1;
+      size = out;
+    }
+
+    return out;
+  }
+  function mergeBytes() {
+    var merged = [];
+
+    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+      params[_key] = arguments[_key];
+    }
+
+    params.forEach(function (param) {
+      if (param.forEach) param.forEach(function (_byte3) {
+        return merged.push(_byte3);
+      });else merged.push(param);
+    });
+    return new Uint8Array(merged);
+  }
+  function synch(unsynch) {
+    var bytes = [];
+    var i = 0;
+
+    while (i < unsynch.length) {
+      bytes.push(unsynch[i]);
+      if (unsynch[i] === 0xff && unsynch[i + 1] === 0x00) i++;
+      i++;
+    }
+
+    return bytes;
+  }
+  function unsynch(synch) {
+    var bytes = [];
+    var i = 0;
+
+    while (i < synch.length) {
+      bytes.push(synch[i]);
+
+      if (synch[i] === 0xff && (synch[i + 1] >= 0xe0 || synch[i + 1] === 0x00)) {
+        bytes.push(0);
+      }
+
+      i++;
+    }
+
+    return bytes;
+  }
+
   var ID3v1 = /*#__PURE__*/function () {
     _createClass(ID3v1, null, [{
       key: "isID3v1",
@@ -3897,6 +4006,10 @@
 
     function ID3v1(buffer) {
       _classCallCheck(this, ID3v1);
+
+      if (!isBuffer(buffer)) {
+        throw new TypeError('buffer is not an instance of Buffer');
+      }
 
       this.name = 'ID3v1';
       this.buffer = buffer;
@@ -4015,10 +4128,8 @@
       }
     }, {
       key: "getAudio",
-      value: function getAudio() {
-        if (!ID3v1.isID3v1(this.buffer)) throw new TagError(100);
-        var audioData = new Uint8Array(this.buffer);
-        return new Uint8Array(this.buffer.slice(0, audioData.length - 128));
+      value: function getAudio$1() {
+        return new Uint8Array(getAudio(this.buffer));
       }
     }]);
 
@@ -4074,41 +4185,6 @@
       get: regexpFlags
     });
   }
-
-  var MATCH = wellKnownSymbol('match'); // `IsRegExp` abstract operation
-  // https://tc39.github.io/ecma262/#sec-isregexp
-
-  var isRegexp = function (it) {
-    var isRegExp;
-    return isObject(it) && ((isRegExp = it[MATCH]) !== undefined ? !!isRegExp : classofRaw(it) == 'RegExp');
-  };
-
-  var notARegexp = function (it) {
-    if (isRegexp(it)) {
-      throw TypeError("The method doesn't accept regular expressions");
-    }
-
-    return it;
-  };
-
-  var MATCH$1 = wellKnownSymbol('match');
-
-  var correctIsRegexpLogic = function (METHOD_NAME) {
-    var regexp = /./;
-
-    try {
-      '/./'[METHOD_NAME](regexp);
-    } catch (e) {
-      try {
-        regexp[MATCH$1] = false;
-        return '/./'[METHOD_NAME](regexp);
-      } catch (f) {
-        /* empty */
-      }
-    }
-
-    return false;
-  };
 
   // https://tc39.github.io/ecma262/#sec-string.prototype.includes
 
@@ -4320,7 +4396,7 @@
   });
 
   var arrayPush = [].push;
-  var min$5 = Math.min;
+  var min$6 = Math.min;
   var MAX_UINT32 = 0xFFFFFFFF; // babel-minify transpiles RegExp('x', 'y') -> /x/y and it causes SyntaxError
 
   var SUPPORTS_Y = !fails(function () {
@@ -4410,7 +4486,7 @@
         var z = regexpExecAbstract(splitter, SUPPORTS_Y ? S : S.slice(q));
         var e;
 
-        if (z === null || (e = min$5(toLength(splitter.lastIndex + (SUPPORTS_Y ? 0 : q)), S.length)) === p) {
+        if (z === null || (e = min$6(toLength(splitter.lastIndex + (SUPPORTS_Y ? 0 : q)), S.length)) === p) {
           q = advanceStringIndex(S, q, unicodeMatching);
         } else {
           A.push(S.slice(p, q));
@@ -4431,6 +4507,8 @@
   }, !SUPPORTS_Y);
 
   var ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8'];
+  var GENRE = ['Blues', 'Classic Rock', 'Country', 'Dance', 'Disco', 'Funk', 'Grunge', 'Hip-Hop', 'Jazz', 'Metal', 'New Age', 'Oldies', 'Other', 'Pop', 'R&B', 'Reggae', 'Rock', 'Techno', 'Industrial', 'Alternative', 'Ska', 'Death Metal', 'Pranks', 'Soundtrack', 'Euro-Techno', 'Ambient', 'Trip-Hop', 'Vocal', 'Jazz+Funk', 'Fusion', 'Trance', 'Classical', 'Instrumental', 'Acid', 'House', 'Game', 'Sound Clip', 'Gospel', 'Noise', 'Alt. Rock', 'Bass', 'Soul', 'Punk', 'Space', 'Meditative', 'Instrumental Pop', 'Instrumental Rock', 'Ethnic', 'Gothic', 'Darkwave', 'Techno-Industrial', 'Electronic', 'Pop-Folk', 'Eurodance', 'Dream', 'Southern Rock', 'Comedy', 'Cult', 'Gangsta Rap', 'Top 40', 'Christian Rap', 'Pop/Funk', 'Jungle', 'Native American', 'Cabaret', 'New Wave', 'Psychedelic', 'Rave', 'Showtunes', 'Trailer', 'Lo-Fi', 'Tribal', 'Acid Punk', 'Acid Jazz', 'Polka', 'Retro', 'Musical', 'Rock & Roll', 'Hard Rock', 'Folk', 'Folk-Rock', 'National Folk', 'Swing', 'Fast-Fusion', 'Bebop', 'Latin', 'Revival', 'Celtic', 'Bluegrass', 'Avantgarde', 'Gothic Rock', 'Progressive Rock', 'Psychedelic Rock', 'Symphonic Rock', 'Slow Rock', 'Big Band', 'Chorus', 'Easy Listening', 'Acoustic', 'Humour', 'Speech', 'Chanson', 'Opera', 'Chamber Music', 'Sonata', 'Symphony', 'Booty Bass', 'Primus', 'Porn Groove', 'Satire', 'Slow Jam', 'Club', 'Tango', 'Samba', 'Folklore', 'Ballad', 'Power Ballad', 'Rhythmic Soul', 'Freestyle', 'Duet', 'Punk Rock', 'Drum Solo', 'A Cappella', 'Euro-House', 'Dance Hall', 'Goa', 'Drum & Bass', 'Club-House', 'Hardcore', 'Terror', 'Indie', 'BritPop', 'Afro-Punk', 'Polsk Punk', 'Beat', 'Christian Gangsta Rap', 'Heavy Metal', 'Black Metal', 'Crossover', 'Contemporary Christian', 'Christian Rock', 'Merengue', 'Salsa', 'Thrash Metal', 'Anime', 'JPop', 'Synthpop', 'Abstract', 'Art Rock', 'Baroque', 'Bhangra', 'Big Beat', 'Breakbeat', 'Chillout', 'Downtempo', 'Dub', 'EBM', 'Eclectic', 'Electro', 'Electroclash', 'Emo', 'Experimental', 'Garage', 'Global', 'IDM', 'Illbient', 'Industro-Goth', 'Jam Band', 'Krautrock', 'Leftfield', 'Lounge', 'Math Rock', 'New Romantic', 'Nu-Breakz', 'Post-Punk', 'Post-Rock', 'Psytrance', 'Shoegaze', 'Space Rock', 'Trop Rock', 'World Music', 'Neoclassical', 'Audiobook', 'Audio Theatre', 'Neue Deutsche Welle', 'Podcast', 'Indie Rock', 'G-Funk', 'Dubstep', 'Garage Rock', 'Psybient'];
+
   /**
    *  Frame Parsers
    *  @param {BufferView} view - View of the frame excluding the header
@@ -5692,7 +5770,7 @@
     }
   });
 
-  function getHeaderBytes(id, size, version) {
+  function getHeaderBytes(id, size, version, flags) {
     var idBytes = encodeString(id, 'ascii');
     var sizeView = new BufferView(4);
 
@@ -5706,16 +5784,36 @@
         break;
     }
 
-    return mergeBytes(idBytes, sizeView.getUint8(0, 4), 0, 0);
+    var flagsBytes = [0, 0];
+
+    if (version === 4 && flags.unsynchronisation) {
+      flagsBytes[1] = setBit(flagsBytes[1], 1);
+    }
+
+    if (version === 4 && flags.dataLengthIndicator) {
+      flagsBytes[1] = setBit(flagsBytes[1], 0);
+    }
+
+    return mergeBytes(idBytes, sizeView.getUint8(0, 4), flagsBytes);
+  }
+
+  function unsynchData(data) {
+    var sizeView = new BufferView(4);
+    var dataBytes = unsynch(data);
+    sizeView.setUint32(0, encodeSynch(data.length));
+    return mergeBytes(sizeView.getUint8(0, 4), dataBytes);
   }
   /**
    *  Frames writers
    *  @param {any[]} values - Validated frame of values array
-   *  @param {number} version - Frame will be written according to this version
+   *  @param {object} options - Options when writing
    */
 
 
-  function textFrame$2(values, id, version) {
+  function textFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var encoding = 0;
     var strBytes = [];
     values = Array.isArray(values[0]) ? values[0] : [values[0]];
@@ -5732,10 +5830,18 @@
         break;
     }
 
-    var header = getHeaderBytes(id, strBytes.length + 1, version);
-    return mergeBytes(header, encoding, strBytes);
+    var data = mergeBytes(encoding, strBytes);
+    if (unsynch) data = unsynchData(data);
+    var header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    });
+    return mergeBytes(header, data);
   }
-  function asciiFrame(values, id, version) {
+  function asciiFrame(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var strBytes = [];
     values = Array.isArray(values[0]) ? values[0] : [values[0]];
 
@@ -5749,10 +5855,15 @@
         break;
     }
 
-    var header = getHeaderBytes(id, strBytes.length + 1, version);
-    return mergeBytes(header, 0, strBytes);
+    var data = mergeBytes(0, strBytes);
+    if (unsynch) data = unsynchData(data);
+    var header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    });
+    return mergeBytes(header, data);
   }
-  function setFrame$2(values, id, version) {
+  function setFrame$2(values, options) {
     var strings = [];
     values = Array.isArray(values[0]) ? values[0] : [values[0]];
     values.forEach(function (value) {
@@ -5760,14 +5871,25 @@
       if (value.total) string += '/' + value.total.toString();
       strings.push(string);
     });
-    return asciiFrame([strings], id, version);
+    return asciiFrame([strings], options);
   }
-  function urlFrame$2(values, id, version) {
+  function urlFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var strBytes = encodeString(values[0] + '\0', 'ascii');
-    var header = getHeaderBytes(id, strBytes.length, version);
-    return mergeBytes(header, strBytes);
+    var data = strBytes;
+    if (unsynch) data = unsynchData(data);
+    var header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    });
+    return mergeBytes(header, data);
   }
-  function txxxFrame$2(values, id, version) {
+  function txxxFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
       var encoding = 0;
@@ -5787,16 +5909,23 @@
           break;
       }
 
-      var size = descBytes.length + strBytes.length + 1;
-      var header = getHeaderBytes(id, size, version);
-      var merged = mergeBytes(header, encoding, descBytes, strBytes);
+      var data = mergeBytes(encoding, descBytes, strBytes);
+      if (unsynch) data = unsynchData(data);
+      var header = getHeaderBytes(id, data.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
+      var merged = mergeBytes(header, data);
       merged.forEach(function (_byte) {
         return bytes.push(_byte);
       });
     });
     return bytes;
   }
-  function wxxxFrame$2(values, id, version) {
+  function wxxxFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
       var encoding = 0;
@@ -5816,19 +5945,27 @@
           break;
       }
 
-      var size = descBytes.length + strBytes.length + 1;
-      var header = getHeaderBytes(id, size, version);
-      var merged = mergeBytes(header, encoding, descBytes, strBytes);
+      var data = mergeBytes(encoding, descBytes, strBytes);
+      if (unsynch) data = unsynchData(data);
+      var header = getHeaderBytes(id, data.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
+      var merged = mergeBytes(header, data);
       merged.forEach(function (_byte2) {
         return bytes.push(_byte2);
       });
     });
     return bytes;
   }
-  function iplsFrame$1(values, id, version) {
-    return textFrame$2(values, id, 4);
+  function iplsFrame$1(values, options) {
+    options.version = 4;
+    return textFrame$2(values, options);
   }
-  function langDescFrame$2(values, id, version) {
+  function langDescFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
       value.language = value.language || 'eng';
@@ -5851,16 +5988,23 @@
           break;
       }
 
-      var size = descBytes.length + textBytes.length + 4;
-      var header = getHeaderBytes(id, size, version);
-      var merged = mergeBytes(header, encoding, langBytes, descBytes, textBytes);
+      var data = mergeBytes(encoding, langBytes, descBytes, textBytes);
+      if (unsynch) data = unsynchData(data);
+      var header = getHeaderBytes(id, data.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
+      var merged = mergeBytes(header, data);
       merged.forEach(function (_byte3) {
         return bytes.push(_byte3);
       });
     });
     return bytes;
   }
-  function apicFrame$2(values, id, version) {
+  function apicFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
       value.type = value.type || 3;
@@ -5881,16 +6025,23 @@
           break;
       }
 
-      var size = mimeBytes.length + strBytes.length + imageBytes.length + 2;
-      var header = getHeaderBytes(id, size, version);
-      var merged = mergeBytes(header, encoding, mimeBytes, value.type, strBytes, imageBytes);
+      var data = mergeBytes(encoding, mimeBytes, value.type, strBytes, imageBytes);
+      if (unsynch) data = unsynchData(data);
+      var header = getHeaderBytes(id, data.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
+      var merged = mergeBytes(header, data);
       merged.forEach(function (_byte4) {
         return bytes.push(_byte4);
       });
     });
     return bytes;
   }
-  function geobFrame$2(values, id, version) {
+  function geobFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
       var mime = encodeString(value.format + '\0', 'ascii');
@@ -5911,30 +6062,44 @@
           break;
       }
 
-      var size = mime.length + filename.length + description.length + object.length + 1;
-      var header = getHeaderBytes(id, size, version);
-      var merged = mergeBytes(header, encoding, mime, filename, description, object);
+      var data = mergeBytes(encoding, mime, filename, description, object);
+      if (unsynch) data = unsynchData(data);
+      var header = getHeaderBytes(id, data.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
+      var merged = mergeBytes(header, data);
       merged.forEach(function (_byte5) {
         return bytes.push(_byte5);
       });
     });
     return bytes;
   }
-  function ufidFrame$2(values, id, version) {
+  function ufidFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
       var ownerBytes = encodeString(value.ownerId + '\0', 'ascii');
       var idBytes = new Uint8Array(value.id);
-      var size = ownerBytes.length + idBytes.length;
-      var header = getHeaderBytes(id, size, version);
-      var merged = mergeBytes(header, ownerBytes, idBytes);
+      var data = mergeBytes(ownerBytes, idBytes);
+      if (unsynch) data = unsynchData(data);
+      var header = getHeaderBytes(id, data.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
+      var merged = mergeBytes(header, data);
       merged.forEach(function (_byte6) {
         return bytes.push(_byte6);
       });
     });
     return bytes;
   }
-  function userFrame$2(values, id, version) {
+  function userFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
       value.language = value.language || 'eng';
@@ -5954,15 +6119,23 @@
           break;
       }
 
-      var header = getHeaderBytes(id, textBytes.length + 4, version);
-      var merged = mergeBytes(header, encoding, langBytes, textBytes);
+      var data = mergeBytes(encoding, langBytes, textBytes);
+      if (unsynch) data = unsynchData(data);
+      var header = getHeaderBytes(id, data.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
+      var merged = mergeBytes(header, data);
       merged.forEach(function (_byte7) {
         return bytes.push(_byte7);
       });
     });
     return bytes;
   }
-  function owneFrame$2(values, id, version) {
+  function owneFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
       var encoding = 0;
@@ -5983,43 +6156,64 @@
           break;
       }
 
-      var size = priceBytes.length + sellerBytes.length + 12;
-      var header = getHeaderBytes(id, size, version);
-      var merged = mergeBytes(header, encoding, codeBytes, priceBytes, dateBytes, sellerBytes);
+      var data = mergeBytes(encoding, codeBytes, priceBytes, dateBytes, sellerBytes);
+      if (unsynch) data = unsynchData(data);
+      var header = getHeaderBytes(id, data.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
+      var merged = mergeBytes(header, data);
       merged.forEach(function (_byte8) {
         return bytes.push(_byte8);
       });
     });
     return bytes;
   }
-  function privFrame$2(values, id, version) {
+  function privFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
       var ownerIdBytes = encodeString(value.ownerId, 'ascii');
-      var data = new Uint8Array(value.data);
-      var size = ownerIdBytes.length + data.length;
-      var header = getHeaderBytes(id, size, version);
-      var merged = mergeBytes(header, ownerIdBytes, data);
+      var privData = new Uint8Array(value.data);
+      var data = mergeBytes(ownerIdBytes, privData);
+      if (unsynch) data = unsynchData(data);
+      var header = getHeaderBytes(id, data.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
+      var merged = mergeBytes(header, data);
       merged.forEach(function (_byte9) {
         return bytes.push(_byte9);
       });
     });
     return bytes;
   }
-  function signFrame$2(values, id, version) {
+  function signFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
       var signature = new Uint8Array(value.signature);
-      var size = signature.length + 1;
-      var header = getHeaderBytes(id, size, version);
-      var merged = mergeBytes(header, value.group, signature);
+      var data = mergeBytes(value.group, signature);
+      if (unsynch) data = unsynchData(data);
+      var header = getHeaderBytes(id, data.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
+      var merged = mergeBytes(header, data);
       merged.forEach(function (_byte10) {
         return bytes.push(_byte10);
       });
     });
     return bytes;
   }
-  function syltFrame$2(values, id, version) {
+  function syltFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
       value.language = value.language || 'eng';
@@ -6053,19 +6247,30 @@
           lyricsBytes = mergeBytes(lyricsBytes, string, timeBytes.getUint8(0, 4));
         }
       });
-      var size = descBytes.length + lyricsBytes.length + 6;
-      var header = getHeaderBytes(id, size, version);
-      var merged = mergeBytes(header, encoding, langBytes, value.format, value.type, descBytes, lyricsBytes);
+      var data = mergeBytes(encoding, langBytes, value.format, value.type, descBytes, lyricsBytes);
+      if (unsynch) data = unsynchData(data);
+      var header = getHeaderBytes(id, data.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
+      var merged = mergeBytes(header, data);
       merged.forEach(function (_byte11) {
         return bytes.push(_byte11);
       });
     });
     return bytes;
   }
-  function mcdiFrame$2(values, id, version) {
+  function mcdiFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
-      var header = getHeaderBytes(id, value.length, version);
+      if (unsynch) value = unsynchData(value);
+      var header = getHeaderBytes(id, value.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
       var merged = mergeBytes(header, value);
       merged.forEach(function (_byte12) {
         return bytes.push(_byte12);
@@ -6073,11 +6278,19 @@
     });
     return bytes;
   }
-  function sytcFrame$2(values, id, version) {
+  function sytcFrame$2(values, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
-      var header = getHeaderBytes(id, value.data.length + 1, version);
-      var merged = mergeBytes(header, value.format, value.data);
+      var data = mergeBytes(value.format, value.data);
+      if (unsynch) data = unsynchData(data);
+      var header = getHeaderBytes(id, data.length, version, {
+        unsynchronisation: unsynch,
+        dataLengthIndicator: unsynch
+      });
+      var merged = mergeBytes(header, data);
       merged.forEach(function (_byte13) {
         return bytes.push(_byte13);
       });
@@ -6637,6 +6850,10 @@
 
       _classCallCheck(this, ID3v2);
 
+      if (!isBuffer(buffer)) {
+        throw new TypeError('buffer is not an instance of Buffer');
+      }
+
       this.name = 'ID3v2';
       this.buffer = buffer;
       this.options = {
@@ -6674,17 +6891,15 @@
         while (offset < this.size) {
           var frameBytes = view.getUint8(offset, limit);
           var frame = decodeFrame.call(this, frameBytes);
+          if (!frame) break;
+          offset += frame.size + 10;
+          limit -= frame.size + 10;
 
-          if (frame) {
-            offset += frame.size + 10;
-            limit -= frame.size + 10;
-
-            if (frame.id === 'SEEK') {
-              this.read(offset + frame.value);
-            } else {
-              this.frames.push(frame);
-            }
-          } else break;
+          if (frame.id === 'SEEK') {
+            this.read(offset + frame.value);
+          } else {
+            this.frames.push(frame);
+          }
         }
 
         return this.frames;
@@ -6700,21 +6915,14 @@
 
         for (var id in framesObj) {
           var frameDesc = frames[id];
+          if (!frameDesc) throw new TagError(202, id);
+          if (!frameDesc.version.includes(this.major)) throw new TagError(204, id);
 
-          if (frameDesc) {
-            if (frameDesc.version.includes(this.major)) {
-              validateID$1(id);
-
-              try {
-                frameDesc.validate(framesObj[id], this.major);
-              } catch (e) {
-                throw new TagError(203, "ID: ".concat(id, ", Message: ").concat(e.message));
-              }
-            } else {
-              throw new TagError(204, id);
-            }
-          } else {
-            throw new TagError(202, id);
+          try {
+            validateID$1(id);
+            frameDesc.validate(framesObj[id], this.major);
+          } catch (e) {
+            throw new TagError(203, "ID: ".concat(id, ", Message: ").concat(e.message));
           }
         }
 
@@ -6728,7 +6936,8 @@
         this.minor = 0;
         if (!this.validate()) return false;
         var framesObj = this.getFrames();
-        var headerBytes = [0x49, 0x44, 0x33, this.major, this.minor, 0];
+        var headerBytes = [0x49, 0x44, 0x33, this.major, this.minor];
+        var flagsByte = 0;
         var sizeView = new BufferView(4);
         var paddingBytes = new Uint8Array(this.options.padding);
         var audioBytes = this.getAudio();
@@ -6736,14 +6945,19 @@
 
         for (var id in framesObj) {
           var frameDesc = frames[id];
-          var bytes = frameDesc.write(framesObj[id], id, this.major);
+          var bytes = frameDesc.write(framesObj[id], {
+            id: id,
+            version: this.major,
+            unsynch: this.flags.unsynchronisation
+          });
           bytes.forEach(function (_byte) {
             return framesBytes.push(_byte);
           });
         }
 
+        if (this.flags.unsynchronisation) flagsByte = setBit(flagsByte, 7);
         sizeView.setUint32(0, encodeSynch(framesBytes.length + paddingBytes.length));
-        this.buffer = mergeBytes(headerBytes, sizeView.getUint8(0, 4), framesBytes, paddingBytes, audioBytes).buffer;
+        this.buffer = mergeBytes(headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes, audioBytes).buffer;
         this.read();
         return this.buffer;
       }
@@ -6784,12 +6998,9 @@
         var array = this.frames;
         var counts = 0;
         this.frames.forEach(function (frame, i) {
-          if (frame.id === id) {
-            if (index === null) array[i] = undefined;else {
-              if (counts === index) array[i] = undefined;
-              counts++;
-            }
-          }
+          if (frame.id !== id) return false;
+          if (index === null || counts === index) array[i] = undefined;
+          counts++;
         });
         this.frames = array.filter(function (elem) {
           return elem !== undefined;
@@ -6803,16 +7014,16 @@
         var array = this.frames;
         var counts = 0;
         this.frames.forEach(function (frame, i) {
-          if (frame.id === id) {
-            if (counts === index) {
-              if (Array.isArray(array[i])) array[i].push(value);else if (replace) array[i] = {
-                id: id,
-                value: value
-              };
-            }
+          if (frame.id !== id) return false;
 
-            counts++;
+          if (counts === index) {
+            if (Array.isArray(array[i])) array[i].push(value);else if (replace) array[i] = {
+              id: id,
+              value: value
+            };
           }
+
+          counts++;
         });
         this.frames = array;
       }
@@ -6827,17 +7038,8 @@
       }
     }, {
       key: "getAudio",
-      value: function getAudio() {
-        var audioData = new Uint8Array(this.buffer);
-        var i = 0;
-
-        while (i < audioData.length) {
-          if (audioData[i] === 0xff && audioData[i + 1] === 0xfb) {
-            return new Uint8Array(this.buffer.slice(i));
-          } else i++;
-        }
-
-        return new Uint8Array(0);
+      value: function getAudio$1() {
+        return new Uint8Array(getAudio(this.buffer));
       }
     }]);
 
@@ -6881,9 +7083,12 @@
       dataLength -= 4;
     }
 
-    if (this.major === 3 && this.flags.unsynchronisation || this.major === 4 && (this.flags.unsynchronisation || frame.flags.unsynchronisation)) {
+    var unsynchedData = this.flags.unsynchronisation;
+    if (this.major === 4) unsynchedData = frame.flags.unsynchronisation;
+
+    if (unsynchedData) {
       var uint8 = frameView.getUint8(offset, dataLength);
-      var unsynched = unsynch(uint8);
+      var unsynched = synch(uint8);
       contentBuffer = new Uint8Array(unsynched);
     } else {
       contentBuffer = frameView.getUint8(offset, actualSize);
@@ -6904,6 +7109,21 @@
         console.warn('frames are deprecated. Please use the tagger\'s instead');
         this.tagger.frames = value;
       }
+    }], [{
+      key: "ID3v1",
+      get: function get() {
+        return ID3v1;
+      }
+    }, {
+      key: "ID3v2",
+      get: function get() {
+        return ID3v2;
+      }
+    }, {
+      key: "genre",
+      get: function get() {
+        return GENRE;
+      }
     }]);
 
     function MP3Tag(buffer) {
@@ -6916,7 +7136,7 @@
       }
 
       this.name = 'MP3Tag';
-      this.version = '1.3.1';
+      this.version = '1.4.0';
       this.buffer = buffer;
       this.options = options;
       this.tagger = {};
@@ -6942,6 +7162,7 @@
       key: "save",
       value: function save() {
         var old = this.buffer;
+        this.tagger.options = this.options;
         this.buffer = this.tagger.save();
         return old;
       }
@@ -6980,8 +7201,8 @@
       }
     }, {
       key: "getAudio",
-      value: function getAudio() {
-        return this.tagger.getAudio();
+      value: function getAudio$1() {
+        return new Uint8Array(getAudio(this.buffer));
       }
     }, {
       key: "getBlob",
