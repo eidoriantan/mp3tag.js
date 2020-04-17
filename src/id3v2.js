@@ -6,8 +6,12 @@ import * as flags from './id3v2/flags'
 import * as frames from './id3v2/frames'
 
 import { getAudio } from './utils/audio'
-import { decodeSynch, encodeSynch, mergeBytes, synch } from './utils/bytes'
 import { isBuffer } from './utils/types'
+
+import {
+  setBit, decodeSynch, encodeSynch,
+  mergeBytes, synch
+} from './utils/bytes'
 
 export default class ID3v2 {
   static isID3v2 (buffer) {
@@ -99,7 +103,8 @@ export default class ID3v2 {
 
     if (!this.validate()) return false
     const framesObj = this.getFrames()
-    const headerBytes = [0x49, 0x44, 0x33, this.major, this.minor, 0]
+    const headerBytes = [0x49, 0x44, 0x33, this.major, this.minor]
+    let flagsByte = 0
     const sizeView = new BufferView(4)
     const paddingBytes = new Uint8Array(this.options.padding)
     const audioBytes = this.getAudio()
@@ -107,13 +112,20 @@ export default class ID3v2 {
 
     for (const id in framesObj) {
       const frameDesc = frames[id]
-      const bytes = frameDesc.write(framesObj[id], id, this.major)
+      const bytes = frameDesc.write(framesObj[id], {
+        id,
+        version: this.major,
+        unsynch: this.flags.unsynchronisation
+      })
+
       bytes.forEach(byte => framesBytes.push(byte))
     }
 
+    if (this.flags.unsynchronisation) flagsByte = setBit(flagsByte, 7)
+
     sizeView.setUint32(0, encodeSynch(framesBytes.length + paddingBytes.length))
     this.buffer = mergeBytes(
-      headerBytes, sizeView.getUint8(0, 4),
+      headerBytes, flagsByte, sizeView.getUint8(0, 4),
       framesBytes, paddingBytes, audioBytes
     ).buffer
 

@@ -1,9 +1,9 @@
 
-import { encodeSynch, mergeBytes } from '../utils/bytes'
+import { setBit, encodeSynch, mergeBytes, unsynch } from '../utils/bytes'
 import { encodeString } from '../utils/strings'
 import BufferView from '../viewer'
 
-function getHeaderBytes (id, size, version) {
+function getHeaderBytes (id, size, version, flags) {
   const idBytes = encodeString(id, 'ascii')
   const sizeView = new BufferView(4)
 
@@ -17,16 +17,34 @@ function getHeaderBytes (id, size, version) {
       break
   }
 
-  return mergeBytes(idBytes, sizeView.getUint8(0, 4), 0, 0)
+  const flagsBytes = [0, 0]
+  if (version === 4 && flags.unsynchronisation) {
+    flagsBytes[1] = setBit(flagsBytes[1], 1)
+  }
+
+  if (version === 4 && flags.dataLengthIndicator) {
+    flagsBytes[1] = setBit(flagsBytes[1], 0)
+  }
+
+  return mergeBytes(idBytes, sizeView.getUint8(0, 4), flagsBytes)
+}
+
+function unsynchData (data) {
+  const sizeView = new BufferView(4)
+  const dataBytes = unsynch(data)
+
+  sizeView.setUint32(0, encodeSynch(data.length))
+  return mergeBytes(sizeView.getUint8(0, 4), dataBytes)
 }
 
 /**
  *  Frames writers
  *  @param {any[]} values - Validated frame of values array
- *  @param {number} version - Frame will be written according to this version
+ *  @param {object} options - Options when writing
  */
 
-export function textFrame (values, id, version) {
+export function textFrame (values, options) {
+  const { id, version, unsynch } = options
   let encoding = 0
   let strBytes = []
 
@@ -43,11 +61,19 @@ export function textFrame (values, id, version) {
       break
   }
 
-  const header = getHeaderBytes(id, strBytes.length + 1, version)
-  return mergeBytes(header, encoding, strBytes)
+  let data = mergeBytes(encoding, strBytes)
+  if (unsynch) data = unsynchData(data)
+
+  const header = getHeaderBytes(id, data.length, version, {
+    unsynchronisation: unsynch,
+    dataLengthIndicator: unsynch
+  })
+
+  return mergeBytes(header, data)
 }
 
-export function asciiFrame (values, id, version) {
+export function asciiFrame (values, options) {
+  const { id, version, unsynch } = options
   let strBytes = []
 
   values = Array.isArray(values[0]) ? values[0] : [values[0]]
@@ -61,11 +87,18 @@ export function asciiFrame (values, id, version) {
       break
   }
 
-  const header = getHeaderBytes(id, strBytes.length + 1, version)
-  return mergeBytes(header, 0, strBytes)
+  let data = mergeBytes(0, strBytes)
+  if (unsynch) data = unsynchData(data)
+
+  const header = getHeaderBytes(id, data.length, version, {
+    unsynchronisation: unsynch,
+    dataLengthIndicator: unsynch
+  })
+
+  return mergeBytes(header, data)
 }
 
-export function setFrame (values, id, version) {
+export function setFrame (values, options) {
   const strings = []
 
   values = Array.isArray(values[0]) ? values[0] : [values[0]]
@@ -75,17 +108,26 @@ export function setFrame (values, id, version) {
     strings.push(string)
   })
 
-  return asciiFrame([strings], id, version)
+  return asciiFrame([strings], options)
 }
 
-export function urlFrame (values, id, version) {
+export function urlFrame (values, options) {
+  const { id, version, unsynch } = options
   const strBytes = encodeString(values[0] + '\0', 'ascii')
-  const header = getHeaderBytes(id, strBytes.length, version)
 
-  return mergeBytes(header, strBytes)
+  let data = strBytes
+  if (unsynch) data = unsynchData(data)
+
+  const header = getHeaderBytes(id, data.length, version, {
+    unsynchronisation: unsynch,
+    dataLengthIndicator: unsynch
+  })
+
+  return mergeBytes(header, data)
 }
 
-export function txxxFrame (values, id, version) {
+export function txxxFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
     let encoding = 0
@@ -105,16 +147,23 @@ export function txxxFrame (values, id, version) {
         break
     }
 
-    const size = descBytes.length + strBytes.length + 1
-    const header = getHeaderBytes(id, size, version)
-    const merged = mergeBytes(header, encoding, descBytes, strBytes)
+    let data = mergeBytes(encoding, descBytes, strBytes)
+    if (unsynch) data = unsynchData(data)
+
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
     merged.forEach(byte => bytes.push(byte))
   })
 
   return bytes
 }
 
-export function wxxxFrame (values, id, version) {
+export function wxxxFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
     let encoding = 0
@@ -134,20 +183,28 @@ export function wxxxFrame (values, id, version) {
         break
     }
 
-    const size = descBytes.length + strBytes.length + 1
-    const header = getHeaderBytes(id, size, version)
-    const merged = mergeBytes(header, encoding, descBytes, strBytes)
+    let data = mergeBytes(encoding, descBytes, strBytes)
+    if (unsynch) data = unsynchData(data)
+
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
     merged.forEach(byte => bytes.push(byte))
   })
 
   return bytes
 }
 
-export function iplsFrame (values, id, version) {
-  return textFrame(values, id, 4)
+export function iplsFrame (values, options) {
+  options.version = 4
+  return textFrame(values, options)
 }
 
-export function langDescFrame (values, id, version) {
+export function langDescFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
     value.language = value.language || 'eng'
@@ -171,16 +228,23 @@ export function langDescFrame (values, id, version) {
         break
     }
 
-    const size = descBytes.length + textBytes.length + 4
-    const header = getHeaderBytes(id, size, version)
-    const merged = mergeBytes(header, encoding, langBytes, descBytes, textBytes)
+    let data = mergeBytes(encoding, langBytes, descBytes, textBytes)
+    if (unsynch) data = unsynchData(data)
+
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
     merged.forEach(byte => bytes.push(byte))
   })
 
   return bytes
 }
 
-export function apicFrame (values, id, version) {
+export function apicFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
     value.type = value.type || 3
@@ -202,19 +266,23 @@ export function apicFrame (values, id, version) {
         break
     }
 
-    const size = mimeBytes.length + strBytes.length + imageBytes.length + 2
-    const header = getHeaderBytes(id, size, version)
-    const merged = mergeBytes(
-      header, encoding, mimeBytes, value.type, strBytes, imageBytes
-    )
+    let data = mergeBytes(encoding, mimeBytes, value.type, strBytes, imageBytes)
+    if (unsynch) data = unsynchData(data)
 
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
     merged.forEach(byte => bytes.push(byte))
   })
 
   return bytes
 }
 
-export function geobFrame (values, id, version) {
+export function geobFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
     const mime = encodeString(value.format + '\0', 'ascii')
@@ -235,33 +303,45 @@ export function geobFrame (values, id, version) {
         break
     }
 
-    const size = mime.length + filename.length + description.length +
-      object.length + 1
-    const header = getHeaderBytes(id, size, version)
-    const merged = mergeBytes(header, encoding, mime, filename, description,
-      object)
+    let data = mergeBytes(encoding, mime, filename, description, object)
+    if (unsynch) data = unsynchData(data)
 
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
     merged.forEach(byte => bytes.push(byte))
   })
 
   return bytes
 }
 
-export function ufidFrame (values, id, version) {
+export function ufidFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
     const ownerBytes = encodeString(value.ownerId + '\0', 'ascii')
     const idBytes = new Uint8Array(value.id)
-    const size = ownerBytes.length + idBytes.length
-    const header = getHeaderBytes(id, size, version)
-    const merged = mergeBytes(header, ownerBytes, idBytes)
+
+    let data = mergeBytes(ownerBytes, idBytes)
+    if (unsynch) data = unsynchData(data)
+
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
     merged.forEach(byte => bytes.push(byte))
   })
 
   return bytes
 }
 
-export function userFrame (values, id, version) {
+export function userFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
     value.language = value.language || 'eng'
@@ -281,15 +361,23 @@ export function userFrame (values, id, version) {
         break
     }
 
-    const header = getHeaderBytes(id, textBytes.length + 4, version)
-    const merged = mergeBytes(header, encoding, langBytes, textBytes)
+    let data = mergeBytes(encoding, langBytes, textBytes)
+    if (unsynch) data = unsynchData(data)
+
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
     merged.forEach(byte => bytes.push(byte))
   })
 
   return bytes
 }
 
-export function owneFrame (values, id, version) {
+export function owneFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
     let encoding = 0
@@ -310,45 +398,68 @@ export function owneFrame (values, id, version) {
         break
     }
 
-    const size = priceBytes.length + sellerBytes.length + 12
-    const header = getHeaderBytes(id, size, version)
-    const merged = mergeBytes(header, encoding, codeBytes, priceBytes,
-      dateBytes, sellerBytes)
+    let data = mergeBytes(
+      encoding, codeBytes, priceBytes, dateBytes, sellerBytes
+    )
+    if (unsynch) data = unsynchData(data)
 
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
     merged.forEach(byte => bytes.push(byte))
   })
 
   return bytes
 }
 
-export function privFrame (values, id, version) {
+export function privFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
     const ownerIdBytes = encodeString(value.ownerId, 'ascii')
-    const data = new Uint8Array(value.data)
-    const size = ownerIdBytes.length + data.length
-    const header = getHeaderBytes(id, size, version)
-    const merged = mergeBytes(header, ownerIdBytes, data)
+    const privData = new Uint8Array(value.data)
+
+    let data = mergeBytes(ownerIdBytes, privData)
+    if (unsynch) data = unsynchData(data)
+
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
     merged.forEach(byte => bytes.push(byte))
   })
 
   return bytes
 }
 
-export function signFrame (values, id, version) {
+export function signFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
     const signature = new Uint8Array(value.signature)
-    const size = signature.length + 1
-    const header = getHeaderBytes(id, size, version)
-    const merged = mergeBytes(header, value.group, signature)
+
+    let data = mergeBytes(value.group, signature)
+    if (unsynch) data = unsynchData(data)
+
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
     merged.forEach(byte => bytes.push(byte))
   })
 
   return bytes
 }
 
-export function syltFrame (values, id, version) {
+export function syltFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
     value.language = value.language || 'eng'
@@ -384,23 +495,33 @@ export function syltFrame (values, id, version) {
       }
     })
 
-    const size = descBytes.length + lyricsBytes.length + 6
-    const header = getHeaderBytes(id, size, version)
-    const merged = mergeBytes(
-      header, encoding, langBytes, value.format, value.type,
-      descBytes, lyricsBytes
-    )
+    let data = mergeBytes(encoding, langBytes, value.format, value.type,
+      descBytes, lyricsBytes)
+    if (unsynch) data = unsynchData(data)
 
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
     merged.forEach(byte => bytes.push(byte))
   })
 
   return bytes
 }
 
-export function mcdiFrame (values, id, version) {
+export function mcdiFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
-    const header = getHeaderBytes(id, value.length, version)
+    if (unsynch) value = unsynchData(value)
+
+    const header = getHeaderBytes(id, value.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
     const merged = mergeBytes(header, value)
     merged.forEach(byte => bytes.push(byte))
   })
@@ -408,11 +529,19 @@ export function mcdiFrame (values, id, version) {
   return bytes
 }
 
-export function sytcFrame (values, id, version) {
+export function sytcFrame (values, options) {
+  const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
-    const header = getHeaderBytes(id, value.data.length + 1, version)
-    const merged = mergeBytes(header, value.format, value.data)
+    let data = mergeBytes(value.format, value.data)
+    if (unsynch) data = unsynchData(data)
+
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
     merged.forEach(byte => bytes.push(byte))
   })
 
