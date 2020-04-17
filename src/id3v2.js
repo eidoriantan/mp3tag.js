@@ -228,8 +228,10 @@ function decodeFrame (bytes) {
     dataLength -= 4
   }
 
-  if ((this.major === 3 && this.flags.unsynchronisation) || (this.major === 4 &&
-    (this.flags.unsynchronisation || frame.flags.unsynchronisation))) {
+  let unsynchedData = this.flags.unsynchronisation
+  if (this.major === 4) unsynchedData = frame.flags.unsynchronisation
+
+  if (unsynchedData) {
     const uint8 = frameView.getUint8(offset, dataLength)
     const unsynched = unsynch(uint8)
     contentBuffer = new Uint8Array(unsynched)
