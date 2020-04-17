@@ -41,13 +41,13 @@ export function mergeBytes (...params) {
   return new Uint8Array(merged)
 }
 
-export function unsynch (array) {
+export function synch (unsynch) {
   const bytes = []
   let i = 0
 
-  while (i < array.length) {
-    bytes.push(array[i])
-    if (array[i] === 0xff && array[i + 1] === 0x00) i++
+  while (i < unsynch.length) {
+    bytes.push(unsynch[i])
+    if (unsynch[i] === 0xff && unsynch[i + 1] === 0x00) i++
     i++
   }
 

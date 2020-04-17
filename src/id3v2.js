@@ -6,7 +6,7 @@ import * as flags from './id3v2/flags'
 import * as frames from './id3v2/frames'
 
 import { getAudio } from './utils/audio'
-import { decodeSynch, encodeSynch, mergeBytes, unsynch } from './utils/bytes'
+import { decodeSynch, encodeSynch, mergeBytes, synch } from './utils/bytes'
 import { isBuffer } from './utils/types'
 
 export default class ID3v2 {
@@ -233,7 +233,7 @@ function decodeFrame (bytes) {
 
   if (unsynchedData) {
     const uint8 = frameView.getUint8(offset, dataLength)
-    const unsynched = unsynch(uint8)
+    const unsynched = synch(uint8)
     contentBuffer = new Uint8Array(unsynched)
   } else {
     contentBuffer = frameView.getUint8(offset, actualSize)
