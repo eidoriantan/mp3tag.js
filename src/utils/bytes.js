@@ -57,3 +57,19 @@ export function synch (unsynch) {
 
   return bytes
 }
+
+export function unsynch (synch) {
+  const bytes = []
+  let i = 0
+
+  while (i < synch.length) {
+    bytes.push(synch[i])
+    if (synch[i] === 0xff && (synch[i + 1] >= 0xe0 || synch[i + 1] === 0x00)) {
+      bytes.push(0)
+    }
+
+    i++
+  }
+
+  return bytes
+}
