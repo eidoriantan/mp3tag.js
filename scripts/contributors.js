@@ -8,13 +8,13 @@ $(document).ready(function () {
     accepts: 'application/vnd.github.v3+json',
     dataType: 'json',
     success: function (users) {
-      users.forEach(function (user) {
+      $.each(users, function () {
         const item = $(template).clone()
-        $(item).find('[data-temp=\'user-link\']').attr('href', user.html_url)
-        $(item).find('[data-temp=\'user-image\']').attr({
-          src: user.avatar_url,
-          title: user.login,
-          alt: user.login
+        $(item).find('[data-temp="user-link"]').attr('href', this.html_url)
+        $(item).find('[data-temp="user-image"]').attr({
+          src: this.avatar_url,
+          title: this.login,
+          alt: this.login
         })
         $(item).find('[data-temp]').removeAttr('data-temp')
 
