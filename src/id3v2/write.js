@@ -29,12 +29,18 @@ function getHeaderBytes (id, size, version, flags) {
   return mergeBytes(idBytes, sizeView.getUint8(0, 4), flagsBytes)
 }
 
-function unsynchData (data) {
+function unsynchData (data, version) {
   const sizeView = new BufferView(4)
   const dataBytes = unsynch(data)
+  const content = []
 
-  sizeView.setUint32(0, encodeSynch(data.length))
-  return mergeBytes(sizeView.getUint8(0, 4), dataBytes)
+  if (version === 4) {
+    sizeView.setUint32(0, encodeSynch(data.length))
+    content.push(...sizeView.getUint8(0, 4))
+  }
+
+  dataBytes.forEach(byte => content.push(byte))
+  return new Uint8Array(content)
 }
 
 /**
@@ -62,7 +68,7 @@ export function textFrame (values, options) {
   }
 
   let data = mergeBytes(encoding, strBytes)
-  if (unsynch) data = unsynchData(data)
+  if (unsynch) data = unsynchData(data, version)
 
   const header = getHeaderBytes(id, data.length, version, {
     unsynchronisation: unsynch,
@@ -88,7 +94,7 @@ export function asciiFrame (values, options) {
   }
 
   let data = mergeBytes(0, strBytes)
-  if (unsynch) data = unsynchData(data)
+  if (unsynch) data = unsynchData(data, version)
 
   const header = getHeaderBytes(id, data.length, version, {
     unsynchronisation: unsynch,
@@ -116,7 +122,7 @@ export function urlFrame (values, options) {
   const strBytes = encodeString(values[0] + '\0', 'ascii')
 
   let data = strBytes
-  if (unsynch) data = unsynchData(data)
+  if (unsynch) data = unsynchData(data, version)
 
   const header = getHeaderBytes(id, data.length, version, {
     unsynchronisation: unsynch,
@@ -148,7 +154,7 @@ export function txxxFrame (values, options) {
     }
 
     let data = mergeBytes(encoding, descBytes, strBytes)
-    if (unsynch) data = unsynchData(data)
+    if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -184,7 +190,7 @@ export function wxxxFrame (values, options) {
     }
 
     let data = mergeBytes(encoding, descBytes, strBytes)
-    if (unsynch) data = unsynchData(data)
+    if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -229,7 +235,7 @@ export function langDescFrame (values, options) {
     }
 
     let data = mergeBytes(encoding, langBytes, descBytes, textBytes)
-    if (unsynch) data = unsynchData(data)
+    if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -267,7 +273,7 @@ export function apicFrame (values, options) {
     }
 
     let data = mergeBytes(encoding, mimeBytes, value.type, strBytes, imageBytes)
-    if (unsynch) data = unsynchData(data)
+    if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -304,7 +310,7 @@ export function geobFrame (values, options) {
     }
 
     let data = mergeBytes(encoding, mime, filename, description, object)
-    if (unsynch) data = unsynchData(data)
+    if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -326,7 +332,7 @@ export function ufidFrame (values, options) {
     const idBytes = new Uint8Array(value.id)
 
     let data = mergeBytes(ownerBytes, idBytes)
-    if (unsynch) data = unsynchData(data)
+    if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -362,7 +368,7 @@ export function userFrame (values, options) {
     }
 
     let data = mergeBytes(encoding, langBytes, textBytes)
-    if (unsynch) data = unsynchData(data)
+    if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -401,7 +407,7 @@ export function owneFrame (values, options) {
     let data = mergeBytes(
       encoding, codeBytes, priceBytes, dateBytes, sellerBytes
     )
-    if (unsynch) data = unsynchData(data)
+    if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -423,7 +429,7 @@ export function privFrame (values, options) {
     const privData = new Uint8Array(value.data)
 
     let data = mergeBytes(ownerIdBytes, privData)
-    if (unsynch) data = unsynchData(data)
+    if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -444,7 +450,7 @@ export function signFrame (values, options) {
     const signature = new Uint8Array(value.signature)
 
     let data = mergeBytes(value.group, signature)
-    if (unsynch) data = unsynchData(data)
+    if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -497,7 +503,7 @@ export function syltFrame (values, options) {
 
     let data = mergeBytes(encoding, langBytes, value.format, value.type,
       descBytes, lyricsBytes)
-    if (unsynch) data = unsynchData(data)
+    if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -515,7 +521,7 @@ export function mcdiFrame (values, options) {
   const { id, version, unsynch } = options
   const bytes = []
   values.forEach(function (value) {
-    if (unsynch) value = unsynchData(value)
+    if (unsynch) value = unsynchData(value, version)
 
     const header = getHeaderBytes(id, value.length, version, {
       unsynchronisation: unsynch,
@@ -534,7 +540,7 @@ export function sytcFrame (values, options) {
   const bytes = []
   values.forEach(function (value) {
     let data = mergeBytes(value.format, value.data)
-    if (unsynch) data = unsynchData(data)
+    if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
