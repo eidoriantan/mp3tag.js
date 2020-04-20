@@ -28,7 +28,7 @@ export default class MP3Tag {
     }
 
     this.name = 'MP3Tag'
-    this.version = '1.4.0'
+    this.version = '1.4.1'
     this.buffer = buffer
     this.options = options
     this.tagger = {}
