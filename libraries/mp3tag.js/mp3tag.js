@@ -5797,11 +5797,20 @@
     return mergeBytes(idBytes, sizeView.getUint8(0, 4), flagsBytes);
   }
 
-  function unsynchData(data) {
+  function unsynchData(data, version) {
     var sizeView = new BufferView(4);
     var dataBytes = unsynch(data);
-    sizeView.setUint32(0, encodeSynch(data.length));
-    return mergeBytes(sizeView.getUint8(0, 4), dataBytes);
+    var content = [];
+
+    if (version === 4) {
+      sizeView.setUint32(0, encodeSynch(data.length));
+      content.push.apply(content, _toConsumableArray(sizeView.getUint8(0, 4)));
+    }
+
+    dataBytes.forEach(function (_byte) {
+      return content.push(_byte);
+    });
+    return new Uint8Array(content);
   }
   /**
    *  Frames writers
@@ -5831,7 +5840,7 @@
     }
 
     var data = mergeBytes(encoding, strBytes);
-    if (unsynch) data = unsynchData(data);
+    if (unsynch) data = unsynchData(data, version);
     var header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
       dataLengthIndicator: unsynch
@@ -5856,7 +5865,7 @@
     }
 
     var data = mergeBytes(0, strBytes);
-    if (unsynch) data = unsynchData(data);
+    if (unsynch) data = unsynchData(data, version);
     var header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
       dataLengthIndicator: unsynch
@@ -5879,7 +5888,7 @@
         unsynch = options.unsynch;
     var strBytes = encodeString(values[0] + '\0', 'ascii');
     var data = strBytes;
-    if (unsynch) data = unsynchData(data);
+    if (unsynch) data = unsynchData(data, version);
     var header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
       dataLengthIndicator: unsynch
@@ -5910,14 +5919,14 @@
       }
 
       var data = mergeBytes(encoding, descBytes, strBytes);
-      if (unsynch) data = unsynchData(data);
+      if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte) {
-        return bytes.push(_byte);
+      merged.forEach(function (_byte2) {
+        return bytes.push(_byte2);
       });
     });
     return bytes;
@@ -5946,14 +5955,14 @@
       }
 
       var data = mergeBytes(encoding, descBytes, strBytes);
-      if (unsynch) data = unsynchData(data);
+      if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte2) {
-        return bytes.push(_byte2);
+      merged.forEach(function (_byte3) {
+        return bytes.push(_byte3);
       });
     });
     return bytes;
@@ -5989,14 +5998,14 @@
       }
 
       var data = mergeBytes(encoding, langBytes, descBytes, textBytes);
-      if (unsynch) data = unsynchData(data);
+      if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte3) {
-        return bytes.push(_byte3);
+      merged.forEach(function (_byte4) {
+        return bytes.push(_byte4);
       });
     });
     return bytes;
@@ -6026,14 +6035,14 @@
       }
 
       var data = mergeBytes(encoding, mimeBytes, value.type, strBytes, imageBytes);
-      if (unsynch) data = unsynchData(data);
+      if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte4) {
-        return bytes.push(_byte4);
+      merged.forEach(function (_byte5) {
+        return bytes.push(_byte5);
       });
     });
     return bytes;
@@ -6063,14 +6072,14 @@
       }
 
       var data = mergeBytes(encoding, mime, filename, description, object);
-      if (unsynch) data = unsynchData(data);
+      if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte5) {
-        return bytes.push(_byte5);
+      merged.forEach(function (_byte6) {
+        return bytes.push(_byte6);
       });
     });
     return bytes;
@@ -6084,14 +6093,14 @@
       var ownerBytes = encodeString(value.ownerId + '\0', 'ascii');
       var idBytes = new Uint8Array(value.id);
       var data = mergeBytes(ownerBytes, idBytes);
-      if (unsynch) data = unsynchData(data);
+      if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte6) {
-        return bytes.push(_byte6);
+      merged.forEach(function (_byte7) {
+        return bytes.push(_byte7);
       });
     });
     return bytes;
@@ -6120,14 +6129,14 @@
       }
 
       var data = mergeBytes(encoding, langBytes, textBytes);
-      if (unsynch) data = unsynchData(data);
+      if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte7) {
-        return bytes.push(_byte7);
+      merged.forEach(function (_byte8) {
+        return bytes.push(_byte8);
       });
     });
     return bytes;
@@ -6157,14 +6166,14 @@
       }
 
       var data = mergeBytes(encoding, codeBytes, priceBytes, dateBytes, sellerBytes);
-      if (unsynch) data = unsynchData(data);
+      if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte8) {
-        return bytes.push(_byte8);
+      merged.forEach(function (_byte9) {
+        return bytes.push(_byte9);
       });
     });
     return bytes;
@@ -6178,14 +6187,14 @@
       var ownerIdBytes = encodeString(value.ownerId, 'ascii');
       var privData = new Uint8Array(value.data);
       var data = mergeBytes(ownerIdBytes, privData);
-      if (unsynch) data = unsynchData(data);
+      if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte9) {
-        return bytes.push(_byte9);
+      merged.forEach(function (_byte10) {
+        return bytes.push(_byte10);
       });
     });
     return bytes;
@@ -6198,14 +6207,14 @@
     values.forEach(function (value) {
       var signature = new Uint8Array(value.signature);
       var data = mergeBytes(value.group, signature);
-      if (unsynch) data = unsynchData(data);
+      if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte10) {
-        return bytes.push(_byte10);
+      merged.forEach(function (_byte11) {
+        return bytes.push(_byte11);
       });
     });
     return bytes;
@@ -6248,14 +6257,14 @@
         }
       });
       var data = mergeBytes(encoding, langBytes, value.format, value.type, descBytes, lyricsBytes);
-      if (unsynch) data = unsynchData(data);
+      if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte11) {
-        return bytes.push(_byte11);
+      merged.forEach(function (_byte12) {
+        return bytes.push(_byte12);
       });
     });
     return bytes;
@@ -6266,14 +6275,14 @@
         unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (value) {
-      if (unsynch) value = unsynchData(value);
+      if (unsynch) value = unsynchData(value, version);
       var header = getHeaderBytes(id, value.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, value);
-      merged.forEach(function (_byte12) {
-        return bytes.push(_byte12);
+      merged.forEach(function (_byte13) {
+        return bytes.push(_byte13);
       });
     });
     return bytes;
@@ -6285,14 +6294,14 @@
     var bytes = [];
     values.forEach(function (value) {
       var data = mergeBytes(value.format, value.data);
-      if (unsynch) data = unsynchData(data);
+      if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
         dataLengthIndicator: unsynch
       });
       var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte13) {
-        return bytes.push(_byte13);
+      merged.forEach(function (_byte14) {
+        return bytes.push(_byte14);
       });
     });
     return bytes;
@@ -7136,7 +7145,7 @@
       }
 
       this.name = 'MP3Tag';
-      this.version = '1.4.0';
+      this.version = '1.4.1';
       this.buffer = buffer;
       this.options = options;
       this.tagger = {};
