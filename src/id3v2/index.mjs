@@ -161,11 +161,11 @@ export function encode (tags, options) {
     tags.TDRC = tags.TDRC || (tags.year !== '' ? tags.year : undefined)
   }
 
-  tags.COMM = tags.COMM || (tags.comment !== '' ? {
+  tags.COMM = tags.COMM || (tags.comment !== '' ? [{
     language: 'eng',
     descriptor: '',
     text: tags.comment
-  } : undefined)
+  }] : undefined)
 
   tags.TRCK = tags.TRCK || (tags.track !== '' ? tags.track : undefined)
   tags.TCON = tags.TCON || (tags.genre !== '' ? tags.genre : undefined)
