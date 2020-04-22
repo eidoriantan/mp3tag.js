@@ -15,9 +15,11 @@ export function includes (array, object) {
 
 export function mergeObjects (obj1, obj2) {
   const filtered = obj1
-  Object.keys(obj2)
-    .filter(key => obj2[key] !== undefined)
-    .forEach(key => { filtered[key] = obj2[key] })
+
+  for (const key in obj2) {
+    if (obj1[key] !== undefined && obj1[key] !== '') filtered[key] = obj1[key]
+    if (obj2[key] !== undefined && obj2[key] !== '') filtered[key] = obj2[key]
+  }
 
   return filtered
 }

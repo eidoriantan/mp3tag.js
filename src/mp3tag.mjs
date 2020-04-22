@@ -35,20 +35,29 @@ export default class MP3Tag {
       id3v2: true
     })
 
-    let v1Tags = {}
-    let v2Tags = {}
+    let tags = {
+      title: '',
+      artist: '',
+      album: '',
+      year: '',
+      comment: '',
+      track: '',
+      genre: ''
+    }
 
     try {
       if (options.id3v1 && ID3v1.hasID3v1(this.buffer)) {
         this.log('ID3v1 found, reading...')
-        v1Tags = ID3v1.decode(this.buffer)
+        const v1Tags = ID3v1.decode(this.buffer)
         this.log('ID3v1 reading finished')
+        tags = mergeObjects(tags, v1Tags)
       }
 
       if (options.id3v2 && ID3v2.hasID3v2(this.buffer)) {
         this.log('ID3v2 found, reading...')
-        v2Tags = ID3v2.decode(this.buffer)
+        const v2Tags = ID3v2.decode(this.buffer)
         this.log('ID3v2 reading finished')
+        tags = mergeObjects(tags, v2Tags)
       }
     } catch (error) {
       if (error instanceof TagError) {
@@ -57,7 +66,7 @@ export default class MP3Tag {
       } else throw error
     }
 
-    if (this.errorCode < 0) this.tags = mergeObjects(v1Tags, v2Tags)
+    if (this.errorCode < 0) this.tags = tags
     return this.tags
   }
 

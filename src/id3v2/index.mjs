@@ -72,14 +72,13 @@ export function decode (buffer, tagOffset = 0) {
     } else pushTag({ id: frame.id, value: frame.value })
   }
 
-  tags.title = tags.TIT2 || ''
-  tags.artist = tags.TPE1 || ''
-  tags.album = tags.TALB || ''
-  tags.year = version === 3 ? tags.TYER || ''
-    : (tags.TDRC ? tags.TDRC.substr(0, 4) : '')
-  tags.comment = tags.COMM ? tags.COMM[0].text : ''
-  tags.track = tags.TRCK ? tags.TRCK.split('/')[0] : ''
-  tags.genre = tags.TCON || ''
+  tags.title = tags.TIT2
+  tags.artist = tags.TPE1
+  tags.album = tags.TALB
+  tags.year = version === 3 ? tags.TYER : (tags.TDRC && tags.TDRC.substr(0, 4))
+  tags.comment = tags.COMM && tags.COMM[0].text
+  tags.track = tags.TRCK && tags.TRCK.split('/')[0]
+  tags.genre = tags.TCON
 
   return tags
 }
