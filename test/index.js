@@ -10,13 +10,16 @@ describe('MP3Tag', function () {
     const mp3tag = new MP3Tag(bytes.buffer)
     mp3tag.read()
 
-    assert.deepStrictEqual(new Uint8Array(mp3tag.getAudio()), new Uint8Array([
+    const actual = new Uint8Array(mp3tag.getAudio())
+    const expected = new Uint8Array([
       255, 251, 224, 0, 0, 0, 0, 0, 170, 170, 170, 170, 170, 170
-    ]))
+    ])
+
+    assert.deepStrictEqual(actual, expected)
   })
 
   after(function () {
-    const extendTests = ['id3v1/index.js', 'id3v2/index.js']
+    const extendTests = ['id3v1/index.js', 'id3v2/index.js', 'id3.js']
     const tests = this.test.parent.tests
     let failed = false
 
