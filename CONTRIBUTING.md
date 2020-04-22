@@ -6,6 +6,8 @@ make sure that you are following this guideline:
  * When editting JavaScript files, we should use the
    [standard.js styleguide](https://standardjs.com/rules.html);
 
+ * Extending the styleguide, please limit the rowlength to 80 characters;
+
  * Test your changes by running `npm run test` before committing. This makes
    sure that you are following the styleguide and not breaking any codes;
 
