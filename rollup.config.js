@@ -5,7 +5,7 @@ import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
 
 export default {
-  input: 'src/mp3tag.js',
+  input: 'src/mp3tag.mjs',
   strictDeprecations: true,
   output: [{
     file: 'dist/mp3tag.js',
@@ -23,6 +23,6 @@ export default {
     babel()
   ],
   watch: {
-    include: ['src/**/*.js']
+    include: ['src/**/*.mjs']
   }
 }

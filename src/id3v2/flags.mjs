@@ -1,6 +1,5 @@
 
-import { isBitSet } from '../utils/bytes'
-import TagError from '../error'
+import { isBitSet } from '../utils/bytes.mjs'
 
 export function getHeaderFlags (byte, version) {
   const flags = {}
@@ -17,9 +16,6 @@ export function getHeaderFlags (byte, version) {
       flags.experimentalIndicator = isBitSet(byte, 5)
       flags.footerPresent = isBitSet(byte, 4)
       break
-
-    default:
-      throw new TagError(201, version)
   }
 
   return flags
@@ -47,9 +43,6 @@ export function getFrameFlags (bytes, version) {
       flags.unsynchronisation = isBitSet(bytes[1], 1)
       flags.dataLengthIndicator = isBitSet(bytes[1], 0)
       break
-
-    default:
-      throw new TagError(201, version)
   }
 
   return flags

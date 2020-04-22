@@ -1,11 +1,7 @@
 
-import * as parsers from './parse'
-import * as validators from './validate'
-import * as writers from './write'
-
-export function validateID (id) {
-  return validators.validateID(id)
-}
+import * as parsers from './parse.mjs'
+import * as validators from './validate.mjs'
+import * as writers from './write.mjs'
 
 export const APIC = {
   parse: parsers.apicFrame,
@@ -89,8 +85,8 @@ export const TALB = {
 }
 
 export const TBPM = {
-  parse: parsers.numberFrame,
-  validate: validators.numberFrame,
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
   write: writers.asciiFrame,
   version: [3, 4]
 }
@@ -131,8 +127,8 @@ export const TDEN = {
 }
 
 export const TDLY = {
-  parse: parsers.numberFrame,
-  validate: validators.numberFrame,
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
   write: writers.asciiFrame,
   version: [3]
 }
@@ -236,8 +232,8 @@ export const TLAN = {
 }
 
 export const TLEN = {
-  parse: parsers.numberFrame,
-  validate: validators.numberFrame,
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
   write: writers.asciiFrame,
   version: [3, 4]
 }
@@ -383,8 +379,8 @@ export const TRSO = {
 }
 
 export const TSIZ = {
-  parse: parsers.numberFrame,
-  validate: validators.numberFrame,
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
   write: writers.asciiFrame,
   version: [3]
 }

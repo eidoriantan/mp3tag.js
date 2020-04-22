@@ -7,12 +7,19 @@ export function includes (array, object) {
     if (objectEqual(array[i], object)) {
       included = true
       break
-    }
-
-    i++
+    } else i++
   }
 
   return included
+}
+
+export function mergeObjects (obj1, obj2) {
+  const filtered = obj1
+  Object.keys(obj2)
+    .filter(key => obj2[key] !== undefined)
+    .forEach(key => { filtered[key] = obj2[key] })
+
+  return filtered
 }
 
 export function objectEqual (obj1, obj2) {
@@ -39,4 +46,28 @@ export function objectEqual (obj1, obj2) {
   }
 
   return true
+}
+
+export function overwriteDefault (usrObj, defObj) {
+  const object = {}
+  for (const prop in defObj) {
+    const defVal = defObj[prop]
+    const usrVal = usrObj[prop]
+
+    if (typeof usrVal === 'undefined') {
+      object[prop] = defVal
+      continue
+    }
+
+    switch (typeof defVal) {
+      case 'object':
+        object[prop] = overwriteDefault(usrVal, defVal)
+        break
+
+      default:
+        object[prop] = typeof defVal === typeof usrVal ? usrVal : defVal
+    }
+  }
+
+  return object
 }

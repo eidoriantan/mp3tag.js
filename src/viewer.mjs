@@ -1,6 +1,6 @@
 
-import { decodeUTF8 } from './utils/strings'
-import { isBuffer } from './utils/types'
+import { decodeUTF8 } from './utils/strings.mjs'
+import { isBuffer } from './utils/types.mjs'
 
 export default class BufferView extends DataView {
   static isViewable (param) {

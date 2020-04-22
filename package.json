@@ -1,6 +1,6 @@
 {
   "name": "mp3tag.js",
-  "version": "1.4.1",
+  "version": "2.0.0-alpha",
   "description": "MP3 tagging written in pure JavaScript",
   "main": "dist/mp3tag.js",
   "dependencies": {},
@@ -28,7 +28,7 @@
     "build": "rollup -c",
     "watch": "rollup -c -w",
     "lint": "eslint -c .eslintrc.json **/*.js --quiet --max-warnings 2",
-    "test": "npm run lint && mocha --colors --require esm"
+    "test": "npm run lint && mocha --require esm --colors"
   },
   "repository": {
     "type": "git",
