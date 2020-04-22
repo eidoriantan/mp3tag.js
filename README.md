@@ -17,13 +17,13 @@ The website is also open sourced and can be viewed at the
 [gh-pages](https://github.com/eidoriantan/mp3tag.js/tree/gh-pages) branch.
 
 ### Features
- * Read ID3v1, ID3v2.3, and ID3v2.4 tags
- * Write ID3v1, ID3v2.3, and ID3v2.4 tags
+ * Read ID3v1 and ID3v2 tags synchronously
+ * Write ID3v1 and ID3v2 tags synchronously
  * Supports unsynchronisation
- * Input validation according to [id3.org](http://id3.org) standards
+ * Standards compliant. See [id3.org](http://id3.org)
 
 ## Installation
-You can download the built library at
+You can download the ready-to-use script at
 [GitHub releases](https://github.com/eidoriantan/mp3tag.js/releases) or you can
 build your own by cloning this repository using `git` then build it.
 
@@ -37,7 +37,7 @@ npm run build
 You can also install this package by using `npm`:
 
 ```shell
-npm install --save mp3tag.js
+npm install --save mp3tag.js@latest
 ```
 
 ## Usage
@@ -50,17 +50,8 @@ inputFile.onchange = function () {
   reader.onload = function () {
     const buffer = this.result
     const mp3tag = new MP3Tag(buffer)
-    const tagger = mp3tag.read()
-
-    if (tagger.name === 'ID3v2') {
-      console.debug(tagger.getFrames())
-    } else if (tagger.name === 'ID3v1') {
-      console.debug(tagger.title)
-      console.debug(tagger.artist)
-      console.debug(tagger.album)
-      console.debug(tagger.year)
-      console.debug(tagger.comment)
-    }
+    mp3tag.read()
+    console.log(mp3tag.tags)
   }
 
   if (this.files.length > 0) {
