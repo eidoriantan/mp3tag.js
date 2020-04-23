@@ -45,6 +45,36 @@ describe('ID3v2', function () {
     })
   })
 
+  it('Transform data', function () {
+    this.mp3tag.tags.TYER = '2020'
+    this.mp3tag.save({
+      strict: true,
+      id3v1: { include: false },
+      id3v2: { unsynch: false, version: 4 }
+    })
+    this.mp3tag.read()
+
+    assert.deepStrictEqual(this.mp3tag.tags, {
+      title: 'title',
+      artist: '',
+      album: '',
+      year: '2020',
+      comment: '',
+      track: '',
+      genre: '',
+      v2Version: [4, 0],
+      v2Size: 33,
+      v2Flags: {
+        unsynchronisation: false,
+        extendedHeader: false,
+        footerPresent: false,
+        experimentalIndicator: false
+      },
+      TIT2: 'title',
+      TDRC: '2020'
+    })
+  })
+
   it('Write data', function () {
     this.mp3tag.tags.TIT2 = 'NEW TITLE'
     this.mp3tag.tags.title = 'IGNORED'
