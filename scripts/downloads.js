@@ -9,6 +9,7 @@ $(document).ready(function () {
     dataType: 'json',
     success: function (releases) {
       $.each(releases, function (i) {
+        if (this.prerelease) return true
         const row = $(template).clone(true, true)
 
         if (i === 0) $(row).find('[data-temp="row"]').addClass('table-primary')
