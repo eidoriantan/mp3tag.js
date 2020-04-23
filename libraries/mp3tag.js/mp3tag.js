@@ -937,6 +937,134 @@
   addToUnscopables('values');
   addToUnscopables('entries');
 
+  // https://tc39.github.io/ecma262/#sec-isarray
+
+  var isArray = Array.isArray || function isArray(arg) {
+    return classofRaw(arg) == 'Array';
+  };
+
+  var createProperty = function (object, key, value) {
+    var propertyKey = toPrimitive(key);
+    if (propertyKey in object) objectDefineProperty.f(object, propertyKey, createPropertyDescriptor(0, value));else object[propertyKey] = value;
+  };
+
+  var engineUserAgent = getBuiltIn('navigator', 'userAgent') || '';
+
+  var process = global_1.process;
+  var versions = process && process.versions;
+  var v8 = versions && versions.v8;
+  var match, version;
+
+  if (v8) {
+    match = v8.split('.');
+    version = match[0] + match[1];
+  } else if (engineUserAgent) {
+    match = engineUserAgent.match(/Edge\/(\d+)/);
+
+    if (!match || match[1] >= 74) {
+      match = engineUserAgent.match(/Chrome\/(\d+)/);
+      if (match) version = match[1];
+    }
+  }
+
+  var engineV8Version = version && +version;
+
+  var SPECIES = wellKnownSymbol('species');
+
+  var arrayMethodHasSpeciesSupport = function (METHOD_NAME) {
+    // We can't use this feature detection in V8 since it causes
+    // deoptimization and serious performance degradation
+    // https://github.com/zloirock/core-js/issues/677
+    return engineV8Version >= 51 || !fails(function () {
+      var array = [];
+      var constructor = array.constructor = {};
+
+      constructor[SPECIES] = function () {
+        return {
+          foo: 1
+        };
+      };
+
+      return array[METHOD_NAME](Boolean).foo !== 1;
+    });
+  };
+
+  var defineProperty$1 = Object.defineProperty;
+  var cache = {};
+
+  var thrower = function (it) {
+    throw it;
+  };
+
+  var arrayMethodUsesToLength = function (METHOD_NAME, options) {
+    if (has(cache, METHOD_NAME)) return cache[METHOD_NAME];
+    if (!options) options = {};
+    var method = [][METHOD_NAME];
+    var ACCESSORS = has(options, 'ACCESSORS') ? options.ACCESSORS : false;
+    var argument0 = has(options, 0) ? options[0] : thrower;
+    var argument1 = has(options, 1) ? options[1] : undefined;
+    return cache[METHOD_NAME] = !!method && !fails(function () {
+      if (ACCESSORS && !descriptors) return true;
+      var O = {
+        length: -1
+      };
+      if (ACCESSORS) defineProperty$1(O, 1, {
+        enumerable: true,
+        get: thrower
+      });else O[1] = 1;
+      method.call(O, argument0, argument1);
+    });
+  };
+
+  var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('slice');
+  var USES_TO_LENGTH = arrayMethodUsesToLength('slice', {
+    ACCESSORS: true,
+    0: 0,
+    1: 2
+  });
+  var SPECIES$1 = wellKnownSymbol('species');
+  var nativeSlice = [].slice;
+  var max$1 = Math.max; // `Array.prototype.slice` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.slice
+  // fallback for not array-like ES3 strings and DOM objects
+
+  _export({
+    target: 'Array',
+    proto: true,
+    forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH
+  }, {
+    slice: function slice(start, end) {
+      var O = toIndexedObject(this);
+      var length = toLength(O.length);
+      var k = toAbsoluteIndex(start, length);
+      var fin = toAbsoluteIndex(end === undefined ? length : end, length); // inline `ArraySpeciesCreate` for usage native `Array#slice` where it's possible
+
+      var Constructor, result, n;
+
+      if (isArray(O)) {
+        Constructor = O.constructor; // cross-realm fallback
+
+        if (typeof Constructor == 'function' && (Constructor === Array || isArray(Constructor.prototype))) {
+          Constructor = undefined;
+        } else if (isObject(Constructor)) {
+          Constructor = Constructor[SPECIES$1];
+          if (Constructor === null) Constructor = undefined;
+        }
+
+        if (Constructor === Array || Constructor === undefined) {
+          return nativeSlice.call(O, k, fin);
+        }
+      }
+
+      result = new (Constructor === undefined ? Array : Constructor)(max$1(fin - k, 0));
+
+      for (n = 0; k < fin; k++, n++) if (k in O) createProperty(result, n, O[k]);
+
+      result.length = n;
+      return result;
+    }
+  });
+
   var arrayBufferNative = typeof ArrayBuffer !== 'undefined' && typeof DataView !== 'undefined';
 
   var redefineAll = function (target, src, options) {
@@ -1085,7 +1213,7 @@
   };
 
   var getOwnPropertyNames = objectGetOwnPropertyNames.f;
-  var defineProperty$1 = objectDefineProperty.f;
+  var defineProperty$2 = objectDefineProperty.f;
   var getInternalState$1 = internalState.get;
   var setInternalState$1 = internalState.set;
   var ARRAY_BUFFER = 'ArrayBuffer';
@@ -1127,7 +1255,7 @@
   };
 
   var addGetter = function (Constructor, key) {
-    defineProperty$1(Constructor[PROTOTYPE$1], key, {
+    defineProperty$2(Constructor[PROTOTYPE$1], key, {
       get: function () {
         return getInternalState$1(this)[key];
       }
@@ -1337,13 +1465,13 @@
     return it;
   };
 
-  var SPECIES = wellKnownSymbol('species'); // `SpeciesConstructor` abstract operation
+  var SPECIES$2 = wellKnownSymbol('species'); // `SpeciesConstructor` abstract operation
   // https://tc39.github.io/ecma262/#sec-speciesconstructor
 
   var speciesConstructor = function (O, defaultConstructor) {
     var C = anObject(O).constructor;
     var S;
-    return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? defaultConstructor : aFunction$1(S);
+    return C === undefined || (S = anObject(C)[SPECIES$2]) == undefined ? defaultConstructor : aFunction$1(S);
   };
 
   var ArrayBuffer$1 = arrayBuffer.ArrayBuffer;
@@ -1381,7 +1509,7 @@
     }
   });
 
-  var defineProperty$2 = objectDefineProperty.f;
+  var defineProperty$3 = objectDefineProperty.f;
   var FunctionPrototype = Function.prototype;
   var FunctionPrototypeToString = FunctionPrototype.toString;
   var nameRE = /^\s*function ([^ (]*)/;
@@ -1389,7 +1517,7 @@
   // https://tc39.github.io/ecma262/#sec-function-instances-name
 
   if (descriptors && !(NAME in FunctionPrototype)) {
-    defineProperty$2(FunctionPrototype, NAME, {
+    defineProperty$3(FunctionPrototype, NAME, {
       configurable: true,
       get: function () {
         try {
@@ -1497,7 +1625,7 @@
     return ITERATION_SUPPORT;
   };
 
-  var defineProperty$3 = objectDefineProperty.f;
+  var defineProperty$4 = objectDefineProperty.f;
   var Int8Array$1 = global_1.Int8Array;
   var Int8ArrayPrototype = Int8Array$1 && Int8Array$1.prototype;
   var Uint8ClampedArray = global_1.Uint8ClampedArray;
@@ -1629,7 +1757,7 @@
 
   if (descriptors && !has(TypedArrayPrototype, TO_STRING_TAG$3)) {
     TYPED_ARRAY_TAG_REQIRED = true;
-    defineProperty$3(TypedArrayPrototype, TO_STRING_TAG$3, {
+    defineProperty$4(TypedArrayPrototype, TO_STRING_TAG$3, {
       get: function () {
         return isObject(this) ? this[TYPED_ARRAY_TAG] : undefined;
       }
@@ -1766,13 +1894,7 @@
     return result;
   };
 
-  // https://tc39.github.io/ecma262/#sec-isarray
-
-  var isArray = Array.isArray || function isArray(arg) {
-    return classofRaw(arg) == 'Array';
-  };
-
-  var SPECIES$1 = wellKnownSymbol('species'); // `ArraySpeciesCreate` abstract operation
+  var SPECIES$3 = wellKnownSymbol('species'); // `ArraySpeciesCreate` abstract operation
   // https://tc39.github.io/ecma262/#sec-arrayspeciescreate
 
   var arraySpeciesCreate = function (originalArray, length) {
@@ -1782,7 +1904,7 @@
       C = originalArray.constructor; // cross-realm fallback
 
       if (typeof C == 'function' && (C === Array || isArray(C.prototype))) C = undefined;else if (isObject(C)) {
-        C = C[SPECIES$1];
+        C = C[SPECIES$3];
         if (C === null) C = undefined;
       }
     }
@@ -1863,14 +1985,14 @@
     findIndex: createMethod$1(6)
   };
 
-  var SPECIES$2 = wellKnownSymbol('species');
+  var SPECIES$4 = wellKnownSymbol('species');
 
   var setSpecies = function (CONSTRUCTOR_NAME) {
     var Constructor = getBuiltIn(CONSTRUCTOR_NAME);
     var defineProperty = objectDefineProperty.f;
 
-    if (descriptors && Constructor && !Constructor[SPECIES$2]) {
-      defineProperty(Constructor, SPECIES$2, {
+    if (descriptors && Constructor && !Constructor[SPECIES$4]) {
+      defineProperty(Constructor, SPECIES$4, {
         configurable: true,
         get: function () {
           return this;
@@ -2291,43 +2413,16 @@
     });
   };
 
-  var defineProperty$4 = Object.defineProperty;
-  var cache = {};
-
-  var thrower = function (it) {
-    throw it;
-  };
-
-  var arrayMethodUsesToLength = function (METHOD_NAME, options) {
-    if (has(cache, METHOD_NAME)) return cache[METHOD_NAME];
-    if (!options) options = {};
-    var method = [][METHOD_NAME];
-    var ACCESSORS = has(options, 'ACCESSORS') ? options.ACCESSORS : false;
-    var argument0 = has(options, 0) ? options[0] : thrower;
-    var argument1 = has(options, 1) ? options[1] : undefined;
-    return cache[METHOD_NAME] = !!method && !fails(function () {
-      if (ACCESSORS && !descriptors) return true;
-      var O = {
-        length: -1
-      };
-      if (ACCESSORS) defineProperty$4(O, 1, {
-        enumerable: true,
-        get: thrower
-      });else O[1] = 1;
-      method.call(O, argument0, argument1);
-    });
-  };
-
   var min$3 = Math.min;
   var nativeLastIndexOf = [].lastIndexOf;
   var NEGATIVE_ZERO = !!nativeLastIndexOf && 1 / [1].lastIndexOf(1, -0) < 0;
   var STRICT_METHOD = arrayMethodIsStrict('lastIndexOf'); // For preventing possible almost infinite loop in non-standard implementations, test the forward version of the method
 
-  var USES_TO_LENGTH = arrayMethodUsesToLength('indexOf', {
+  var USES_TO_LENGTH$1 = arrayMethodUsesToLength('indexOf', {
     ACCESSORS: true,
     1: 0
   });
-  var FORCED = NEGATIVE_ZERO || !STRICT_METHOD || !USES_TO_LENGTH; // `Array.prototype.lastIndexOf` method implementation
+  var FORCED = NEGATIVE_ZERO || !STRICT_METHOD || !USES_TO_LENGTH$1; // `Array.prototype.lastIndexOf` method implementation
   // https://tc39.github.io/ecma262/#sec-array.prototype.lastindexof
 
   var arrayLastIndexOf = FORCED ? function lastIndexOf(searchElement
@@ -2770,501 +2865,50 @@
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
-  // https://tc39.github.io/ecma262/#sec-get-regexp.prototype.flags
-
-
-  var regexpFlags = function () {
-    var that = anObject(this);
-    var result = '';
-    if (that.global) result += 'g';
-    if (that.ignoreCase) result += 'i';
-    if (that.multiline) result += 'm';
-    if (that.dotAll) result += 's';
-    if (that.unicode) result += 'u';
-    if (that.sticky) result += 'y';
-    return result;
+  var E_CODES = {
+    0: 'Unknown error',
+    1: 'This format is not yet supported',
+    100: 'ID3v1 Error: This file is not an ID3v1',
+    101: 'ID3v1 Error: Malform tag',
+    102: 'ID3v1 Error: Frame validation failed',
+    200: 'ID3v2 Error: This file is not an ID3v2',
+    201: 'ID3v2 Error: Malform tag',
+    202: 'ID3v2 Error: Frame validation failed',
+    203: 'ID3v2 Error: This frame is not existing in this version of ID3v2'
   };
 
-  // so we use an intermediate function.
+  var TagError = /*#__PURE__*/function (_Error) {
+    _inherits(TagError, _Error);
 
+    var _super = _createSuper(TagError);
 
-  function RE(s, f) {
-    return RegExp(s, f);
-  }
+    function TagError(code) {
+      var _this;
 
-  var UNSUPPORTED_Y = fails(function () {
-    // babel-minify transpiles RegExp('a', 'y') -> /a/y and it causes SyntaxError
-    var re = RE('a', 'y');
-    re.lastIndex = 2;
-    return re.exec('abcd') != null;
-  });
-  var BROKEN_CARET = fails(function () {
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=773687
-    var re = RE('^r', 'gy');
-    re.lastIndex = 2;
-    return re.exec('str') != null;
-  });
-  var regexpStickyHelpers = {
-    UNSUPPORTED_Y: UNSUPPORTED_Y,
-    BROKEN_CARET: BROKEN_CARET
-  };
+      var extra = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
-  var nativeExec = RegExp.prototype.exec; // This always refers to the native implementation, because the
-  // String#replace polyfill uses ./fix-regexp-well-known-symbol-logic.js,
-  // which loads this file before patching the method.
+      _classCallCheck(this, TagError);
 
-  var nativeReplace = String.prototype.replace;
-  var patchedExec = nativeExec;
+      _this = _super.call(this, E_CODES[code]);
+      _this.name = 'MP3TagError';
+      _this.code = code;
+      _this.extra = extra;
 
-  var UPDATES_LAST_INDEX_WRONG = function () {
-    var re1 = /a/;
-    var re2 = /b*/g;
-    nativeExec.call(re1, 'a');
-    nativeExec.call(re2, 'a');
-    return re1.lastIndex !== 0 || re2.lastIndex !== 0;
-  }();
+      _this.parseMessage();
 
-  var UNSUPPORTED_Y$1 = regexpStickyHelpers.UNSUPPORTED_Y || regexpStickyHelpers.BROKEN_CARET; // nonparticipating capturing group, copied from es5-shim's String#split patch.
-
-  var NPCG_INCLUDED = /()??/.exec('')[1] !== undefined;
-  var PATCH = UPDATES_LAST_INDEX_WRONG || NPCG_INCLUDED || UNSUPPORTED_Y$1;
-
-  if (PATCH) {
-    patchedExec = function exec(str) {
-      var re = this;
-      var lastIndex, reCopy, match, i;
-      var sticky = UNSUPPORTED_Y$1 && re.sticky;
-      var flags = regexpFlags.call(re);
-      var source = re.source;
-      var charsAdded = 0;
-      var strCopy = str;
-
-      if (sticky) {
-        flags = flags.replace('y', '');
-
-        if (flags.indexOf('g') === -1) {
-          flags += 'g';
-        }
-
-        strCopy = String(str).slice(re.lastIndex); // Support anchored sticky behavior.
-
-        if (re.lastIndex > 0 && (!re.multiline || re.multiline && str[re.lastIndex - 1] !== '\n')) {
-          source = '(?: ' + source + ')';
-          strCopy = ' ' + strCopy;
-          charsAdded++;
-        } // ^(? + rx + ) is needed, in combination with some str slicing, to
-        // simulate the 'y' flag.
-
-
-        reCopy = new RegExp('^(?:' + source + ')', flags);
-      }
-
-      if (NPCG_INCLUDED) {
-        reCopy = new RegExp('^' + source + '$(?!\\s)', flags);
-      }
-
-      if (UPDATES_LAST_INDEX_WRONG) lastIndex = re.lastIndex;
-      match = nativeExec.call(sticky ? reCopy : re, strCopy);
-
-      if (sticky) {
-        if (match) {
-          match.input = match.input.slice(charsAdded);
-          match[0] = match[0].slice(charsAdded);
-          match.index = re.lastIndex;
-          re.lastIndex += match[0].length;
-        } else re.lastIndex = 0;
-      } else if (UPDATES_LAST_INDEX_WRONG && match) {
-        re.lastIndex = re.global ? match.index + match[0].length : lastIndex;
-      }
-
-      if (NPCG_INCLUDED && match && match.length > 1) {
-        // Fix browsers whose `exec` methods don't consistently return `undefined`
-        // for NPCG, like IE8. NOTE: This doesn' work for /(.?)?/
-        nativeReplace.call(match[0], reCopy, function () {
-          for (i = 1; i < arguments.length - 2; i++) {
-            if (arguments[i] === undefined) match[i] = undefined;
-          }
-        });
-      }
-
-      return match;
-    };
-  }
-
-  var regexpExec = patchedExec;
-
-  _export({
-    target: 'RegExp',
-    proto: true,
-    forced: /./.exec !== regexpExec
-  }, {
-    exec: regexpExec
-  });
-
-  var SPECIES$3 = wellKnownSymbol('species');
-  var REPLACE_SUPPORTS_NAMED_GROUPS = !fails(function () {
-    // #replace needs built-in support for named groups.
-    // #match works fine because it just return the exec results, even if it has
-    // a "grops" property.
-    var re = /./;
-
-    re.exec = function () {
-      var result = [];
-      result.groups = {
-        a: '7'
-      };
-      return result;
-    };
-
-    return ''.replace(re, '$<a>') !== '7';
-  }); // IE <= 11 replaces $0 with the whole match, as if it was $&
-  // https://stackoverflow.com/questions/6024666/getting-ie-to-replace-a-regex-with-the-literal-string-0
-
-  var REPLACE_KEEPS_$0 = function () {
-    return 'a'.replace(/./, '$0') === '$0';
-  }();
-
-  var REPLACE = wellKnownSymbol('replace'); // Safari <= 13.0.3(?) substitutes nth capture where n>m with an empty string
-
-  var REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE = function () {
-    if (/./[REPLACE]) {
-      return /./[REPLACE]('a', '$0') === '';
+      return _this;
     }
 
-    return false;
-  }(); // Chrome 51 has a buggy "split" implementation when RegExp#exec !== nativeExec
-  // Weex JS has frozen built-in prototypes, so use try / catch wrapper
-
-
-  var SPLIT_WORKS_WITH_OVERWRITTEN_EXEC = !fails(function () {
-    var re = /(?:)/;
-    var originalExec = re.exec;
-
-    re.exec = function () {
-      return originalExec.apply(this, arguments);
-    };
-
-    var result = 'ab'.split(re);
-    return result.length !== 2 || result[0] !== 'a' || result[1] !== 'b';
-  });
-
-  var fixRegexpWellKnownSymbolLogic = function (KEY, length, exec, sham) {
-    var SYMBOL = wellKnownSymbol(KEY);
-    var DELEGATES_TO_SYMBOL = !fails(function () {
-      // String methods call symbol-named RegEp methods
-      var O = {};
-
-      O[SYMBOL] = function () {
-        return 7;
-      };
-
-      return ''[KEY](O) != 7;
-    });
-    var DELEGATES_TO_EXEC = DELEGATES_TO_SYMBOL && !fails(function () {
-      // Symbol-named RegExp methods call .exec
-      var execCalled = false;
-      var re = /a/;
-
-      if (KEY === 'split') {
-        // We can't use real regex here since it causes deoptimization
-        // and serious performance degradation in V8
-        // https://github.com/zloirock/core-js/issues/306
-        re = {}; // RegExp[@@split] doesn't call the regex's exec method, but first creates
-        // a new one. We need to return the patched regex when creating the new one.
-
-        re.constructor = {};
-
-        re.constructor[SPECIES$3] = function () {
-          return re;
-        };
-
-        re.flags = '';
-        re[SYMBOL] = /./[SYMBOL];
+    _createClass(TagError, [{
+      key: "parseMessage",
+      value: function parseMessage() {
+        this.message = E_CODES[this.code];
+        if (this.extra) this.message += " \"".concat(this.extra, "\"");
       }
+    }]);
 
-      re.exec = function () {
-        execCalled = true;
-        return null;
-      };
-
-      re[SYMBOL]('');
-      return !execCalled;
-    });
-
-    if (!DELEGATES_TO_SYMBOL || !DELEGATES_TO_EXEC || KEY === 'replace' && !(REPLACE_SUPPORTS_NAMED_GROUPS && REPLACE_KEEPS_$0 && !REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE) || KEY === 'split' && !SPLIT_WORKS_WITH_OVERWRITTEN_EXEC) {
-      var nativeRegExpMethod = /./[SYMBOL];
-      var methods = exec(SYMBOL, ''[KEY], function (nativeMethod, regexp, str, arg2, forceStringMethod) {
-        if (regexp.exec === regexpExec) {
-          if (DELEGATES_TO_SYMBOL && !forceStringMethod) {
-            // The native String method already delegates to @@method (this
-            // polyfilled function), leasing to infinite recursion.
-            // We avoid it by directly calling the native @@method method.
-            return {
-              done: true,
-              value: nativeRegExpMethod.call(regexp, str, arg2)
-            };
-          }
-
-          return {
-            done: true,
-            value: nativeMethod.call(str, regexp, arg2)
-          };
-        }
-
-        return {
-          done: false
-        };
-      }, {
-        REPLACE_KEEPS_$0: REPLACE_KEEPS_$0,
-        REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE: REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE
-      });
-      var stringMethod = methods[0];
-      var regexMethod = methods[1];
-      redefine(String.prototype, KEY, stringMethod);
-      redefine(RegExp.prototype, SYMBOL, length == 2 // 21.2.5.8 RegExp.prototype[@@replace](string, replaceValue)
-      // 21.2.5.11 RegExp.prototype[@@split](string, limit)
-      ? function (string, arg) {
-        return regexMethod.call(string, this, arg);
-      } // 21.2.5.6 RegExp.prototype[@@match](string)
-      // 21.2.5.9 RegExp.prototype[@@search](string)
-      : function (string) {
-        return regexMethod.call(string, this);
-      });
-    }
-
-    if (sham) createNonEnumerableProperty(RegExp.prototype[SYMBOL], 'sham', true);
-  };
-
-  var createMethod$3 = function (CONVERT_TO_STRING) {
-    return function ($this, pos) {
-      var S = String(requireObjectCoercible($this));
-      var position = toInteger(pos);
-      var size = S.length;
-      var first, second;
-      if (position < 0 || position >= size) return CONVERT_TO_STRING ? '' : undefined;
-      first = S.charCodeAt(position);
-      return first < 0xD800 || first > 0xDBFF || position + 1 === size || (second = S.charCodeAt(position + 1)) < 0xDC00 || second > 0xDFFF ? CONVERT_TO_STRING ? S.charAt(position) : first : CONVERT_TO_STRING ? S.slice(position, position + 2) : (first - 0xD800 << 10) + (second - 0xDC00) + 0x10000;
-    };
-  };
-
-  var stringMultibyte = {
-    // `String.prototype.codePointAt` method
-    // https://tc39.github.io/ecma262/#sec-string.prototype.codepointat
-    codeAt: createMethod$3(false),
-    // `String.prototype.at` method
-    // https://github.com/mathiasbynens/String.prototype.at
-    charAt: createMethod$3(true)
-  };
-
-  var charAt = stringMultibyte.charAt; // `AdvanceStringIndex` abstract operation
-  // https://tc39.github.io/ecma262/#sec-advancestringindex
-
-  var advanceStringIndex = function (S, index, unicode) {
-    return index + (unicode ? charAt(S, index).length : 1);
-  };
-
-  // https://tc39.github.io/ecma262/#sec-regexpexec
-
-  var regexpExecAbstract = function (R, S) {
-    var exec = R.exec;
-
-    if (typeof exec === 'function') {
-      var result = exec.call(R, S);
-
-      if (typeof result !== 'object') {
-        throw TypeError('RegExp exec method returned something other than an Object or null');
-      }
-
-      return result;
-    }
-
-    if (classofRaw(R) !== 'RegExp') {
-      throw TypeError('RegExp#exec called on incompatible receiver');
-    }
-
-    return regexpExec.call(R, S);
-  };
-
-  var max$1 = Math.max;
-  var min$4 = Math.min;
-  var floor$3 = Math.floor;
-  var SUBSTITUTION_SYMBOLS = /\$([$&'`]|\d\d?|<[^>]*>)/g;
-  var SUBSTITUTION_SYMBOLS_NO_NAMED = /\$([$&'`]|\d\d?)/g;
-
-  var maybeToString = function (it) {
-    return it === undefined ? it : String(it);
-  }; // @@replace logic
-
-
-  fixRegexpWellKnownSymbolLogic('replace', 2, function (REPLACE, nativeReplace, maybeCallNative, reason) {
-    var REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE = reason.REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE;
-    var REPLACE_KEEPS_$0 = reason.REPLACE_KEEPS_$0;
-    var UNSAFE_SUBSTITUTE = REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE ? '$' : '$0';
-    return [// `String.prototype.replace` method
-    // https://tc39.github.io/ecma262/#sec-string.prototype.replace
-    function replace(searchValue, replaceValue) {
-      var O = requireObjectCoercible(this);
-      var replacer = searchValue == undefined ? undefined : searchValue[REPLACE];
-      return replacer !== undefined ? replacer.call(searchValue, O, replaceValue) : nativeReplace.call(String(O), searchValue, replaceValue);
-    }, // `RegExp.prototype[@@replace]` method
-    // https://tc39.github.io/ecma262/#sec-regexp.prototype-@@replace
-    function (regexp, replaceValue) {
-      if (!REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE && REPLACE_KEEPS_$0 || typeof replaceValue === 'string' && replaceValue.indexOf(UNSAFE_SUBSTITUTE) === -1) {
-        var res = maybeCallNative(nativeReplace, regexp, this, replaceValue);
-        if (res.done) return res.value;
-      }
-
-      var rx = anObject(regexp);
-      var S = String(this);
-      var functionalReplace = typeof replaceValue === 'function';
-      if (!functionalReplace) replaceValue = String(replaceValue);
-      var global = rx.global;
-
-      if (global) {
-        var fullUnicode = rx.unicode;
-        rx.lastIndex = 0;
-      }
-
-      var results = [];
-
-      while (true) {
-        var result = regexpExecAbstract(rx, S);
-        if (result === null) break;
-        results.push(result);
-        if (!global) break;
-        var matchStr = String(result[0]);
-        if (matchStr === '') rx.lastIndex = advanceStringIndex(S, toLength(rx.lastIndex), fullUnicode);
-      }
-
-      var accumulatedResult = '';
-      var nextSourcePosition = 0;
-
-      for (var i = 0; i < results.length; i++) {
-        result = results[i];
-        var matched = String(result[0]);
-        var position = max$1(min$4(toInteger(result.index), S.length), 0);
-        var captures = []; // NOTE: This is equivalent to
-        //   captures = result.slice(1).map(maybeToString)
-        // but for some reason `nativeSlice.call(result, 1, result.length)` (called in
-        // the slice polyfill when slicing native arrays) "doesn't work" in safari 9 and
-        // causes a crash (https://pastebin.com/N21QzeQA) when trying to debug it.
-
-        for (var j = 1; j < result.length; j++) captures.push(maybeToString(result[j]));
-
-        var namedCaptures = result.groups;
-
-        if (functionalReplace) {
-          var replacerArgs = [matched].concat(captures, position, S);
-          if (namedCaptures !== undefined) replacerArgs.push(namedCaptures);
-          var replacement = String(replaceValue.apply(undefined, replacerArgs));
-        } else {
-          replacement = getSubstitution(matched, S, position, captures, namedCaptures, replaceValue);
-        }
-
-        if (position >= nextSourcePosition) {
-          accumulatedResult += S.slice(nextSourcePosition, position) + replacement;
-          nextSourcePosition = position + matched.length;
-        }
-      }
-
-      return accumulatedResult + S.slice(nextSourcePosition);
-    }]; // https://tc39.github.io/ecma262/#sec-getsubstitution
-
-    function getSubstitution(matched, str, position, captures, namedCaptures, replacement) {
-      var tailPos = position + matched.length;
-      var m = captures.length;
-      var symbols = SUBSTITUTION_SYMBOLS_NO_NAMED;
-
-      if (namedCaptures !== undefined) {
-        namedCaptures = toObject(namedCaptures);
-        symbols = SUBSTITUTION_SYMBOLS;
-      }
-
-      return nativeReplace.call(replacement, symbols, function (match, ch) {
-        var capture;
-
-        switch (ch.charAt(0)) {
-          case '$':
-            return '$';
-
-          case '&':
-            return matched;
-
-          case '`':
-            return str.slice(0, position);
-
-          case "'":
-            return str.slice(tailPos);
-
-          case '<':
-            capture = namedCaptures[ch.slice(1, -1)];
-            break;
-
-          default:
-            // \d\d?
-            var n = +ch;
-            if (n === 0) return match;
-
-            if (n > m) {
-              var f = floor$3(n / 10);
-              if (f === 0) return match;
-              if (f <= m) return captures[f - 1] === undefined ? ch.charAt(1) : captures[f - 1] + ch.charAt(1);
-              return match;
-            }
-
-            capture = captures[n - 1];
-        }
-
-        return capture === undefined ? '' : capture;
-      });
-    }
-  });
-
-  var createProperty = function (object, key, value) {
-    var propertyKey = toPrimitive(key);
-    if (propertyKey in object) objectDefineProperty.f(object, propertyKey, createPropertyDescriptor(0, value));else object[propertyKey] = value;
-  };
-
-  var engineUserAgent = getBuiltIn('navigator', 'userAgent') || '';
-
-  var process = global_1.process;
-  var versions = process && process.versions;
-  var v8 = versions && versions.v8;
-  var match, version;
-
-  if (v8) {
-    match = v8.split('.');
-    version = match[0] + match[1];
-  } else if (engineUserAgent) {
-    match = engineUserAgent.match(/Edge\/(\d+)/);
-
-    if (!match || match[1] >= 74) {
-      match = engineUserAgent.match(/Chrome\/(\d+)/);
-      if (match) version = match[1];
-    }
-  }
-
-  var engineV8Version = version && +version;
-
-  var SPECIES$4 = wellKnownSymbol('species');
-
-  var arrayMethodHasSpeciesSupport = function (METHOD_NAME) {
-    // We can't use this feature detection in V8 since it causes
-    // deoptimization and serious performance degradation
-    // https://github.com/zloirock/core-js/issues/677
-    return engineV8Version >= 51 || !fails(function () {
-      var array = [];
-      var constructor = array.constructor = {};
-
-      constructor[SPECIES$4] = function () {
-        return {
-          foo: 1
-        };
-      };
-
-      return array[METHOD_NAME](Boolean).foo !== 1;
-    });
-  };
+    return TagError;
+  }( /*#__PURE__*/_wrapNativeSuper(Error));
 
   var IS_CONCAT_SPREADABLE = wellKnownSymbol('isConcatSpreadable');
   var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
@@ -3319,72 +2963,6 @@
       return A;
     }
   });
-
-  var E_CODES = {
-    0: 'Unknown error',
-    1: 'This format is not yet supported',
-    100: 'This file is not an ID3v1',
-    103: 'Frame validation failed',
-    200: 'This file is not an ID3v2',
-    201: 'Unsupported ID3v2 major version',
-    202: 'Unsupported frame',
-    203: 'Frame validation failed',
-    204: 'Frame is not supported in this version of ID3v2'
-  };
-
-  var TagError = /*#__PURE__*/function (_Error) {
-    _inherits(TagError, _Error);
-
-    var _super = _createSuper(TagError);
-
-    function TagError(code, param) {
-      var _this;
-
-      _classCallCheck(this, TagError);
-
-      _this = _super.call(this, E_CODES[code]);
-      _this.name = 'TagError';
-      _this.code = code;
-      _this.error = param;
-      _this.message = _this.parseMessage();
-      return _this;
-    }
-
-    _createClass(TagError, [{
-      key: "parseMessage",
-      value: function parseMessage() {
-        var string = '';
-
-        switch (this.code) {
-          case 100:
-            string = "ID3v1 Error: ".concat(E_CODES[this.code]);
-            break;
-
-          case 103:
-            string = "ID3v1 Error: ".concat(E_CODES[this.code], " \"").concat(this.error, "\"");
-            break;
-
-          case 200:
-            string = "ID3v2 Error: ".concat(E_CODES[this.code]);
-            break;
-
-          case 201:
-          case 202:
-          case 203:
-          case 204:
-            string = "ID3v2 Error: ".concat(E_CODES[this.code], " \"").concat(this.error, "\"");
-            break;
-
-          default:
-            string = "".concat(E_CODES[this.code]);
-        }
-
-        return string;
-      }
-    }]);
-
-    return TagError;
-  }( /*#__PURE__*/_wrapNativeSuper(Error));
 
   // https://tc39.github.io/ecma262/#sec-array.isarray
 
@@ -3465,7 +3043,7 @@
 
   var getOwnPropertyDescriptor$2 = objectGetOwnPropertyDescriptor.f;
   var nativeEndsWith = ''.endsWith;
-  var min$5 = Math.min;
+  var min$4 = Math.min;
   var CORRECT_IS_REGEXP_LOGIC = correctIsRegexpLogic('endsWith'); // https://github.com/zloirock/core-js/pull/702
 
   var MDN_POLYFILL_BUG =  !CORRECT_IS_REGEXP_LOGIC && !!function () {
@@ -3486,7 +3064,7 @@
       notARegexp(searchString);
       var endPosition = arguments.length > 1 ? arguments[1] : undefined;
       var len = toLength(that.length);
-      var end = endPosition === undefined ? len : min$5(toLength(endPosition), len);
+      var end = endPosition === undefined ? len : min$4(toLength(endPosition), len);
       var search = String(searchString);
       return nativeEndsWith ? nativeEndsWith.call(that, search, end) : that.slice(end - search.length, end) === search;
     }
@@ -3494,10 +3072,10 @@
 
   var $forEach$1 = arrayIteration.forEach;
   var STRICT_METHOD$1 = arrayMethodIsStrict('forEach');
-  var USES_TO_LENGTH$1 = arrayMethodUsesToLength('forEach'); // `Array.prototype.forEach` method implementation
+  var USES_TO_LENGTH$2 = arrayMethodUsesToLength('forEach'); // `Array.prototype.forEach` method implementation
   // https://tc39.github.io/ecma262/#sec-array.prototype.foreach
 
-  var arrayForEach = !STRICT_METHOD$1 || !USES_TO_LENGTH$1 ? function forEach(callbackfn
+  var arrayForEach = !STRICT_METHOD$1 || !USES_TO_LENGTH$2 ? function forEach(callbackfn
   /* , thisArg */
   ) {
     return $forEach$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
@@ -3669,8 +3247,7 @@
   }
 
   function isBuffer(param) {
-    if (param instanceof ArrayBuffer) return true;
-    if (typeof Buffer !== 'undefined' && param instanceof Buffer) return true;
+    if (param instanceof ArrayBuffer) return true;else if (typeof Buffer !== 'undefined' && param instanceof Buffer) return true;
     return false;
   }
 
@@ -3841,80 +3418,588 @@
     return BufferView;
   }( /*#__PURE__*/_wrapNativeSuper(DataView));
 
-  var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('slice');
-  var USES_TO_LENGTH$2 = arrayMethodUsesToLength('slice', {
+  var $includes$1 = arrayIncludes.includes;
+  var USES_TO_LENGTH$3 = arrayMethodUsesToLength('indexOf', {
     ACCESSORS: true,
-    0: 0,
-    1: 2
-  });
-  var SPECIES$5 = wellKnownSymbol('species');
-  var nativeSlice = [].slice;
-  var max$2 = Math.max; // `Array.prototype.slice` method
-  // https://tc39.github.io/ecma262/#sec-array.prototype.slice
-  // fallback for not array-like ES3 strings and DOM objects
+    1: 0
+  }); // `Array.prototype.includes` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.includes
 
   _export({
     target: 'Array',
     proto: true,
-    forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH$2
+    forced: !USES_TO_LENGTH$3
   }, {
-    slice: function slice(start, end) {
-      var O = toIndexedObject(this);
-      var length = toLength(O.length);
-      var k = toAbsoluteIndex(start, length);
-      var fin = toAbsoluteIndex(end === undefined ? length : end, length); // inline `ArraySpeciesCreate` for usage native `Array#slice` where it's possible
+    includes: function includes(el
+    /* , fromIndex = 0 */
+    ) {
+      return $includes$1(this, el, arguments.length > 1 ? arguments[1] : undefined);
+    }
+  }); // https://tc39.github.io/ecma262/#sec-array.prototype-@@unscopables
 
-      var Constructor, result, n;
+  addToUnscopables('includes');
 
-      if (isArray(O)) {
-        Constructor = O.constructor; // cross-realm fallback
+  var $indexOf$1 = arrayIncludes.indexOf;
+  var nativeIndexOf = [].indexOf;
+  var NEGATIVE_ZERO$1 = !!nativeIndexOf && 1 / [1].indexOf(1, -0) < 0;
+  var STRICT_METHOD$2 = arrayMethodIsStrict('indexOf');
+  var USES_TO_LENGTH$4 = arrayMethodUsesToLength('indexOf', {
+    ACCESSORS: true,
+    1: 0
+  }); // `Array.prototype.indexOf` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.indexof
 
-        if (typeof Constructor == 'function' && (Constructor === Array || isArray(Constructor.prototype))) {
-          Constructor = undefined;
-        } else if (isObject(Constructor)) {
-          Constructor = Constructor[SPECIES$5];
-          if (Constructor === null) Constructor = undefined;
-        }
-
-        if (Constructor === Array || Constructor === undefined) {
-          return nativeSlice.call(O, k, fin);
-        }
-      }
-
-      result = new (Constructor === undefined ? Array : Constructor)(max$2(fin - k, 0));
-
-      for (n = 0; k < fin; k++, n++) if (k in O) createProperty(result, n, O[k]);
-
-      result.length = n;
-      return result;
+  _export({
+    target: 'Array',
+    proto: true,
+    forced: NEGATIVE_ZERO$1 || !STRICT_METHOD$2 || !USES_TO_LENGTH$4
+  }, {
+    indexOf: function indexOf(searchElement
+    /* , fromIndex = 0 */
+    ) {
+      return NEGATIVE_ZERO$1 // convert -0 to +0
+      ? nativeIndexOf.apply(this, arguments) || 0 : $indexOf$1(this, searchElement, arguments.length > 1 ? arguments[1] : undefined);
     }
   });
 
-  function getAudio(buffer) {
-    if (!BufferView.isViewable(buffer)) {
-      throw new TypeError('buffer is not viewable');
-    }
+  var DatePrototype = Date.prototype;
+  var INVALID_DATE = 'Invalid Date';
+  var TO_STRING = 'toString';
+  var nativeDateToString = DatePrototype[TO_STRING];
+  var getTime = DatePrototype.getTime; // `Date.prototype.toString` method
+  // https://tc39.github.io/ecma262/#sec-date.prototype.tostring
 
-    var view = new BufferView(buffer);
-    var start = null;
-    var end = view.byteLength;
-    var i = 0;
+  if (new Date(NaN) + '' != INVALID_DATE) {
+    redefine(DatePrototype, TO_STRING, function toString() {
+      var value = getTime.call(this); // eslint-disable-next-line no-self-compare
 
-    while (i < view.byteLength) {
-      if (view.getUint8(i) === 0xff && view.getUint8(i + 1) === 0xfb) {
-        start = i;
-        break;
-      } else i++;
-    }
-
-    var tag = end - 128;
-
-    if (tag > -1 && view.getString(tag, 3, 'ascii').string === 'TAG') {
-      end -= 128;
-    }
-
-    return start !== null ? view.buffer.slice(start, end) : new ArrayBuffer(0);
+      return value === value ? nativeDateToString.call(this) : INVALID_DATE;
+    });
   }
+
+  // a string of all valid unicode whitespaces
+  // eslint-disable-next-line max-len
+  var whitespaces = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
+
+  var whitespace = '[' + whitespaces + ']';
+  var ltrim = RegExp('^' + whitespace + whitespace + '*');
+  var rtrim = RegExp(whitespace + whitespace + '*$'); // `String.prototype.{ trim, trimStart, trimEnd, trimLeft, trimRight }` methods implementation
+
+  var createMethod$3 = function (TYPE) {
+    return function ($this) {
+      var string = String(requireObjectCoercible($this));
+      if (TYPE & 1) string = string.replace(ltrim, '');
+      if (TYPE & 2) string = string.replace(rtrim, '');
+      return string;
+    };
+  };
+
+  var stringTrim = {
+    // `String.prototype.{ trimLeft, trimStart }` methods
+    // https://tc39.github.io/ecma262/#sec-string.prototype.trimstart
+    start: createMethod$3(1),
+    // `String.prototype.{ trimRight, trimEnd }` methods
+    // https://tc39.github.io/ecma262/#sec-string.prototype.trimend
+    end: createMethod$3(2),
+    // `String.prototype.trim` method
+    // https://tc39.github.io/ecma262/#sec-string.prototype.trim
+    trim: createMethod$3(3)
+  };
+
+  var trim = stringTrim.trim;
+  var $parseInt = global_1.parseInt;
+  var hex = /^[+-]?0[Xx]/;
+  var FORCED$5 = $parseInt(whitespaces + '08') !== 8 || $parseInt(whitespaces + '0x16') !== 22; // `parseInt` method
+  // https://tc39.github.io/ecma262/#sec-parseint-string-radix
+
+  var numberParseInt = FORCED$5 ? function parseInt(string, radix) {
+    var S = trim(String(string));
+    return $parseInt(S, radix >>> 0 || (hex.test(S) ? 16 : 10));
+  } : $parseInt;
+
+  // https://tc39.github.io/ecma262/#sec-parseint-string-radix
+
+  _export({
+    global: true,
+    forced: parseInt != numberParseInt
+  }, {
+    parseInt: numberParseInt
+  });
+
+  // https://tc39.github.io/ecma262/#sec-get-regexp.prototype.flags
+
+
+  var regexpFlags = function () {
+    var that = anObject(this);
+    var result = '';
+    if (that.global) result += 'g';
+    if (that.ignoreCase) result += 'i';
+    if (that.multiline) result += 'm';
+    if (that.dotAll) result += 's';
+    if (that.unicode) result += 'u';
+    if (that.sticky) result += 'y';
+    return result;
+  };
+
+  // so we use an intermediate function.
+
+
+  function RE(s, f) {
+    return RegExp(s, f);
+  }
+
+  var UNSUPPORTED_Y = fails(function () {
+    // babel-minify transpiles RegExp('a', 'y') -> /a/y and it causes SyntaxError
+    var re = RE('a', 'y');
+    re.lastIndex = 2;
+    return re.exec('abcd') != null;
+  });
+  var BROKEN_CARET = fails(function () {
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=773687
+    var re = RE('^r', 'gy');
+    re.lastIndex = 2;
+    return re.exec('str') != null;
+  });
+  var regexpStickyHelpers = {
+    UNSUPPORTED_Y: UNSUPPORTED_Y,
+    BROKEN_CARET: BROKEN_CARET
+  };
+
+  var nativeExec = RegExp.prototype.exec; // This always refers to the native implementation, because the
+  // String#replace polyfill uses ./fix-regexp-well-known-symbol-logic.js,
+  // which loads this file before patching the method.
+
+  var nativeReplace = String.prototype.replace;
+  var patchedExec = nativeExec;
+
+  var UPDATES_LAST_INDEX_WRONG = function () {
+    var re1 = /a/;
+    var re2 = /b*/g;
+    nativeExec.call(re1, 'a');
+    nativeExec.call(re2, 'a');
+    return re1.lastIndex !== 0 || re2.lastIndex !== 0;
+  }();
+
+  var UNSUPPORTED_Y$1 = regexpStickyHelpers.UNSUPPORTED_Y || regexpStickyHelpers.BROKEN_CARET; // nonparticipating capturing group, copied from es5-shim's String#split patch.
+
+  var NPCG_INCLUDED = /()??/.exec('')[1] !== undefined;
+  var PATCH = UPDATES_LAST_INDEX_WRONG || NPCG_INCLUDED || UNSUPPORTED_Y$1;
+
+  if (PATCH) {
+    patchedExec = function exec(str) {
+      var re = this;
+      var lastIndex, reCopy, match, i;
+      var sticky = UNSUPPORTED_Y$1 && re.sticky;
+      var flags = regexpFlags.call(re);
+      var source = re.source;
+      var charsAdded = 0;
+      var strCopy = str;
+
+      if (sticky) {
+        flags = flags.replace('y', '');
+
+        if (flags.indexOf('g') === -1) {
+          flags += 'g';
+        }
+
+        strCopy = String(str).slice(re.lastIndex); // Support anchored sticky behavior.
+
+        if (re.lastIndex > 0 && (!re.multiline || re.multiline && str[re.lastIndex - 1] !== '\n')) {
+          source = '(?: ' + source + ')';
+          strCopy = ' ' + strCopy;
+          charsAdded++;
+        } // ^(? + rx + ) is needed, in combination with some str slicing, to
+        // simulate the 'y' flag.
+
+
+        reCopy = new RegExp('^(?:' + source + ')', flags);
+      }
+
+      if (NPCG_INCLUDED) {
+        reCopy = new RegExp('^' + source + '$(?!\\s)', flags);
+      }
+
+      if (UPDATES_LAST_INDEX_WRONG) lastIndex = re.lastIndex;
+      match = nativeExec.call(sticky ? reCopy : re, strCopy);
+
+      if (sticky) {
+        if (match) {
+          match.input = match.input.slice(charsAdded);
+          match[0] = match[0].slice(charsAdded);
+          match.index = re.lastIndex;
+          re.lastIndex += match[0].length;
+        } else re.lastIndex = 0;
+      } else if (UPDATES_LAST_INDEX_WRONG && match) {
+        re.lastIndex = re.global ? match.index + match[0].length : lastIndex;
+      }
+
+      if (NPCG_INCLUDED && match && match.length > 1) {
+        // Fix browsers whose `exec` methods don't consistently return `undefined`
+        // for NPCG, like IE8. NOTE: This doesn' work for /(.?)?/
+        nativeReplace.call(match[0], reCopy, function () {
+          for (i = 1; i < arguments.length - 2; i++) {
+            if (arguments[i] === undefined) match[i] = undefined;
+          }
+        });
+      }
+
+      return match;
+    };
+  }
+
+  var regexpExec = patchedExec;
+
+  _export({
+    target: 'RegExp',
+    proto: true,
+    forced: /./.exec !== regexpExec
+  }, {
+    exec: regexpExec
+  });
+
+  var TO_STRING$1 = 'toString';
+  var RegExpPrototype = RegExp.prototype;
+  var nativeToString = RegExpPrototype[TO_STRING$1];
+  var NOT_GENERIC = fails(function () {
+    return nativeToString.call({
+      source: 'a',
+      flags: 'b'
+    }) != '/a/b';
+  }); // FF44- RegExp#toString has a wrong name
+
+  var INCORRECT_NAME = nativeToString.name != TO_STRING$1; // `RegExp.prototype.toString` method
+  // https://tc39.github.io/ecma262/#sec-regexp.prototype.tostring
+
+  if (NOT_GENERIC || INCORRECT_NAME) {
+    redefine(RegExp.prototype, TO_STRING$1, function toString() {
+      var R = anObject(this);
+      var p = String(R.source);
+      var rf = R.flags;
+      var f = String(rf === undefined && R instanceof RegExp && !('flags' in RegExpPrototype) ? regexpFlags.call(R) : rf);
+      return '/' + p + '/' + f;
+    }, {
+      unsafe: true
+    });
+  }
+
+  var SPECIES$5 = wellKnownSymbol('species');
+  var REPLACE_SUPPORTS_NAMED_GROUPS = !fails(function () {
+    // #replace needs built-in support for named groups.
+    // #match works fine because it just return the exec results, even if it has
+    // a "grops" property.
+    var re = /./;
+
+    re.exec = function () {
+      var result = [];
+      result.groups = {
+        a: '7'
+      };
+      return result;
+    };
+
+    return ''.replace(re, '$<a>') !== '7';
+  }); // IE <= 11 replaces $0 with the whole match, as if it was $&
+  // https://stackoverflow.com/questions/6024666/getting-ie-to-replace-a-regex-with-the-literal-string-0
+
+  var REPLACE_KEEPS_$0 = function () {
+    return 'a'.replace(/./, '$0') === '$0';
+  }();
+
+  var REPLACE = wellKnownSymbol('replace'); // Safari <= 13.0.3(?) substitutes nth capture where n>m with an empty string
+
+  var REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE = function () {
+    if (/./[REPLACE]) {
+      return /./[REPLACE]('a', '$0') === '';
+    }
+
+    return false;
+  }(); // Chrome 51 has a buggy "split" implementation when RegExp#exec !== nativeExec
+  // Weex JS has frozen built-in prototypes, so use try / catch wrapper
+
+
+  var SPLIT_WORKS_WITH_OVERWRITTEN_EXEC = !fails(function () {
+    var re = /(?:)/;
+    var originalExec = re.exec;
+
+    re.exec = function () {
+      return originalExec.apply(this, arguments);
+    };
+
+    var result = 'ab'.split(re);
+    return result.length !== 2 || result[0] !== 'a' || result[1] !== 'b';
+  });
+
+  var fixRegexpWellKnownSymbolLogic = function (KEY, length, exec, sham) {
+    var SYMBOL = wellKnownSymbol(KEY);
+    var DELEGATES_TO_SYMBOL = !fails(function () {
+      // String methods call symbol-named RegEp methods
+      var O = {};
+
+      O[SYMBOL] = function () {
+        return 7;
+      };
+
+      return ''[KEY](O) != 7;
+    });
+    var DELEGATES_TO_EXEC = DELEGATES_TO_SYMBOL && !fails(function () {
+      // Symbol-named RegExp methods call .exec
+      var execCalled = false;
+      var re = /a/;
+
+      if (KEY === 'split') {
+        // We can't use real regex here since it causes deoptimization
+        // and serious performance degradation in V8
+        // https://github.com/zloirock/core-js/issues/306
+        re = {}; // RegExp[@@split] doesn't call the regex's exec method, but first creates
+        // a new one. We need to return the patched regex when creating the new one.
+
+        re.constructor = {};
+
+        re.constructor[SPECIES$5] = function () {
+          return re;
+        };
+
+        re.flags = '';
+        re[SYMBOL] = /./[SYMBOL];
+      }
+
+      re.exec = function () {
+        execCalled = true;
+        return null;
+      };
+
+      re[SYMBOL]('');
+      return !execCalled;
+    });
+
+    if (!DELEGATES_TO_SYMBOL || !DELEGATES_TO_EXEC || KEY === 'replace' && !(REPLACE_SUPPORTS_NAMED_GROUPS && REPLACE_KEEPS_$0 && !REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE) || KEY === 'split' && !SPLIT_WORKS_WITH_OVERWRITTEN_EXEC) {
+      var nativeRegExpMethod = /./[SYMBOL];
+      var methods = exec(SYMBOL, ''[KEY], function (nativeMethod, regexp, str, arg2, forceStringMethod) {
+        if (regexp.exec === regexpExec) {
+          if (DELEGATES_TO_SYMBOL && !forceStringMethod) {
+            // The native String method already delegates to @@method (this
+            // polyfilled function), leasing to infinite recursion.
+            // We avoid it by directly calling the native @@method method.
+            return {
+              done: true,
+              value: nativeRegExpMethod.call(regexp, str, arg2)
+            };
+          }
+
+          return {
+            done: true,
+            value: nativeMethod.call(str, regexp, arg2)
+          };
+        }
+
+        return {
+          done: false
+        };
+      }, {
+        REPLACE_KEEPS_$0: REPLACE_KEEPS_$0,
+        REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE: REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE
+      });
+      var stringMethod = methods[0];
+      var regexMethod = methods[1];
+      redefine(String.prototype, KEY, stringMethod);
+      redefine(RegExp.prototype, SYMBOL, length == 2 // 21.2.5.8 RegExp.prototype[@@replace](string, replaceValue)
+      // 21.2.5.11 RegExp.prototype[@@split](string, limit)
+      ? function (string, arg) {
+        return regexMethod.call(string, this, arg);
+      } // 21.2.5.6 RegExp.prototype[@@match](string)
+      // 21.2.5.9 RegExp.prototype[@@search](string)
+      : function (string) {
+        return regexMethod.call(string, this);
+      });
+    }
+
+    if (sham) createNonEnumerableProperty(RegExp.prototype[SYMBOL], 'sham', true);
+  };
+
+  var createMethod$4 = function (CONVERT_TO_STRING) {
+    return function ($this, pos) {
+      var S = String(requireObjectCoercible($this));
+      var position = toInteger(pos);
+      var size = S.length;
+      var first, second;
+      if (position < 0 || position >= size) return CONVERT_TO_STRING ? '' : undefined;
+      first = S.charCodeAt(position);
+      return first < 0xD800 || first > 0xDBFF || position + 1 === size || (second = S.charCodeAt(position + 1)) < 0xDC00 || second > 0xDFFF ? CONVERT_TO_STRING ? S.charAt(position) : first : CONVERT_TO_STRING ? S.slice(position, position + 2) : (first - 0xD800 << 10) + (second - 0xDC00) + 0x10000;
+    };
+  };
+
+  var stringMultibyte = {
+    // `String.prototype.codePointAt` method
+    // https://tc39.github.io/ecma262/#sec-string.prototype.codepointat
+    codeAt: createMethod$4(false),
+    // `String.prototype.at` method
+    // https://github.com/mathiasbynens/String.prototype.at
+    charAt: createMethod$4(true)
+  };
+
+  var charAt = stringMultibyte.charAt; // `AdvanceStringIndex` abstract operation
+  // https://tc39.github.io/ecma262/#sec-advancestringindex
+
+  var advanceStringIndex = function (S, index, unicode) {
+    return index + (unicode ? charAt(S, index).length : 1);
+  };
+
+  // https://tc39.github.io/ecma262/#sec-regexpexec
+
+  var regexpExecAbstract = function (R, S) {
+    var exec = R.exec;
+
+    if (typeof exec === 'function') {
+      var result = exec.call(R, S);
+
+      if (typeof result !== 'object') {
+        throw TypeError('RegExp exec method returned something other than an Object or null');
+      }
+
+      return result;
+    }
+
+    if (classofRaw(R) !== 'RegExp') {
+      throw TypeError('RegExp#exec called on incompatible receiver');
+    }
+
+    return regexpExec.call(R, S);
+  };
+
+  var max$2 = Math.max;
+  var min$5 = Math.min;
+  var floor$3 = Math.floor;
+  var SUBSTITUTION_SYMBOLS = /\$([$&'`]|\d\d?|<[^>]*>)/g;
+  var SUBSTITUTION_SYMBOLS_NO_NAMED = /\$([$&'`]|\d\d?)/g;
+
+  var maybeToString = function (it) {
+    return it === undefined ? it : String(it);
+  }; // @@replace logic
+
+
+  fixRegexpWellKnownSymbolLogic('replace', 2, function (REPLACE, nativeReplace, maybeCallNative, reason) {
+    var REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE = reason.REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE;
+    var REPLACE_KEEPS_$0 = reason.REPLACE_KEEPS_$0;
+    var UNSAFE_SUBSTITUTE = REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE ? '$' : '$0';
+    return [// `String.prototype.replace` method
+    // https://tc39.github.io/ecma262/#sec-string.prototype.replace
+    function replace(searchValue, replaceValue) {
+      var O = requireObjectCoercible(this);
+      var replacer = searchValue == undefined ? undefined : searchValue[REPLACE];
+      return replacer !== undefined ? replacer.call(searchValue, O, replaceValue) : nativeReplace.call(String(O), searchValue, replaceValue);
+    }, // `RegExp.prototype[@@replace]` method
+    // https://tc39.github.io/ecma262/#sec-regexp.prototype-@@replace
+    function (regexp, replaceValue) {
+      if (!REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE && REPLACE_KEEPS_$0 || typeof replaceValue === 'string' && replaceValue.indexOf(UNSAFE_SUBSTITUTE) === -1) {
+        var res = maybeCallNative(nativeReplace, regexp, this, replaceValue);
+        if (res.done) return res.value;
+      }
+
+      var rx = anObject(regexp);
+      var S = String(this);
+      var functionalReplace = typeof replaceValue === 'function';
+      if (!functionalReplace) replaceValue = String(replaceValue);
+      var global = rx.global;
+
+      if (global) {
+        var fullUnicode = rx.unicode;
+        rx.lastIndex = 0;
+      }
+
+      var results = [];
+
+      while (true) {
+        var result = regexpExecAbstract(rx, S);
+        if (result === null) break;
+        results.push(result);
+        if (!global) break;
+        var matchStr = String(result[0]);
+        if (matchStr === '') rx.lastIndex = advanceStringIndex(S, toLength(rx.lastIndex), fullUnicode);
+      }
+
+      var accumulatedResult = '';
+      var nextSourcePosition = 0;
+
+      for (var i = 0; i < results.length; i++) {
+        result = results[i];
+        var matched = String(result[0]);
+        var position = max$2(min$5(toInteger(result.index), S.length), 0);
+        var captures = []; // NOTE: This is equivalent to
+        //   captures = result.slice(1).map(maybeToString)
+        // but for some reason `nativeSlice.call(result, 1, result.length)` (called in
+        // the slice polyfill when slicing native arrays) "doesn't work" in safari 9 and
+        // causes a crash (https://pastebin.com/N21QzeQA) when trying to debug it.
+
+        for (var j = 1; j < result.length; j++) captures.push(maybeToString(result[j]));
+
+        var namedCaptures = result.groups;
+
+        if (functionalReplace) {
+          var replacerArgs = [matched].concat(captures, position, S);
+          if (namedCaptures !== undefined) replacerArgs.push(namedCaptures);
+          var replacement = String(replaceValue.apply(undefined, replacerArgs));
+        } else {
+          replacement = getSubstitution(matched, S, position, captures, namedCaptures, replaceValue);
+        }
+
+        if (position >= nextSourcePosition) {
+          accumulatedResult += S.slice(nextSourcePosition, position) + replacement;
+          nextSourcePosition = position + matched.length;
+        }
+      }
+
+      return accumulatedResult + S.slice(nextSourcePosition);
+    }]; // https://tc39.github.io/ecma262/#sec-getsubstitution
+
+    function getSubstitution(matched, str, position, captures, namedCaptures, replacement) {
+      var tailPos = position + matched.length;
+      var m = captures.length;
+      var symbols = SUBSTITUTION_SYMBOLS_NO_NAMED;
+
+      if (namedCaptures !== undefined) {
+        namedCaptures = toObject(namedCaptures);
+        symbols = SUBSTITUTION_SYMBOLS;
+      }
+
+      return nativeReplace.call(replacement, symbols, function (match, ch) {
+        var capture;
+
+        switch (ch.charAt(0)) {
+          case '$':
+            return '$';
+
+          case '&':
+            return matched;
+
+          case '`':
+            return str.slice(0, position);
+
+          case "'":
+            return str.slice(tailPos);
+
+          case '<':
+            capture = namedCaptures[ch.slice(1, -1)];
+            break;
+
+          default:
+            // \d\d?
+            var n = +ch;
+            if (n === 0) return match;
+
+            if (n > m) {
+              var f = floor$3(n / 10);
+              if (f === 0) return match;
+              if (f <= m) return captures[f - 1] === undefined ? ch.charAt(1) : captures[f - 1] + ch.charAt(1);
+              return match;
+            }
+
+            capture = captures[n - 1];
+        }
+
+        return capture === undefined ? '' : capture;
+      });
+    }
+  });
 
   function isBitSet(_byte, bit) {
     return (_byte & 1 << bit) > 0;
@@ -3991,162 +4076,158 @@
     return bytes;
   }
 
-  var ID3v1 = /*#__PURE__*/function () {
-    _createClass(ID3v1, null, [{
-      key: "isID3v1",
-      value: function isID3v1(buffer) {
-        var offset = buffer.byteLength - 128;
+  var GENRES = ['Blues', 'Classic Rock', 'Country', 'Dance', 'Disco', 'Funk', 'Grunge', 'Hip-Hop', 'Jazz', 'Metal', 'New Age', 'Oldies', 'Other', 'Pop', 'R&B', 'Reggae', 'Rock', 'Techno', 'Industrial', 'Alternative', 'Ska', 'Death Metal', 'Pranks', 'Soundtrack', 'Euro-Techno', 'Ambient', 'Trip-Hop', 'Vocal', 'Jazz+Funk', 'Fusion', 'Trance', 'Classical', 'Instrumental', 'Acid', 'House', 'Game', 'Sound Clip', 'Gospel', 'Noise', 'Alt. Rock', 'Bass', 'Soul', 'Punk', 'Space', 'Meditative', 'Instrumental Pop', 'Instrumental Rock', 'Ethnic', 'Gothic', 'Darkwave', 'Techno-Industrial', 'Electronic', 'Pop-Folk', 'Eurodance', 'Dream', 'Southern Rock', 'Comedy', 'Cult', 'Gangsta Rap', 'Top 40', 'Christian Rap', 'Pop/Funk', 'Jungle', 'Native American', 'Cabaret', 'New Wave', 'Psychedelic', 'Rave', 'Showtunes', 'Trailer', 'Lo-Fi', 'Tribal', 'Acid Punk', 'Acid Jazz', 'Polka', 'Retro', 'Musical', 'Rock & Roll', 'Hard Rock', 'Folk', 'Folk-Rock', 'National Folk', 'Swing', 'Fast-Fusion', 'Bebop', 'Latin', 'Revival', 'Celtic', 'Bluegrass', 'Avantgarde', 'Gothic Rock', 'Progressive Rock', 'Psychedelic Rock', 'Symphonic Rock', 'Slow Rock', 'Big Band', 'Chorus', 'Easy Listening', 'Acoustic', 'Humour', 'Speech', 'Chanson', 'Opera', 'Chamber Music', 'Sonata', 'Symphony', 'Booty Bass', 'Primus', 'Porn Groove', 'Satire', 'Slow Jam', 'Club', 'Tango', 'Samba', 'Folklore', 'Ballad', 'Power Ballad', 'Rhythmic Soul', 'Freestyle', 'Duet', 'Punk Rock', 'Drum Solo', 'A Cappella', 'Euro-House', 'Dance Hall', 'Goa', 'Drum & Bass', 'Club-House', 'Hardcore', 'Terror', 'Indie', 'BritPop', 'Afro-Punk', 'Polsk Punk', 'Beat', 'Christian Gangsta Rap', 'Heavy Metal', 'Black Metal', 'Crossover', 'Contemporary Christian', 'Christian Rock', 'Merengue', 'Salsa', 'Thrash Metal', 'Anime', 'JPop', 'Synthpop', 'Abstract', 'Art Rock', 'Baroque', 'Bhangra', 'Big Beat', 'Breakbeat', 'Chillout', 'Downtempo', 'Dub', 'EBM', 'Eclectic', 'Electro', 'Electroclash', 'Emo', 'Experimental', 'Garage', 'Global', 'IDM', 'Illbient', 'Industro-Goth', 'Jam Band', 'Krautrock', 'Leftfield', 'Lounge', 'Math Rock', 'New Romantic', 'Nu-Breakz', 'Post-Punk', 'Post-Rock', 'Psytrance', 'Shoegaze', 'Space Rock', 'Trop Rock', 'World Music', 'Neoclassical', 'Audiobook', 'Audio Theatre', 'Neue Deutsche Welle', 'Podcast', 'Indie Rock', 'G-Funk', 'Dubstep', 'Garage Rock', 'Psybient'];
+  function hasID3v1(buffer) {
+    if (!isBuffer(buffer)) throw new TypeError('buffer is not ArrayBuffer/Buffer');
+    var offset = buffer.byteLength - 128;
 
-        if (offset > -1) {
-          var view = new BufferView(buffer, offset);
-          return view.getString(0, 3, 'ascii').string === 'TAG';
-        } else return false;
-      }
-    }]);
+    if (offset > -1) {
+      var view = new BufferView(buffer, offset);
+      return view.getString(0, 3, 'ascii').string === 'TAG';
+    } else return false;
+  }
+  function decode(buffer) {
+    if (!hasID3v1(buffer)) throw new TagError(100);
+    var view = new BufferView(buffer, buffer.byteLength - 128); // @TODO: Trim null characters instead of replacing all of it
 
-    function ID3v1(buffer) {
-      _classCallCheck(this, ID3v1);
+    var title = view.getString(3, 30, 'utf-8').string.replace(/\0/g, '');
+    var artist = view.getString(33, 30, 'utf-8').string.replace(/\0/g, '');
+    var album = view.getString(63, 30, 'utf-8').string.replace(/\0/g, '');
+    var year = view.getString(93, 4, 'utf-8').string.replace(/\0/g, '');
+    var track = view.getUint8(126).toString() || '';
+    var comment = view.getString(97, track !== null ? 28 : 30, 'utf-8').string.replace(/\0/g, '');
+    var genre = GENRES[view.getUint8(127)] || '';
+    var tags = {
+      title: title,
+      artist: artist,
+      album: album,
+      year: year,
+      track: track,
+      comment: comment,
+      genre: genre
+    };
+    tags.v1Version = track ? 1 : 0;
+    tags.v1Size = 128;
+    return tags;
+  }
+  function validate(tags, strict) {
+    var _tags$title = tags.title,
+        title = _tags$title === void 0 ? '' : _tags$title,
+        _tags$artist = tags.artist,
+        artist = _tags$artist === void 0 ? '' : _tags$artist,
+        _tags$album = tags.album,
+        album = _tags$album === void 0 ? '' : _tags$album,
+        _tags$year = tags.year,
+        year = _tags$year === void 0 ? '' : _tags$year,
+        _tags$comment = tags.comment,
+        comment = _tags$comment === void 0 ? '' : _tags$comment,
+        track = tags.track,
+        _tags$genre = tags.genre,
+        genre = _tags$genre === void 0 ? '' : _tags$genre;
 
-      if (!isBuffer(buffer)) {
-        throw new TypeError('buffer is not an instance of Buffer');
-      }
-
-      this.name = 'ID3v1';
-      this.buffer = buffer;
-      this.title = '';
-      this.artist = '';
-      this.album = '';
-      this.year = '';
-      this.comment = '';
-      this.track = undefined;
-      this.genre = -1;
+    if (typeof title !== 'string') {
+      throw new TagError(102, 'Title is not a string');
+    } else if (title.length > 30) {
+      throw new TagError(102, 'Title length exceeds 30 characters');
     }
 
-    _createClass(ID3v1, [{
-      key: "read",
-      value: function read() {
-        if (!ID3v1.isID3v1(this.buffer)) throw new TagError(100);
-        var offset = this.buffer.byteLength - 128;
-        var view = new BufferView(this.buffer, offset);
-        this.title = view.getString(3, 30, 'utf-8').string.replace(/\0/g, '');
-        this.artist = view.getString(33, 30, 'utf-8').string.replace(/\0/g, '');
-        this.album = view.getString(63, 30, 'utf-8').string.replace(/\0/g, '');
-        this.year = view.getString(93, 4, 'utf-8').string.replace(/\0/g, '');
-        this.track = view.getUint8(126) || undefined;
-        this.comment = view.getString(97, typeof this.track !== 'undefined' ? 28 : 30, 'utf-8').string.replace(/\0/g, '');
-        this.genre = view.getUint8(127);
+    if (typeof artist !== 'string') {
+      throw new TagError(102, 'Artist is not a string');
+    } else if (artist.length > 30) {
+      throw new TagError(102, 'Artist length exceeds 30 characters');
+    }
+
+    if (typeof album !== 'string') {
+      throw new TagError(102, 'Album is not a string');
+    } else if (album.length > 30) {
+      throw new TagError(102, 'Album length exceeds 30 characters');
+    }
+
+    if (typeof year !== 'string') {
+      throw new TagError(102, 'Year is not a string');
+    } else if (year.length > 4) {
+      throw new TagError(102, 'Year length exceeds 4 characters');
+    }
+
+    if (typeof comment !== 'string') {
+      throw new TagError(102, 'Comment is not a string');
+    }
+
+    if (typeof track !== 'string') {
+      throw new TagError(102, 'Track is not a string');
+    } else if (parseInt(track) > 255 || parseInt(track) < 0) {
+      throw new TagError(102, 'Track should be in range 255 - 0');
+    }
+
+    if (track !== '') {
+      if (comment.length > 28) {
+        throw new TagError(102, 'Comment length exceeds 28 characters');
       }
-    }, {
-      key: "validate",
-      value: function validate() {
-        if (typeof this.title !== 'string' || typeof this.artist !== 'string' || typeof this.album !== 'string' || typeof this.year !== 'string' || typeof this.comment !== 'string') {
-          throw new TagError(103, 'Title/Artist/Album/Year/Comment is not a string');
-        }
+    } else if (comment.length > 30) {
+      throw new TagError(102, 'Comment length exceeds 30 characters');
+    }
 
-        if (this.title.length > 30) {
-          throw new TagError(103, 'Title length exceeds 30');
-        }
+    if (typeof genre !== 'string') {
+      throw new TagError(102, 'Genre is not a string');
+    } else if (strict && !GENRES.includes(genre) && genre !== '') {
+      throw new TagError(102, 'Unknown genre');
+    }
 
-        if (this.artist.length > 30) {
-          throw new TagError(103, 'Artist length exceeds 30');
-        }
+    return true;
+  }
+  function encode(tags) {
+    var title = tags.title,
+        artist = tags.artist,
+        album = tags.album,
+        year = tags.year,
+        comment = tags.comment,
+        track = tags.track,
+        genre = tags.genre;
 
-        if (this.album.length > 30) {
-          throw new TagError(103, 'Album length exceeds 30');
-        }
+    while (title.length < 30) {
+      title += '\0';
+    }
 
-        if (this.year.length > 4) {
-          throw new TagError(103, 'Year length exceeds 4');
-        }
+    while (artist.length < 30) {
+      artist += '\0';
+    }
 
-        if (typeof this.track !== 'undefined') {
-          if (typeof this.track !== 'number') {
-            throw new TagError(103, 'Track is not a number');
-          } else if (this.track > 255 || this.track < 1) {
-            throw new TagError(103, 'Track should be in range of 1 - 255');
-          }
+    while (album.length < 30) {
+      album += '\0';
+    }
 
-          if (this.comment.length > 28) {
-            throw new TagError(103, 'Comment length exceeds 28');
-          }
-        } else if (this.comment.length > 30) {
-          throw new TagError(103, 'Comment length exceeds 30');
-        }
+    while (year.length < 4) {
+      year += '\0';
+    }
 
-        if (typeof this.genre !== 'number') {
-          throw new TagError(103, 'Genre is not a number');
-        } else if (this.genre > 255 || this.genre < 0) {
-          throw new TagError(103, 'Genre should be in range of 0 - 255');
-        }
+    genre = GENRES.indexOf(genre);
 
-        return true;
+    if (track !== '') {
+      while (comment.length < 28) {
+        comment += '\0';
       }
-    }, {
-      key: "save",
-      value: function save() {
-        if (!this.validate()) return false;
-        var audio = this.getAudio();
-        var title = this.title;
-        var artist = this.artist;
-        var album = this.album;
-        var year = this.year;
-        var comment = this.comment;
-        var track = this.track;
-        var genre = this.genre;
 
-        while (title.length < 30) {
-          title += '\0';
-        }
-
-        while (artist.length < 30) {
-          artist += '\0';
-        }
-
-        while (album.length < 30) {
-          album += '\0';
-        }
-
-        while (year.length < 4) {
-          year += '\0';
-        }
-
-        if (typeof track !== 'undefined') {
-          while (comment.length < 28) {
-            comment += '\0';
-          }
-
-          comment += '\0' + String.fromCharCode(track);
-        } else {
-          while (comment.length < 30) {
-            comment += '\0';
-          }
-        }
-
-        this.buffer = mergeBytes(audio, 0x54, 0x41, 0x47, encodeString(title, 'utf-8'), encodeString(artist, 'utf-8'), encodeString(album, 'utf-8'), encodeString(year, 'utf-8'), encodeString(comment, 'utf-8'), genre).buffer;
-        this.read();
-        return this.buffer;
+      comment += '\0' + String.fromCharCode(track);
+    } else {
+      while (comment.length < 30) {
+        comment += '\0';
       }
-    }, {
-      key: "getAudio",
-      value: function getAudio$1() {
-        return new Uint8Array(getAudio(this.buffer));
-      }
-    }]);
+    }
 
-    return ID3v1;
-  }();
+    return mergeBytes(0x54, 0x41, 0x47, encodeString(title, 'utf-8'), encodeString(artist, 'utf-8'), encodeString(album, 'utf-8'), encodeString(year, 'utf-8'), encodeString(comment, 'utf-8'), genre > -1 ? genre : 12).buffer;
+  }
 
   var $filter$1 = arrayIteration.filter;
   var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport('filter'); // Edge 14- issue
 
-  var USES_TO_LENGTH$3 = arrayMethodUsesToLength('filter'); // `Array.prototype.filter` method
+  var USES_TO_LENGTH$5 = arrayMethodUsesToLength('filter'); // `Array.prototype.filter` method
   // https://tc39.github.io/ecma262/#sec-array.prototype.filter
   // with adding support of @@species
 
   _export({
     target: 'Array',
     proto: true,
-    forced: !HAS_SPECIES_SUPPORT$1 || !USES_TO_LENGTH$3
+    forced: !HAS_SPECIES_SUPPORT$1 || !USES_TO_LENGTH$5
   }, {
     filter: function filter(callbackfn
     /* , thisArg */
@@ -4155,26 +4236,20 @@
     }
   });
 
-  var $includes$1 = arrayIncludes.includes;
-  var USES_TO_LENGTH$4 = arrayMethodUsesToLength('indexOf', {
-    ACCESSORS: true,
-    1: 0
-  }); // `Array.prototype.includes` method
-  // https://tc39.github.io/ecma262/#sec-array.prototype.includes
+  var FAILS_ON_PRIMITIVES = fails(function () {
+    objectKeys(1);
+  }); // `Object.keys` method
+  // https://tc39.github.io/ecma262/#sec-object.keys
 
   _export({
-    target: 'Array',
-    proto: true,
-    forced: !USES_TO_LENGTH$4
+    target: 'Object',
+    stat: true,
+    forced: FAILS_ON_PRIMITIVES
   }, {
-    includes: function includes(el
-    /* , fromIndex = 0 */
-    ) {
-      return $includes$1(this, el, arguments.length > 1 ? arguments[1] : undefined);
+    keys: function keys(it) {
+      return objectKeys(toObject(it));
     }
-  }); // https://tc39.github.io/ecma262/#sec-array.prototype-@@unscopables
-
-  addToUnscopables('includes');
+  });
 
   var UNSUPPORTED_Y$2 = regexpStickyHelpers.UNSUPPORTED_Y; // `RegExp.prototype.flags` getter
   // https://tc39.github.io/ecma262/#sec-get-regexp.prototype.flags
@@ -4199,200 +4274,6 @@
     ) {
       return !!~String(requireObjectCoercible(this)).indexOf(notARegexp(searchString), arguments.length > 1 ? arguments[1] : undefined);
     }
-  });
-
-  function getHeaderFlags(_byte, version) {
-    var flags = {};
-
-    switch (version) {
-      case 3:
-        flags.unsynchronisation = isBitSet(_byte, 7);
-        flags.extendedHeader = isBitSet(_byte, 6);
-        flags.experimentalIndicator = isBitSet(_byte, 5);
-        break;
-
-      case 4:
-        flags.unsynchronisation = isBitSet(_byte, 7);
-        flags.extendedHeader = isBitSet(_byte, 6);
-        flags.experimentalIndicator = isBitSet(_byte, 5);
-        flags.footerPresent = isBitSet(_byte, 4);
-        break;
-
-      default:
-        throw new TagError(201, version);
-    }
-
-    return flags;
-  }
-  function getFrameFlags(bytes, version) {
-    var flags = {};
-
-    switch (version) {
-      case 3:
-        flags.tagAlterPreservation = isBitSet(bytes[0], 7);
-        flags.fileAlterPreservation = isBitSet(bytes[0], 6);
-        flags.readOnly = isBitSet(bytes[0], 5);
-        flags.compression = isBitSet(bytes[1], 7);
-        flags.encryption = isBitSet(bytes[1], 6);
-        flags.groupingIdentity = isBitSet(bytes[1], 5);
-        break;
-
-      case 4:
-        flags.tagAlterPreservation = isBitSet(bytes[0], 6);
-        flags.fileAlterPreservation = isBitSet(bytes[0], 5);
-        flags.readOnly = isBitSet(bytes[0], 4);
-        flags.groupingIdentity = isBitSet(bytes[1], 6);
-        flags.compression = isBitSet(bytes[1], 3);
-        flags.encryption = isBitSet(bytes[1], 2);
-        flags.unsynchronisation = isBitSet(bytes[1], 1);
-        flags.dataLengthIndicator = isBitSet(bytes[1], 0);
-        break;
-
-      default:
-        throw new TagError(201, version);
-    }
-
-    return flags;
-  }
-
-  var $map$1 = arrayIteration.map;
-  var HAS_SPECIES_SUPPORT$2 = arrayMethodHasSpeciesSupport('map'); // FF49- issue
-
-  var USES_TO_LENGTH$5 = arrayMethodUsesToLength('map'); // `Array.prototype.map` method
-  // https://tc39.github.io/ecma262/#sec-array.prototype.map
-  // with adding support of @@species
-
-  _export({
-    target: 'Array',
-    proto: true,
-    forced: !HAS_SPECIES_SUPPORT$2 || !USES_TO_LENGTH$5
-  }, {
-    map: function map(callbackfn
-    /* , thisArg */
-    ) {
-      return $map$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-    }
-  });
-
-  var DatePrototype = Date.prototype;
-  var INVALID_DATE = 'Invalid Date';
-  var TO_STRING = 'toString';
-  var nativeDateToString = DatePrototype[TO_STRING];
-  var getTime = DatePrototype.getTime; // `Date.prototype.toString` method
-  // https://tc39.github.io/ecma262/#sec-date.prototype.tostring
-
-  if (new Date(NaN) + '' != INVALID_DATE) {
-    redefine(DatePrototype, TO_STRING, function toString() {
-      var value = getTime.call(this); // eslint-disable-next-line no-self-compare
-
-      return value === value ? nativeDateToString.call(this) : INVALID_DATE;
-    });
-  }
-
-  // a string of all valid unicode whitespaces
-  // eslint-disable-next-line max-len
-  var whitespaces = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
-
-  var whitespace = '[' + whitespaces + ']';
-  var ltrim = RegExp('^' + whitespace + whitespace + '*');
-  var rtrim = RegExp(whitespace + whitespace + '*$'); // `String.prototype.{ trim, trimStart, trimEnd, trimLeft, trimRight }` methods implementation
-
-  var createMethod$4 = function (TYPE) {
-    return function ($this) {
-      var string = String(requireObjectCoercible($this));
-      if (TYPE & 1) string = string.replace(ltrim, '');
-      if (TYPE & 2) string = string.replace(rtrim, '');
-      return string;
-    };
-  };
-
-  var stringTrim = {
-    // `String.prototype.{ trimLeft, trimStart }` methods
-    // https://tc39.github.io/ecma262/#sec-string.prototype.trimstart
-    start: createMethod$4(1),
-    // `String.prototype.{ trimRight, trimEnd }` methods
-    // https://tc39.github.io/ecma262/#sec-string.prototype.trimend
-    end: createMethod$4(2),
-    // `String.prototype.trim` method
-    // https://tc39.github.io/ecma262/#sec-string.prototype.trim
-    trim: createMethod$4(3)
-  };
-
-  var trim = stringTrim.trim;
-  var $parseInt = global_1.parseInt;
-  var hex = /^[+-]?0[Xx]/;
-  var FORCED$5 = $parseInt(whitespaces + '08') !== 8 || $parseInt(whitespaces + '0x16') !== 22; // `parseInt` method
-  // https://tc39.github.io/ecma262/#sec-parseint-string-radix
-
-  var numberParseInt = FORCED$5 ? function parseInt(string, radix) {
-    var S = trim(String(string));
-    return $parseInt(S, radix >>> 0 || (hex.test(S) ? 16 : 10));
-  } : $parseInt;
-
-  // https://tc39.github.io/ecma262/#sec-parseint-string-radix
-
-  _export({
-    global: true,
-    forced: parseInt != numberParseInt
-  }, {
-    parseInt: numberParseInt
-  });
-
-  var TO_STRING$1 = 'toString';
-  var RegExpPrototype = RegExp.prototype;
-  var nativeToString = RegExpPrototype[TO_STRING$1];
-  var NOT_GENERIC = fails(function () {
-    return nativeToString.call({
-      source: 'a',
-      flags: 'b'
-    }) != '/a/b';
-  }); // FF44- RegExp#toString has a wrong name
-
-  var INCORRECT_NAME = nativeToString.name != TO_STRING$1; // `RegExp.prototype.toString` method
-  // https://tc39.github.io/ecma262/#sec-regexp.prototype.tostring
-
-  if (NOT_GENERIC || INCORRECT_NAME) {
-    redefine(RegExp.prototype, TO_STRING$1, function toString() {
-      var R = anObject(this);
-      var p = String(R.source);
-      var rf = R.flags;
-      var f = String(rf === undefined && R instanceof RegExp && !('flags' in RegExpPrototype) ? regexpFlags.call(R) : rf);
-      return '/' + p + '/' + f;
-    }, {
-      unsafe: true
-    });
-  }
-
-  fixRegexpWellKnownSymbolLogic('match', 1, function (MATCH, nativeMatch, maybeCallNative) {
-    return [// `String.prototype.match` method
-    // https://tc39.github.io/ecma262/#sec-string.prototype.match
-    function match(regexp) {
-      var O = requireObjectCoercible(this);
-      var matcher = regexp == undefined ? undefined : regexp[MATCH];
-      return matcher !== undefined ? matcher.call(regexp, O) : new RegExp(regexp)[MATCH](String(O));
-    }, // `RegExp.prototype[@@match]` method
-    // https://tc39.github.io/ecma262/#sec-regexp.prototype-@@match
-    function (regexp) {
-      var res = maybeCallNative(nativeMatch, regexp, this);
-      if (res.done) return res.value;
-      var rx = anObject(regexp);
-      var S = String(this);
-      if (!rx.global) return regexpExecAbstract(rx, S);
-      var fullUnicode = rx.unicode;
-      rx.lastIndex = 0;
-      var A = [];
-      var n = 0;
-      var result;
-
-      while ((result = regexpExecAbstract(rx, S)) !== null) {
-        var matchStr = String(result[0]);
-        A[n] = matchStr;
-        if (matchStr === '') rx.lastIndex = advanceStringIndex(S, toLength(rx.lastIndex), fullUnicode);
-        n++;
-      }
-
-      return n === 0 ? null : A;
-    }];
   });
 
   var arrayPush = [].push;
@@ -4506,64 +4387,79 @@
     }];
   }, !SUPPORTS_Y);
 
-  var ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8'];
-  var GENRE = ['Blues', 'Classic Rock', 'Country', 'Dance', 'Disco', 'Funk', 'Grunge', 'Hip-Hop', 'Jazz', 'Metal', 'New Age', 'Oldies', 'Other', 'Pop', 'R&B', 'Reggae', 'Rock', 'Techno', 'Industrial', 'Alternative', 'Ska', 'Death Metal', 'Pranks', 'Soundtrack', 'Euro-Techno', 'Ambient', 'Trip-Hop', 'Vocal', 'Jazz+Funk', 'Fusion', 'Trance', 'Classical', 'Instrumental', 'Acid', 'House', 'Game', 'Sound Clip', 'Gospel', 'Noise', 'Alt. Rock', 'Bass', 'Soul', 'Punk', 'Space', 'Meditative', 'Instrumental Pop', 'Instrumental Rock', 'Ethnic', 'Gothic', 'Darkwave', 'Techno-Industrial', 'Electronic', 'Pop-Folk', 'Eurodance', 'Dream', 'Southern Rock', 'Comedy', 'Cult', 'Gangsta Rap', 'Top 40', 'Christian Rap', 'Pop/Funk', 'Jungle', 'Native American', 'Cabaret', 'New Wave', 'Psychedelic', 'Rave', 'Showtunes', 'Trailer', 'Lo-Fi', 'Tribal', 'Acid Punk', 'Acid Jazz', 'Polka', 'Retro', 'Musical', 'Rock & Roll', 'Hard Rock', 'Folk', 'Folk-Rock', 'National Folk', 'Swing', 'Fast-Fusion', 'Bebop', 'Latin', 'Revival', 'Celtic', 'Bluegrass', 'Avantgarde', 'Gothic Rock', 'Progressive Rock', 'Psychedelic Rock', 'Symphonic Rock', 'Slow Rock', 'Big Band', 'Chorus', 'Easy Listening', 'Acoustic', 'Humour', 'Speech', 'Chanson', 'Opera', 'Chamber Music', 'Sonata', 'Symphony', 'Booty Bass', 'Primus', 'Porn Groove', 'Satire', 'Slow Jam', 'Club', 'Tango', 'Samba', 'Folklore', 'Ballad', 'Power Ballad', 'Rhythmic Soul', 'Freestyle', 'Duet', 'Punk Rock', 'Drum Solo', 'A Cappella', 'Euro-House', 'Dance Hall', 'Goa', 'Drum & Bass', 'Club-House', 'Hardcore', 'Terror', 'Indie', 'BritPop', 'Afro-Punk', 'Polsk Punk', 'Beat', 'Christian Gangsta Rap', 'Heavy Metal', 'Black Metal', 'Crossover', 'Contemporary Christian', 'Christian Rock', 'Merengue', 'Salsa', 'Thrash Metal', 'Anime', 'JPop', 'Synthpop', 'Abstract', 'Art Rock', 'Baroque', 'Bhangra', 'Big Beat', 'Breakbeat', 'Chillout', 'Downtempo', 'Dub', 'EBM', 'Eclectic', 'Electro', 'Electroclash', 'Emo', 'Experimental', 'Garage', 'Global', 'IDM', 'Illbient', 'Industro-Goth', 'Jam Band', 'Krautrock', 'Leftfield', 'Lounge', 'Math Rock', 'New Romantic', 'Nu-Breakz', 'Post-Punk', 'Post-Rock', 'Psytrance', 'Shoegaze', 'Space Rock', 'Trop Rock', 'World Music', 'Neoclassical', 'Audiobook', 'Audio Theatre', 'Neue Deutsche Welle', 'Podcast', 'Indie Rock', 'G-Funk', 'Dubstep', 'Garage Rock', 'Psybient'];
-
-  /**
-   *  Frame Parsers
-   *  @param {BufferView} view - View of the frame excluding the header
-   *  @param {number} version - Frame will be parsed according to this version
-   */
-
-  function textFrame(view, version) {
-    var encoding = ENCODINGS[view.getUint8(0)];
-    var value;
+  function getHeaderFlags(_byte, version) {
+    var flags = {};
 
     switch (version) {
       case 3:
-        value = view.getCString(1, encoding).string.split('/');
+        flags.unsynchronisation = isBitSet(_byte, 7);
+        flags.extendedHeader = isBitSet(_byte, 6);
+        flags.experimentalIndicator = isBitSet(_byte, 5);
         break;
 
       case 4:
-        value = view.getString(1, view.byteLength - 1, encoding).string.split('\0');
+        flags.unsynchronisation = isBitSet(_byte, 7);
+        flags.extendedHeader = isBitSet(_byte, 6);
+        flags.experimentalIndicator = isBitSet(_byte, 5);
+        flags.footerPresent = isBitSet(_byte, 4);
         break;
-
-      default:
-        throw new TagError(201, version);
     }
 
-    return value.length === 1 ? value[0] : value;
+    return flags;
   }
-  function numberFrame(view, version) {
-    var value = textFrame(view, version);
+  function getFrameFlags(bytes, version) {
+    var flags = {};
 
-    var toNumber = function toNumber(string) {
-      return string.match(/^(\d+)$/) !== null ? parseInt(string) : string;
-    };
+    switch (version) {
+      case 3:
+        flags.tagAlterPreservation = isBitSet(bytes[0], 7);
+        flags.fileAlterPreservation = isBitSet(bytes[0], 6);
+        flags.readOnly = isBitSet(bytes[0], 5);
+        flags.compression = isBitSet(bytes[1], 7);
+        flags.encryption = isBitSet(bytes[1], 6);
+        flags.groupingIdentity = isBitSet(bytes[1], 5);
+        break;
 
-    return Array.isArray(value) ? value.map(function (elem) {
-      return toNumber(elem);
-    }) : toNumber(value);
+      case 4:
+        flags.tagAlterPreservation = isBitSet(bytes[0], 6);
+        flags.fileAlterPreservation = isBitSet(bytes[0], 5);
+        flags.readOnly = isBitSet(bytes[0], 4);
+        flags.groupingIdentity = isBitSet(bytes[1], 6);
+        flags.compression = isBitSet(bytes[1], 3);
+        flags.encryption = isBitSet(bytes[1], 2);
+        flags.unsynchronisation = isBitSet(bytes[1], 1);
+        flags.dataLengthIndicator = isBitSet(bytes[1], 0);
+        break;
+    }
+
+    return flags;
   }
-  function setFrame(view, version) {
-    var value = textFrame(view, version);
 
-    var toSet = function toSet(object) {
-      var set = {};
-      var splitted = object.split('/');
-      if (splitted[0]) set.position = parseInt(splitted[0]);
-      if (splitted[1]) set.total = parseInt(splitted[1]);
-      return set;
-    };
-
-    return Array.isArray(value) ? value.map(function (elem) {
-      return toSet(elem);
-    }) : toSet(value);
+  var ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8'];
+  function textFrame(buffer, version) {
+    var view = new BufferView(buffer);
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var len = view.byteLength - 1;
+    return version === 3 ? view.getCString(1, encoding).string.replace(/\//g, '\\\\') : view.getString(1, len, encoding).string.replace(/\0/g, '\\\\');
   }
-  function urlFrame(view, version) {
+  function setFrame(buffer, version) {
+    var view = new BufferView(buffer);
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var len = view.byteLength - 1;
+    return version === 3 ? view.getCString(1, encoding).string : view.getString(1, len, encoding).string.replace(/\0/g, '\\\\');
+  }
+  function iplsFrame(buffer, version) {
+    var view = new BufferView(buffer);
+    var encoding = ENCODINGS[view.getUint8(0)];
+    var len = view.byteLength - 1;
+    return view.getString(1, len, encoding).string.replace(/\0/g, '\\\\');
+  }
+  function urlFrame(buffer, version) {
+    var view = new BufferView(buffer);
     return view.getCString(0, 'ascii').string;
   }
-  function txxxFrame(view, version) {
+  function txxxFrame(buffer, version) {
+    var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
     var description = view.getCString(1, encoding);
     var valueOffset = description.length + 1;
@@ -4574,7 +4470,8 @@
       text: value.string
     };
   }
-  function wxxxFrame(view, version) {
+  function wxxxFrame(buffer, version) {
+    var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
     var description = view.getCString(1, encoding);
     var urlOffset = description.length + 1;
@@ -4585,20 +4482,8 @@
       url: url.string
     };
   }
-  function iplsFrame(view, version) {
-    var encoding = ENCODINGS[view.getUint8(0)];
-    var people = [];
-    var length = 1;
-
-    while (length < view.byteLength) {
-      var person = view.getCString(length, encoding);
-      people.push(person.string);
-      length += person.length;
-    }
-
-    return people;
-  }
-  function langDescFrame(view, version) {
+  function langDescFrame(buffer, version) {
+    var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
     var descriptor = view.getCString(4, encoding);
     var textOffset = descriptor.length + 4;
@@ -4610,7 +4495,8 @@
       text: text.string
     };
   }
-  function apicFrame(view, version) {
+  function apicFrame(buffer, version) {
+    var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
     var mime = view.getCString(1, 'ascii');
     var type = view.getUint8(mime.length + 1);
@@ -4625,7 +4511,8 @@
       data: data
     };
   }
-  function geobFrame(view, version) {
+  function geobFrame(buffer, version) {
+    var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
     var mime = view.getCString(1, 'ascii');
     var fname = view.getCString(mime.length + 1, encoding);
@@ -4640,7 +4527,8 @@
       object: object
     };
   }
-  function ufidFrame(view, version) {
+  function ufidFrame(buffer, version) {
+    var view = new BufferView(buffer);
     var ownerId = view.getCString(0, 'ascii');
     var id = view.getUint8(ownerId.length, view.byteLength - ownerId.length);
     return {
@@ -4648,14 +4536,16 @@
       id: id
     };
   }
-  function userFrame(view, version) {
+  function userFrame(buffer, version) {
+    var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
     return {
       language: view.getString(1, 3, 'ascii').string,
       text: view.getString(4, view.byteLength - 4, encoding).string
     };
   }
-  function owneFrame(view, version) {
+  function owneFrame(buffer, version) {
+    var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
     var currencyCode = view.getString(1, 3, 'ascii');
     var currency = view.getCString(4, 'ascii');
@@ -4672,7 +4562,8 @@
       seller: seller.string
     };
   }
-  function privFrame(view, version) {
+  function privFrame(buffer, version) {
+    var view = new BufferView(buffer);
     var ownerId = view.getCString(0, 'ascii');
     var data = view.getUint8(ownerId.length, view.byteLength - ownerId.length);
     return {
@@ -4680,16 +4571,19 @@
       data: data
     };
   }
-  function signFrame(view, version) {
+  function signFrame(buffer, version) {
+    var view = new BufferView(buffer);
     return {
       group: view.getUint8,
       signature: view.getUint8(1, view.byteLength - 1)
     };
   }
-  function seekFrame(view, version) {
+  function seekFrame(buffer, version) {
+    var view = new BufferView(buffer);
     return view.getUint32(0);
   }
-  function syltFrame(view, version) {
+  function syltFrame(buffer, version) {
+    var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
     var language = view.getString(1, 3, 'ascii').string;
     var format = view.getUint8(4);
@@ -4725,10 +4619,12 @@
       lyrics: text
     };
   }
-  function mcdiFrame(view, version) {
+  function mcdiFrame(buffer, version) {
+    var view = new BufferView(buffer);
     return view.getUint8(0, view.byteLength);
   }
-  function sytcFrame(view, version) {
+  function sytcFrame(buffer, version) {
+    var view = new BufferView(buffer);
     return {
       format: view.getUint8(0),
       data: view.getUint8(1, view.byteLength - 1)
@@ -5132,20 +5028,52 @@
   }
 
   var $every$1 = arrayIteration.every;
-  var STRICT_METHOD$2 = arrayMethodIsStrict('every');
+  var STRICT_METHOD$3 = arrayMethodIsStrict('every');
   var USES_TO_LENGTH$6 = arrayMethodUsesToLength('every'); // `Array.prototype.every` method
   // https://tc39.github.io/ecma262/#sec-array.prototype.every
 
   _export({
     target: 'Array',
     proto: true,
-    forced: !STRICT_METHOD$2 || !USES_TO_LENGTH$6
+    forced: !STRICT_METHOD$3 || !USES_TO_LENGTH$6
   }, {
     every: function every(callbackfn
     /* , thisArg */
     ) {
       return $every$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
     }
+  });
+
+  fixRegexpWellKnownSymbolLogic('match', 1, function (MATCH, nativeMatch, maybeCallNative) {
+    return [// `String.prototype.match` method
+    // https://tc39.github.io/ecma262/#sec-string.prototype.match
+    function match(regexp) {
+      var O = requireObjectCoercible(this);
+      var matcher = regexp == undefined ? undefined : regexp[MATCH];
+      return matcher !== undefined ? matcher.call(regexp, O) : new RegExp(regexp)[MATCH](String(O));
+    }, // `RegExp.prototype[@@match]` method
+    // https://tc39.github.io/ecma262/#sec-regexp.prototype-@@match
+    function (regexp) {
+      var res = maybeCallNative(nativeMatch, regexp, this);
+      if (res.done) return res.value;
+      var rx = anObject(regexp);
+      var S = String(this);
+      if (!rx.global) return regexpExecAbstract(rx, S);
+      var fullUnicode = rx.unicode;
+      rx.lastIndex = 0;
+      var A = [];
+      var n = 0;
+      var result;
+
+      while ((result = regexpExecAbstract(rx, S)) !== null) {
+        var matchStr = String(result[0]);
+        A[n] = matchStr;
+        if (matchStr === '') rx.lastIndex = advanceStringIndex(S, toLength(rx.lastIndex), fullUnicode);
+        n++;
+      }
+
+      return n === 0 ? null : A;
+    }];
   });
 
   var defineProperty$7 = objectDefineProperty.f;
@@ -5221,6 +5149,14 @@
 
   setSpecies('RegExp');
 
+  var year = '(\\d{4})';
+  var month = '(0[1-9]|1[0-2])';
+  var day = '(0[1-9]|1\\d|2\\d|3[0-1])';
+  var hour = '(0\\d|1\\d|2[0-3])';
+  var minute = '(0\\d|1\\d|2\\d|3\\d|4\\d|5\\d)';
+  var second = minute;
+  var timeRegex = new RegExp("^(".concat(year, "(-").concat(month, "(-").concat(day, "(T").concat(hour, "(:").concat(minute, "(:").concat(second, ")?)?)?)?)?)$"));
+
   function includes(array, object) {
     var included = false;
     var i = 0;
@@ -5229,12 +5165,20 @@
       if (objectEqual(array[i], object)) {
         included = true;
         break;
-      }
-
-      i++;
+      } else i++;
     }
 
     return included;
+  }
+  function mergeObjects(obj1, obj2) {
+    var filtered = obj1;
+
+    for (var key in obj2) {
+      if (obj1[key] !== undefined && obj1[key] !== '') filtered[key] = obj1[key];
+      if (obj2[key] !== undefined && obj2[key] !== '') filtered[key] = obj2[key];
+    }
+
+    return filtered;
   }
   function objectEqual(obj1, obj2) {
     for (var prop in obj1) {
@@ -5260,530 +5204,389 @@
 
     return true;
   }
+  function overwriteDefault(usrObj, defObj) {
+    var object = {};
 
+    for (var prop in defObj) {
+      var defVal = defObj[prop];
+      var usrVal = usrObj[prop];
+
+      if (typeof usrVal === 'undefined') {
+        object[prop] = defVal;
+        continue;
+      }
+
+      switch (_typeof(defVal)) {
+        case 'object':
+          object[prop] = overwriteDefault(usrVal, defVal);
+          break;
+
+        default:
+          object[prop] = _typeof(defVal) === _typeof(usrVal) ? usrVal : defVal;
+      }
+    }
+
+    return object;
+  }
+
+  var stringRegex = /^(.*)$/;
+  var setRegex = /^([0-9]+)(\/[0-9]+)?$/;
   var urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/;
   var langRegex = /^([a-z]{3}|XXX)$/;
-  var stringRegex = /^(.*)$/;
-  var year = '(\\d{4})';
-  var month = '(0[1-9]|1[0-2])';
-  var day = '(0[1-9]|1\\d|2\\d|3[0-1])';
-  var hour = '(0\\d|1\\d|2[0-3])';
-  var minute = '(0\\d|1\\d|2\\d|3\\d|4\\d|5\\d)';
-  var second = minute;
-  var timeRegex = new RegExp("^(".concat(year, "(-").concat(month, "(-").concat(day, "(T").concat(hour, "(:").concat(minute, "(:").concat(second, ")?)?)?)?)?)$"));
-  function validateID(id) {
-    if (!id.match(/^([A-Z0-9]{4})$/)) {
-      throw new TagError(203, 'ID is invalid');
+  var imageRegex = /(image\/[a-z0-9!#$&.+\-^_]+){0,129}/;
+  var syltRegex = /^((\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)|)/;
+  function textFrame$1(value, version, strict) {
+    if (typeof value !== 'string') {
+      throw new TagError(201, 'Value is not a string');
+    }
+
+    if (strict && !value.match(stringRegex)) {
+      throw new TagError(201, 'Newlines are not allowed');
     }
 
     return true;
   }
-  /**
-   *  Validators
-   *  @param {any[]} values - Array of frame values
-   *  @param {number} version - Frame will be validated according to this version
-   */
+  function setFrame$1(value, version, strict) {
+    if (version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
+    value.forEach(function (set) {
+      textFrame$1(set, version, strict);
 
-  function textFrame$1(values, version) {
-    if (values.length > 1) {
-      throw new TagError(203, 'Multiple `T???` frames are not allowed');
-    }
-
-    values = Array.isArray(values[0]) ? values[0] : [values[0]];
-    values.forEach(function (value) {
-      if (typeof value !== 'string') {
-        throw new TagError(203, 'Value is not a string');
+      if (typeof set !== 'string' && typeof set !== 'number') {
+        throw new TagError(201, 'Value is not a string/number');
       }
 
-      if (!value.match(stringRegex)) {
-        throw new TagError(203, 'Newlines are not allowed');
+      var match = set.match(setRegex);
+
+      if (strict && typeof set === 'string') {
+        if (match === null) throw new TagError(201, 'Invalid format (eg. 1/2)');
+        var position = parseInt(match[1]);
+        var total = match[2] ? parseInt(match[2].substr(1)) : null;
+
+        if (total !== null && position > total) {
+          throw new TagError(201, 'Position is greater then total');
+        }
       }
     });
     return true;
   }
-  function numberFrame$1(values, version) {
-    if (values.length > 1) {
-      throw new TagError(203, 'Multiple `T???` frames are not allowed');
-    }
+  function timeFrame(value, version, strict) {
+    if (version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
+    value.forEach(function (time) {
+      textFrame$1(time, version, strict);
 
-    values = Array.isArray(values[0]) ? values[0] : [values[0]];
-    values.forEach(function (value) {
-      if (typeof value !== 'number') {
-        throw new TagError(203, 'Value is not a number');
+      if (version === 3 && strict && !time.match(/^(\d{4})$/)) {
+        throw new TagError(201, 'Value is not 4 numeric characters');
+      }
+
+      if (version === 4 && strict && !time.match(timeRegex)) {
+        throw new TagError(201, 'Time frames must follow ISO 8601');
       }
     });
     return true;
   }
-  function setFrame$1(values, version) {
-    if (values.length > 1) {
-      throw new TagError(203, 'Multiple `T???` frames are not allowed');
-    }
+  function tkeyFrame(value, version, strict) {
+    if (version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
+    value.forEach(function (tkey) {
+      textFrame$1(tkey, version, strict);
 
-    values = Array.isArray(values[0]) ? values[0] : [values[0]];
-    values.forEach(function (value) {
-      if (typeof value.position !== 'number') {
-        throw new TagError(203, 'Position is not a number');
-      }
-
-      if (value.total && typeof value.total !== 'number') {
-        throw new TagError(203, 'Total is not a number');
-      }
-
-      if (value.total && value.position > value.total) {
-        throw new TagError(203, 'Position is greater than total');
+      if (strict && !tkey.match(/^([A-Gb#mo]{3})$/)) {
+        throw new TagError(201, 'Invalid TKEY Format (eg Cbm)');
       }
     });
     return true;
   }
-  function timeFrame(values, version) {
-    if (values.length > 1) {
-      throw new TagError(203, 'Multiple `T???` frames are not allowed');
-    }
+  function tlanFrame(value, version, strict) {
+    if (version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
+    value.forEach(function (tlan) {
+      textFrame$1(tlan, version, strict);
 
-    values = Array.isArray(values[0]) ? values[0] : [values[0]];
-    values.forEach(function (value) {
-      switch (version) {
-        case 3:
-          if (!value.toString().match(/^(\d{4})$/)) {
-            throw new TagError(203, 'Value is not 4 numeric characters');
-          }
-
-          break;
-
-        case 4:
-          if (typeof value !== 'string') {
-            throw new TagError(203, 'Value is not a string');
-          }
-
-          if (!value.match(timeRegex)) {
-            throw new TagError(203, 'Time frames should follow ISO 8601');
-          }
-
-          break;
+      if (strict && !tlan.match(langRegex)) {
+        throw new TagError(201, 'Language must follow ISO 639-2');
       }
     });
     return true;
   }
-  function urlFrame$1(values, version) {
-    if (values.length > 1) {
-      throw new TagError(203, 'Multiple `W???` frames are not allowed');
-    }
+  function tsrcFrame(value, version, strict) {
+    if (version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
+    value.forEach(function (tsrc) {
+      textFrame$1(tsrc, version, strict);
 
-    values.forEach(function (value) {
-      if (typeof value !== 'string') {
-        throw new TagError(203, 'URL is not a string');
-      }
-
-      if (!value.match(urlRegex)) {
-        throw new TagError(203, 'URL is not a valid URL');
+      if (strict && !tsrc.match(/^([A-Z0-9]{12})$/)) {
+        throw new TagError(201, 'Invalid ISRC format');
       }
     });
     return true;
   }
-  function txxxFrame$1(values, verion) {
+  function urlFrame$1(value, version, strict) {
+    textFrame$1(value, version, strict);
+    if (strict && !value.match(urlRegex)) throw new TagError(201, 'Invalid URL');
+    return true;
+  }
+  function txxxFrame$1(values, version, strict) {
     var descriptions = [];
     values.forEach(function (value) {
-      if (typeof value.description !== 'string' || typeof value.text !== 'string') {
-        throw new TagError(203, 'Text/description is not a string');
-      }
+      textFrame$1(value.description, version, strict);
+      textFrame$1(value.text, version, strict);
 
-      if (!value.description.match(stringRegex) || !value.text.match(stringRegex)) {
-        throw new TagError('Newlines are not allowed');
-      }
-
-      if (descriptions.includes(value.description)) {
-        throw new TagError(203, 'Description should not duplicate');
-      } else {
-        descriptions.push(value.description);
-      }
+      if (strict && includes(descriptions, value.description)) {
+        throw new TagError(201, 'Description should not duplicate');
+      } else descriptions.push(value.description);
     });
     return true;
   }
-  function wxxxFrame$1(values, version) {
+  function wxxxFrame$1(values, version, strict) {
     var descriptions = [];
     values.forEach(function (value) {
-      if (typeof value.description !== 'string' || typeof value.url !== 'string') {
-        throw new TagError(203, 'Text/URL is not a string');
-      }
+      textFrame$1(value.description, version, strict);
+      urlFrame$1(value.url, version, strict);
 
-      if (!value.description.match(stringRegex)) {
-        throw new TagError(203, 'Newlines are not allowed');
-      }
-
-      if (!value.url.match(urlRegex)) {
-        throw new TagError(203, 'URL is an invalid URL');
-      }
-
-      if (descriptions.includes(value.description)) {
-        throw new TagError(203, 'Description should not duplicate');
-      } else {
-        descriptions.push(value.description);
-      }
+      if (strict && includes(descriptions, value.description)) {
+        throw new TagError(201, 'Description should not duplicate');
+      } else descriptions.push(value.description);
     });
     return true;
   }
-  function tkeyFrame(values, version) {
-    if (values.length > 1) {
-      throw new TagError(203, 'Multiple `T???` frames are not allowed');
-    }
-
-    values = Array.isArray(values[0]) ? values[0] : [values[0]];
-    values.forEach(function (value) {
-      if (typeof value !== 'string') {
-        throw new TagError(203, 'Value is not a string');
-      }
-
-      if (!value.match(/^([A-Gb#mo]{3})$/)) {
-        throw new TagError(203, 'Invalid TKEY Format (e.g. Cbm)');
-      }
-    });
-    return true;
-  }
-  function tlanFrame(values, version) {
-    if (values.length > 1) {
-      throw new TagError(203, 'Multiple `T???` frames are not allowed');
-    }
-
-    values = Array.isArray(values[0]) ? values[0] : [values[0]];
-    values.forEach(function (value) {
-      if (typeof value !== 'string') {
-        throw new TagError(203, 'Value is not a string');
-      }
-
-      if (!value.match(langRegex)) {
-        throw new TagError(203, 'Language does not follow ISO 639-2');
-      }
-    });
-    return true;
-  }
-  function tsrcFrame(values, version) {
-    if (values.length > 1) {
-      throw new TagError(203, 'Multiple `T???` frames are not allowed');
-    }
-
-    values = Array.isArray(values[0]) ? values[0] : [values[0]];
-    values.forEach(function (value) {
-      if (typeof value !== 'string') {
-        throw new TagError(203, 'Value is not a string');
-      }
-
-      if (!value.match(/^([A-Z0-9]{12})$/)) {
-        throw new TagError(203, 'Invalid ISRC format');
-      }
-    });
-    return true;
-  }
-  function langDescFrame$1(values, version) {
+  function langDescFrame$1(values, version, strict) {
     var langDescs = [];
-    values.forEach(function (value) {
-      if (_typeof(value) !== 'object') {
-        throw new TagError(203, 'Value is not an object');
+    values.forEach(function (langDesc) {
+      textFrame$1(langDesc.language, version, strict);
+      textFrame$1(langDesc.descriptor, version, strict);
+
+      if (typeof langDesc.text !== 'string') {
+        throw new TagError(201, 'Text is not a string');
       }
 
-      value.language = value.language || 'eng';
-      value.descriptor = value.descriptor || '';
-
-      if (typeof value.language !== 'string' || typeof value.descriptor !== 'string' || typeof value.text !== 'string') {
-        throw new TagError(203, 'Language/descriptor/text is not a string');
-      }
-
-      if (!value.language.match(langRegex)) {
-        throw new TagError(203, 'Language does not follow ISO 639-2');
-      }
-
-      if (!value.descriptor.match(stringRegex)) {
-        throw new TagError(203, 'Newlines are not allowed');
+      if (strict && !langDesc.language.match(langRegex)) {
+        throw new TagError(201, 'Language must follow ISO 639-2');
       }
 
       var checkObj = {
-        language: value.language,
-        descriptor: value.descriptor
+        language: langDesc.language,
+        descriptor: langDesc.descriptor
       };
 
-      if (includes(langDescs, checkObj)) {
-        throw new TagError(203, 'Language and descriptor should not duplicate');
-      } else {
-        langDescs.push(checkObj);
-      }
+      if (strict && includes(langDescs, checkObj)) {
+        throw new TagError(201, 'Language and descriptor should not duplicate');
+      } else langDescs.push(checkObj);
     });
     return true;
   }
-  function apicFrame$1(values, version) {
+  function apicFrame$1(values, version, strict) {
     var descriptions = [];
-    values.forEach(function (value) {
-      value.type = value.type || 3;
+    values.forEach(function (apic) {
+      textFrame$1(apic.format, version, strict);
+      textFrame$1(apic.description, version, strict);
 
-      if (typeof value.format !== 'string' || typeof value.description !== 'string' || typeof value.type !== 'number') {
-        throw new TagError(203, 'Format/type/description is invalid');
+      if (typeof apic.type !== 'number') {
+        throw new TagError(201, 'Type is not a number');
       }
 
-      if (!BufferView.isViewable(value.data)) {
-        throw new TagError(203, 'Image data should be viewable');
+      if (apic.type > 255 || apic.type < 0) {
+        throw new TagError(201, 'Type should be in range of 0 - 255');
       }
 
-      if (!value.format.match(/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/)) {
-        throw new TagError(203, 'Format should be an image');
+      if (!BufferView.isViewable(apic.data)) {
+        throw new TagError(201, 'Image data should be viewable');
       }
 
-      if (value.type > 21 || value.type < 0) {
-        throw new TagError(203, 'Type should be in the range of 0 - 21');
-      }
+      if (strict) {
+        if (apic.type > 21 || apic.type < 0) {
+          throw new TagError(201, 'Type should be in range of 0 - 21');
+        }
 
-      if (value.description.length > 64) {
-        throw new TagError(203, 'Description should not exceed 64');
-      }
+        if (!apic.format.match(imageRegex)) {
+          throw new TagError(201, 'Format should be an image MIME');
+        }
 
-      if (descriptions.includes(value.description)) {
-        throw new TagError(203, 'Cover description should not duplicate');
-      } else {
-        descriptions.push(value.description);
+        if (apic.description.length > 64) {
+          throw new TagError(201, 'Description should not exceed 64');
+        }
+
+        if (includes(descriptions, apic.description)) {
+          throw new TagError(201, 'Description should not duplicate');
+        } else descriptions.push(apic.description);
       }
     });
     return true;
   }
-  function geobFrame$1(values, version) {
+  function geobFrame$1(values, version, strict) {
     var descriptions = [];
-    values.forEach(function (value) {
-      if (typeof value.format !== 'string' || typeof value.filename !== 'string' || typeof value.description !== 'string') {
-        throw new TagError(203, 'Format/filename/description is not a string');
+    values.forEach(function (geob) {
+      textFrame$1(geob.format, version, strict);
+      textFrame$1(geob.filename, version, strict);
+      textFrame$1(geob.description, version, strict);
+
+      if (!BufferView.isViewable(geob.object)) {
+        throw new TagError(201, 'Object data should be viewable');
       }
 
-      if (!BufferView.isViewable(value.object)) {
-        throw new TagError(203, 'Object data should be viewable');
-      }
-
-      if (descriptions.includes(value.description)) {
-        throw new TagError(203, 'GEOB description should not duplicate');
-      } else {
-        descriptions.push(value.description);
-      }
+      if (strict && includes(descriptions, geob.description)) {
+        throw new TagError(201, 'GEOB description should not duplicate');
+      } else descriptions.push(geob.description);
     });
     return true;
   }
-  function ufidFrame$1(values, version) {
+  function ufidFrame$1(values, version, strict) {
     var ownerIds = [];
-    values.forEach(function (value) {
-      if (typeof value.ownerId !== 'string') {
-        throw new TagError(203, 'ownerId is not a string');
+    values.forEach(function (ufid) {
+      textFrame$1(ufid.ownerId, version, strict);
+
+      if (!BufferView.isViewable(ufid.id)) {
+        throw new TagError(201, 'ID should be viewable');
       }
 
-      if (value.ownerId === '') {
-        throw new TagError(203, 'ownerId should not be blank');
-      }
+      if (strict) {
+        if (ufid.ownerId === '') {
+          throw new TagError(201, 'ownerId should not be blank');
+        }
 
-      if (!BufferView.isViewable(value.id)) {
-        throw new TagError(203, 'id should be viewable');
-      }
+        var idLength = ufid.id.byteLength || ufid.id.length || 0;
 
-      var idLength = value.id.byteLength || value.id.length || 0;
+        if (idLength > 64) {
+          throw new TagError(201, 'ID bytelength should not exceed 64 bytes');
+        }
 
-      if (idLength > 64) {
-        throw new TagError(203, 'id should not exceed 64 bytes');
-      }
-
-      if (ownerIds.includes(value.ownerId)) {
-        throw new TagError(203, 'ownerId should not duplicate');
-      } else {
-        ownerIds.push(value.ownerId);
+        if (includes(ownerIds, ufid.ownerId)) {
+          throw new TagError(201, 'ownerId should not duplicate');
+        } else ownerIds.push(ufid.ownerId);
       }
     });
     return true;
   }
-  function userFrame$1(values, version) {
-    values.forEach(function (value) {
-      if (_typeof(value) !== 'object') {
-        throw new TagError(203, 'Value is not an object');
+  function userFrame$1(values, version, strict) {
+    values.forEach(function (user) {
+      textFrame$1(user.language, version, strict);
+
+      if (typeof user.text !== 'string') {
+        throw new TagError(201, 'Text is not a string');
       }
 
-      value.language = value.language || 'eng';
-
-      if (typeof value.language !== 'string' || typeof value.text !== 'string') {
-        throw new TagError(203, 'Language/text is not a string');
-      }
-
-      if (!value.language.match(langRegex)) {
-        throw new TagError(203, 'Language does not follow ISO 639-2');
+      if (strict && !user.language.match(langRegex)) {
+        throw new TagError(201, 'Language must follow ISO 639-2');
       }
     });
     return true;
   }
-  function owneFrame$1(values, version) {
-    if (values.length > 1) {
-      throw new TagError('Multiple `OWNE` frames are not allowed');
-    }
+  function owneFrame$1(value, version, strict) {
+    textFrame$1(value.date, version, strict);
+    textFrame$1(value.seller, version, strict);
+    textFrame$1(value.currencyCode, version, strict);
+    textFrame$1(value.currencyPrice, version, strict);
 
-    values.forEach(function (value) {
-      if (_typeof(value) !== 'object') {
-        throw new TagError(203, 'Value is not an object');
-      }
-
-      if (_typeof(value.currency) !== 'object' || typeof value.date !== 'string' || typeof value.seller !== 'string') {
-        throw new TagError(203, 'Value is not valid');
-      }
-
-      if (typeof value.currency.code !== 'string' || typeof value.currency.price !== 'string') {
-        throw new TagError(203, 'Currency values are not valid');
-      }
-
-      if (!value.currency.code.match(/^([A-Z]{3})$/)) {
-        throw new TagError(203, 'Currency code is not valid');
-      }
-
-      if (!value.currency.price.match(/^(\d*)\.(\d+)$/)) {
-        throw new TagError(203, 'Currency price is not valid');
-      }
-
+    if (strict) {
       if (!value.date.match("".concat(year).concat(month).concat(day))) {
-        throw new TagError(203, 'Date must follow this format: YYYYMMDD');
+        throw new TagError(201, 'Date is not valid (format: YYYYMMDD)');
       }
-    });
+
+      if (!value.currencyCode.match(/^([A-Z]{3})$/)) {
+        throw new TagError(201, 'Currency code is not valid (eg. USD)');
+      }
+
+      if (!value.currencyPrice.match(/^(\d*)\.(\d+)$/)) {
+        throw new TagError(201, 'Currency price is not valid (eg. 2.00)');
+      }
+    }
+
     return true;
   }
-  function privFrame$1(values, version) {
+  function privFrame$1(values, version, strict) {
     var contents = [];
-    values.forEach(function (value) {
-      if (typeof value.ownerId !== 'string') {
-        throw new TagError(203, 'ownerId is not a string');
+    values.forEach(function (priv) {
+      urlFrame$1(priv.ownerId, version, strict);
+
+      if (!BufferView.isViewable(priv.data)) {
+        throw new TagError(201, 'Data should be viewable');
       }
 
-      if (!value.ownerId.match(urlRegex)) {
-        throw new TagError(203, 'ownerId is an invalid URL');
-      }
-
-      if (!BufferView.isViewable(value.data)) {
-        throw new TagError(203, 'Data should be viewable');
-      }
-
-      if (includes(contents, value.data)) {
-        throw new TagError(203, 'Data should not duplicate');
-      } else {
-        contents.push(value.data);
-      }
+      if (strict && includes(contents, priv.data)) {
+        throw new TagError(201, 'Data should not duplicate');
+      } else contents.push(priv.data);
     });
     return true;
   }
-  function signFrame$1(values, version) {
+  function signFrame$1(values, version, strict) {
     var signs = [];
-    values.forEach(function (value) {
-      if (typeof value.group !== 'number') {
-        throw new TagError(203, 'Group ID is not a number');
+    values.forEach(function (sign) {
+      if (typeof sign.group !== 'number') {
+        throw new TagError(201, 'Group ID is not a number');
       }
 
-      if (value.group < 0 || value.group > 255) {
-        throw new TagError(203, 'Group ID should be in the range of 0 - 255');
+      if (sign.group < 0 || sign.group > 255) {
+        throw new TagError(201, 'Group ID should be in the range of 0 - 255');
       }
 
-      if (!BufferView.isViewable(value.signature)) {
-        throw new TagError(203, 'Signature should be viewable');
+      if (!BufferView.isViewable(sign.signature)) {
+        throw new TagError(201, 'Signature should be viewable');
       }
 
-      if (includes(signs, value)) {
-        throw new TagError(203, 'SIGN contents should be identical to others');
-      } else {
-        signs.push(value);
-      }
+      if (strict && includes(signs, sign)) {
+        throw new TagError(201, 'SIGN contents should not be identical to others');
+      } else signs.push(sign);
     });
     return true;
   }
-  function syltFrame$1(values, version) {
+  function syltFrame$1(values, version, strict) {
     var sylts = [];
-    values.forEach(function (value) {
-      if (_typeof(value) !== 'object') {
-        throw new TagError('Value is not an object');
+    values.forEach(function (sylt) {
+      textFrame$1(sylt.language, version, strict);
+      textFrame$1(sylt.descriptor, version, strict);
+
+      if (typeof sylt.lyrics !== 'string') {
+        throw new TagError(201, 'Lyrics is not a string');
       }
 
-      value.language = value.language || 'eng';
-      value.descriptor = value.descriptor || '';
-      value.type = value.type || 1;
+      sylt.type = sylt.type || 1;
 
-      if (typeof value.language !== 'string' || typeof value.type !== 'number' || typeof value.descriptor !== 'string' || typeof value.lyrics !== 'string') {
-        throw new TagError('Language/Type/Descriptor is invalid');
+      if (typeof sylt.type !== 'number') {
+        throw new TagError(201, 'Type is not a number');
       }
 
-      if (!value.language.match(langRegex)) {
-        throw new TagError(203, 'Language does not follow ISO 639-2');
-      }
+      if (strict) {
+        if (!sylt.language.match(langRegex)) {
+          throw new TagError(201, 'Language must follow ISO 639-2');
+        }
 
-      var regex = /^((\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)|)/;
-      var valid = value.lyrics.split('\n').every(function (entry) {
-        return regex.test(entry);
-      });
+        if (sylt.lyrics.split('\n').every(function (entry) {
+          return syltRegex.test(entry);
+        })) {
+          throw new TagError(201, 'Lyrics must follow this format: [mm:ss.xxx]');
+        }
 
-      if (!valid) {
-        throw new TagError(203, 'Lyrics do not follow format: [mm:ss.xxx] string');
-      }
+        var checkObj = {
+          language: sylt.language,
+          descriptor: sylt.descriptor
+        };
 
-      var checkObj = {
-        language: value.language,
-        descriptor: value.descriptor
-      };
-
-      if (includes(sylts, checkObj)) {
-        throw new TagError('1 SYLT with the same language and descriptor only');
-      } else {
-        sylts.push(checkObj);
+        if (includes(sylts, checkObj)) {
+          throw new TagError(201, '1 SYLT with same language and descriptor only');
+        } else sylts.push(checkObj);
       }
     });
     return true;
   }
-  function mcdiFrame$1(values, version) {
-    if (values.length > 1) {
-      throw new TagError(203, 'Multiple `MCDI` frame are not allowed');
+  function mcdiFrame$1(value, version, strict) {
+    if (!BufferView.isViewable(value)) {
+      throw new TagError(201, 'Value should be viewable');
     }
 
-    values.forEach(function (value) {
-      if (!BufferView.isViewable(value)) {
-        throw new TagError(203, 'Value should be viewable');
-      }
-    });
     return true;
   }
-  function sytcFrame$1(values, version) {
-    if (values.length > 1) {
-      throw new TagError(203, 'Multiple `SYTC` frame are not allowed');
+  function sytcFrame$1(value, version, strict) {
+    if (!BufferView.isViewable(value.data)) {
+      throw new TagError(201, 'Data should be viewable');
     }
 
-    values.forEach(function (value) {
-      if (value.format > 2 || value.format < 1) {
-        throw new TagError(203, 'Invalid timestamp format');
-      }
+    if (strict && (value.format > 2 || value.format < 1)) {
+      throw new TagError(201, 'Invalid timestamp');
+    }
 
-      if (!BufferView.isViewable(value.data)) {
-        throw new TagError(203, 'Value data should be viewable');
-      }
-    });
     return true;
   }
-
-  var nativeJoin = [].join;
-  var ES3_STRINGS = indexedObject != Object;
-  var STRICT_METHOD$3 = arrayMethodIsStrict('join', ','); // `Array.prototype.join` method
-  // https://tc39.github.io/ecma262/#sec-array.prototype.join
-
-  _export({
-    target: 'Array',
-    proto: true,
-    forced: ES3_STRINGS || !STRICT_METHOD$3
-  }, {
-    join: function join(separator) {
-      return nativeJoin.call(toIndexedObject(this), separator === undefined ? ',' : separator);
-    }
-  });
 
   function getHeaderBytes(id, size, version, flags) {
     var idBytes = encodeString(id, 'ascii');
     var sizeView = new BufferView(4);
-
-    switch (version) {
-      case 3:
-        sizeView.setUint32(0, size);
-        break;
-
-      case 4:
-        sizeView.setUint32(0, encodeSynch(size));
-        break;
-    }
-
+    sizeView.setUint32(0, version === 3 ? size : encodeSynch(size));
     var flagsBytes = [0, 0];
 
     if (version === 4 && flags.unsynchronisation) {
@@ -5812,30 +5615,23 @@
     });
     return new Uint8Array(content);
   }
-  /**
-   *  Frames writers
-   *  @param {any[]} values - Validated frame of values array
-   *  @param {object} options - Options when writing
-   */
 
-
-  function textFrame$2(values, options) {
+  function textFrame$2(value, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
     var encoding = 0;
     var strBytes = [];
-    values = Array.isArray(values[0]) ? values[0] : [values[0]];
 
     switch (version) {
       case 3:
         encoding = 1;
-        strBytes = encodeString(values.join('/') + '\0', 'utf-16');
+        strBytes = encodeString(value.replace('\\\\', '/') + '\0', 'utf-16');
         break;
 
       case 4:
         encoding = 3;
-        strBytes = encodeString(values.join('\0') + '\0', 'utf-8');
+        strBytes = encodeString(value.replace('\\\\', '\0') + '\0', 'utf-8');
         break;
     }
 
@@ -5847,20 +5643,19 @@
     });
     return mergeBytes(header, data);
   }
-  function asciiFrame(values, options) {
+  function asciiFrame(value, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
     var strBytes = [];
-    values = Array.isArray(values[0]) ? values[0] : [values[0]];
 
     switch (version) {
       case 3:
-        strBytes = encodeString(values.join('/') + '\0', 'ascii');
+        strBytes = encodeString(value.replace('\\\\', '/') + '\0', 'ascii');
         break;
 
       case 4:
-        strBytes = encodeString(values.join('\0') + '\0', 'ascii');
+        strBytes = encodeString(value.replace('\\\\', '\0') + '\0', 'ascii');
         break;
     }
 
@@ -5872,49 +5667,43 @@
     });
     return mergeBytes(header, data);
   }
-  function setFrame$2(values, options) {
-    var strings = [];
-    values = Array.isArray(values[0]) ? values[0] : [values[0]];
-    values.forEach(function (value) {
-      var string = value.position.toString();
-      if (value.total) string += '/' + value.total.toString();
-      strings.push(string);
-    });
-    return asciiFrame([strings], options);
+  function setFrame$2(value, options) {
+    var version = options.version;
+    if (version === 3) value = value.toString().split('\\\\')[0];else if (version === 4) value = value.toString().replace('\\\\', '\0');
+    return asciiFrame(value, options);
   }
-  function urlFrame$2(values, options) {
+  function urlFrame$2(value, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
-    var strBytes = encodeString(values[0] + '\0', 'ascii');
-    var data = strBytes;
-    if (unsynch) data = unsynchData(data, version);
-    var header = getHeaderBytes(id, data.length, version, {
+    var strBytes = encodeString(value + '\0', 'ascii');
+    if (unsynch) strBytes = unsynchData(strBytes, version);
+    var header = getHeaderBytes(id, strBytes.length, version, {
       unsynchronisation: unsynch,
       dataLengthIndicator: unsynch
     });
-    return mergeBytes(header, data);
+    return mergeBytes(header, strBytes);
   }
   function txxxFrame$2(values, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
     var bytes = [];
-    values.forEach(function (value) {
+    values.forEach(function (txxx) {
       var encoding = 0;
       var descBytes, strBytes;
 
       switch (version) {
         case 3:
           encoding = 1;
-          descBytes = encodeString(value.description + '\0', 'utf-16');
-          strBytes = encodeString(value.text + '\0', 'utf-16');
+          descBytes = encodeString(txxx.description + '\0', 'utf-16');
+          strBytes = encodeString(txxx.text + '\0', 'utf-16');
           break;
 
         case 4:
           encoding = 3;
-          descBytes = encodeString(values.description + '\0', 'utf-8');
-          strBytes = encodeString(values.text + '\0', 'utf-8');
+          descBytes = encodeString(txxx.description + '\0', 'utf-8');
+          strBytes = encodeString(txxx.text + '\0', 'utf-8');
           break;
       }
 
@@ -5936,21 +5725,21 @@
         version = options.version,
         unsynch = options.unsynch;
     var bytes = [];
-    values.forEach(function (value) {
+    values.forEach(function (wxxx) {
       var encoding = 0;
       var descBytes, strBytes;
 
       switch (version) {
         case 3:
           encoding = 1;
-          descBytes = encodeString(value.description + '\0', 'utf-16');
-          strBytes = encodeString(value.url + '\0', 'ascii');
+          descBytes = encodeString(wxxx.description + '\0', 'utf-16');
+          strBytes = encodeString(wxxx.url + '\0', 'ascii');
           break;
 
         case 4:
           encoding = 3;
-          descBytes = encodeString(value.description + '\0', 'utf-8');
-          strBytes = encodeString(value.url + '\0', 'ascii');
+          descBytes = encodeString(wxxx.description + '\0', 'utf-8');
+          strBytes = encodeString(wxxx.url + '\0', 'ascii');
           break;
       }
 
@@ -5967,33 +5756,31 @@
     });
     return bytes;
   }
-  function iplsFrame$1(values, options) {
+  function iplsFrame$1(value, options) {
     options.version = 4;
-    return textFrame$2(values, options);
+    return textFrame$2(value, options);
   }
   function langDescFrame$2(values, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
     var bytes = [];
-    values.forEach(function (value) {
-      value.language = value.language || 'eng';
-      value.descriptor = value.descriptor || '';
+    values.forEach(function (langDesc) {
       var encoding = 0;
-      var langBytes = encodeString(value.language, 'ascii');
+      var langBytes = encodeString(langDesc.language, 'ascii');
       var descBytes, textBytes;
 
       switch (version) {
         case 3:
           encoding = 1;
-          descBytes = encodeString(value.descriptor + '\0', 'utf-16');
-          textBytes = encodeString(value.text + '\0', 'utf-16');
+          descBytes = encodeString(langDesc.descriptor + '\0', 'utf-16');
+          textBytes = encodeString(langDesc.text + '\0', 'utf-16');
           break;
 
         case 4:
           encoding = 3;
-          descBytes = encodeString(value.descriptor + '\0', 'utf-8');
-          textBytes = encodeString(value.text + '\0', 'utf-8');
+          descBytes = encodeString(langDesc.descriptor + '\0', 'utf-8');
+          textBytes = encodeString(langDesc.text + '\0', 'utf-8');
           break;
       }
 
@@ -6015,26 +5802,25 @@
         version = options.version,
         unsynch = options.unsynch;
     var bytes = [];
-    values.forEach(function (value) {
-      value.type = value.type || 3;
+    values.forEach(function (apic) {
       var encoding = 0;
-      var mimeBytes = encodeString(value.format + '\0', 'ascii');
-      var imageBytes = new Uint8Array(value.data);
+      var mimeBytes = encodeString(apic.format + '\0', 'ascii');
+      var imageBytes = new Uint8Array(apic.data);
       var strBytes = [];
 
       switch (version) {
         case 3:
           encoding = 1;
-          strBytes = encodeString(value.description + '\0', 'utf-16');
+          strBytes = encodeString(apic.description + '\0', 'utf-16');
           break;
 
         case 4:
           encoding = 3;
-          strBytes = encodeString(value.description + '\0', 'utf-8');
+          strBytes = encodeString(apic.description + '\0', 'utf-8');
           break;
       }
 
-      var data = mergeBytes(encoding, mimeBytes, value.type, strBytes, imageBytes);
+      var data = mergeBytes(encoding, mimeBytes, apic.type, strBytes, imageBytes);
       if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
@@ -6052,22 +5838,22 @@
         version = options.version,
         unsynch = options.unsynch;
     var bytes = [];
-    values.forEach(function (value) {
-      var mime = encodeString(value.format + '\0', 'ascii');
-      var object = new Uint8Array(value.object);
+    values.forEach(function (geob) {
+      var mime = encodeString(geob.format + '\0', 'ascii');
+      var object = new Uint8Array(geob.object);
       var encoding, filename, description;
 
       switch (version) {
         case 3:
           encoding = 1;
-          filename = encodeString(value.filename + '\0', 'utf-16');
-          description = encodeString(value.description + '\0', 'utf-16');
+          filename = encodeString(geob.filename + '\0', 'utf-16');
+          description = encodeString(geob.description + '\0', 'utf-16');
           break;
 
         case 4:
           encoding = 3;
-          filename = encodeString(value.filename + '\0', 'utf-8');
-          description = encodeString(value.description + '\0', 'utf-8');
+          filename = encodeString(geob.filename + '\0', 'utf-8');
+          description = encodeString(geob.description + '\0', 'utf-8');
           break;
       }
 
@@ -6089,9 +5875,9 @@
         version = options.version,
         unsynch = options.unsynch;
     var bytes = [];
-    values.forEach(function (value) {
-      var ownerBytes = encodeString(value.ownerId + '\0', 'ascii');
-      var idBytes = new Uint8Array(value.id);
+    values.forEach(function (ufid) {
+      var ownerBytes = encodeString(ufid.ownerId + '\0', 'ascii');
+      var idBytes = new Uint8Array(ufid.id);
       var data = mergeBytes(ownerBytes, idBytes);
       if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
@@ -6110,21 +5896,20 @@
         version = options.version,
         unsynch = options.unsynch;
     var bytes = [];
-    values.forEach(function (value) {
-      value.language = value.language || 'eng';
+    values.forEach(function (user) {
       var encoding = 0;
-      var langBytes = encodeString(value.language, 'ascii');
+      var langBytes = encodeString(user.language, 'ascii');
       var textBytes;
 
       switch (version) {
         case 3:
           encoding = 1;
-          textBytes = encodeString(value.text + '\0', 'utf-16');
+          textBytes = encodeString(user.text + '\0', 'utf-16');
           break;
 
         case 4:
           encoding = 3;
-          textBytes = encodeString(value.text + '\0', 'utf-8');
+          textBytes = encodeString(user.text + '\0', 'utf-8');
           break;
       }
 
@@ -6141,31 +5926,45 @@
     });
     return bytes;
   }
-  function owneFrame$2(values, options) {
+  function owneFrame$2(value, options) {
+    var id = options.id,
+        version = options.version,
+        unsynch = options.unsynch;
+    var encoding = 0;
+    var codeBytes = encodeString(value.currencCode, 'ascii');
+    var priceBytes = encodeString(value.currencyPrice + '\0', 'ascii');
+    var dateBytes = encodeString(value.date, 'ascii');
+    var sellerBytes;
+
+    switch (version) {
+      case 3:
+        encoding = 1;
+        sellerBytes = encodeString(value.seller, 'utf-16');
+        break;
+
+      case 4:
+        encoding = 3;
+        sellerBytes = encodeString(value.seller, 'utf-8');
+        break;
+    }
+
+    var data = mergeBytes(encoding, codeBytes, priceBytes, dateBytes, sellerBytes);
+    if (unsynch) data = unsynchData(data, version);
+    var header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    });
+    return mergeBytes(header, data);
+  }
+  function privFrame$2(values, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
     var bytes = [];
-    values.forEach(function (value) {
-      var encoding = 0;
-      var codeBytes = encodeString(value.currency.code, 'ascii');
-      var priceBytes = encodeString(value.currency.price + '\0', 'ascii');
-      var dateBytes = encodeString(value.date, 'ascii');
-      var sellerBytes;
-
-      switch (version) {
-        case 3:
-          encoding = 1;
-          sellerBytes = encodeString(value.seller, 'utf-16');
-          break;
-
-        case 4:
-          encoding = 3;
-          sellerBytes = encodeString(value.seller, 'utf-8');
-          break;
-      }
-
-      var data = mergeBytes(encoding, codeBytes, priceBytes, dateBytes, sellerBytes);
+    values.forEach(function (priv) {
+      var ownerIdBytes = encodeString(priv.ownerId, 'ascii');
+      var privData = new Uint8Array(priv.data);
+      var data = mergeBytes(ownerIdBytes, privData);
       if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
@@ -6178,15 +5977,14 @@
     });
     return bytes;
   }
-  function privFrame$2(values, options) {
+  function signFrame$2(values, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
     var bytes = [];
-    values.forEach(function (value) {
-      var ownerIdBytes = encodeString(value.ownerId, 'ascii');
-      var privData = new Uint8Array(value.data);
-      var data = mergeBytes(ownerIdBytes, privData);
+    values.forEach(function (sign) {
+      var signature = new Uint8Array(sign.signature);
+      var data = mergeBytes(sign.group, signature);
       if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
@@ -6199,14 +5997,41 @@
     });
     return bytes;
   }
-  function signFrame$2(values, options) {
+  function syltFrame$2(values, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
     var bytes = [];
-    values.forEach(function (value) {
-      var signature = new Uint8Array(value.signature);
-      var data = mergeBytes(value.group, signature);
+    values.forEach(function (sylt) {
+      var encoding = 0;
+      var langBytes = encodeString(sylt.language, 'ascii');
+      var descBytes = [];
+
+      switch (version) {
+        case 3:
+          encoding = 1;
+          descBytes = encodeString(sylt.descriptor + '\0', 'utf-16');
+          break;
+
+        case 4:
+          encoding = 3;
+          descBytes = encodeString(sylt.descriptor + '\0', 'utf-8');
+          break;
+      }
+
+      var regex = /^(\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)/;
+      var lyricsBytes = [];
+      sylt.lyrics.replace(/\r\n/, '\n').split('\n').forEach(function (line) {
+        if (line !== '') {
+          var result = regex.exec(line);
+          var time = parseInt(result[1].replace(/[^0-9]/g, ''));
+          var string = encodeString((result[2] || '') + '\n\0', 'ascii');
+          var timeBytes = new BufferView(4);
+          timeBytes.setUint32(0, time);
+          lyricsBytes = mergeBytes(lyricsBytes, string, timeBytes.getUint8(0, 4));
+        }
+      });
+      var data = mergeBytes(encoding, langBytes, sylt.format, sylt.type, descBytes, lyricsBytes);
       if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
@@ -6219,97 +6044,30 @@
     });
     return bytes;
   }
-  function syltFrame$2(values, options) {
+  function mcdiFrame$2(value, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
-    var bytes = [];
-    values.forEach(function (value) {
-      value.language = value.language || 'eng';
-      value.descriptor = value.descriptor || '';
-      value.type = value.type || 1;
-      var encoding = 0;
-      var langBytes = encodeString(value.language, 'ascii');
-      var descBytes = [];
-
-      switch (version) {
-        case 3:
-          encoding = 1;
-          descBytes = encodeString(value.descriptor + '\0', 'utf-16');
-          break;
-
-        case 4:
-          encoding = 3;
-          descBytes = encodeString(value.descriptor + '\0', 'utf-8');
-          break;
-      }
-
-      var regex = /^(\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)/;
-      var lyricsBytes = [];
-      value.lyrics.replace(/\r\n/, '\n').split('\n').forEach(function (line) {
-        if (line !== '') {
-          var result = regex.exec(line);
-          var time = parseInt(result[1].replace(/[^0-9]/g, ''));
-          var string = encodeString((result[2] || '') + '\n\0', 'ascii');
-          var timeBytes = new BufferView(4);
-          timeBytes.setUint32(0, time);
-          lyricsBytes = mergeBytes(lyricsBytes, string, timeBytes.getUint8(0, 4));
-        }
-      });
-      var data = mergeBytes(encoding, langBytes, value.format, value.type, descBytes, lyricsBytes);
-      if (unsynch) data = unsynchData(data, version);
-      var header = getHeaderBytes(id, data.length, version, {
-        unsynchronisation: unsynch,
-        dataLengthIndicator: unsynch
-      });
-      var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte12) {
-        return bytes.push(_byte12);
-      });
+    if (unsynch) value = unsynchData(value, version);
+    var header = getHeaderBytes(id, value.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
     });
-    return bytes;
+    return mergeBytes(header, value);
   }
-  function mcdiFrame$2(values, options) {
+  function sytcFrame$2(value, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
-    var bytes = [];
-    values.forEach(function (value) {
-      if (unsynch) value = unsynchData(value, version);
-      var header = getHeaderBytes(id, value.length, version, {
-        unsynchronisation: unsynch,
-        dataLengthIndicator: unsynch
-      });
-      var merged = mergeBytes(header, value);
-      merged.forEach(function (_byte13) {
-        return bytes.push(_byte13);
-      });
+    var data = mergeBytes(value.format, value.data);
+    if (unsynch) data = unsynchData(data, version);
+    var header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
     });
-    return bytes;
-  }
-  function sytcFrame$2(values, options) {
-    var id = options.id,
-        version = options.version,
-        unsynch = options.unsynch;
-    var bytes = [];
-    values.forEach(function (value) {
-      var data = mergeBytes(value.format, value.data);
-      if (unsynch) data = unsynchData(data, version);
-      var header = getHeaderBytes(id, data.length, version, {
-        unsynchronisation: unsynch,
-        dataLengthIndicator: unsynch
-      });
-      var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte14) {
-        return bytes.push(_byte14);
-      });
-    });
-    return bytes;
+    return mergeBytes(header, data);
   }
 
-  function validateID$1(id) {
-    return validateID(id);
-  }
   var APIC = {
     parse: apicFrame,
     validate: apicFrame$1,
@@ -6380,8 +6138,8 @@
     version: [3, 4]
   };
   var TBPM = {
-    parse: numberFrame,
-    validate: numberFrame$1,
+    parse: textFrame,
+    validate: textFrame$1,
     write: asciiFrame,
     version: [3, 4]
   };
@@ -6416,8 +6174,8 @@
     version: [4]
   };
   var TDLY = {
-    parse: numberFrame,
-    validate: numberFrame$1,
+    parse: textFrame,
+    validate: textFrame$1,
     write: asciiFrame,
     version: [3]
   };
@@ -6506,8 +6264,8 @@
     version: [3, 4]
   };
   var TLEN = {
-    parse: numberFrame,
-    validate: numberFrame$1,
+    parse: textFrame,
+    validate: textFrame$1,
     write: asciiFrame,
     version: [3, 4]
   };
@@ -6632,8 +6390,8 @@
     version: [3, 4]
   };
   var TSIZ = {
-    parse: numberFrame,
-    validate: numberFrame$1,
+    parse: textFrame,
+    validate: textFrame$1,
     write: asciiFrame,
     version: [3]
   };
@@ -6766,7 +6524,6 @@
 
   var frames = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    validateID: validateID$1,
     APIC: APIC,
     COMM: COMM,
     GEOB: GEOB,
@@ -6845,381 +6602,431 @@
     WXXX: WXXX
   });
 
-  var ID3v2 = /*#__PURE__*/function () {
-    _createClass(ID3v2, null, [{
-      key: "isID3v2",
-      value: function isID3v2(buffer) {
-        var view = new BufferView(buffer);
-        return view.getString(0, 3, 'ascii').string === 'ID3';
-      }
-    }]);
+  function hasID3v2(buffer) {
+    if (!isBuffer(buffer)) throw new TypeError('buffer is not ArrayBuffer/Buffer');
+    var view = new BufferView(buffer);
+    return view.getString(0, 3, 'ascii').string === 'ID3';
+  }
+  function decode$1(buffer) {
+    var tagOffset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var view = new BufferView(buffer, tagOffset);
+    if (!hasID3v2(view.buffer)) throw new TagError(200);
+    var version = view.getUint8(3, 2);
+    var size = decodeSynch(view.getUint32(6));
+    var flags = getHeaderFlags(view.getUint8(5), version[0]);
+    var tags = {
+      v2Version: version,
+      v2Size: size,
+      v2Flags: flags
+    };
 
-    function ID3v2(buffer) {
-      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-      _classCallCheck(this, ID3v2);
-
-      if (!isBuffer(buffer)) {
-        throw new TypeError('buffer is not an instance of Buffer');
-      }
-
-      this.name = 'ID3v2';
-      this.buffer = buffer;
-      this.options = {
-        padding: options.padding !== undefined ? options.padding : 4096,
-        version: options.version !== undefined ? options.version : false
-      };
-      this.frames = [];
+    if (version[0] !== 3 && version[0] !== 4) {
+      throw new TagError(200, 'Unknown version');
     }
 
-    _createClass(ID3v2, [{
-      key: "read",
-      value: function read() {
-        var tagOffset = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-        var view = new BufferView(this.buffer, tagOffset);
-        if (view.getString(0, 3, 'ascii').string !== 'ID3') throw new TagError(200);
-        var version = view.getUint8(3, 2);
+    var offset = 10;
+    var limit = size;
 
-        switch (version[0]) {
-          case 3:
-          case 4:
-            this.major = version[0];
-            this.minor = version[1];
-            break;
+    var pushTag = function pushTag(tag) {
+      var singleFrame = ['OWNE', 'MCDI', 'SYTC'];
 
-          default:
-            throw new TagError(201, version[0]);
-        }
+      switch (_typeof(tag.value)) {
+        case 'number':
+        case 'string':
+          tag.value = tag.value.toString();
+          if (tags[tag.id]) tags[tag.id] += '\\\\' + tag.value;else tags[tag.id] = tag.value;
+          break;
 
-        this.size = decodeSynch(view.getUint32(6));
-        this.flags = getHeaderFlags(view.getUint8(5), this.major);
-        this.frames = [];
-        var offset = 10;
-        var limit = this.size;
-
-        while (offset < this.size) {
-          var frameBytes = view.getUint8(offset, limit);
-          var frame = decodeFrame.call(this, frameBytes);
-          if (!frame) break;
-          offset += frame.size + 10;
-          limit -= frame.size + 10;
-
-          if (frame.id === 'SEEK') {
-            this.read(offset + frame.value);
-          } else {
-            this.frames.push(frame);
+        case 'object':
+          if (singleFrame.includes(tag.id)) tags[tag.id] = tag.value;else {
+            if (tags[tag.id]) tags[tag.id].push(tag.value);else tags[tag.id] = [tag.value];
           }
-        }
-
-        return this.frames;
+          break;
       }
-    }, {
-      key: "validate",
-      value: function validate() {
-        if (this.major !== 3 && this.major !== 4) {
-          throw new TagError(201, this.major);
-        }
+    };
 
-        var framesObj = this.getFrames();
+    while (offset < size) {
+      var frameBytes = view.getUint8(offset, limit);
+      var frame = decodeFrame(frameBytes, {
+        version: version,
+        flags: flags
+      });
+      if (!frame) break;
+      offset += frame.size + 10;
+      limit -= frame.size + 10;
 
-        for (var id in framesObj) {
-          var frameDesc = frames[id];
-          if (!frameDesc) throw new TagError(202, id);
-          if (!frameDesc.version.includes(this.major)) throw new TagError(204, id);
+      if (frame.id === 'SEEK') {
+        var seekedTags = decode$1(buffer, offset + frame.value);
 
-          try {
-            validateID$1(id);
-            frameDesc.validate(framesObj[id], this.major);
-          } catch (e) {
-            throw new TagError(203, "ID: ".concat(id, ", Message: ").concat(e.message));
-          }
-        }
-
-        return true;
-      }
-    }, {
-      key: "save",
-      value: function save() {
-        if (this.frames.length === 0) return this.getAudio().buffer;
-        this.major = this.options.version || this.major || 3;
-        this.minor = 0;
-        if (!this.validate()) return false;
-        var framesObj = this.getFrames();
-        var headerBytes = [0x49, 0x44, 0x33, this.major, this.minor];
-        var flagsByte = 0;
-        var sizeView = new BufferView(4);
-        var paddingBytes = new Uint8Array(this.options.padding);
-        var audioBytes = this.getAudio();
-        var framesBytes = [];
-
-        for (var id in framesObj) {
-          var frameDesc = frames[id];
-          var bytes = frameDesc.write(framesObj[id], {
+        for (var id in seekedTags) {
+          pushTag({
             id: id,
-            version: this.major,
-            unsynch: this.flags.unsynchronisation
-          });
-          bytes.forEach(function (_byte) {
-            return framesBytes.push(_byte);
+            value: seekedTags[id]
           });
         }
-
-        if (this.flags.unsynchronisation) flagsByte = setBit(flagsByte, 7);
-        sizeView.setUint32(0, encodeSynch(framesBytes.length + paddingBytes.length));
-        this.buffer = mergeBytes(headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes, audioBytes).buffer;
-        this.read();
-        return this.buffer;
-      }
-    }, {
-      key: "getFrames",
-      value: function getFrames() {
-        var object = {};
-        this.frames.forEach(function (frame) {
-          if (typeof object[frame.id] !== 'undefined') {
-            object[frame.id].push(frame.value);
-          } else {
-            object[frame.id] = [frame.value];
-          }
-        });
-        return object;
-      }
-    }, {
-      key: "addFrame",
-      value: function addFrame(id, value) {
-        var oldFrames = _toConsumableArray(this.frames);
-
-        this.frames.push({
-          id: id,
-          value: value
-        });
-
-        try {
-          this.validate();
-        } catch (e) {
-          this.frames = oldFrames;
-          throw new TagError(203, e.message);
-        }
-      }
-    }, {
-      key: "removeFrame",
-      value: function removeFrame(id) {
-        var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-        var array = this.frames;
-        var counts = 0;
-        this.frames.forEach(function (frame, i) {
-          if (frame.id !== id) return false;
-          if (index === null || counts === index) array[i] = undefined;
-          counts++;
-        });
-        this.frames = array.filter(function (elem) {
-          return elem !== undefined;
-        });
-      }
-    }, {
-      key: "editFrame",
-      value: function editFrame(id, value) {
-        var index = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-        var replace = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
-        var array = this.frames;
-        var counts = 0;
-        this.frames.forEach(function (frame, i) {
-          if (frame.id !== id) return false;
-
-          if (counts === index) {
-            if (Array.isArray(array[i])) array[i].push(value);else if (replace) array[i] = {
-              id: id,
-              value: value
-            };
-          }
-
-          counts++;
-        });
-        this.frames = array;
-      }
-    }, {
-      key: "existsFrame",
-      value: function existsFrame(id) {
-        var found = false;
-        this.frames.forEach(function (frame) {
-          if (frame.id === id) found = true;
-        });
-        return found;
-      }
-    }, {
-      key: "getAudio",
-      value: function getAudio$1() {
-        return new Uint8Array(getAudio(this.buffer));
-      }
-    }]);
-
-    return ID3v2;
-  }();
-
-  function decodeFrame(bytes) {
-    var frameView = new BufferView(bytes);
-    if (frameView.getUint8(0) === 0x00) return false;
-    var frame = {};
-    frame.id = frameView.getUint8String(0, 4);
-
-    switch (this.major) {
-      case 3:
-        frame.size = frameView.getUint32(4);
-        break;
-
-      case 4:
-        frame.size = decodeSynch(frameView.getUint32(4));
-        break;
-
-      default:
-        throw new TagError(201, this.major);
+      } else pushTag({
+        id: frame.id,
+        value: frame.value
+      });
     }
 
-    frame.flags = getFrameFlags(frameView.getUint8(8, 2), this.major);
-    var frameDesc = frames[frame.id];
+    tags.title = tags.TIT2;
+    tags.artist = tags.TPE1;
+    tags.album = tags.TALB;
+    tags.year = version === 3 ? tags.TYER : tags.TDRC && tags.TDRC.substr(0, 4);
+    tags.comment = tags.COMM && tags.COMM[0].text;
+    tags.track = tags.TRCK && tags.TRCK.split('/')[0];
+    tags.genre = tags.TCON;
+    return tags;
+  }
+
+  function decodeFrame(bytes, options) {
+    var view = new BufferView(bytes);
+    if (view.getUint8(0) === 0x00) return false;
+    var frame = {};
+    var version = options.version,
+        flags = options.flags;
+    frame.id = view.getUint8String(0, 4);
+    frame.flags = getFrameFlags(view.getUint8(8, 2), version[0]);
+    var sizeByte = view.getUint32(4);
+    frame.size = version[0] === 4 ? decodeSynch(sizeByte) : sizeByte;
+    var frameSpec = frames[frame.id];
     var offset = 10;
     var actualSize = frame.size;
     var dataLength = frame.size;
-    var contentBuffer = [];
+    var contents;
 
-    if (!frameDesc) {
+    if (!frameSpec) {
       console.warn("Skipping unsupported frame: ".concat(frame.id));
       return frame;
     }
 
     if (frame.flags.dataLengthIndicator) {
-      actualSize = decodeSynch(frameView.getUint32(offset));
+      actualSize = decodeSynch(view.getUint32(offset));
       offset += 4;
       dataLength -= 4;
     }
 
-    var unsynchedData = this.flags.unsynchronisation;
-    if (this.major === 4) unsynchedData = frame.flags.unsynchronisation;
+    var unsynchedData = flags.unsynchronisation;
+    if (version === 4) unsynchedData = frame.flags.unsynchronisation;
 
     if (unsynchedData) {
-      var uint8 = frameView.getUint8(offset, dataLength);
-      var unsynched = synch(uint8);
-      contentBuffer = new Uint8Array(unsynched);
+      var uint8 = view.getUint8(offset, dataLength);
+      var unsynched = synch(Array.isArray(uint8) ? uint8 : [uint8]);
+      contents = new Uint8Array(unsynched);
     } else {
-      contentBuffer = frameView.getUint8(offset, actualSize);
+      var _uint = view.getUint8(offset, actualSize);
+
+      contents = new Uint8Array(Array.isArray(_uint) ? _uint : [_uint]);
     }
 
-    frame.value = frameDesc.parse(new BufferView(contentBuffer), this.major);
+    frame.value = frameSpec.parse(contents.buffer, version[0]);
     return frame;
   }
 
-  var MP3Tag = /*#__PURE__*/function () {
-    _createClass(MP3Tag, [{
-      key: "frames",
-      get: function get() {
-        console.warn('frames are deprecated. Please use the tagger\'s instead');
-        return this.tagger.frames;
-      },
-      set: function set(value) {
-        console.warn('frames are deprecated. Please use the tagger\'s instead');
-        this.tagger.frames = value;
-      }
-    }], [{
-      key: "ID3v1",
-      get: function get() {
-        return ID3v1;
-      }
-    }, {
-      key: "ID3v2",
-      get: function get() {
-        return ID3v2;
-      }
-    }, {
-      key: "genre",
-      get: function get() {
-        return GENRE;
-      }
-    }]);
+  function validate$1(tags, strict, options) {
+    var version = options.version;
+    if (version !== 3 && version !== 4) throw new TagError(200, 'Unknown version');
 
+    for (var id in tags) {
+      if (!Object.keys(frames).includes(id)) continue;
+      var frameSpec = frames[id];
+      if (strict && !frameSpec.version.includes(version)) throw new TagError(203);
+
+      try {
+        frameSpec.validate(tags[id], version, strict);
+      } catch (error) {
+        if (error instanceof TagError) error.message = "".concat(error.message, " at ").concat(id);
+        throw error;
+      }
+    }
+
+    return true;
+  }
+  function encode$1(tags, options) {
+    var version = options.version,
+        padding = options.padding,
+        unsynch = options.unsynch;
+    tags.TIT2 = tags.TIT2 || (tags.title !== '' ? tags.title : undefined);
+    tags.TPE1 = tags.TPE1 || (tags.artist !== '' ? tags.artist : undefined);
+    tags.TALB = tags.TALB || (tags.album !== '' ? tags.album : undefined);
+
+    if (version === 3) {
+      tags.TYER = tags.TYER || (tags.year !== '' ? tags.year : undefined);
+    } else if (version === 4) {
+      tags.TDRC = tags.TDRC || (tags.year !== '' ? tags.year : undefined);
+    }
+
+    tags.COMM = tags.COMM || (tags.comment !== '' ? [{
+      language: 'eng',
+      descriptor: '',
+      text: tags.comment
+    }] : undefined);
+    tags.TRCK = tags.TRCK || (tags.track !== '' ? tags.track : undefined);
+    tags.TCON = tags.TCON || (tags.genre !== '' ? tags.genre : undefined);
+    var ids = Object.keys(frames);
+    var tagIds = Object.keys(tags).filter(function (key) {
+      return ids.includes(key);
+    });
+    var filtered = {};
+    if (tagIds.length === 0) return new ArrayBuffer(0);
+    tagIds.forEach(function (id) {
+      if (tags[id] !== undefined) filtered[id] = tags[id];
+    });
+    var headerBytes = [0x49, 0x44, 0x33, version, 0];
+    var flagsByte = 0;
+    var sizeView = new BufferView(4);
+    var paddingBytes = new Uint8Array(padding);
+    var framesBytes = [];
+
+    for (var id in filtered) {
+      var frameSpec = frames[id];
+      var bytes = frameSpec.write(filtered[id], {
+        id: id,
+        version: version,
+        unsynch: unsynch
+      });
+      bytes.forEach(function (_byte) {
+        return framesBytes.push(_byte);
+      });
+    }
+
+    if (unsynch) flagsByte = setBit(flagsByte, 7);
+    sizeView.setUint32(0, encodeSynch(framesBytes.length));
+    return mergeBytes(headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes).buffer;
+  }
+  function transform(tags, version) {
+    if (version === 3) return transformv4tov3(tags);else if (version === 4) return transformv3tov4(tags);else return new TagError(200, 'Unknown version');
+  }
+
+  function transformv4tov3(tags) {
+    var transformed = {};
+
+    for (var id in tags) {
+      switch (id) {
+        case 'TIPL':
+          transformed.IPLS = tags[id];
+          break;
+
+        case 'TDRC':
+          {
+            var date = timeRegex.exec(tags[id]);
+            if (date[2]) transformed.TYER = date[2];
+            if (date[4] && date[6]) transformed.TDAT = date[6] + date[4];
+            if (date[8] && date[10]) transformed.TIME = date[8] + date[10];
+            break;
+          }
+
+        case 'TDOR':
+          transformed.TORY = tags[id];
+          break;
+
+        case 'TSIZ':
+          break;
+
+        default:
+          transformed[id] = tags[id];
+      }
+    }
+
+    return transformed;
+  }
+
+  function transformv3tov4(tags) {
+    var transformed = {};
+    var tdrc = {};
+
+    for (var id in tags) {
+      switch (id) {
+        case 'IPLS':
+          transformed.TIPL = tags[id];
+          break;
+
+        case 'TDAT':
+          tdrc.date = tags[id];
+          break;
+
+        case 'TIME':
+          tdrc.time = tags[id];
+          break;
+
+        case 'TORY':
+          transformed.TDOR = tags[id];
+          break;
+
+        case 'TRDA':
+          break;
+
+        case 'TYER':
+          tdrc.year = tags[id];
+          break;
+
+        default:
+          transformed[id] = tags[id];
+      }
+    }
+
+    var dateStr = '';
+    if (tdrc.year) dateStr += tdrc.year;
+
+    if (tdrc.date) {
+      dateStr += '-' + tdrc.date.substr(2, 4) + '-' + tdrc.date.substr(0, 2);
+    }
+
+    if (tdrc.time) {
+      dateStr += 'T' + tdrc.time.substr(0, 2) + ':' + tdrc.time.substr(2, 4) + ':00';
+    }
+
+    if (dateStr !== '') transformed.TDRC = dateStr;
+    return transformed;
+  }
+
+  var MP3Tag = /*#__PURE__*/function () {
     function MP3Tag(buffer) {
-      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var verbose = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
       _classCallCheck(this, MP3Tag);
 
       if (!isBuffer(buffer)) {
-        throw new TypeError('buffer is not an instance of Buffer');
+        throw new TypeError('buffer is not ArrayBuffer/Buffer');
       }
 
       this.name = 'MP3Tag';
-      this.version = '1.4.1';
+      this.version = '2.0.0';
+      this.verbose = verbose;
+      this.error = '';
+      this.errorCode = -1;
       this.buffer = buffer;
-      this.options = options;
-      this.tagger = {};
+      this.tags = {};
     }
 
     _createClass(MP3Tag, [{
       key: "read",
       value: function read() {
-        if (ID3v2.isID3v2(this.buffer)) {
-          this.tagger = new ID3v2(this.buffer, this.options);
-          this.tagger.read();
-        } else if (ID3v1.isID3v1(this.buffer)) {
-          this.tagger = new ID3v1(this.buffer);
-          this.tagger.read();
-        } else {
-          this.tagger = new ID3v2(this.buffer, this.options);
-          if (this.tagger.getAudio().length > 0) this.save();else throw new TagError(1);
+        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        this.tags = {};
+        this.error = '';
+        this.errorCode = -1;
+        options = overwriteDefault(options, {
+          id3v1: true,
+          id3v2: true
+        });
+        var tags = {
+          title: '',
+          artist: '',
+          album: '',
+          year: '',
+          comment: '',
+          track: '',
+          genre: ''
+        };
+
+        try {
+          if (options.id3v1 && hasID3v1(this.buffer)) {
+            this.log('ID3v1 found, reading...');
+            var v1Tags = decode(this.buffer);
+            this.log('ID3v1 reading finished');
+            tags = mergeObjects(tags, v1Tags);
+          }
+
+          if (options.id3v2 && hasID3v2(this.buffer)) {
+            this.log('ID3v2 found, reading...');
+            var v2Tags = decode$1(this.buffer);
+            this.log('ID3v2 reading finished');
+            tags = mergeObjects(tags, v2Tags);
+          }
+        } catch (error) {
+          if (error instanceof TagError) {
+            this.error = error.message;
+            this.errorCode = error.code;
+          } else throw error;
         }
 
-        return this.tagger;
+        if (this.errorCode < 0) this.tags = tags;
+        return this.tags;
       }
     }, {
       key: "save",
       value: function save() {
-        var old = this.buffer;
-        this.tagger.options = this.options;
-        this.buffer = this.tagger.save();
-        return old;
-      }
-    }, {
-      key: "getFrames",
-      value: function getFrames() {
-        console.warn('getFrames is deprecated. Please use the tagger\'s instead');
-        return this.tagger.getFrames();
-      }
-    }, {
-      key: "addFrame",
-      value: function addFrame(id, value) {
-        console.warn('addFrame is deprecated. Please use the tagger\'s instead');
-        return this.tagger.addFrame(id, value);
-      }
-    }, {
-      key: "removeFrame",
-      value: function removeFrame(id) {
-        var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-        console.warn('removeFrame is deprecated. Please use the tagger\'s instead');
-        return this.tagger.removeFrame(id, index);
-      }
-    }, {
-      key: "editFrame",
-      value: function editFrame(id, value) {
-        var index = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-        var replace = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
-        console.warn('editFrame is deprecated. Please use the tagger\'s instead');
-        return this.tagger.editFrame(id, value, index, replace);
-      }
-    }, {
-      key: "existsFrame",
-      value: function existsFrame(id) {
-        console.warn('existsFrame is deprecated. Please use the tagger\'s instead');
-        return this.tagger.existsFrame(id);
+        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        this.error = '';
+        this.errorCode = -1;
+        var defaultVersion = this.tags.v2Version ? this.tags.v2Version[0] : 4;
+        options = overwriteDefault(options, {
+          strict: false,
+          id3v1: {
+            include: true
+          },
+          id3v2: {
+            include: true,
+            unsynch: true,
+            version: defaultVersion,
+            padding: 2048
+          }
+        });
+        var audio = new Uint8Array(this.getAudio());
+
+        try {
+          if (options.id3v1.include) {
+            this.log('Validating ID3v1...');
+            validate(this.tags, options.strict);
+            this.log('Writing ID3v1...');
+            var tagBytes = new Uint8Array(encode(this.tags));
+            audio = mergeBytes(audio, tagBytes);
+          }
+
+          if (options.id3v2.include) {
+            this.log('Transforming ID3v2...');
+            this.tags = transform(this.tags, options.id3v2.version);
+            this.log('Validating ID3v2...');
+            validate$1(this.tags, options.strict, options.id3v2);
+            this.log('Writing ID3v2...');
+            var encoded = encode$1(this.tags, options.id3v2);
+
+            var _tagBytes = new Uint8Array(encoded);
+
+            audio = mergeBytes(_tagBytes, audio);
+          }
+        } catch (error) {
+          if (error instanceof TagError) {
+            this.error = error.message;
+            this.errorCode = error.code;
+          } else throw error;
+        }
+
+        if (this.errorCode < 0) this.buffer = audio.buffer;
+        return this.buffer;
       }
     }, {
       key: "getAudio",
-      value: function getAudio$1() {
-        return new Uint8Array(getAudio(this.buffer));
+      value: function getAudio() {
+        var buffer = this.buffer;
+
+        if (!isBuffer(buffer)) {
+          throw new TypeError('buffer is not ArrayBuffer/Buffer');
+        }
+
+        if (hasID3v1(buffer)) {
+          buffer = buffer.slice(0, buffer.byteLength - 128);
+        }
+
+        var view = new BufferView(buffer);
+        var start = 0;
+        var i = 0;
+
+        while (i < view.byteLength) {
+          if (view.getUint8(i) === 0xff && view.getUint8(i + 1) === 0xfb) {
+            start = i;
+            break;
+          } else i++;
+        }
+
+        return buffer.slice(start);
       }
     }, {
-      key: "getBlob",
-      value: function getBlob() {
-        var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'audio/mpeg';
-        return new Blob([this.buffer], {
-          type: type
-        });
+      key: "log",
+      value: function log(message) {
+        if (this.verbose) console.log(message);
       }
     }]);
 
