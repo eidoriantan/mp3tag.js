@@ -11,6 +11,38 @@ import {
   setBit, decodeSynch, encodeSynch, synch, mergeBytes
 } from '../utils/bytes.mjs'
 
+function filter (tags, version) {
+  tags.TIT2 = tags.TIT2 || (tags.title !== '' ? tags.title : undefined)
+  tags.TPE1 = tags.TPE1 || (tags.artist !== '' ? tags.artist : undefined)
+  tags.TALB = tags.TALB || (tags.album !== '' ? tags.album : undefined)
+
+  if (version === 3) {
+    tags.TYER = tags.TYER || (tags.year !== '' ? tags.year : undefined)
+  } else if (version === 4) {
+    tags.TDRC = tags.TDRC || (tags.year !== '' ? tags.year : undefined)
+  }
+
+  tags.COMM = tags.COMM || (tags.comment !== '' ? [{
+    language: 'eng',
+    descriptor: '',
+    text: tags.comment
+  }] : undefined)
+
+  tags.TRCK = tags.TRCK || (tags.track !== '' ? tags.track : undefined)
+  tags.TCON = tags.TCON || (tags.genre !== '' ? tags.genre : undefined)
+
+  const ids = Object.keys(frames)
+  const tagIds = Object.keys(tags).filter(key => ids.includes(key))
+  const filtered = {}
+
+  if (tagIds.length === 0) return new ArrayBuffer(0)
+  tagIds.forEach(id => {
+    if (tags[id] !== undefined) filtered[id] = tags[id]
+  })
+
+  return filtered
+}
+
 export function hasID3v2 (buffer) {
   if (!isBuffer(buffer)) throw new TypeError('buffer is not ArrayBuffer/Buffer')
 
@@ -132,7 +164,8 @@ export function validate (tags, strict, options) {
   const { version } = options
   if (version !== 3 && version !== 4) throw new TagError(200, 'Unknown version')
 
-  for (const id in tags) {
+  const filtered = filter(tags, version)
+  for (const id in filtered) {
     if (!Object.keys(frames).includes(id)) continue
 
     const frameSpec = frames[id]
@@ -151,34 +184,8 @@ export function validate (tags, strict, options) {
 
 export function encode (tags, options) {
   const { version, padding, unsynch } = options
-  tags.TIT2 = tags.TIT2 || (tags.title !== '' ? tags.title : undefined)
-  tags.TPE1 = tags.TPE1 || (tags.artist !== '' ? tags.artist : undefined)
-  tags.TALB = tags.TALB || (tags.album !== '' ? tags.album : undefined)
 
-  if (version === 3) {
-    tags.TYER = tags.TYER || (tags.year !== '' ? tags.year : undefined)
-  } else if (version === 4) {
-    tags.TDRC = tags.TDRC || (tags.year !== '' ? tags.year : undefined)
-  }
-
-  tags.COMM = tags.COMM || (tags.comment !== '' ? [{
-    language: 'eng',
-    descriptor: '',
-    text: tags.comment
-  }] : undefined)
-
-  tags.TRCK = tags.TRCK || (tags.track !== '' ? tags.track : undefined)
-  tags.TCON = tags.TCON || (tags.genre !== '' ? tags.genre : undefined)
-
-  const ids = Object.keys(frames)
-  const tagIds = Object.keys(tags).filter(key => ids.includes(key))
-  const filtered = {}
-
-  if (tagIds.length === 0) return new ArrayBuffer(0)
-  tagIds.forEach(id => {
-    if (tags[id] !== undefined) filtered[id] = tags[id]
-  })
-
+  const filtered = filter(tags, version)
   const headerBytes = [0x49, 0x44, 0x33, version, 0]
   let flagsByte = 0
   const sizeView = new BufferView(4)
