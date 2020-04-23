@@ -9,35 +9,21 @@
 
   <url>
     <loc>https://mp3tag.js.org/docs/</loc>
-    <lastmod>2020-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://mp3tag.js.org/docs/id3v1.html</loc>
-    <lastmod>2020-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://mp3tag.js.org/docs/id3v2.html</loc>
-    <lastmod>2020-04-14</lastmod>
+    <lastmod>2020-04-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://mp3tag.js.org/docs/mp3tag.html</loc>
-    <lastmod>2020-04-18</lastmod>
+    <lastmod>2020-04-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://mp3tag.js.org/docs/usage.html</loc>
-    <lastmod>2020-04-14</lastmod>
+    <lastmod>2020-04-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

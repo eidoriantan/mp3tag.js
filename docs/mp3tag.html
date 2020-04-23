@@ -21,12 +21,14 @@
   <link href="https://kit.fontawesome.com/" rel="dns-prefetch">
   <link href="https://mp3tag.js.org/docs/mp3tag.html" rel="canonical">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous">
+  <link href="/libraries/prismjs/prism.css" rel="stylesheet">
   <link href="/styles/style.css" rel="stylesheet">
 
   <script src="https://kit.fontawesome.com/9cb9988aa5.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha256-/ijcOLwFf26xEYAjW75FizKVo5tnTYiQddPZoLUHHZ8=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha256-WqU1JavFxSAMcLP2WIOI+GB2zWmShMI82mTpLDcqFUg=" crossorigin="anonymous"></script>
+  <script src="/libraries/prismjs/prism.js"></script>
 
   <script src="https://www.googletagmanager.com/gtag/js?id=UA-161214318-3" async></script>
   <script>
@@ -82,68 +84,43 @@
         <a href="/docs/" class="list-group-item list-group-item-action">Installation</a>
         <a href="/docs/usage.html" class="list-group-item list-group-item-action">Usage</a>
         <a href="/docs/mp3tag.html" class="list-group-item list-group-item-action active">MP3Tag</a>
-        <a href="/docs/id3v1.html" class="list-group-item list-group-item-action">ID3v1</a>
-        <a href="/docs/id3v2.html" class="list-group-item list-group-item-action">ID3v2</a>
-        <a href="/docs/id3v2.html#options" class="list-group-item list-group-item-action pl-5">ID3v2 &gt; Options</a>
-        <a href="/docs/id3v2.html#frame" class="list-group-item list-group-item-action pl-5">ID3v2 &gt; Frame</a>
+        <a href="/docs/mp3tag.html#properties" class="list-group-item list-group-item-action pl-5">Properties</a>
+        <a href="/docs/mp3tag.html#methods" class="list-group-item list-group-item-action pl-5">Methods</a>
       </div>
     </aside>
 
     <div class="col offset-12 offset-md-4">
       <h4 class="display-4">MP3Tag</h4>
-      <p class="lead">Exported class</p>
 
+      <h3 id="properties" class="anchored">Properties</h3>
       <div class="card mb-3">
-        <header class="card-header">Property <span class="text-info"><i class="fas fa-info-circle" aria-hidden="true"></i> static</span></header>
+        <header class="card-header">Property</header>
         <div class="card-body">
-          <h5 class="card-title">ID3v1</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="/docs/id3v1.html">ID3v1</a></h6>
-          <p class="card-text">ID3v1 class</p>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <header class="card-header">Property <span class="text-info"><i class="fas fa-info-circle" aria-hidden="true"></i> static</span></header>
-        <div class="card-body">
-          <h5 class="card-title">ID3v2</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="/docs/id3v2.html">ID3v2</a></h6>
-          <p class="card-text">ID3v2 class</p>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <header class="card-header">Property <span class="text-info"><i class="fas fa-info-circle" aria-hidden="true"></i> static</span></header>
-        <div class="card-body">
-          <h5 class="card-title">genre</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: string[]</h6>
-          <p class="card-text">Array of pre-defined genres</p>
+          <h5 class="card-title">verbose</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: boolean</h6>
+          <p class="card-text">Returns true if console logging was used</p>
         </div>
       </div>
 
       <div class="card mb-3">
         <header class="card-header">Property</header>
         <div class="card-body">
-          <h5 class="card-title">name</h5>
+          <h5 class="card-title">error</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: string</h6>
-          <p class="card-text">Name of the library 'MP3Tag'</p>
+          <p class="card-text">
+            If an error was thrown from the last operation such as
+            <code>read</code> and <code>save</code>, this returns the error
+            message
+          </p>
         </div>
       </div>
 
       <div class="card mb-3">
         <header class="card-header">Property</header>
         <div class="card-body">
-          <h5 class="card-title">version</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: string</h6>
-          <p class="card-text">Current version of the library. (eg. "0.6.1")</p>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <header class="card-header">Property <span class="text-warning"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Deprecated</span></header>
-        <div class="card-body">
-          <h5 class="card-title">frames</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="/docs/id3v2.html#frame">Frame</a>[]</h6>
-          <p class="card-text">This is only accessible if the tagger used is <a href="/docs/id3v2.html">ID3v2</a>. Please see ID3v2 instead</p>
+          <h5 class="card-title">errorCode</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: number</h6>
+          <p class="card-text">Error code</p>
         </div>
       </div>
 
@@ -151,97 +128,60 @@
         <header class="card-header">Property</header>
         <div class="card-body">
           <h5 class="card-title">buffer</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
-          <p class="card-text">Saved buffer</p>
+          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
+          <p class="card-text">Current buffer</p>
         </div>
       </div>
 
       <div class="card mb-3">
         <header class="card-header">Property</header>
         <div class="card-body">
-          <h5 class="card-title">tagger</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="/docs/id3v1.html">ID3v1</a> | <a href="/docs/id3v2.html">ID3v2</a></h6>
-          <p class="card-text">Returns the tagger used</p>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <header class="card-header">Property</header>
-        <div class="card-body">
-          <h5 class="card-title">options</h5>
+          <h5 class="card-title">tags</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
-          <p class="card-text">Options to be sent to the tagger everytime you call the <code>MP3Tag.read()</code> method</p>
+          <p class="card-text">Decoded tags object</p>
         </div>
       </div>
 
+      <h3 id="methods" class="anchored">Methods</h3>
       <div class="card mb-3">
         <header class="card-header">Method</header>
         <div class="card-body">
-          <h5 class="card-title">constructor(buffer[, options])</h5>
-          <p class="card-text">This sets the <code>MP3Tag.buffer</code> and <code>MP3Tag.options</code></p>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <header class="card-header">Method</header>
-        <div class="card-body">
-          <h5 class="card-title">read()</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="/docs/id3v1.html">ID3v1</a> | <a href="/docs/id3v2.html">ID3v2</a></h6>
-          <p class="card-text">Automatically detects the ID3 tag version of the buffer then reads it. This returns the tagger used to read the buffer.</p>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <header class="card-header">Method</header>
-        <div class="card-body">
-          <h5 class="card-title">save()</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
-          <p class="card-text">Validate by running the <code>validate</code> method of the tagger then writes them to the buffer. This returns the old buffer</p>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <header class="card-header">Method <span class="text-warning"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Deprecated</span></header>
-        <div class="card-body">
-          <h5 class="card-title">getFrames()</h5>
+          <h5 class="card-title">read([options])</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
-          <p class="card-text">This is only accessible if the tagger used is ID3v2. Please see ID3v2 instead</p>
+          <p class="card-text">This always return <code>MP3Tag.tags</code></p>
+          <pre>
+            <code class="language-javascript">
+              // Default Options
+              {
+                id3v1: true, // do not ignore ID3v1
+                id3v2: true // do not ignore ID3v2
+              }
+            </code>
+          </pre>
         </div>
       </div>
 
       <div class="card mb-3">
-        <header class="card-header">Method <span class="text-warning"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Deprecated</span></header>
+        <header class="card-header">Method</header>
         <div class="card-body">
-          <h5 class="card-title">addFrame(id, value)</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: void</h6>
-          <p class="card-text">This is only accessible if the tagger used is ID3v2. Please see ID3v2 instead</p>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <header class="card-header">Method <span class="text-warning"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Deprecated</span></header>
-        <div class="card-body">
-          <h5 class="card-title">removeFrame(id[, index = null])</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: void</h6>
-          <p class="card-text">This is only accessible if the tagger used is ID3v2. Please see ID3v2 instead</p>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <header class="card-header">Method <span class="text-warning"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Deprecated</span></header>
-        <div class="card-body">
-          <h5 class="card-title">editFrame(id, value[, index = 0, replace = true])</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: void</h6>
-          <p class="card-text">This is only accessible if the tagger used is ID3v2. Please see ID3v2 instead</p>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <header class="card-header">Method <span class="text-warning"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Deprecated</span></header>
-        <div class="card-body">
-          <h5 class="card-title">existsFrame(id)</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: void</h6>
-          <p class="card-text">This is only accessible if the tagger used is ID3v2. Please see ID3v2 instead</p>
+          <h5 class="card-title">save([options])</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
+          <p class="card-text">This always return <code>MP3Tag.buffer</code></p>
+          <pre>
+            <code class="language-javascript">
+              // Default Options
+              {
+                strict: false, // Use strict mode when validating
+                id3v1: { include: true }, // Add ID3v1 tags to buffer
+                id3v2: {
+                  include: true, // Add ID3v2 tags to buffer
+                  unsynch: true, // Use unsynchronisation scheme
+                  version: defaultVersion, // ID3v2 major version
+                  padding: 2048 // Number of null bytes added after ID3v2
+                }
+              }
+            </code>
+          </pre>
         </div>
       </div>
 
@@ -249,17 +189,8 @@
         <header class="card-header">Method</header>
         <div class="card-body">
           <h5 class="card-title">getAudio()</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a></h6>
-          <p class="card-text">Returns the raw audio without tags</p>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <header class="card-header">Method</header>
-        <div class="card-body">
-          <h5 class="card-title">getBlob()</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en/docs/Web/API/Blob">Blob</a></h6>
-          <p class="card-text">Returns the <code>Blob</code> object of the buffer</p>
+          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
+          <p class="card-text">Removed ID3v1 and ID3v2 audio buffer</p>
         </div>
       </div>
     </div>

@@ -21,8 +21,8 @@
   <link href="https://kit.fontawesome.com/" rel="dns-prefetch">
   <link href="https://mp3tag.js.org/docs/usage.html" rel="canonical">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous">
-  <link href="/styles/style.css" rel="stylesheet">
   <link href="/libraries/prismjs/prism.css" rel="stylesheet">
+  <link href="/styles/style.css" rel="stylesheet">
 
   <script src="https://kit.fontawesome.com/9cb9988aa5.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
@@ -84,10 +84,6 @@
         <a href="/docs/" class="list-group-item list-group-item-action">Installation</a>
         <a href="/docs/usage.html" class="list-group-item list-group-item-action active">Usage</a>
         <a href="/docs/mp3tag.html" class="list-group-item list-group-item-action">MP3Tag</a>
-        <a href="/docs/id3v1.html" class="list-group-item list-group-item-action">ID3v1</a>
-        <a href="/docs/id3v2.html" class="list-group-item list-group-item-action">ID3v2</a>
-        <a href="/docs/id3v2.html#options" class="list-group-item list-group-item-action pl-5">ID3v2 &gt; Options</a>
-        <a href="/docs/id3v2.html#frame" class="list-group-item list-group-item-action pl-5">ID3v2 &gt; Frame</a>
       </div>
     </aside>
 
@@ -104,17 +100,17 @@
             reader.onload = function () {
               const buffer = this.result
               const mp3tag = new MP3Tag(buffer)
-              const tagger = mp3tag.read()
+              mp3tag.read()
 
-              if (tagger.name === 'ID3v2') {
-                console.debug(tagger.getFrames())
-              } else if (tagger.name === 'ID3v1') {
-                console.debug(tagger.title)
-                console.debug(tagger.artist)
-                console.debug(tagger.album)
-                console.debug(tagger.year)
-                console.debug(tagger.comment)
-              }
+              if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
+
+              console.log(mp3tag.tags)
+              mp3tag.tags.TIT2 = 'NEW TITLE'
+              mp3tag.tags.TPE1 = 'NEW ARTIST'
+              mp3tag.save({ strict: true })
+
+              if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
+              mp3tag.read()
             }
 
             if (this.files.length > 0) {
@@ -132,17 +128,17 @@
 
           const buffer = fs.readFileSync('/path/to/mp3')
           const mp3tag = new MP3Tag(buffer)
-          const tagger = mp3tag.read()
+          mp3tag.read()
 
-          if (tagger.name === 'ID3v2') {
-            console.debug(tagger.getFrames())
-          } else if (tagger.name === 'ID3v1') {
-            console.debug(tagger.title)
-            console.debug(tagger.artist)
-            console.debug(tagger.album)
-            console.debug(tagger.year)
-            console.debug(tagger.comment)
-          }
+          if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
+
+          console.log(mp3tag.tags)
+          mp3tag.tags.TIT2 = 'NEW TITLE'
+          mp3tag.tags.TPE1 = 'NEW ARTIST'
+          mp3tag.save({ strict: true })
+
+          if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
+          mp3tag.read()
         </code>
       </pre>
     </div>
