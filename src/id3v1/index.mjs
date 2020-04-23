@@ -109,8 +109,8 @@ export function validate (tags, strict) {
 
   if (typeof track !== 'string') {
     throw new TagError(102, 'Track is not a string')
-  } else if (track.length !== 0 && track.length > 1) {
-    throw new TagError(102, 'Track length exceeds 1 character')
+  } else if (parseInt(track) > 255 || parseInt(track) < 0) {
+    throw new TagError(102, 'Track should be in range 255 - 0')
   }
 
   if (track !== '') {
