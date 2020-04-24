@@ -71,7 +71,7 @@ export function decode (buffer, tagOffset = 0) {
   let limit = size
 
   const pushTag = (tag) => {
-    const singleFrame = ['OWNE', 'MCDI', 'SYTC']
+    const singleFrame = ['USER', 'OWNE', 'MCDI', 'SYTC']
     switch (typeof tag.value) {
       case 'number':
       case 'string':
