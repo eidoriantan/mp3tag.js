@@ -330,6 +330,28 @@
           </code>
         </pre>
       </div>
+
+      <div class="card border-dark shadow mb-3 my-4">
+        <header class="card-header border-dark">Private frame</header>
+        <div class="card-body">
+          <h5 class="card-title">ID: PRIV</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
+          <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.28" target="_blank">ID3v2.3.0 section 4.28</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.27</a></h6>
+          <p class="card-text">
+            PRIV frame are parsed and must be saved as an array. If the strict
+            mode is enabled, there should only one frame with the same data
+          </p>
+        </div>
+        <pre class="card-body rounded-0 mb-0">
+          <code class="language-javascript">
+            // PRIV example
+            [{
+              ownerId: 'owner string', // owners identifier
+              data: [1, 2, 3, 4, 5, 6, 7, 8, 9] // data binary
+            }]
+          </code>
+        </pre>
+      </div>
     </div>
   </main>
 
