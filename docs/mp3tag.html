@@ -93,8 +93,8 @@
       <h4 class="display-4">MP3Tag</h4>
 
       <h3 id="properties" class="anchored">Properties</h3>
-      <div class="card mb-3">
-        <header class="card-header">Property</header>
+      <div class="  card border-info shadow mb-3 my-4">
+        <header class="card-header border-info">Property</header>
         <div class="card-body">
           <h5 class="card-title">verbose</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: boolean</h6>
@@ -102,8 +102,8 @@
         </div>
       </div>
 
-      <div class="card mb-3">
-        <header class="card-header">Property</header>
+      <div class="  card border-info shadow mb-3 my-4">
+        <header class="card-header border-info">Property</header>
         <div class="card-body">
           <h5 class="card-title">error</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: string</h6>
@@ -115,8 +115,8 @@
         </div>
       </div>
 
-      <div class="card mb-3">
-        <header class="card-header">Property</header>
+      <div class="  card border-info shadow mb-3 my-4">
+        <header class="card-header border-info">Property</header>
         <div class="card-body">
           <h5 class="card-title">errorCode</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: number</h6>
@@ -124,8 +124,8 @@
         </div>
       </div>
 
-      <div class="card mb-3">
-        <header class="card-header">Property</header>
+      <div class="  card border-info shadow mb-3 my-4">
+        <header class="card-header border-info">Property</header>
         <div class="card-body">
           <h5 class="card-title">buffer</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
@@ -133,8 +133,8 @@
         </div>
       </div>
 
-      <div class="card mb-3">
-        <header class="card-header">Property</header>
+      <div class="  card border-info shadow mb-3 my-4">
+        <header class="card-header border-info">Property</header>
         <div class="card-body">
           <h5 class="card-title">tags</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
@@ -143,50 +143,50 @@
       </div>
 
       <h3 id="methods" class="anchored">Methods</h3>
-      <div class="card mb-3">
-        <header class="card-header">Method</header>
+      <div class="  card border-dark shadow mb-3 my-4">
+        <header class="card-header border-dark">Method</header>
         <div class="card-body">
           <h5 class="card-title">read([options])</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
           <p class="card-text">This always return <code>MP3Tag.tags</code></p>
-          <pre>
-            <code class="language-javascript">
-              // Default Options
-              {
-                id3v1: true, // do not ignore ID3v1
-                id3v2: true // do not ignore ID3v2
-              }
-            </code>
-          </pre>
         </div>
+        <pre class="card-body rounded-0 mb-0">
+          <code class="language-javascript">
+            // Default Options
+            {
+              id3v1: true, // do not ignore ID3v1
+              id3v2: true // do not ignore ID3v2
+            }
+          </code>
+        </pre>
       </div>
 
-      <div class="card mb-3">
-        <header class="card-header">Method</header>
+      <div class="  card border-dark shadow mb-3 my-4">
+        <header class="card-header border-dark">Method</header>
         <div class="card-body">
           <h5 class="card-title">save([options])</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
           <p class="card-text">This always return <code>MP3Tag.buffer</code></p>
-          <pre>
-            <code class="language-javascript">
-              // Default Options
-              {
-                strict: false, // Use strict mode when validating
-                id3v1: { include: true }, // Add ID3v1 tags to buffer
-                id3v2: {
-                  include: true, // Add ID3v2 tags to buffer
-                  unsynch: true, // Use unsynchronisation scheme
-                  version: defaultVersion, // ID3v2 major version
-                  padding: 2048 // Number of null bytes added after ID3v2
-                }
-              }
-            </code>
-          </pre>
         </div>
+        <pre class="card-body rounded-0 mb-0">
+          <code class="language-javascript">
+            // Default Options
+            {
+              strict: false, // Use strict mode when validating
+              id3v1: { include: true }, // Add ID3v1 tags to buffer
+              id3v2: {
+                include: true, // Add ID3v2 tags to buffer
+                unsynch: true, // Use unsynchronisation scheme
+                version: defaultVersion, // ID3v2 major version
+                padding: 2048 // Number of null bytes added after ID3v2
+              }
+            }
+          </code>
+        </pre>
       </div>
 
-      <div class="card mb-3">
-        <header class="card-header">Method</header>
+      <div class="  card border-dark shadow mb-3 my-4">
+        <header class="card-header border-dark">Method</header>
         <div class="card-body">
           <h5 class="card-title">getAudio()</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
