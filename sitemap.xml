@@ -15,6 +15,13 @@
   </url>
 
   <url>
+    <loc>https://mp3tag.js.org/docs/frames.html</loc>
+    <lastmod>2020-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://mp3tag.js.org/docs/mp3tag.html</loc>
     <lastmod>2020-04-24</lastmod>
     <changefreq>weekly</changefreq>
