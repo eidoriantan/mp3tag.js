@@ -232,7 +232,7 @@ function transformv4tov3 (tags) {
         transformed.TORY = tags[id]
         break
 
-      case 'TSIZ':
+      case 'SIGN':
         break
 
       default:
@@ -266,6 +266,7 @@ function transformv3tov4 (tags) {
         break
 
       case 'TRDA':
+      case 'TSIZ':
         break
 
       case 'TYER':
