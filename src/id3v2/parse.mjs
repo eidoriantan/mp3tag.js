@@ -134,10 +134,8 @@ export function owneFrame (buffer, version) {
   const seller = view.getString(sellerOffset, sellerLength, encoding)
 
   return {
-    currency: {
-      code: currencyCode.string,
-      price: currency.string
-    },
+    currencyCode: currencyCode.string,
+    currencyPrice: currency.string,
     date: date.string,
     seller: seller.string
   }
