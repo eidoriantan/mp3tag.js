@@ -96,8 +96,14 @@
         frame if it is not blank.
       </div>
 
+      <!-- <div class="alert alert-info" role="alert">
+        <strong>Note:</strong> ID3v2 Frames that are not mentioned here are
+        not currently supported. You can submit an issue at
+        <a href="https://github.com/eidoriantan/mp3tag.js/issues/new?assignees=eidoriantan&labels=enhancement%2C+frame-support&template=frame-request.md&title=%5BFRAME+ID%5D+Frame" class="alert-link">GitHub issues</a>
+      </div> -->
+
       <div class="alert alert-info" role="alert">
-        <strong>Note:</strong> All strings can be separated by '\\'.
+        <strong>Note:</strong> All string-typed frames are separated by '\\' and should not contain newline characters.
       </div>
 
       <div class="card border-info shadow mb-3 my-4">
@@ -137,10 +143,10 @@
         </div>
         <pre class="card-body rounded-0 mb-0">
           <code class="language-javascript">
-            // TXXX
+            // TXXX example
             [{
-              description: 'string', // description
-              text: 'string' // text information
+              description: 'Text description', // description
+              text: 'Any string here' // text information
             }]
           </code>
         </pre>
@@ -166,10 +172,35 @@
         </div>
         <pre class="card-body rounded-0 mb-0">
           <code class="language-javascript">
-            // WXXX
+            // WXXX example
             [{
-              description: 'string', // description
-              url: 'string' // URL
+              description: 'URL description', // description
+              url: 'https://github.com' // URL
+            }]
+          </code>
+        </pre>
+      </div>
+
+      <div class="card border-dark shadow mb-3 my-4">
+        <header class="card-header border-dark">Commend and Unsynchronised lyrics frames</header>
+        <div class="card-body">
+          <h5 class="card-title">ID: COMM and USLT</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
+          <h6 class="card-subtitle mb-2 text-muted">Links (COMM): <a href="http://id3.org/id3v2.3.0#sec4.11" target="_blank">ID3v2.3.0 section 4.11</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.10</a></h6>
+          <h6 class="card-subtitle mb-2 text-muted">Links (USLT): <a href="http://id3.org/id3v2.3.0#sec4.9" target="_blank">ID3v2.3.0 section 4.9</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.8</a></h6>
+          <p class="card-text">
+            COMM and USLT frames are parsed and must be saved as an array. If
+            the strict mode is enabled, there should only one frame with the
+            same language and content descriptor.
+          </p>
+        </div>
+        <pre class="card-body rounded-0 mb-0">
+          <code class="language-javascript">
+            // COMM and USLT example
+            [{
+              language: 'eng', // language
+              descriptor: 'Content description', // content description
+              text: 'Lyrics or comment goes here' // text
             }]
           </code>
         </pre>
