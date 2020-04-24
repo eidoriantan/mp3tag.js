@@ -352,14 +352,29 @@ export function syltFrame (values, version, strict) {
       throw new TagError(201, 'Lyrics is not a string')
     }
 
-    sylt.type = sylt.type || 1
     if (typeof sylt.type !== 'number') {
       throw new TagError(201, 'Type is not a number')
+    } else if (sylt.type > 255 || sylt.type < 0) {
+      throw new TagError(201, 'Type should be in range of 0 - 255')
+    }
+
+    if (typeof sylt.format !== 'number') {
+      throw new TagError(201, 'Format is not a number')
+    } else if (sylt.format > 255 || sylt.format < 0) {
+      throw new TagError(201, 'Format should be in range of 0 - 255')
     }
 
     if (strict) {
       if (!sylt.language.match(langRegex)) {
         throw new TagError(201, 'Language must follow ISO 639-2')
+      }
+
+      if (sylt.type > 6 || sylt.type < 0) {
+        throw new TagError(201, 'Type should be in range of 0 - 6')
+      }
+
+      if (sylt.format > 2 || sylt.format < 1) {
+        throw new TagError(201, 'Format should be either 1 or 2')
       }
 
       if (sylt.lyrics.split('\n').every(entry => syltRegex.test(entry))) {
