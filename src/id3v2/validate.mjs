@@ -408,6 +408,12 @@ export function sytcFrame (value, version, strict) {
     throw new TagError(201, 'Data should be viewable')
   }
 
+  if (typeof value.format !== 'number') {
+    throw new TagError(201, 'Format is not a number')
+  } else if (value.format > 255 || value.format < 0) {
+    throw new TagError(201, 'Format should be in range of 0 - 255')
+  }
+
   if (strict && (value.format > 2 || value.format < 1)) {
     throw new TagError(201, 'Invalid timestamp')
   }
