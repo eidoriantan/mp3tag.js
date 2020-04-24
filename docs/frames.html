@@ -96,6 +96,10 @@
         frame if it is not blank.
       </div>
 
+      <div class="alert alert-info" role="alert">
+        <strong>Note:</strong> All strings can be separated by '\\'.
+      </div>
+
       <div class="card border-info shadow mb-3 my-4">
         <header class="card-header border-info">Text information frames</header>
         <div class="card-body">
@@ -103,7 +107,7 @@
           <h6 class="card-subtitle mb-2 text-muted">Type: string</h6>
           <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.2.1" target="_blank">ID3v2.3.0 section 4.2.1</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 sections 4.2.1 - 4.2.5</a></h6>
           <p class="card-text">
-            All strings can be separated by '\\'. If strict mode is enabled, all languages must be encoded with
+            If strict mode is enabled, all languages must be encoded with
             <a href="https://www.loc.gov/standards/iso639-2/php/code_list.php" class="card-link" target="_blank">ISO 639-2</a>.
             Some of these frames have its own standards but are only applicable if the strict mode is enabled.
 
@@ -137,6 +141,35 @@
             [{
               description: 'string', // description
               text: 'string' // text information
+            }]
+          </code>
+        </pre>
+      </div>
+
+      <div class="card border-info shadow mb-3 my-4">
+        <header class="card-header border-info">URL frames</header>
+        <div class="card-body">
+          <h5 class="card-title">ID: "W000" - "WZZZ" excluding WXXX</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: string</h6>
+          <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.3.1" target="_blank">ID3v2.3.0 section 4.3.1</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.3.1</a></h6>
+          <p class="card-text">If strict mode is enabled, all URLs are checked if its a valid URL. The current RegExp used is <code>/^(https?):\/\/[^\s/$.?#]+\.[^\s]*/</code></p>
+        </div>
+      </div>
+
+      <div class="card border-dark shadow mb-3 my-4">
+        <header class="card-header border-dark">User defined URL link frame</header>
+        <div class="card-body">
+          <h5 class="card-title">ID: WXXX</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
+          <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.3.2" target="_blank">ID3v2.3.0 section 4.3.2</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.3.2</a></h6>
+          <p class="card-text">WXXX frames are parsed and must be saved as an array</p>
+        </div>
+        <pre class="card-body rounded-0 mb-0">
+          <code class="language-javascript">
+            // WXXX
+            [{
+              description: 'string', // description
+              url: 'string' // URL
             }]
           </code>
         </pre>
