@@ -375,6 +375,34 @@
           </code>
         </pre>
       </div>
+
+      <div class="card border-dark shadow mb-3 my-4">
+        <header class="card-header border-dark">Synchronised lyrics/text frame</header>
+        <div class="card-body">
+          <h5 class="card-title">ID: SYLT</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
+          <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.8" target="_blank">ID3v2.3.0 section 4.8</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.9</a></h6>
+          <p class="card-text">
+            SYLT frame is parsed and must be saved as an array. If the strict
+            mode is enabled, there should only one frame with the same language
+            and content descriptor, language must be encoded with
+            <a href="https://www.loc.gov/standards/iso639-2/php/code_list.php" class="card-link" target="_blank">ISO 639-2</a>,
+            and lyrics must follow the format for each line: [mm:ss.xxx] String to display during the time
+          </p>
+        </div>
+        <pre class="card-body rounded-0 mb-0">
+          <code class="language-javascript">
+            // SYLT example
+            [{
+              language: 'eng', // language
+              format: 1, // Time stamp format
+              type: 1, // Content type
+              descriptor: 'Descriptions', // descriptions
+              lyrics: 'Synced lyrics' // lyrics
+            }]
+          </code>
+        </pre>
+      </div>
     </div>
   </main>
 
