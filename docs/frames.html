@@ -387,7 +387,8 @@
             mode is enabled, there should only one frame with the same language
             and content descriptor, language must be encoded with
             <a href="https://www.loc.gov/standards/iso639-2/php/code_list.php" class="card-link" target="_blank">ISO 639-2</a>,
-            and lyrics must follow the format for each line: [mm:ss.xxx] String to display during the time
+            type should be in range of 0 - 6, format should be either 1 or 2, and
+            lyrics must follow the format for each line: [mm:ss.xxx] String to display during the time
           </p>
         </div>
         <pre class="card-body rounded-0 mb-0">
@@ -418,6 +419,28 @@
           <code class="language-javascript">
             // MCID example
             {
+              data: [1, 2, 3, 4, 5, 6, 7, 8] // binary data
+            }
+          </code>
+        </pre>
+      </div>
+
+      <div class="card border-dark shadow mb-3 my-4">
+        <header class="card-header border-dark">Synchronised tempo codes frame</header>
+        <div class="card-body">
+          <h5 class="card-title">ID: SYTC</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
+          <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.8" target="_blank">ID3v2.3.0 section 4.8</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.7</a></h6>
+          <p class="card-text">
+            SYTC frame is parsed and must be saved as an object. If strict mode
+            is enabled, format must be either 1 or 2.
+          </p>
+        </div>
+        <pre class="card-body rounded-0 mb-0">
+          <code class="language-javascript">
+            // SYTC example
+            {
+              format: 1, // Timestamp format
               data: [1, 2, 3, 4, 5, 6, 7, 8] // binary data
             }
           </code>
