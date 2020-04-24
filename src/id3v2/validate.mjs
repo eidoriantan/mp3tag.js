@@ -396,8 +396,8 @@ export function syltFrame (values, version, strict) {
 }
 
 export function mcdiFrame (value, version, strict) {
-  if (!BufferView.isViewable(value)) {
-    throw new TagError(201, 'Value should be viewable')
+  if (!BufferView.isViewable(value.data)) {
+    throw new TagError(201, 'Data should be viewable')
   }
 
   return true

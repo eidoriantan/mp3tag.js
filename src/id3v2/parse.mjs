@@ -198,7 +198,7 @@ export function syltFrame (buffer, version) {
 
 export function mcdiFrame (buffer, version) {
   const view = new BufferView(buffer)
-  return view.getUint8(0, view.byteLength)
+  return { data: view.getUint8(0, view.byteLength) }
 }
 
 export function sytcFrame (buffer, version) {

@@ -487,14 +487,14 @@ export function syltFrame (values, options) {
 
 export function mcdiFrame (value, options) {
   const { id, version, unsynch } = options
-  if (unsynch) value = unsynchData(value, version)
+  if (unsynch) value.data = unsynchData(value.data, version)
 
-  const header = getHeaderBytes(id, value.length, version, {
+  const header = getHeaderBytes(id, value.data.length, version, {
     unsynchronisation: unsynch,
     dataLengthIndicator: unsynch
   })
 
-  return mergeBytes(header, value)
+  return mergeBytes(header, value.data)
 }
 
 export function sytcFrame (value, options) {
