@@ -325,38 +325,36 @@ export function ufidFrame (values, options) {
   return bytes
 }
 
-export function userFrame (values, options) {
+export function userFrame (value, options) {
   const { id, version, unsynch } = options
   const bytes = []
 
-  values.forEach(user => {
-    let encoding = 0
-    const langBytes = encodeString(user.language, 'ascii')
-    let textBytes
+  let encoding = 0
+  const langBytes = encodeString(value.language, 'ascii')
+  let textBytes
 
-    switch (version) {
-      case 3:
-        encoding = 1
-        textBytes = encodeString(user.text + '\0', 'utf-16')
-        break
+  switch (version) {
+    case 3:
+      encoding = 1
+      textBytes = encodeString(value.text + '\0', 'utf-16')
+      break
 
-      case 4:
-        encoding = 3
-        textBytes = encodeString(user.text + '\0', 'utf-8')
-        break
-    }
+    case 4:
+      encoding = 3
+      textBytes = encodeString(value.text + '\0', 'utf-8')
+      break
+  }
 
-    let data = mergeBytes(encoding, langBytes, textBytes)
-    if (unsynch) data = unsynchData(data, version)
+  let data = mergeBytes(encoding, langBytes, textBytes)
+  if (unsynch) data = unsynchData(data, version)
 
-    const header = getHeaderBytes(id, data.length, version, {
-      unsynchronisation: unsynch,
-      dataLengthIndicator: unsynch
-    })
-
-    const merged = mergeBytes(header, data)
-    merged.forEach(byte => bytes.push(byte))
+  const header = getHeaderBytes(id, data.length, version, {
+    unsynchronisation: unsynch,
+    dataLengthIndicator: unsynch
   })
+
+  const merged = mergeBytes(header, data)
+  merged.forEach(byte => bytes.push(byte))
 
   return bytes
 }
