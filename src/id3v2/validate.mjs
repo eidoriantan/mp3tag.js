@@ -305,7 +305,7 @@ export function owneFrame (value, version, strict) {
 export function privFrame (values, version, strict) {
   const contents = []
   values.forEach(priv => {
-    urlFrame(priv.ownerId, version, strict)
+    textFrame(priv.ownerId, version, strict)
 
     if (!BufferView.isViewable(priv.data)) {
       throw new TagError(201, 'Data should be viewable')
