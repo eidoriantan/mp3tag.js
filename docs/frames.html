@@ -182,7 +182,7 @@
       </div>
 
       <div class="card border-dark shadow mb-3 my-4">
-        <header class="card-header border-dark">Commend and Unsynchronised lyrics frames</header>
+        <header class="card-header border-dark">Comment and Unsynchronised lyrics frames</header>
         <div class="card-body">
           <h5 class="card-title">ID: COMM and USLT</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
@@ -201,6 +201,33 @@
               language: 'eng', // language
               descriptor: 'Content description', // content description
               text: 'Lyrics or comment goes here' // text
+            }]
+          </code>
+        </pre>
+      </div>
+
+      <div class="card border-dark shadow mb-3 my-4">
+        <header class="card-header border-dark">Attached picture frame</header>
+        <div class="card-body">
+          <h5 class="card-title">ID: APIC</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
+          <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.15" target="_blank">ID3v2.3.0 section 4.15</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.14</a></h6>
+          <p class="card-text">
+            APIC frame are parsed and must be saved as an array. If the strict
+            mode is enabled, there should only one frame with the same content
+            descriptor, types should be in range of 0 - 21, format should match
+            <code>/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/</code> regex, and
+            description should not exceed 64 characters.
+          </p>
+        </div>
+        <pre class="card-body rounded-0 mb-0">
+          <code class="language-javascript">
+            // APIC example
+            [{
+              format: 'image/jpeg', // Image MIME
+              type: 3, // See the APIC image types at id3.org
+              description: 'Content description', // content description
+              data: [1, 2, 3, 4, 5, 6, 7, 8] // image bytes
             }]
           </code>
         </pre>
