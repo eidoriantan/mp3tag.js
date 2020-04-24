@@ -2,7 +2,7 @@
 name: Frame request
 about: Frame you want to be supported
 title: "[FRAME ID] Frame"
-labels: enhancement, frame-support
+labels: enhancement
 assignees: eidoriantan
 
 ---
