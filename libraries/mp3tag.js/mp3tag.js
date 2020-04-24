@@ -4554,10 +4554,8 @@
     var sellerLength = view.byteLength - sellerOffset;
     var seller = view.getString(sellerOffset, sellerLength, encoding);
     return {
-      currency: {
-        code: currencyCode.string,
-        price: currency.string
-      },
+      currencyCode: currencyCode.string,
+      currencyPrice: currency.string,
       date: date.string,
       seller: seller.string
     };
@@ -4621,7 +4619,9 @@
   }
   function mcdiFrame(buffer, version) {
     var view = new BufferView(buffer);
-    return view.getUint8(0, view.byteLength);
+    return {
+      data: view.getUint8(0, view.byteLength)
+    };
   }
   function sytcFrame(buffer, version) {
     var view = new BufferView(buffer);
@@ -5289,7 +5289,7 @@
     value.forEach(function (tkey) {
       textFrame$1(tkey, version, strict);
 
-      if (strict && !tkey.match(/^([A-Gb#mo]{3})$/)) {
+      if (strict && !tkey.match(/^([A-Gb#mo]{1,3})$/)) {
         throw new TagError(201, 'Invalid TKEY Format (eg Cbm)');
       }
     });
@@ -5492,7 +5492,7 @@
   function privFrame$1(values, version, strict) {
     var contents = [];
     values.forEach(function (priv) {
-      urlFrame$1(priv.ownerId, version, strict);
+      textFrame$1(priv.ownerId, version, strict);
 
       if (!BufferView.isViewable(priv.data)) {
         throw new TagError(201, 'Data should be viewable');
@@ -5535,15 +5535,29 @@
         throw new TagError(201, 'Lyrics is not a string');
       }
 
-      sylt.type = sylt.type || 1;
-
       if (typeof sylt.type !== 'number') {
         throw new TagError(201, 'Type is not a number');
+      } else if (sylt.type > 255 || sylt.type < 0) {
+        throw new TagError(201, 'Type should be in range of 0 - 255');
+      }
+
+      if (typeof sylt.format !== 'number') {
+        throw new TagError(201, 'Format is not a number');
+      } else if (sylt.format > 255 || sylt.format < 0) {
+        throw new TagError(201, 'Format should be in range of 0 - 255');
       }
 
       if (strict) {
         if (!sylt.language.match(langRegex)) {
           throw new TagError(201, 'Language must follow ISO 639-2');
+        }
+
+        if (sylt.type > 6 || sylt.type < 0) {
+          throw new TagError(201, 'Type should be in range of 0 - 6');
+        }
+
+        if (sylt.format > 2 || sylt.format < 1) {
+          throw new TagError(201, 'Format should be either 1 or 2');
         }
 
         if (sylt.lyrics.split('\n').every(function (entry) {
@@ -5565,8 +5579,8 @@
     return true;
   }
   function mcdiFrame$1(value, version, strict) {
-    if (!BufferView.isViewable(value)) {
-      throw new TagError(201, 'Value should be viewable');
+    if (!BufferView.isViewable(value.data)) {
+      throw new TagError(201, 'Data should be viewable');
     }
 
     return true;
@@ -5574,6 +5588,12 @@
   function sytcFrame$1(value, version, strict) {
     if (!BufferView.isViewable(value.data)) {
       throw new TagError(201, 'Data should be viewable');
+    }
+
+    if (typeof value.format !== 'number') {
+      throw new TagError(201, 'Format is not a number');
+    } else if (value.format > 255 || value.format < 0) {
+      throw new TagError(201, 'Format should be in range of 0 - 255');
     }
 
     if (strict && (value.format > 2 || value.format < 1)) {
@@ -5891,38 +5911,36 @@
     });
     return bytes;
   }
-  function userFrame$2(values, options) {
+  function userFrame$2(value, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
     var bytes = [];
-    values.forEach(function (user) {
-      var encoding = 0;
-      var langBytes = encodeString(user.language, 'ascii');
-      var textBytes;
+    var encoding = 0;
+    var langBytes = encodeString(value.language, 'ascii');
+    var textBytes;
 
-      switch (version) {
-        case 3:
-          encoding = 1;
-          textBytes = encodeString(user.text + '\0', 'utf-16');
-          break;
+    switch (version) {
+      case 3:
+        encoding = 1;
+        textBytes = encodeString(value.text + '\0', 'utf-16');
+        break;
 
-        case 4:
-          encoding = 3;
-          textBytes = encodeString(user.text + '\0', 'utf-8');
-          break;
-      }
+      case 4:
+        encoding = 3;
+        textBytes = encodeString(value.text + '\0', 'utf-8');
+        break;
+    }
 
-      var data = mergeBytes(encoding, langBytes, textBytes);
-      if (unsynch) data = unsynchData(data, version);
-      var header = getHeaderBytes(id, data.length, version, {
-        unsynchronisation: unsynch,
-        dataLengthIndicator: unsynch
-      });
-      var merged = mergeBytes(header, data);
-      merged.forEach(function (_byte8) {
-        return bytes.push(_byte8);
-      });
+    var data = mergeBytes(encoding, langBytes, textBytes);
+    if (unsynch) data = unsynchData(data, version);
+    var header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    });
+    var merged = mergeBytes(header, data);
+    merged.forEach(function (_byte8) {
+      return bytes.push(_byte8);
     });
     return bytes;
   }
@@ -6048,12 +6066,12 @@
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
-    if (unsynch) value = unsynchData(value, version);
-    var header = getHeaderBytes(id, value.length, version, {
+    if (unsynch) value.data = unsynchData(value.data, version);
+    var header = getHeaderBytes(id, value.data.length, version, {
       unsynchronisation: unsynch,
       dataLengthIndicator: unsynch
     });
-    return mergeBytes(header, value);
+    return mergeBytes(header, value.data);
   }
   function sytcFrame$2(value, options) {
     var id = options.id,
@@ -6602,6 +6620,36 @@
     WXXX: WXXX
   });
 
+  function filter(tags, version) {
+    tags.TIT2 = tags.TIT2 || (tags.title !== '' ? tags.title : undefined);
+    tags.TPE1 = tags.TPE1 || (tags.artist !== '' ? tags.artist : undefined);
+    tags.TALB = tags.TALB || (tags.album !== '' ? tags.album : undefined);
+
+    if (version === 3) {
+      tags.TYER = tags.TYER || (tags.year !== '' ? tags.year : undefined);
+    } else if (version === 4) {
+      tags.TDRC = tags.TDRC || (tags.year !== '' ? tags.year : undefined);
+    }
+
+    tags.COMM = tags.COMM || (tags.comment !== '' ? [{
+      language: 'eng',
+      descriptor: '',
+      text: tags.comment
+    }] : undefined);
+    tags.TRCK = tags.TRCK || (tags.track !== '' ? tags.track : undefined);
+    tags.TCON = tags.TCON || (tags.genre !== '' ? tags.genre : undefined);
+    var ids = Object.keys(frames);
+    var tagIds = Object.keys(tags).filter(function (key) {
+      return ids.includes(key);
+    });
+    var filtered = {};
+    if (tagIds.length === 0) return new ArrayBuffer(0);
+    tagIds.forEach(function (id) {
+      if (tags[id] !== undefined) filtered[id] = tags[id];
+    });
+    return filtered;
+  }
+
   function hasID3v2(buffer) {
     if (!isBuffer(buffer)) throw new TypeError('buffer is not ArrayBuffer/Buffer');
     var view = new BufferView(buffer);
@@ -6628,7 +6676,7 @@
     var limit = size;
 
     var pushTag = function pushTag(tag) {
-      var singleFrame = ['OWNE', 'MCDI', 'SYTC'];
+      var singleFrame = ['USER', 'OWNE', 'MCDI', 'SYTC'];
 
       switch (_typeof(tag.value)) {
         case 'number':
@@ -6727,8 +6775,9 @@
   function validate$1(tags, strict, options) {
     var version = options.version;
     if (version !== 3 && version !== 4) throw new TagError(200, 'Unknown version');
+    var filtered = filter(tags, version);
 
-    for (var id in tags) {
+    for (var id in filtered) {
       if (!Object.keys(frames).includes(id)) continue;
       var frameSpec = frames[id];
       if (strict && !frameSpec.version.includes(version)) throw new TagError(203);
@@ -6747,32 +6796,7 @@
     var version = options.version,
         padding = options.padding,
         unsynch = options.unsynch;
-    tags.TIT2 = tags.TIT2 || (tags.title !== '' ? tags.title : undefined);
-    tags.TPE1 = tags.TPE1 || (tags.artist !== '' ? tags.artist : undefined);
-    tags.TALB = tags.TALB || (tags.album !== '' ? tags.album : undefined);
-
-    if (version === 3) {
-      tags.TYER = tags.TYER || (tags.year !== '' ? tags.year : undefined);
-    } else if (version === 4) {
-      tags.TDRC = tags.TDRC || (tags.year !== '' ? tags.year : undefined);
-    }
-
-    tags.COMM = tags.COMM || (tags.comment !== '' ? [{
-      language: 'eng',
-      descriptor: '',
-      text: tags.comment
-    }] : undefined);
-    tags.TRCK = tags.TRCK || (tags.track !== '' ? tags.track : undefined);
-    tags.TCON = tags.TCON || (tags.genre !== '' ? tags.genre : undefined);
-    var ids = Object.keys(frames);
-    var tagIds = Object.keys(tags).filter(function (key) {
-      return ids.includes(key);
-    });
-    var filtered = {};
-    if (tagIds.length === 0) return new ArrayBuffer(0);
-    tagIds.forEach(function (id) {
-      if (tags[id] !== undefined) filtered[id] = tags[id];
-    });
+    var filtered = filter(tags, version);
     var headerBytes = [0x49, 0x44, 0x33, version, 0];
     var flagsByte = 0;
     var sizeView = new BufferView(4);
@@ -6821,7 +6845,7 @@
           transformed.TORY = tags[id];
           break;
 
-        case 'TSIZ':
+        case 'SIGN':
           break;
 
         default:
@@ -6855,6 +6879,7 @@
           break;
 
         case 'TRDA':
+        case 'TSIZ':
           break;
 
         case 'TYER':
@@ -6892,7 +6917,7 @@
       }
 
       this.name = 'MP3Tag';
-      this.version = '2.0.0';
+      this.version = '2.0.1';
       this.verbose = verbose;
       this.error = '';
       this.errorCode = -1;
