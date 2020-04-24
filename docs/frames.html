@@ -303,6 +303,33 @@
           </code>
         </pre>
       </div>
+
+      <div class="card border-dark shadow mb-3 my-4">
+        <header class="card-header border-dark">Ownership frame</header>
+        <div class="card-body">
+          <h5 class="card-title">ID: OWNE</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
+          <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.24" target="_blank">ID3v2.3.0 section 4.24</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.23</a></h6>
+          <p class="card-text">
+            OWNE frame are parsed and must be saved as an object. If the strict
+            mode is enabled, date must match the format <code>YYYYMMDD</code>,
+            currencyCode must be encoded with
+            <a href="https://www.xe.com/iso4217.php" class="card-link" target="_blank">ISO 4217</a>,
+            and the currencyPrice must follow the format <code>N.nn</code>.
+          </p>
+        </div>
+        <pre class="card-body rounded-0 mb-0">
+          <code class="language-javascript">
+            // OWNE example
+            {
+              currencyCode: 'USD', // US dollars
+              currencyPrice: '2.00', // 2 dollars
+              date: '20200424', // YYYYMMDD date format
+              seller: 'Seller' // Seller's name
+            }
+          </code>
+        </pre>
+      </div>
     </div>
   </main>
 
