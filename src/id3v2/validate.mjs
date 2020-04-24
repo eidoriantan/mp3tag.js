@@ -76,7 +76,7 @@ export function tkeyFrame (value, version, strict) {
   value.forEach(tkey => {
     textFrame(tkey, version, strict)
 
-    if (strict && !tkey.match(/^([A-Gb#mo]{3})$/)) {
+    if (strict && !tkey.match(/^([A-Gb#mo]{1,3})$/)) {
       throw new TagError(201, 'Invalid TKEY Format (eg Cbm)')
     }
   })
