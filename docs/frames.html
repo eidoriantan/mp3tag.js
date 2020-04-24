@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
   <meta name="author" content="mp3tag.js Contributors">
   <meta name="description" content="mp3tag.js JavaScript library documentations">
-  <meta name="keywords" content="mp3, id3, audio, tag, edit, write, mp3tag.js, documentations, docs, mp3tag">
+  <meta name="keywords" content="mp3, id3, audio, tag, edit, write, mp3tag.js, documentations, docs, frames, specs">
   <meta name="theme-color" content="#2b594c">
   <meta name="msapplication-TileColor" content="#2b594c">
 
@@ -19,7 +19,7 @@
   <link href="https://cdnjs.cloudflare.com/" rel="dns-prefetch">
   <link href="https://kit.fontawesome.com/" rel="preconnect" crossorigin="anonymous">
   <link href="https://kit.fontawesome.com/" rel="dns-prefetch">
-  <link href="https://mp3tag.js.org/docs/mp3tag.html" rel="canonical">
+  <link href="https://mp3tag.js.org/docs/frames.html" rel="canonical">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous">
   <link href="/libraries/prismjs/prism.css" rel="stylesheet">
   <link href="/styles/style.css" rel="stylesheet">
@@ -41,7 +41,7 @@
     })
   </script>
 
-  <title>MP3Tag | mp3tag.js</title>
+  <title>Tags and Frames | mp3tag.js</title>
 </head>
 
 <body>
@@ -83,116 +83,63 @@
       <div class="list-group">
         <a href="/docs/" class="list-group-item list-group-item-action">Installation</a>
         <a href="/docs/usage.html" class="list-group-item list-group-item-action">Usage</a>
-        <a href="/docs/mp3tag.html" class="list-group-item list-group-item-action active">MP3Tag</a>
-        <a href="/docs/mp3tag.html#properties" class="list-group-item list-group-item-action pl-5">Properties</a>
-        <a href="/docs/mp3tag.html#methods" class="list-group-item list-group-item-action pl-5">Methods</a>
-        <a href="/docs/frames.html" class="list-group-item list-group-item-action">Tags and Frames</a>
+        <a href="/docs/mp3tag.html" class="list-group-item list-group-item-action">MP3Tag</a>
+        <a href="/docs/frames.html" class="list-group-item list-group-item-action active">Tags and Frames</a>
       </div>
     </aside>
 
     <div class="col offset-12 offset-md-4">
-      <h4 class="display-4">MP3Tag</h4>
-
-      <h3 id="properties" class="anchored">Properties</h3>
-      <div class="card border-info shadow mb-3 my-4">
-        <header class="card-header border-info">Property</header>
-        <div class="card-body">
-          <h5 class="card-title">verbose</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: boolean</h6>
-          <p class="card-text">Returns true if console logging was used</p>
-        </div>
+      <h4 class="display-4">Tags and Frames</h4>
+      <div class="alert alert-info" role="alert">
+        <strong>Note:</strong> ID3v1 tags such as title, artist, album, year,
+        comment, track, and genre will be overwritten by its equivalent ID3v2
+        frame if it is not blank.
       </div>
 
       <div class="card border-info shadow mb-3 my-4">
-        <header class="card-header border-info">Property</header>
+        <header class="card-header border-info">Text information frames</header>
         <div class="card-body">
-          <h5 class="card-title">error</h5>
+          <h5 class="card-title">ID: "T000" - "TZZZ" excluding TXXX</h5>
           <h6 class="card-subtitle mb-2 text-muted">Type: string</h6>
+          <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.2.1" target="_blank">ID3v2.3.0 section 4.2.1</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 sections 4.2.1 - 4.2.5</a></h6>
           <p class="card-text">
-            If an error was thrown from the last operation such as
-            <code>read</code> and <code>save</code>, this returns the error
-            message
+            All strings can be separated by '\\'. If strict mode is enabled, all languages must be encoded with
+            <a href="https://www.loc.gov/standards/iso639-2/php/code_list.php" class="card-link" target="_blank">ISO 639-2</a>.
+            Some of these frames have its own standards but are only applicable if the strict mode is enabled.
+
+            <ul>
+              <li>Set frames such as "<i>TPOS</i>" and "<i>TRCK</i>" should follow this format: '1/2' or just '1' and can be separated '1/2\\1'.</li>
+              <li>Time frames at ID3v2.3.0 such as "<i>TDAT</i>", "<i>TIME</i>", "<i>TORY</i>", and "<i>TYER</i>" should have 4 numerical characters</li>
+              <li>
+                Time frames at ID3v2.4.0 such as "<i>TDEN</i>", "<i>TDOR</i>", "<i>TDRC</i>", "<i>TDRL</i>", and "<i>TDTG</i>" should follow this format:
+                yyyy-MM-ddTHH:mm:ss (year, "-", month, "-", day, "T", hour (out of 24), ":", minutes, ":", seconds), but the precision may be reduced by
+                removing as many time indicators as wanted. Hence valid timestamps
+                are yyyy, yyyy-MM, yyyy-MM-dd, yyyy-MM-ddTHH, yyyy-MM-ddTHH:mm and yyyy-MM-ddTHH:mm:ss.
+              </li>
+              <li>"<i>TKEY</i>" frame is represented as a string with a maximum length of three characters. The ground keys are represented with "A","B","C","D","E", "F" and "G" and halfkeys represented with "b" and "#". Minor is represented as "m". Example "Cbm". Off key is represented with an "o" only.</li>
+              <li>"<i>TSRC</i>" frame should have 12 alphanumeric characters</li>
+            </ul>
           </p>
         </div>
       </div>
 
-      <div class="card border-info shadow mb-3 my-4">
-        <header class="card-header border-info">Property</header>
-        <div class="card-body">
-          <h5 class="card-title">errorCode</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: number</h6>
-          <p class="card-text">Error code</p>
-        </div>
-      </div>
-
-      <div class="card border-info shadow mb-3 my-4">
-        <header class="card-header border-info">Property</header>
-        <div class="card-body">
-          <h5 class="card-title">buffer</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
-          <p class="card-text">Current buffer</p>
-        </div>
-      </div>
-
-      <div class="card border-info shadow mb-3 my-4">
-        <header class="card-header border-info">Property</header>
-        <div class="card-body">
-          <h5 class="card-title">tags</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
-          <p class="card-text">Decoded tags object</p>
-        </div>
-      </div>
-
-      <h3 id="methods" class="anchored">Methods</h3>
       <div class="card border-dark shadow mb-3 my-4">
-        <header class="card-header border-dark">Method</header>
+        <header class="card-header border-dark">User defined text information frame</header>
         <div class="card-body">
-          <h5 class="card-title">read([options])</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
-          <p class="card-text">This always return <code>MP3Tag.tags</code></p>
+          <h5 class="card-title">ID: TXXX</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
+          <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.2.2" target="_blank">ID3v2.3.0 section 4.2.2</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.2.6</a></h6>
+          <p class="card-text">TXXX frames are parsed and must be saved as an array</p>
         </div>
         <pre class="card-body rounded-0 mb-0">
           <code class="language-javascript">
-            // Default Options
-            {
-              id3v1: true, // do not ignore ID3v1
-              id3v2: true // do not ignore ID3v2
-            }
+            // TXXX
+            [{
+              description: 'string', // description
+              text: 'string' // text information
+            }]
           </code>
         </pre>
-      </div>
-
-      <div class="card border-dark shadow mb-3 my-4">
-        <header class="card-header border-dark">Method</header>
-        <div class="card-body">
-          <h5 class="card-title">save([options])</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
-          <p class="card-text">This always return <code>MP3Tag.buffer</code></p>
-        </div>
-        <pre class="card-body rounded-0 mb-0">
-          <code class="language-javascript">
-            // Default Options
-            {
-              strict: false, // Use strict mode when validating
-              id3v1: { include: true }, // Add ID3v1 tags to buffer
-              id3v2: {
-                include: true, // Add ID3v2 tags to buffer
-                unsynch: true, // Use unsynchronisation scheme
-                version: defaultVersion, // ID3v2 major version
-                padding: 2048 // Number of null bytes added after ID3v2
-              }
-            }
-          </code>
-        </pre>
-      </div>
-
-      <div class="card border-dark shadow mb-3 my-4">
-        <header class="card-header border-dark">Method</header>
-        <div class="card-body">
-          <h5 class="card-title">getAudio()</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
-          <p class="card-text">Removed ID3v1 and ID3v2 audio buffer</p>
-        </div>
       </div>
     </div>
   </main>
