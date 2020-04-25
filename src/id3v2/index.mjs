@@ -12,14 +12,14 @@ import {
 } from '../utils/bytes.mjs'
 
 function filter (tags, version) {
-  tags.TIT2 = tags.TIT2 || (tags.title !== '' ? tags.title : undefined)
-  tags.TPE1 = tags.TPE1 || (tags.artist !== '' ? tags.artist : undefined)
-  tags.TALB = tags.TALB || (tags.album !== '' ? tags.album : undefined)
+  tags.TIT2 = tags.TIT2 || tags.title || undefined
+  tags.TPE1 = tags.TPE1 || tags.artist || undefined
+  tags.TALB = tags.TALB || tags.album || undefined
 
   if (version === 3) {
-    tags.TYER = tags.TYER || (tags.year !== '' ? tags.year : undefined)
+    tags.TYER = tags.TYER || tags.year || undefined
   } else if (version === 4) {
-    tags.TDRC = tags.TDRC || (tags.year !== '' ? tags.year : undefined)
+    tags.TDRC = tags.TDRC || tags.year || undefined
   }
 
   tags.COMM = tags.COMM || (tags.comment !== '' ? [{
@@ -28,8 +28,8 @@ function filter (tags, version) {
     text: tags.comment
   }] : undefined)
 
-  tags.TRCK = tags.TRCK || (tags.track !== '' ? tags.track : undefined)
-  tags.TCON = tags.TCON || (tags.genre !== '' ? tags.genre : undefined)
+  tags.TRCK = tags.TRCK || tags.track || undefined
+  tags.TCON = tags.TCON || tags.genre || undefined
 
   const ids = Object.keys(frames)
   const tagIds = Object.keys(tags).filter(key => ids.includes(key))
