@@ -2,7 +2,28 @@
   "name": "mp3tag.js",
   "version": "2.0.1",
   "description": "MP3 tagging written in pure JavaScript",
+  "keywords": ["node", "browser", "audio", "mp3", "tag", "id3"],
+  "homepage": "https://mp3tag.js.org",
+  "bugs": "https://github.com/eidoriantan/mp3tag.js/issues",
+  "license": "MIT",
+  "author": {
+    "name": "Adriane Justine Tan",
+    "email": "eidoriantan@gmail.com",
+    "url": "https://eidoriantan.github.io"
+  },
+  "contributors": [],
+  "funding": {
+    "type": "patreon",
+    "url": "https://patreon.com/eidoriantan"
+  },
   "main": "dist/mp3tag.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eidoriantan/mp3tag.js.git"
+  },
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.9.0",
@@ -29,29 +50,5 @@
     "watch": "rollup -c -w",
     "lint": "eslint -c .eslintrc.json **/*.js --quiet --max-warnings 2",
     "test": "npm run lint && mocha --require esm --colors"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/eidoriantan/mp3tag.js.git"
-  },
-  "keywords": [
-    "audio",
-    "mp3",
-    "id3",
-    "tag",
-    "read",
-    "write",
-    "browser",
-    "javascript"
-  ],
-  "author": "Adriane Justine Tan <eidoriantan@gmail.com>",
-  "funding": {
-    "type": "patreon",
-    "url": "https://patreon.com/eidoriantan"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/eidoriantan/mp3tag.js/issues"
-  },
-  "homepage": "https://mp3tag.js.org"
+  }
 }
