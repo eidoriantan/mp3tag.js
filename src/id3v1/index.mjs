@@ -41,6 +41,19 @@ const GENRES = [
   'Garage Rock', 'Psybient'
 ]
 
+function filter (tags) {
+  tags.title = tags.TIT2 || tags.title || ''
+  tags.artist = tags.TPE1 || tags.artist || ''
+  tags.album = tags.TALB || tags.album || ''
+  tags.year = tags.TYER || (tags.TDRC ? tags.TDRC.substr(0, 4) : '') ||
+    tags.year || ''
+  tags.comment = (tags.COMM ? tags.COMM[0].text : '') || tags.comment || ''
+  tags.track = (tags.TRCK ? tags.TRCK.split('/')[0] : '') || tags.track || ''
+  tags.genre = tags.TCON || tags.genre || ''
+
+  return tags
+}
+
 export function hasID3v1 (buffer) {
   if (!isBuffer(buffer)) throw new TypeError('buffer is not ArrayBuffer/Buffer')
 
@@ -56,7 +69,6 @@ export function decode (buffer) {
 
   const view = new BufferView(buffer, buffer.byteLength - 128)
 
-  // @TODO: Trim null characters instead of replacing all of it
   const title = view.getString(3, 30, 'utf-8').string.replace(/\0/g, '')
   const artist = view.getString(33, 30, 'utf-8').string.replace(/\0/g, '')
   const album = view.getString(63, 30, 'utf-8').string.replace(/\0/g, '')
@@ -74,10 +86,8 @@ export function decode (buffer) {
 }
 
 export function validate (tags, strict) {
-  const {
-    title = '', artist = '', album = '', year = '', comment = '', track,
-    genre = ''
-  } = tags
+  const filtered = filter(tags)
+  const { title, artist, album, year, comment, track, genre } = filtered
 
   if (typeof title !== 'string') {
     throw new TagError(102, 'Title is not a string')
@@ -131,7 +141,8 @@ export function validate (tags, strict) {
 }
 
 export function encode (tags) {
-  let { title, artist, album, year, comment, track, genre } = tags
+  const filtered = filter(tags)
+  let { title, artist, album, year, comment, track, genre } = filtered
 
   while (title.length < 30) title += '\0'
   while (artist.length < 30) artist += '\0'
