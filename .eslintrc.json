@@ -10,6 +10,7 @@
     "mocha": true
   },
   "extends": "standard",
+  "rules": { "max-len": ["error", 80] },
   "noInlineConfig": true,
   "ignorePatterns": ["dist", "node_modules"]
 }
