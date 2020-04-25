@@ -18,6 +18,7 @@
   },
   "main": "dist/mp3tag.js",
   "directories": {
+    "example": "examples",
     "test": "test"
   },
   "repository": {
