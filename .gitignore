@@ -1,4 +1,12 @@
+
+.DS_Store
+
+# Ignore distributions, node modules and .npmrc files
 dist/
 node_modules/
 .npmrc
-.DS_Store
+
+# Ignore generated Jekyll files
+_site
+.sass-cache
+.jekyll-metadata

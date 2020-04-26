@@ -1,114 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-  <meta name="author" content="mp3tag.js Contributors">
-  <meta name="description" content="mp3tag.js JavaScript library downloads page">
-  <meta name="keywords" content="mp3, id3, audio, tag, edit, write, downloads">
-  <meta name="theme-color" content="#2b594c">
-  <meta name="msapplication-TileColor" content="#2b594c">
+---
+layout: default
+title: Downloads
+description: JavaScript library download page
+keywords: mp3, id3, audio, tag, edit, write, downloads
+scripts:
+  - /assets/js/downloads.js
+---
+<main class="main container">
+  <h3>{{ site.github.project_title }} Releases</h3>
+  <p class="lead">Visit the release page for changes and details</p>
 
-  <link href="/LICENSE" rel="license">
-  <link href="/site.webmanifest" rel="manifest">
-  <link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180">
-  <link href="/favicon-32x32.png" rel="icon" type="image/png" sizes="32x32">
-  <link href="/favicon-16x16.png" rel="icon" type="image/png" sizes="16x16">
-  <link href="/safari-pinned-tab.svg" rel="mask-icon" color="#2b594c">
-  <link href="https://cdnjs.cloudflare.com/" rel="preconnect" crossorigin="anonymous">
-  <link href="https://cdnjs.cloudflare.com/" rel="dns-prefetch">
-  <link href="https://kit.fontawesome.com/" rel="preconnect" crossorigin="anonymous">
-  <link href="https://kit.fontawesome.com/" rel="dns-prefetch">
-  <link href="https://mp3tag.js.org/downloads/" rel="canonical">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous">
-  <link href="/styles/style.css" rel="stylesheet">
+  <table class="table table-striped table-bordered">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Version</th>
+        <th scope="col">Downloads</th>
+      </tr>
+    </thead>
 
-  <script src="https://kit.fontawesome.com/9cb9988aa5.js" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha256-/ijcOLwFf26xEYAjW75FizKVo5tnTYiQddPZoLUHHZ8=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha256-WqU1JavFxSAMcLP2WIOI+GB2zWmShMI82mTpLDcqFUg=" crossorigin="anonymous"></script>
+    <tbody id="tbody">
+    </tbody>
+  </table>
+</main>
 
-  <script src="https://www.googletagmanager.com/gtag/js?id=UA-161214318-3" async></script>
-  <script>
-    window.dataLayer = window.dataLayer || []
-    function gtag () { dataLayer.push(arguments) }
+<template id="release-item-template">
+  <tr data-temp="row">
+    <td>
+      <span data-temp="name"></span> (<a href="" data-temp="page">Release page</a>)
+    </td>
 
-    gtag('js', new Date())
-    gtag('config', 'UA-161214318-3', {
-      'anonymize_ip': true
-    })
-  </script>
-
-  <script src="/scripts/downloads.js"></script>
-  <title>Downloads | mp3tag.js</title>
-</head>
-
-<body>
-  <header class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <a href="https://mp3tag.js.org" class="navbar-brand">
-      <img src="/images/logo.png" class="d-inline-block align-top" alt="mp3tag.js Logo">
-      mp3tag.js
-    </a>
-
-    <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#header-nav" aria-controls="header-nav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <nav id="header-nav" class="collapse navbar-collapse" aria-label="Main Navigator">
-      <div class="navbar-nav">
-        <a href="/" class="nav-item nav-link">
-          <i class="fas fa-home" aria-hidden="true"></i> Home
-        </a>
-
-        <a href="/docs/" class="nav-item nav-link">
-          <i class="fas fa-book" aria-hidden="true"></i> Documentations
-        </a>
-
-        <a href="/downloads/" class="nav-item nav-link active">
-          <i class="fas fa-download" aria-hidden="true"></i> Downloads
-        </a>
-      </div>
-    </nav>
-  </header>
-
-  <main class="main container">
-    <h3>mp3tag.js Releases</h3>
-    <p class="lead">Visit the release page for changes and details</p>
-
-    <table class="table table-striped table-bordered">
-      <thead class="thead-dark">
-        <tr>
-          <th scope="col">Version</th>
-          <th scope="col">Downloads</th>
-        </tr>
-      </thead>
-
-      <tbody id="tbody">
-      </tbody>
-    </table>
-  </main>
-
-  <template id="release-item-template">
-    <tr data-temp="row">
-      <td>
-        <span data-temp="name"></span>
-        (<a href="" data-temp="page">Release page</a>)
-      </td>
-
-      <td>
-        <a href="" class="btn btn-primary" role="button" data-temp="source">
-          <i class="fas fa-code" aria-hidden="true"></i> Source Codes
-        </a>
-
-        <a href="" class="btn btn-secondary" role="button" data-temp="dist">
-          <i class="fas fa-download" aria-hidden="true"></i> Distributable
-        </a>
-      </td>
-    </tr>
-  </template>
-
-  <footer class="footer bg-dark text-center text-white py-3 px-3">
-    <div class="text-muted">Copyright &copy; 2020, <a href="https://github.com/eidoriantan/mp3tag.js/contributors" class="text-white">mp3tag.js Contributors</a></div>
-  </footer>
-</body>
-</html>
+    <td>
+      <a href="" class="btn btn-primary" role="button" data-temp="source">Source Codes</a>
+      <a href="" class="btn btn-secondary" role="button" data-temp="dist">Distributable</a>
+    </td>
+  </tr>
+</template>

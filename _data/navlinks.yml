@@ -1,0 +1,17 @@
+
+- name: Home
+  directories:
+    - /
+    - /index.html
+
+- name: Documentations
+  directories:
+    - /docs/
+    - /docs/index.html
+    - /docs/mp3tag.html
+    - /docs/usage.html
+
+- name: Downloads
+  directories:
+    - /downloads/
+    - /downloads/index.html

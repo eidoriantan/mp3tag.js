@@ -1,102 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-  <meta name="author" content="mp3tag.js Contributors">
-  <meta name="description" content="mp3tag.js JavaScript library documentations">
-  <meta name="keywords" content="mp3, id3, audio, tag, edit, write, mp3tag.js, documentations, docs, install, installation">
-  <meta name="theme-color" content="#2b594c">
-  <meta name="msapplication-TileColor" content="#2b594c">
+---
+layout: default
+title: Installation
+description: JavaScript library documentations page. How to install the library
+keywords: mp3, id3, audio, tag, edit, write, documentations, docs, install, installation
+---
+<main class="main row no-gutters mx-5">
+  {% include docs_aside.html active='installation' %}
 
-  <link href="/LICENSE" rel="license">
-  <link href="/site.webmanifest" rel="manifest">
-  <link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180">
-  <link href="/favicon-32x32.png" rel="icon" type="image/png" sizes="32x32">
-  <link href="/favicon-16x16.png" rel="icon" type="image/png" sizes="16x16">
-  <link href="/safari-pinned-tab.svg" rel="mask-icon" color="#2b594c">
-  <link href="https://cdnjs.cloudflare.com/" rel="preconnect" crossorigin="anonymous">
-  <link href="https://cdnjs.cloudflare.com/" rel="dns-prefetch">
-  <link href="https://kit.fontawesome.com/" rel="preconnect" crossorigin="anonymous">
-  <link href="https://kit.fontawesome.com/" rel="dns-prefetch">
-  <link href="https://mp3tag.js.org/docs/" rel="canonical">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous">
-  <link href="/styles/style.css" rel="stylesheet">
+  <div class="col offset-12 offset-md-4">
+    <h4 class="display-4">Installation</h4>
+    <p class="lead">
+      You can install the library by downloading the distributed package and including them on your scripts.
+      This library does not require any more dependencies. <a href="/downloads/">Go to Downloads page</a>
+    </p>
 
-  <script src="https://kit.fontawesome.com/9cb9988aa5.js" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha256-/ijcOLwFf26xEYAjW75FizKVo5tnTYiQddPZoLUHHZ8=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha256-WqU1JavFxSAMcLP2WIOI+GB2zWmShMI82mTpLDcqFUg=" crossorigin="anonymous"></script>
+    <p class="lead">
+      If you have <a href="https://www.npmjs.com/get-npm">npm</a>, you can also install the library by running the code:
+    </p>
 
-  <script src="https://www.googletagmanager.com/gtag/js?id=UA-161214318-3" async></script>
-  <script>
-    window.dataLayer = window.dataLayer || []
-    function gtag () { dataLayer.push(arguments) }
-
-    gtag('js', new Date())
-    gtag('config', 'UA-161214318-3', {
-      'anonymize_ip': true
-    })
-  </script>
-
-  <title>Installation | mp3tag.js</title>
-</head>
-
-<body>
-  <header class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <a href="https://mp3tag.js.org" class="navbar-brand">
-      <img src="/images/logo.png" class="d-inline-block align-top" alt="mp3tag.js Logo">
-      mp3tag.js
-    </a>
-
-    <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#header-nav" aria-controls="header-nav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <nav id="header-nav" class="collapse navbar-collapse" aria-label="Main Navigator">
-      <div class="navbar-nav">
-        <a href="/" class="nav-item nav-link">
-          <i class="fas fa-home" aria-hidden="true"></i> Home
-        </a>
-
-        <a href="/docs/" class="nav-item nav-link active">
-          <i class="fas fa-book" aria-hidden="true"></i> Documentations
-        </a>
-
-        <a href="/downloads/" class="nav-item nav-link">
-          <i class="fas fa-download" aria-hidden="true"></i> Downloads
-        </a>
-      </div>
-    </nav>
-  </header>
-
-  <main class="main row no-gutters mx-5">
-    <aside class="col-12 col-md-3 position-md-fixed">
-      <div class="list-group">
-        <a href="/docs/" class="list-group-item list-group-item-action active">Installation</a>
-        <a href="/docs/usage.html" class="list-group-item list-group-item-action">Usage</a>
-        <a href="/docs/mp3tag.html" class="list-group-item list-group-item-action">MP3Tag</a>
-        <a href="/docs/frames.html" class="list-group-item list-group-item-action">Tags and Frames</a>
-      </div>
-    </aside>
-
-    <div class="col offset-12 offset-md-4">
-      <h4 class="display-4">Installation</h4>
-      <p class="lead">
-        You can install the library by downloading the distributed package and including them on your scripts.
-        This library does not require any more dependencies. <a href="/downloads/">Go to Downloads page</a>
-      </p>
-
-      <p class="lead">
-        If you have <a href="https://www.npmjs.com/get-npm">npm</a>, you can also install the library by running the code:
-      </p>
-
-      <code class="bg-secondary text-white rounded-sm px-3 py-2">npm install --save mp3tag.js@latest</code>
-    </div>
-  </main>
-
-  <footer class="footer bg-dark text-center text-white py-3 px-3">
-    <div class="text-muted">Copyright &copy; 2020, <a href="https://github.com/eidoriantan/mp3tag.js/contributors" class="text-white">mp3tag.js Contributors</a></div>
-  </footer>
-</body>
-</html>
+    <code class="bg-secondary text-white rounded-sm px-3 py-2">
+      npm install --save {{ site.github.project_title }}@latest
+    </code>
+  </div>
+</main>

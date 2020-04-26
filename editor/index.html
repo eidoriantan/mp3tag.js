@@ -1,254 +1,167 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-  <meta name="author" content="mp3tag.js Contributors">
-  <meta name="description" content="Edit your audio files easily with this mp3tagger!">
-  <meta name="keywords" content="mp3, id3, audio, tag, edit, write, editor, demo, online">
-  <meta name="theme-color" content="#2b594c">
-  <meta name="msapplication-TileColor" content="#2b594c">
+---
+layout: default
+footer: false
+toast: true
 
-  <link href="/LICENSE" rel="license">
-  <link href="/site.webmanifest" rel="manifest">
-  <link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180">
-  <link href="/favicon-32x32.png" rel="icon" type="image/png" sizes="32x32">
-  <link href="/favicon-16x16.png" rel="icon" type="image/png" sizes="16x16">
-  <link href="/safari-pinned-tab.svg" rel="mask-icon" color="#2b594c">
-  <link href="https://cdnjs.cloudflare.com/" rel="preconnect" crossorigin="anonymous">
-  <link href="https://cdnjs.cloudflare.com/" rel="dns-prefetch">
-  <link href="https://kit.fontawesome.com/" rel="preconnect" crossorigin="anonymous">
-  <link href="https://kit.fontawesome.com/" rel="dns-prefetch">
-  <link href="https://mp3tag.js.org/editor/" rel="canonical">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous">
-  <link href="/styles/style.css" rel="stylesheet">
+title: Editor
+description: Edit your audio files easily with this mp3tagger!
+keywords: mp3, id3, audio, tag, edit, write, editor, demo, online
+stylesheets:
+  - /assets/css/editor.css
+scripts:
+  - /assets/js/mp3tag.js/mp3tag.min.js
+  - /assets/js/editor.js
+---
+<main class="row no-gutters">
+  <form id="edit-form" action="/editor/" method="get" class="edit-column col-3 border-0 border-right shadow-lg">
+    <img id="cover-preview" src="/assets/images/blank.jpg" alt="Album Cover Preview" width="120" height="120" class="d-block shadow-sm border my-3 mx-auto">
 
-  <script src="https://kit.fontawesome.com/9cb9988aa5.js" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha256-/ijcOLwFf26xEYAjW75FizKVo5tnTYiQddPZoLUHHZ8=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha256-WqU1JavFxSAMcLP2WIOI+GB2zWmShMI82mTpLDcqFUg=" crossorigin="anonymous"></script>
-  <script src="/libraries/mp3tag.js/mp3tag.min.js"></script>
-  <script src="/scripts/ui.js"></script>
-  <script src="/scripts/utils.js"></script>
-  <script src="/scripts/editor.js"></script>
+    <div class="form-group mx-3">
+      <label for="cover">Album Cover</label>
+      <input type="file" id="cover" name="cover" accept="image/jpeg" class="form-control" disabled>
+    </div>
 
-  <script src="https://www.googletagmanager.com/gtag/js?id=UA-161214318-3" async></script>
-  <script>
-    window.dataLayer = window.dataLayer || []
-    function gtag () { dataLayer.push(arguments) }
+    <div class="form-group mx-3">
+      <label for="title">Title</label>
+      <input type="text" id="title" name="title" value="" placeholder="Fade Into You" class="form-control" disabled>
+    </div>
 
-    gtag('js', new Date())
-    gtag('config', 'UA-161214318-3', {
-      'anonymize_ip': true
-    })
-  </script>
+    <div class="form-group mx-3">
+      <label for="artist">Artist</label>
+      <input type="text" id="artist" name="artist" value="" placeholder="Mazzy Star" class="form-control" disabled>
+    </div>
 
-  <title>Editor | mp3tag.js</title>
-</head>
+    <div class="form-group mx-3">
+      <label for="album">Album</label>
+      <input type="text" id="album" name="album" value="" placeholder="So Tonight That I Might See" class="form-control" disabled>
+    </div>
 
-<body>
-  <header class="navbar navbar-expand-md navbar-dark bg-dark sticky-top">
-    <a href="https://mp3tag.js.org" class="navbar-brand">
-      <img src="/images/logo.png" class="d-inline-block align-top" alt="mp3tag.js Logo">
-      mp3tag.js
-    </a>
-
-    <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#header-nav" aria-controls="header-nav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <nav id="header-nav" class="collapse navbar-collapse" aria-label="Main Navigator">
-      <div class="navbar-nav">
-        <a href="/" class="nav-item nav-link">
-          <i class="fas fa-home" aria-hidden="true"></i> Home
-        </a>
-
-        <a href="/docs/" class="nav-item nav-link">
-          <i class="fas fa-book" aria-hidden="true"></i> Documentations
-        </a>
-
-        <a href="/downloads/" class="nav-item nav-link">
-          <i class="fas fa-download" aria-hidden="true"></i> Downloads
-        </a>
+    <div class="form-row mx-3 mb-3">
+      <div class="col">
+        <label for="language">Language</label>
+        <input type="text" id="language" name="language" value="" placeholder="eng" pattern="^[a-z]{3}$" class="form-control" disabled>
       </div>
-    </nav>
-  </header>
 
-  <div class="toaster-container" aria-live="polite" aria-atomic="true">
-    <div id="toaster" class="toaster"></div>
+      <div class="col">
+        <label for="track">Track</label>
+        <input type="text" id="track" name="track" value="" placeholder="1/3" pattern="[0-9]+\/[0-9]+" class="form-control" disabled>
+      </div>
+    </div>
+
+    <div class="form-group mx-3">
+      <label for="genre">Genre</label>
+      <input type="text" id="genre" name="genre" value="" placeholder="Rock" class="form-control" disabled>
+    </div>
+
+    <div class="form-group mx-3">
+      <label for="isrc">ISRC</label>
+      <input type="text" id="isrc" name="isrc" value="" placeholder="GBJRZ1600010" pattern="^[A-Z0-9]{12}$" class="form-control" disabled>
+    </div>
+
+    <div class="form-group mx-3">
+      <label for="year">Year</label>
+      <input type="number" id="year" name="year" value="" placeholder="1993" min="1000" max="2020" class="form-control" disabled>
+    </div>
+
+    <div class="form-group mx-3">
+      <label for="month">Month</label>
+      <select id="month" name="month" class="form-control" disabled>
+        <option value="00"> - </option>
+        <option value="01">January</option>
+        <option value="02">February</option>
+        <option value="03">March</option>
+        <option value="04">April</option>
+        <option value="05">May</option>
+        <option value="06">June</option>
+        <option value="07">July</option>
+        <option value="08">August</option>
+        <option value="09">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+    </div>
+
+    <div class="form-group mx-3">
+      <label for="day">Day</label>
+      <select id="day" name="day" class="form-control" disabled>
+        <option value="00"> - </option>
+        <option value="01">01</option>
+        <option value="02">02</option>
+        <option value="03">03</option>
+        <option value="04">04</option>
+        <option value="05">05</option>
+        <option value="06">06</option>
+        <option value="07">07</option>
+        <option value="08">08</option>
+        <option value="09">09</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+        <option value="14">14</option>
+        <option value="15">15</option>
+        <option value="16">16</option>
+        <option value="17">17</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+        <option value="20">20</option>
+        <option value="21">21</option>
+        <option value="22">22</option>
+        <option value="23">23</option>
+        <option value="24">24</option>
+        <option value="25">25</option>
+        <option value="26">26</option>
+        <option value="27">27</option>
+        <option value="28">28</option>
+        <option value="29">29</option>
+        <option value="30">30</option>
+        <option value="31">31</option>
+      </select>
+    </div>
+
+    <div class="form-group mx-3">
+      <label for="composer">Composer</label>
+      <input type="text" id="composer" name="composer" value="" placeholder="Hope Sandoval; David Roback" class="form-control" disabled>
+    </div>
+
+    <div class="form-group mx-3">
+      <label for="lyrics">Lyrics</label>
+      <textarea id="lyrics" name="lyrics" placeholder="eng||lyrics" rows="5" class="form-control" disabled></textarea>
+    </div>
+
+    <footer class="card-footer">
+      <button type="submit" class="btn btn-primary" disabled>Save</button>
+      <a id="download" href="" download="" class="btn btn-primary disabled" role="button">Download</a>
+    </footer>
+  </form>
+
+  <div id="list-wrapper" class="edit-column col-9 border-0">
+    <table class="table table-striped table-hover">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">Name</th>
+        </tr>
+      </thead>
+
+      <tbody id="audio-list"></tbody>
+    </table>
+
+    <div id="no-audio" class="text-center w-50 pt-5 mx-auto">
+      <strong>No audio imported.</strong><br>
+      This editor doesn't use any data or internet connections and works offline. Everything is done
+      through your browser.
+    </div>
+
+    <div class="text-center mx-auto">
+      <input type="file" id="file-audios" accept="audio/mpeg" class="mt-5" multiple>
+      <label for="file-audios">Select file(s)</label>
+    </div>
   </div>
+</main>
 
-  <main class="row no-gutters">
-    <form id="edit-form" action="/editor/" method="get" class="col-3 border-0 border-right shadow-lg zindex-dropdown fill">
-      <img id="cover-preview" src="/images/blank.jpg" alt="Album Cover Preview" width="120" height="120" class="d-block shadow-sm border my-3 mx-auto">
-
-      <div class="form-group mx-3">
-        <label for="cover">Album Cover</label>
-        <input type="file" id="cover" name="cover" accept="image/jpeg" class="form-control" disabled>
-      </div>
-
-      <div class="form-group mx-3">
-        <label for="title">Title</label>
-        <input type="text" id="title" name="title" value="" placeholder="Fade Into You" class="form-control" disabled>
-      </div>
-
-      <div class="form-group mx-3">
-        <label for="artist">Artist</label>
-        <input type="text" id="artist" name="artist" value="" placeholder="Mazzy Star" class="form-control" disabled>
-      </div>
-
-      <div class="form-group mx-3">
-        <label for="album">Album</label>
-        <input type="text" id="album" name="album" value="" placeholder="So Tonight That I Might See" class="form-control" disabled>
-      </div>
-
-      <div class="form-row mx-3 mb-3">
-        <div class="col">
-          <label for="language">Language</label>
-          <input type="text" id="language" name="language" value="" placeholder="eng" pattern="^[a-z]{3}$" class="form-control" disabled>
-        </div>
-
-        <div class="col">
-          <label for="track">Track</label>
-          <input type="text" id="track" name="track" value="" placeholder="1/3" pattern="[0-9]+\/[0-9]+" class="form-control" disabled>
-        </div>
-      </div>
-
-      <div class="form-group mx-3">
-        <label for="genre">Genre</label>
-        <input type="text" id="genre" name="genre" value="" placeholder="Rock" class="form-control" disabled>
-      </div>
-
-      <div class="form-group mx-3">
-        <label for="isrc">ISRC</label>
-        <input type="text" id="isrc" name="isrc" value="" placeholder="GBJRZ1600010" pattern="^[A-Z0-9]{12}$" class="form-control" disabled>
-      </div>
-
-      <div class="form-group mx-3">
-        <label for="year">Year</label>
-        <input type="number" id="year" name="year" value="" placeholder="1993" min="1000" max="2020" class="form-control" disabled>
-      </div>
-
-      <div class="form-group mx-3">
-        <label for="month">Month</label>
-        <select id="month" name="month" class="form-control" disabled>
-          <option value="00"> - </option>
-          <option value="01">January</option>
-          <option value="02">February</option>
-          <option value="03">March</option>
-          <option value="04">April</option>
-          <option value="05">May</option>
-          <option value="06">June</option>
-          <option value="07">July</option>
-          <option value="08">August</option>
-          <option value="09">September</option>
-          <option value="10">October</option>
-          <option value="11">November</option>
-          <option value="12">December</option>
-        </select>
-      </div>
-
-      <div class="form-group mx-3">
-        <label for="day">Day</label>
-        <select id="day" name="day" class="form-control" disabled>
-          <option value="00"> - </option>
-          <option value="01">01</option>
-          <option value="02">02</option>
-          <option value="03">03</option>
-          <option value="04">04</option>
-          <option value="05">05</option>
-          <option value="06">06</option>
-          <option value="07">07</option>
-          <option value="08">08</option>
-          <option value="09">09</option>
-          <option value="10">10</option>
-          <option value="11">11</option>
-          <option value="12">12</option>
-          <option value="13">13</option>
-          <option value="14">14</option>
-          <option value="15">15</option>
-          <option value="16">16</option>
-          <option value="17">17</option>
-          <option value="18">18</option>
-          <option value="19">19</option>
-          <option value="20">20</option>
-          <option value="21">21</option>
-          <option value="22">22</option>
-          <option value="23">23</option>
-          <option value="24">24</option>
-          <option value="25">25</option>
-          <option value="26">26</option>
-          <option value="27">27</option>
-          <option value="28">28</option>
-          <option value="29">29</option>
-          <option value="30">30</option>
-          <option value="31">31</option>
-        </select>
-      </div>
-
-      <div class="form-group mx-3">
-        <label for="composer">Composer</label>
-        <input type="text" id="composer" name="composer" value="" placeholder="Hope Sandoval; David Roback" class="form-control" disabled>
-      </div>
-
-      <div class="form-group mx-3">
-        <label for="lyrics">Lyrics</label>
-        <textarea id="lyrics" name="lyrics" placeholder="eng||lyrics" rows="5" class="form-control" disabled></textarea>
-      </div>
-
-      <footer class="card-footer">
-        <button type="submit" class="btn btn-primary" disabled>
-          <i class="fas fa-save mr-1" aria-hidden="true"></i>Save
-        </button>
-
-        <a id="download" href="" download="" class="btn btn-primary disabled" role="button">
-          <i class="fas fa-download mr-1" aria-hidden="true"></i>Download
-        </a>
-      </footer>
-    </form>
-
-    <div id="list-wrapper" class="col-9 border-0 fill">
-      <table class="table table-striped table-hover">
-        <thead class="thead-dark">
-          <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Last Modified Date</th>
-          </tr>
-        </thead>
-
-        <tbody id="audio-list"></tbody>
-      </table>
-
-      <div id="no-audio" class="text-center w-50 pt-5 mx-auto">
-        <i class="fas fa-arrow-down" aria-hidden="true"></i> <strong>No audio imported.</strong><br>
-        Any audios imported here doesn't upload to our servers therefore it's not using any data or
-        internet connections and everything is done via your browser. You can also work offline.
-      </div>
-
-      <div class="text-center mx-auto">
-        <input type="file" id="file-audios" accept="audio/mpeg" class="mt-5" multiple>
-        <label for="file-audios">Select file(s)</label>
-      </div>
-    </div>
-  </main>
-
-  <template id="audio-item-template">
-    <tr class="user-select-none pointer">
-      <td scope="row" data-temp="filename"></td>
-      <td data-temp="date"></td>
-    </tr>
-  </template>
-
-  <template id="toast-template">
-    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-      <header class="toast-header">
-        <i class="fas mr-2" data-temp="icon" aria-hidden="true"></i>
-        <span data-temp="title"></span>
-      </header>
-
-      <div class="toast-body" data-temp="body">
-      </div>
-    </div>
-  </template>
-</body>
-</html>
+<template id="audio-item-template">
+  <tr class="c-pointer">
+    <td scope="row" data-temp="filename"></td>
+  </tr>
+</template>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <meta name="keywords" content="{{ page.keywords }}">
+  <meta name="theme-color" content="{{ site.color }}">
+  <meta name="msapplication-TileColor" content="{{ site.color }}">
+
+  <link href="{{ '/LICENSE' | absolute_url }}" rel="license">
+  <link href="{{ '/site.webmanifest' | absolute_url }}" rel="manifest">
+  <link href="{{ '/assets/apple-touch-icon.png' | absolute_url }}" rel="apple-touch-icon" sizes="180x180">
+  <link href="{{ '/assets/favicon-32x32.png' | absolute_url }}" rel="icon" type="image/png" sizes="32x32">
+  <link href="{{ '/assets/favicon-16x16.png' | absolute_url }}" rel="icon" type="image/png" sizes="16x16">
+  <link href="{{ '/assets/safari-pinned-tab.svg' | absolute_url }}" rel="mask-icon" color="{{ site.color }}">
+  <link href="{{ '/assets/css/default.css' | absolute_url }}" rel="stylesheet">
+
+  {% for stylesheet in page.stylesheets %}
+  <link href="{{ stylesheet | absolute_url }}" rel="stylesheet">
+  {% endfor %}
+
+  <script src="{{ '/assets/js/jquery/jquery.min.js' | absolute_url }}"></script>
+  <script src="{{ '/assets/js/bootstrap/bootstrap.min.js' | absolute_url }}"></script>
+  <script src="{{ '/assets/js/default.js' | absolute_url }}"></script>
+  {% for script in page.scripts %}
+  <script src="{{ script | absolute_url }}"></script>
+  {% endfor %}
+
+  {% seo title=false %}
+  <script src="https://www.googletagmanager.com/gtag/js?id=UA-161214318-3" async></script>
+  <script>
+    window.dataLayer = window.dataLayer || []
+    function gtag () { dataLayer.push(arguments) }
+
+    gtag('js', new Date())
+    gtag('config', 'UA-161214318-3', { 'anonymize_ip': true })
+  </script>
+
+  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+</head>
+
+<body>
+  <header class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a href="{{ site.github.url }}" class="navbar-brand">
+      <img src="{{ site.logo | absolute_url }}" class="d-inline-block align-top" alt="{{ site.github.project_title }} Logo">
+      {{ site.github.project_title }}
+    </a>
+
+    {% include navs.html %}
+  </header>
+
+  {% if page.toast == true %}
+  <div class="toaster-container" aria-live="polite" aria-atomic="true">
+    <div id="toaster" class="toaster"></div>
+  </div>
+  {% endif %}
+
+  {{ content }}
+
+  {% if page.toast == true %}
+  <template id="toast-template">
+    <div class="toast c-pointer" role="alert" aria-live="assertive" aria-atomic="true">
+      <header class="toast-header">
+        <i class="fas mr-2" data-temp="icon" aria-hidden="true"></i>
+        <span data-temp="title"></span>
+      </header>
+
+      <div class="toast-body" data-temp="body">
+      </div>
+    </div>
+  </template>
+  {% endif %}
+
+  {% if page.footer != false %}
+  <footer class="footer bg-dark text-center text-white py-3 px-3">
+    <div class="text-muted">Copyright &copy; 2020, <a href="{{ site.github.repository_url }}/contributors" class="text-white">{{ site.github.project_title }} Contributors</a></div>
+  </footer>
+  {% endif %}
+</body>
+</html>

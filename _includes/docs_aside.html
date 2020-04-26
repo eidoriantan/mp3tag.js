@@ -1,0 +1,12 @@
+<aside class="col-12 col-md-3 pos-md-fixed">
+  <div class="list-group">
+    <a href="/docs/" class="list-group-item list-group-item-action{% if include.active == 'installation' %} active{% endif %}">Installation</a>
+    <a href="/docs/usage.html" class="list-group-item list-group-item-action{% if include.active == 'usage' %} active{% endif %}">Usage</a>
+    <a href="/docs/mp3tag.html" class="list-group-item list-group-item-action{% if include.active == 'mp3tag' %} active{% endif %}">MP3Tag</a>
+    {% if include.active == 'mp3tag' %}
+    <a href="#properties" class="list-group-item list-group-item-action pl-5">Properties</a>
+    <a href="#methods" class="list-group-item list-group-item-action pl-5">Methods</a>
+    {% endif %}
+    <a href="/docs/frames.html" class="list-group-item list-group-item-action{% if include.active == 'frames' %} active{% endif %}">Tags and Frames</a>
+  </div>
+</aside>

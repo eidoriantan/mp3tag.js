@@ -1,0 +1,21 @@
+
+title: mp3tag.js
+tagline: MP3 tagging written in pure JavaScript
+description: >-
+  mp3tag.js is an open sourced JavaScript library used to edit the metadata of
+  audio files.
+
+author: Adriane Justine Tan
+email: eidoriantan@gmail.com
+
+url: https://mp3tag.js.org
+logo: /assets/images/logo.png
+color: "#2b594c"
+google_site_verification: pygHTY6j2sle4JJ1YmSCYlf8nxIxnq4u9bHe48Mc9do
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+sass:
+  style: compressed

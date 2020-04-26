@@ -1,4 +1,0 @@
-User-agent: *
-Allow: *
-
-Sitemap: https://mp3tag.js.org/sitemap.xml
