@@ -4001,281 +4001,6 @@
     }
   });
 
-  function isBitSet(_byte, bit) {
-    return (_byte & 1 << bit) > 0;
-  }
-  function setBit(_byte2, bit) {
-    return _byte2 | 1 << bit;
-  }
-  function decodeSynch(synch) {
-    var out = 0;
-    var mask = 0x7F000000;
-
-    while (mask) {
-      out >>= 1;
-      out |= synch & mask;
-      mask >>= 8;
-    }
-
-    return out;
-  }
-  function encodeSynch(size) {
-    var out = 0;
-    var mask = 0x7F;
-
-    while (mask ^ 0x7FFFFFFF) {
-      out = size & ~mask;
-      out <<= 1;
-      out |= size & mask;
-      mask = (mask + 1 << 8) - 1;
-      size = out;
-    }
-
-    return out;
-  }
-  function mergeBytes() {
-    var merged = [];
-
-    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
-      params[_key] = arguments[_key];
-    }
-
-    params.forEach(function (param) {
-      if (param.forEach) param.forEach(function (_byte3) {
-        return merged.push(_byte3);
-      });else merged.push(param);
-    });
-    return new Uint8Array(merged);
-  }
-  function synch(unsynch) {
-    var bytes = [];
-    var i = 0;
-
-    while (i < unsynch.length) {
-      bytes.push(unsynch[i]);
-      if (unsynch[i] === 0xff && unsynch[i + 1] === 0x00) i++;
-      i++;
-    }
-
-    return bytes;
-  }
-  function unsynch(synch) {
-    var bytes = [];
-    var i = 0;
-
-    while (i < synch.length) {
-      bytes.push(synch[i]);
-
-      if (synch[i] === 0xff && (synch[i + 1] >= 0xe0 || synch[i + 1] === 0x00)) {
-        bytes.push(0);
-      }
-
-      i++;
-    }
-
-    return bytes;
-  }
-
-  var GENRES = ['Blues', 'Classic Rock', 'Country', 'Dance', 'Disco', 'Funk', 'Grunge', 'Hip-Hop', 'Jazz', 'Metal', 'New Age', 'Oldies', 'Other', 'Pop', 'R&B', 'Reggae', 'Rock', 'Techno', 'Industrial', 'Alternative', 'Ska', 'Death Metal', 'Pranks', 'Soundtrack', 'Euro-Techno', 'Ambient', 'Trip-Hop', 'Vocal', 'Jazz+Funk', 'Fusion', 'Trance', 'Classical', 'Instrumental', 'Acid', 'House', 'Game', 'Sound Clip', 'Gospel', 'Noise', 'Alt. Rock', 'Bass', 'Soul', 'Punk', 'Space', 'Meditative', 'Instrumental Pop', 'Instrumental Rock', 'Ethnic', 'Gothic', 'Darkwave', 'Techno-Industrial', 'Electronic', 'Pop-Folk', 'Eurodance', 'Dream', 'Southern Rock', 'Comedy', 'Cult', 'Gangsta Rap', 'Top 40', 'Christian Rap', 'Pop/Funk', 'Jungle', 'Native American', 'Cabaret', 'New Wave', 'Psychedelic', 'Rave', 'Showtunes', 'Trailer', 'Lo-Fi', 'Tribal', 'Acid Punk', 'Acid Jazz', 'Polka', 'Retro', 'Musical', 'Rock & Roll', 'Hard Rock', 'Folk', 'Folk-Rock', 'National Folk', 'Swing', 'Fast-Fusion', 'Bebop', 'Latin', 'Revival', 'Celtic', 'Bluegrass', 'Avantgarde', 'Gothic Rock', 'Progressive Rock', 'Psychedelic Rock', 'Symphonic Rock', 'Slow Rock', 'Big Band', 'Chorus', 'Easy Listening', 'Acoustic', 'Humour', 'Speech', 'Chanson', 'Opera', 'Chamber Music', 'Sonata', 'Symphony', 'Booty Bass', 'Primus', 'Porn Groove', 'Satire', 'Slow Jam', 'Club', 'Tango', 'Samba', 'Folklore', 'Ballad', 'Power Ballad', 'Rhythmic Soul', 'Freestyle', 'Duet', 'Punk Rock', 'Drum Solo', 'A Cappella', 'Euro-House', 'Dance Hall', 'Goa', 'Drum & Bass', 'Club-House', 'Hardcore', 'Terror', 'Indie', 'BritPop', 'Afro-Punk', 'Polsk Punk', 'Beat', 'Christian Gangsta Rap', 'Heavy Metal', 'Black Metal', 'Crossover', 'Contemporary Christian', 'Christian Rock', 'Merengue', 'Salsa', 'Thrash Metal', 'Anime', 'JPop', 'Synthpop', 'Abstract', 'Art Rock', 'Baroque', 'Bhangra', 'Big Beat', 'Breakbeat', 'Chillout', 'Downtempo', 'Dub', 'EBM', 'Eclectic', 'Electro', 'Electroclash', 'Emo', 'Experimental', 'Garage', 'Global', 'IDM', 'Illbient', 'Industro-Goth', 'Jam Band', 'Krautrock', 'Leftfield', 'Lounge', 'Math Rock', 'New Romantic', 'Nu-Breakz', 'Post-Punk', 'Post-Rock', 'Psytrance', 'Shoegaze', 'Space Rock', 'Trop Rock', 'World Music', 'Neoclassical', 'Audiobook', 'Audio Theatre', 'Neue Deutsche Welle', 'Podcast', 'Indie Rock', 'G-Funk', 'Dubstep', 'Garage Rock', 'Psybient'];
-  function hasID3v1(buffer) {
-    if (!isBuffer(buffer)) throw new TypeError('buffer is not ArrayBuffer/Buffer');
-    var offset = buffer.byteLength - 128;
-
-    if (offset > -1) {
-      var view = new BufferView(buffer, offset);
-      return view.getString(0, 3, 'ascii').string === 'TAG';
-    } else return false;
-  }
-  function decode(buffer) {
-    if (!hasID3v1(buffer)) throw new TagError(100);
-    var view = new BufferView(buffer, buffer.byteLength - 128); // @TODO: Trim null characters instead of replacing all of it
-
-    var title = view.getString(3, 30, 'utf-8').string.replace(/\0/g, '');
-    var artist = view.getString(33, 30, 'utf-8').string.replace(/\0/g, '');
-    var album = view.getString(63, 30, 'utf-8').string.replace(/\0/g, '');
-    var year = view.getString(93, 4, 'utf-8').string.replace(/\0/g, '');
-    var track = view.getUint8(126).toString() || '';
-    var comment = view.getString(97, track !== null ? 28 : 30, 'utf-8').string.replace(/\0/g, '');
-    var genre = GENRES[view.getUint8(127)] || '';
-    var tags = {
-      title: title,
-      artist: artist,
-      album: album,
-      year: year,
-      track: track,
-      comment: comment,
-      genre: genre
-    };
-    tags.v1Version = track ? 1 : 0;
-    tags.v1Size = 128;
-    return tags;
-  }
-  function validate(tags, strict) {
-    var _tags$title = tags.title,
-        title = _tags$title === void 0 ? '' : _tags$title,
-        _tags$artist = tags.artist,
-        artist = _tags$artist === void 0 ? '' : _tags$artist,
-        _tags$album = tags.album,
-        album = _tags$album === void 0 ? '' : _tags$album,
-        _tags$year = tags.year,
-        year = _tags$year === void 0 ? '' : _tags$year,
-        _tags$comment = tags.comment,
-        comment = _tags$comment === void 0 ? '' : _tags$comment,
-        track = tags.track,
-        _tags$genre = tags.genre,
-        genre = _tags$genre === void 0 ? '' : _tags$genre;
-
-    if (typeof title !== 'string') {
-      throw new TagError(102, 'Title is not a string');
-    } else if (title.length > 30) {
-      throw new TagError(102, 'Title length exceeds 30 characters');
-    }
-
-    if (typeof artist !== 'string') {
-      throw new TagError(102, 'Artist is not a string');
-    } else if (artist.length > 30) {
-      throw new TagError(102, 'Artist length exceeds 30 characters');
-    }
-
-    if (typeof album !== 'string') {
-      throw new TagError(102, 'Album is not a string');
-    } else if (album.length > 30) {
-      throw new TagError(102, 'Album length exceeds 30 characters');
-    }
-
-    if (typeof year !== 'string') {
-      throw new TagError(102, 'Year is not a string');
-    } else if (year.length > 4) {
-      throw new TagError(102, 'Year length exceeds 4 characters');
-    }
-
-    if (typeof comment !== 'string') {
-      throw new TagError(102, 'Comment is not a string');
-    }
-
-    if (typeof track !== 'string') {
-      throw new TagError(102, 'Track is not a string');
-    } else if (parseInt(track) > 255 || parseInt(track) < 0) {
-      throw new TagError(102, 'Track should be in range 255 - 0');
-    }
-
-    if (track !== '') {
-      if (comment.length > 28) {
-        throw new TagError(102, 'Comment length exceeds 28 characters');
-      }
-    } else if (comment.length > 30) {
-      throw new TagError(102, 'Comment length exceeds 30 characters');
-    }
-
-    if (typeof genre !== 'string') {
-      throw new TagError(102, 'Genre is not a string');
-    } else if (strict && !GENRES.includes(genre) && genre !== '') {
-      throw new TagError(102, 'Unknown genre');
-    }
-
-    return true;
-  }
-  function encode(tags) {
-    var title = tags.title,
-        artist = tags.artist,
-        album = tags.album,
-        year = tags.year,
-        comment = tags.comment,
-        track = tags.track,
-        genre = tags.genre;
-
-    while (title.length < 30) {
-      title += '\0';
-    }
-
-    while (artist.length < 30) {
-      artist += '\0';
-    }
-
-    while (album.length < 30) {
-      album += '\0';
-    }
-
-    while (year.length < 4) {
-      year += '\0';
-    }
-
-    genre = GENRES.indexOf(genre);
-
-    if (track !== '') {
-      while (comment.length < 28) {
-        comment += '\0';
-      }
-
-      comment += '\0' + String.fromCharCode(track);
-    } else {
-      while (comment.length < 30) {
-        comment += '\0';
-      }
-    }
-
-    return mergeBytes(0x54, 0x41, 0x47, encodeString(title, 'utf-8'), encodeString(artist, 'utf-8'), encodeString(album, 'utf-8'), encodeString(year, 'utf-8'), encodeString(comment, 'utf-8'), genre > -1 ? genre : 12).buffer;
-  }
-
-  var $filter$1 = arrayIteration.filter;
-  var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport('filter'); // Edge 14- issue
-
-  var USES_TO_LENGTH$5 = arrayMethodUsesToLength('filter'); // `Array.prototype.filter` method
-  // https://tc39.github.io/ecma262/#sec-array.prototype.filter
-  // with adding support of @@species
-
-  _export({
-    target: 'Array',
-    proto: true,
-    forced: !HAS_SPECIES_SUPPORT$1 || !USES_TO_LENGTH$5
-  }, {
-    filter: function filter(callbackfn
-    /* , thisArg */
-    ) {
-      return $filter$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-    }
-  });
-
-  var FAILS_ON_PRIMITIVES = fails(function () {
-    objectKeys(1);
-  }); // `Object.keys` method
-  // https://tc39.github.io/ecma262/#sec-object.keys
-
-  _export({
-    target: 'Object',
-    stat: true,
-    forced: FAILS_ON_PRIMITIVES
-  }, {
-    keys: function keys(it) {
-      return objectKeys(toObject(it));
-    }
-  });
-
-  var UNSUPPORTED_Y$2 = regexpStickyHelpers.UNSUPPORTED_Y; // `RegExp.prototype.flags` getter
-  // https://tc39.github.io/ecma262/#sec-get-regexp.prototype.flags
-
-  if (descriptors && (/./g.flags != 'g' || UNSUPPORTED_Y$2)) {
-    objectDefineProperty.f(RegExp.prototype, 'flags', {
-      configurable: true,
-      get: regexpFlags
-    });
-  }
-
-  // https://tc39.github.io/ecma262/#sec-string.prototype.includes
-
-
-  _export({
-    target: 'String',
-    proto: true,
-    forced: !correctIsRegexpLogic('includes')
-  }, {
-    includes: function includes(searchString
-    /* , position = 0 */
-    ) {
-      return !!~String(requireObjectCoercible(this)).indexOf(notARegexp(searchString), arguments.length > 1 ? arguments[1] : undefined);
-    }
-  });
-
   var arrayPush = [].push;
   var min$6 = Math.min;
   var MAX_UINT32 = 0xFFFFFFFF; // babel-minify transpiles RegExp('x', 'y') -> /x/y and it causes SyntaxError
@@ -4386,6 +4111,288 @@
       return A;
     }];
   }, !SUPPORTS_Y);
+
+  function isBitSet(_byte, bit) {
+    return (_byte & 1 << bit) > 0;
+  }
+  function setBit(_byte2, bit) {
+    return _byte2 | 1 << bit;
+  }
+  function decodeSynch(synch) {
+    var out = 0;
+    var mask = 0x7F000000;
+
+    while (mask) {
+      out >>= 1;
+      out |= synch & mask;
+      mask >>= 8;
+    }
+
+    return out;
+  }
+  function encodeSynch(size) {
+    var out = 0;
+    var mask = 0x7F;
+
+    while (mask ^ 0x7FFFFFFF) {
+      out = size & ~mask;
+      out <<= 1;
+      out |= size & mask;
+      mask = (mask + 1 << 8) - 1;
+      size = out;
+    }
+
+    return out;
+  }
+  function mergeBytes() {
+    var merged = [];
+
+    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+      params[_key] = arguments[_key];
+    }
+
+    params.forEach(function (param) {
+      if (param.forEach) param.forEach(function (_byte3) {
+        return merged.push(_byte3);
+      });else merged.push(param);
+    });
+    return new Uint8Array(merged);
+  }
+  function synch(unsynch) {
+    var bytes = [];
+    var i = 0;
+
+    while (i < unsynch.length) {
+      bytes.push(unsynch[i]);
+      if (unsynch[i] === 0xff && unsynch[i + 1] === 0x00) i++;
+      i++;
+    }
+
+    return bytes;
+  }
+  function unsynch(synch) {
+    var bytes = [];
+    var i = 0;
+
+    while (i < synch.length) {
+      bytes.push(synch[i]);
+
+      if (synch[i] === 0xff && (synch[i + 1] >= 0xe0 || synch[i + 1] === 0x00)) {
+        bytes.push(0);
+      }
+
+      i++;
+    }
+
+    return bytes;
+  }
+
+  var GENRES = ['Blues', 'Classic Rock', 'Country', 'Dance', 'Disco', 'Funk', 'Grunge', 'Hip-Hop', 'Jazz', 'Metal', 'New Age', 'Oldies', 'Other', 'Pop', 'R&B', 'Reggae', 'Rock', 'Techno', 'Industrial', 'Alternative', 'Ska', 'Death Metal', 'Pranks', 'Soundtrack', 'Euro-Techno', 'Ambient', 'Trip-Hop', 'Vocal', 'Jazz+Funk', 'Fusion', 'Trance', 'Classical', 'Instrumental', 'Acid', 'House', 'Game', 'Sound Clip', 'Gospel', 'Noise', 'Alt. Rock', 'Bass', 'Soul', 'Punk', 'Space', 'Meditative', 'Instrumental Pop', 'Instrumental Rock', 'Ethnic', 'Gothic', 'Darkwave', 'Techno-Industrial', 'Electronic', 'Pop-Folk', 'Eurodance', 'Dream', 'Southern Rock', 'Comedy', 'Cult', 'Gangsta Rap', 'Top 40', 'Christian Rap', 'Pop/Funk', 'Jungle', 'Native American', 'Cabaret', 'New Wave', 'Psychedelic', 'Rave', 'Showtunes', 'Trailer', 'Lo-Fi', 'Tribal', 'Acid Punk', 'Acid Jazz', 'Polka', 'Retro', 'Musical', 'Rock & Roll', 'Hard Rock', 'Folk', 'Folk-Rock', 'National Folk', 'Swing', 'Fast-Fusion', 'Bebop', 'Latin', 'Revival', 'Celtic', 'Bluegrass', 'Avantgarde', 'Gothic Rock', 'Progressive Rock', 'Psychedelic Rock', 'Symphonic Rock', 'Slow Rock', 'Big Band', 'Chorus', 'Easy Listening', 'Acoustic', 'Humour', 'Speech', 'Chanson', 'Opera', 'Chamber Music', 'Sonata', 'Symphony', 'Booty Bass', 'Primus', 'Porn Groove', 'Satire', 'Slow Jam', 'Club', 'Tango', 'Samba', 'Folklore', 'Ballad', 'Power Ballad', 'Rhythmic Soul', 'Freestyle', 'Duet', 'Punk Rock', 'Drum Solo', 'A Cappella', 'Euro-House', 'Dance Hall', 'Goa', 'Drum & Bass', 'Club-House', 'Hardcore', 'Terror', 'Indie', 'BritPop', 'Afro-Punk', 'Polsk Punk', 'Beat', 'Christian Gangsta Rap', 'Heavy Metal', 'Black Metal', 'Crossover', 'Contemporary Christian', 'Christian Rock', 'Merengue', 'Salsa', 'Thrash Metal', 'Anime', 'JPop', 'Synthpop', 'Abstract', 'Art Rock', 'Baroque', 'Bhangra', 'Big Beat', 'Breakbeat', 'Chillout', 'Downtempo', 'Dub', 'EBM', 'Eclectic', 'Electro', 'Electroclash', 'Emo', 'Experimental', 'Garage', 'Global', 'IDM', 'Illbient', 'Industro-Goth', 'Jam Band', 'Krautrock', 'Leftfield', 'Lounge', 'Math Rock', 'New Romantic', 'Nu-Breakz', 'Post-Punk', 'Post-Rock', 'Psytrance', 'Shoegaze', 'Space Rock', 'Trop Rock', 'World Music', 'Neoclassical', 'Audiobook', 'Audio Theatre', 'Neue Deutsche Welle', 'Podcast', 'Indie Rock', 'G-Funk', 'Dubstep', 'Garage Rock', 'Psybient'];
+
+  function filter(tags) {
+    tags.title = tags.TIT2 || tags.title || '';
+    tags.artist = tags.TPE1 || tags.artist || '';
+    tags.album = tags.TALB || tags.album || '';
+    tags.year = tags.TYER || (tags.TDRC ? tags.TDRC.substr(0, 4) : '') || tags.year || '';
+    tags.comment = (tags.COMM ? tags.COMM[0].text : '') || tags.comment || '';
+    tags.track = (tags.TRCK ? tags.TRCK.split('/')[0] : '') || tags.track || '';
+    tags.genre = tags.TCON || tags.genre || '';
+    return tags;
+  }
+
+  function hasID3v1(buffer) {
+    if (!isBuffer(buffer)) throw new TypeError('buffer is not ArrayBuffer/Buffer');
+    var offset = buffer.byteLength - 128;
+
+    if (offset > -1) {
+      var view = new BufferView(buffer, offset);
+      return view.getString(0, 3, 'ascii').string === 'TAG';
+    } else return false;
+  }
+  function decode(buffer) {
+    if (!hasID3v1(buffer)) throw new TagError(100);
+    var view = new BufferView(buffer, buffer.byteLength - 128);
+    var title = view.getString(3, 30, 'utf-8').string.replace(/\0/g, '');
+    var artist = view.getString(33, 30, 'utf-8').string.replace(/\0/g, '');
+    var album = view.getString(63, 30, 'utf-8').string.replace(/\0/g, '');
+    var year = view.getString(93, 4, 'utf-8').string.replace(/\0/g, '');
+    var track = view.getUint8(126).toString() || '';
+    var comment = view.getString(97, track !== null ? 28 : 30, 'utf-8').string.replace(/\0/g, '');
+    var genre = GENRES[view.getUint8(127)] || '';
+    var tags = {
+      title: title,
+      artist: artist,
+      album: album,
+      year: year,
+      track: track,
+      comment: comment,
+      genre: genre
+    };
+    tags.v1Version = track ? 1 : 0;
+    tags.v1Size = 128;
+    return tags;
+  }
+  function validate(tags, strict) {
+    var filtered = filter(tags);
+    var title = filtered.title,
+        artist = filtered.artist,
+        album = filtered.album,
+        year = filtered.year,
+        comment = filtered.comment,
+        track = filtered.track,
+        genre = filtered.genre;
+
+    if (typeof title !== 'string') {
+      throw new TagError(102, 'Title is not a string');
+    } else if (title.length > 30) {
+      throw new TagError(102, 'Title length exceeds 30 characters');
+    }
+
+    if (typeof artist !== 'string') {
+      throw new TagError(102, 'Artist is not a string');
+    } else if (artist.length > 30) {
+      throw new TagError(102, 'Artist length exceeds 30 characters');
+    }
+
+    if (typeof album !== 'string') {
+      throw new TagError(102, 'Album is not a string');
+    } else if (album.length > 30) {
+      throw new TagError(102, 'Album length exceeds 30 characters');
+    }
+
+    if (typeof year !== 'string') {
+      throw new TagError(102, 'Year is not a string');
+    } else if (year.length > 4) {
+      throw new TagError(102, 'Year length exceeds 4 characters');
+    }
+
+    if (typeof comment !== 'string') {
+      throw new TagError(102, 'Comment is not a string');
+    }
+
+    if (typeof track !== 'string') {
+      throw new TagError(102, 'Track is not a string');
+    } else if (parseInt(track) > 255 || parseInt(track) < 0) {
+      throw new TagError(102, 'Track should be in range 255 - 0');
+    }
+
+    if (track !== '') {
+      if (comment.length > 28) {
+        throw new TagError(102, 'Comment length exceeds 28 characters');
+      }
+    } else if (comment.length > 30) {
+      throw new TagError(102, 'Comment length exceeds 30 characters');
+    }
+
+    if (typeof genre !== 'string') {
+      throw new TagError(102, 'Genre is not a string');
+    } else if (strict && !GENRES.includes(genre) && genre !== '') {
+      throw new TagError(102, 'Unknown genre');
+    }
+
+    return true;
+  }
+  function encode(tags) {
+    var filtered = filter(tags);
+    var title = filtered.title,
+        artist = filtered.artist,
+        album = filtered.album,
+        year = filtered.year,
+        comment = filtered.comment,
+        track = filtered.track,
+        genre = filtered.genre;
+
+    while (title.length < 30) {
+      title += '\0';
+    }
+
+    while (artist.length < 30) {
+      artist += '\0';
+    }
+
+    while (album.length < 30) {
+      album += '\0';
+    }
+
+    while (year.length < 4) {
+      year += '\0';
+    }
+
+    genre = GENRES.indexOf(genre);
+
+    if (track !== '') {
+      while (comment.length < 28) {
+        comment += '\0';
+      }
+
+      comment += '\0' + String.fromCharCode(track);
+    } else {
+      while (comment.length < 30) {
+        comment += '\0';
+      }
+    }
+
+    return mergeBytes(0x54, 0x41, 0x47, encodeString(title, 'utf-8'), encodeString(artist, 'utf-8'), encodeString(album, 'utf-8'), encodeString(year, 'utf-8'), encodeString(comment, 'utf-8'), genre > -1 ? genre : 12).buffer;
+  }
+
+  var $filter$1 = arrayIteration.filter;
+  var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport('filter'); // Edge 14- issue
+
+  var USES_TO_LENGTH$5 = arrayMethodUsesToLength('filter'); // `Array.prototype.filter` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.filter
+  // with adding support of @@species
+
+  _export({
+    target: 'Array',
+    proto: true,
+    forced: !HAS_SPECIES_SUPPORT$1 || !USES_TO_LENGTH$5
+  }, {
+    filter: function filter(callbackfn
+    /* , thisArg */
+    ) {
+      return $filter$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+    }
+  });
+
+  var FAILS_ON_PRIMITIVES = fails(function () {
+    objectKeys(1);
+  }); // `Object.keys` method
+  // https://tc39.github.io/ecma262/#sec-object.keys
+
+  _export({
+    target: 'Object',
+    stat: true,
+    forced: FAILS_ON_PRIMITIVES
+  }, {
+    keys: function keys(it) {
+      return objectKeys(toObject(it));
+    }
+  });
+
+  var UNSUPPORTED_Y$2 = regexpStickyHelpers.UNSUPPORTED_Y; // `RegExp.prototype.flags` getter
+  // https://tc39.github.io/ecma262/#sec-get-regexp.prototype.flags
+
+  if (descriptors && (/./g.flags != 'g' || UNSUPPORTED_Y$2)) {
+    objectDefineProperty.f(RegExp.prototype, 'flags', {
+      configurable: true,
+      get: regexpFlags
+    });
+  }
+
+  // https://tc39.github.io/ecma262/#sec-string.prototype.includes
+
+
+  _export({
+    target: 'String',
+    proto: true,
+    forced: !correctIsRegexpLogic('includes')
+  }, {
+    includes: function includes(searchString
+    /* , position = 0 */
+    ) {
+      return !!~String(requireObjectCoercible(this)).indexOf(notARegexp(searchString), arguments.length > 1 ? arguments[1] : undefined);
+    }
+  });
 
   function getHeaderFlags(_byte, version) {
     var flags = {};
@@ -6620,15 +6627,15 @@
     WXXX: WXXX
   });
 
-  function filter(tags, version) {
-    tags.TIT2 = tags.TIT2 || (tags.title !== '' ? tags.title : undefined);
-    tags.TPE1 = tags.TPE1 || (tags.artist !== '' ? tags.artist : undefined);
-    tags.TALB = tags.TALB || (tags.album !== '' ? tags.album : undefined);
+  function filter$1(tags, version) {
+    tags.TIT2 = tags.TIT2 || tags.title || undefined;
+    tags.TPE1 = tags.TPE1 || tags.artist || undefined;
+    tags.TALB = tags.TALB || tags.album || undefined;
 
     if (version === 3) {
-      tags.TYER = tags.TYER || (tags.year !== '' ? tags.year : undefined);
+      tags.TYER = tags.TYER || tags.year || undefined;
     } else if (version === 4) {
-      tags.TDRC = tags.TDRC || (tags.year !== '' ? tags.year : undefined);
+      tags.TDRC = tags.TDRC || tags.year || undefined;
     }
 
     tags.COMM = tags.COMM || (tags.comment !== '' ? [{
@@ -6636,8 +6643,8 @@
       descriptor: '',
       text: tags.comment
     }] : undefined);
-    tags.TRCK = tags.TRCK || (tags.track !== '' ? tags.track : undefined);
-    tags.TCON = tags.TCON || (tags.genre !== '' ? tags.genre : undefined);
+    tags.TRCK = tags.TRCK || tags.track || undefined;
+    tags.TCON = tags.TCON || tags.genre || undefined;
     var ids = Object.keys(frames);
     var tagIds = Object.keys(tags).filter(function (key) {
       return ids.includes(key);
@@ -6775,7 +6782,7 @@
   function validate$1(tags, strict, options) {
     var version = options.version;
     if (version !== 3 && version !== 4) throw new TagError(200, 'Unknown version');
-    var filtered = filter(tags, version);
+    var filtered = filter$1(tags, version);
 
     for (var id in filtered) {
       if (!Object.keys(frames).includes(id)) continue;
@@ -6796,7 +6803,7 @@
     var version = options.version,
         padding = options.padding,
         unsynch = options.unsynch;
-    var filtered = filter(tags, version);
+    var filtered = filter$1(tags, version);
     var headerBytes = [0x49, 0x44, 0x33, version, 0];
     var flagsByte = 0;
     var sizeView = new BufferView(4);
@@ -6917,7 +6924,7 @@
       }
 
       this.name = 'MP3Tag';
-      this.version = '2.0.1';
+      this.version = '2.0.2';
       this.verbose = verbose;
       this.error = '';
       this.errorCode = -1;
