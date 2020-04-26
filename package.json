@@ -1,8 +1,15 @@
 {
   "name": "mp3tag.js",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "MP3 tagging written in pure JavaScript",
-  "keywords": ["node", "browser", "audio", "mp3", "tag", "id3"],
+  "keywords": [
+    "node",
+    "browser",
+    "audio",
+    "mp3",
+    "tag",
+    "id3"
+  ],
   "homepage": "https://mp3tag.js.org",
   "bugs": "https://github.com/eidoriantan/mp3tag.js/issues",
   "license": "MIT",
@@ -39,7 +46,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "esm": "^3.2.25",
-    "mocha": "^7.1.1",
+    "mocha": "^7.1.2",
     "regenerator-runtime": "^0.13.5",
     "rollup": "^2.7.2",
     "rollup-plugin-babel": "^4.4.0",
