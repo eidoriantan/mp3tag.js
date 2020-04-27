@@ -5,6 +5,7 @@ const GITHUB_REPO = '{{ site.github.api_url }}/repos/{{ site.github.repository_n
 
 $(document).ready(function () {
   const template = $('#release-item-template').prop('content')
+  toast('Retrieving', 'Retrieving releases from GitHub...', TOAST_INFO)
   $.ajax(GITHUB_REPO + '/releases', {
     method: 'GET',
     accepts: 'application/vnd.github.v3+json',
@@ -25,6 +26,8 @@ $(document).ready(function () {
 
         $('#tbody').append(row)
       })
+
+      toast('Success', 'Retrieved successfully', TOAST_SUCCESS)
     }
   })
 })
