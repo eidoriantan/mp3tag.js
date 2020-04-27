@@ -3210,7 +3210,8 @@
 
     return bytes;
   }
-  function encodeString(string, format) {
+  function encodeString(string) {
+    var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'windows1251';
     var bytes = [];
 
     switch (format) {
@@ -3236,6 +3237,7 @@
           break;
         }
 
+      case 'windows1251':
       default:
         for (var _i = 0; _i < string.length; _i++) {
           bytes.push(string.charCodeAt(_i));
@@ -3287,16 +3289,20 @@
 
     _createClass(BufferView, [{
       key: "getString",
-      value: function getString(offset, maxlength, format) {
+      value: function getString(offset, maxlength) {
+        var format = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'windows1251';
         var string = '';
         var bytes = this.getUint8(offset, maxlength);
         if (!Array.isArray(bytes)) bytes = [bytes];
 
         switch (format) {
+          case 'utf8':
           case 'utf-8':
             string = decodeUTF8(bytes);
             break;
 
+          case 'utf16':
+          case 'utf16be':
           case 'utf-16':
           case 'utf-16be':
             {
@@ -3312,6 +3318,7 @@
               break;
             }
 
+          case 'windows1251':
           default:
             string = this.getUint8String(offset, maxlength);
         }
@@ -3323,11 +3330,14 @@
       }
     }, {
       key: "getCString",
-      value: function getCString(offset, format) {
+      value: function getCString(offset) {
+        var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'windows1251';
         var bytes, bytesPerChar;
         var limit = this.byteLength - offset;
 
         switch (format) {
+          case 'utf16':
+          case 'utf16be':
           case 'utf-16':
           case 'utf-16be':
             bytesPerChar = 2;
@@ -4206,7 +4216,7 @@
 
     if (offset > -1) {
       var view = new BufferView(buffer, offset);
-      return view.getString(0, 3, 'ascii').string === 'TAG';
+      return view.getString(0, 3).string === 'TAG';
     } else return false;
   }
   function decode(buffer) {
@@ -4244,25 +4254,25 @@
 
     if (typeof title !== 'string') {
       throw new TagError(102, 'Title is not a string');
-    } else if (title.length > 30) {
+    } else if (encodeString(title, 'utf-8').length > 30) {
       throw new TagError(102, 'Title length exceeds 30 characters');
     }
 
     if (typeof artist !== 'string') {
       throw new TagError(102, 'Artist is not a string');
-    } else if (artist.length > 30) {
+    } else if (encodeString(artist, 'utf-8').length > 30) {
       throw new TagError(102, 'Artist length exceeds 30 characters');
     }
 
     if (typeof album !== 'string') {
       throw new TagError(102, 'Album is not a string');
-    } else if (album.length > 30) {
+    } else if (encodeString(album, 'utf-8').length > 30) {
       throw new TagError(102, 'Album length exceeds 30 characters');
     }
 
     if (typeof year !== 'string') {
       throw new TagError(102, 'Year is not a string');
-    } else if (year.length > 4) {
+    } else if (encodeString(year, 'utf-8').length > 4) {
       throw new TagError(102, 'Year length exceeds 4 characters');
     }
 
@@ -4277,10 +4287,10 @@
     }
 
     if (track !== '') {
-      if (comment.length > 28) {
+      if (encodeString(comment, 'utf-8').length > 28) {
         throw new TagError(102, 'Comment length exceeds 28 characters');
       }
-    } else if (comment.length > 30) {
+    } else if (encodeString(comment, 'utf-8').length > 30) {
       throw new TagError(102, 'Comment length exceeds 30 characters');
     }
 
@@ -4301,38 +4311,42 @@
         comment = filtered.comment,
         track = filtered.track,
         genre = filtered.genre;
+    title = encodeString(title, 'utf-8');
+    artist = encodeString(artist, 'utf-8');
+    album = encodeString(album, 'utf-8');
+    year = encodeString(year, 'utf-8');
+    comment = encodeString(comment, 'utf-8');
+    genre = GENRES.indexOf(genre);
 
     while (title.length < 30) {
-      title += '\0';
+      title.push(0);
     }
 
     while (artist.length < 30) {
-      artist += '\0';
+      artist.push(0);
     }
 
     while (album.length < 30) {
-      album += '\0';
+      album.push(0);
     }
 
     while (year.length < 4) {
-      year += '\0';
+      year.push(0);
     }
-
-    genre = GENRES.indexOf(genre);
 
     if (track !== '') {
       while (comment.length < 28) {
-        comment += '\0';
+        comment.push(0);
       }
 
-      comment += '\0' + String.fromCharCode(track);
+      comment.push(0, parseInt(track));
     } else {
       while (comment.length < 30) {
-        comment += '\0';
+        comment.push(0);
       }
     }
 
-    return mergeBytes(0x54, 0x41, 0x47, encodeString(title, 'utf-8'), encodeString(artist, 'utf-8'), encodeString(album, 'utf-8'), encodeString(year, 'utf-8'), encodeString(comment, 'utf-8'), genre > -1 ? genre : 12).buffer;
+    return mergeBytes(0x54, 0x41, 0x47, title, artist, album, year, comment, genre > -1 ? genre : 12).buffer;
   }
 
   var $filter$1 = arrayIteration.filter;
@@ -4442,7 +4456,7 @@
     return flags;
   }
 
-  var ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8'];
+  var ENCODINGS = ['windows1251', 'utf-16', 'utf-16be', 'utf-8'];
   function textFrame(buffer, version) {
     var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
@@ -4463,7 +4477,7 @@
   }
   function urlFrame(buffer, version) {
     var view = new BufferView(buffer);
-    return view.getCString(0, 'ascii').string;
+    return view.getCString(0).string;
   }
   function txxxFrame(buffer, version) {
     var view = new BufferView(buffer);
@@ -4483,7 +4497,7 @@
     var description = view.getCString(1, encoding);
     var urlOffset = description.length + 1;
     var urlLength = view.byteLength - urlOffset;
-    var url = view.getString(urlOffset, urlLength, 'ascii');
+    var url = view.getString(urlOffset, urlLength);
     return {
       description: description.string,
       url: url.string
@@ -4497,7 +4511,7 @@
     var textLength = view.byteLength - textOffset;
     var text = view.getString(textOffset, textLength, encoding);
     return {
-      language: view.getString(1, 3, 'ascii').string,
+      language: view.getString(1, 3).string,
       descriptor: descriptor.string,
       text: text.string
     };
@@ -4505,7 +4519,7 @@
   function apicFrame(buffer, version) {
     var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
-    var mime = view.getCString(1, 'ascii');
+    var mime = view.getCString(1);
     var type = view.getUint8(mime.length + 1);
     var desc = view.getCString(mime.length + 2, encoding);
     var dataOffset = mime.length + desc.length + 2;
@@ -4521,7 +4535,7 @@
   function geobFrame(buffer, version) {
     var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
-    var mime = view.getCString(1, 'ascii');
+    var mime = view.getCString(1);
     var fname = view.getCString(mime.length + 1, encoding);
     var desc = view.getCString(fname.length + mime.length + 1, encoding);
     var binOffset = mime.length + fname.length + desc.length + 1;
@@ -4536,7 +4550,7 @@
   }
   function ufidFrame(buffer, version) {
     var view = new BufferView(buffer);
-    var ownerId = view.getCString(0, 'ascii');
+    var ownerId = view.getCString(0);
     var id = view.getUint8(ownerId.length, view.byteLength - ownerId.length);
     return {
       ownerId: ownerId.string,
@@ -4547,16 +4561,16 @@
     var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
     return {
-      language: view.getString(1, 3, 'ascii').string,
+      language: view.getString(1, 3).string,
       text: view.getString(4, view.byteLength - 4, encoding).string
     };
   }
   function owneFrame(buffer, version) {
     var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
-    var currencyCode = view.getString(1, 3, 'ascii');
-    var currency = view.getCString(4, 'ascii');
-    var date = view.getString(currency.length + 4, 8, 'ascii');
+    var currencyCode = view.getString(1, 3);
+    var currency = view.getCString(4);
+    var date = view.getString(currency.length + 4, 8);
     var sellerOffset = currency.length + date.length + 4;
     var sellerLength = view.byteLength - sellerOffset;
     var seller = view.getString(sellerOffset, sellerLength, encoding);
@@ -4569,7 +4583,7 @@
   }
   function privFrame(buffer, version) {
     var view = new BufferView(buffer);
-    var ownerId = view.getCString(0, 'ascii');
+    var ownerId = view.getCString(0);
     var data = view.getUint8(ownerId.length, view.byteLength - ownerId.length);
     return {
       ownerId: ownerId.string,
@@ -4590,7 +4604,7 @@
   function syltFrame(buffer, version) {
     var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
-    var language = view.getString(1, 3, 'ascii').string;
+    var language = view.getString(1, 3).string;
     var format = view.getUint8(4);
     var type = view.getUint8(5);
     var descriptor = view.getCString(6, encoding);
@@ -4601,7 +4615,7 @@
 
     for (var i = 0; i < lyrics.length; i += 4) {
       var lyricsView = new BufferView(lyrics);
-      var line = lyricsView.getCString(i, 'ascii');
+      var line = lyricsView.getCString(i);
       var time = lyricsView.getUint32(i + line.length);
       var minutes = Math.floor(time / 60000).toString();
       var seconds = Math.floor(time % 60000 / 1000).toString();
@@ -5611,7 +5625,7 @@
   }
 
   function getHeaderBytes(id, size, version, flags) {
-    var idBytes = encodeString(id, 'ascii');
+    var idBytes = encodeString(id);
     var sizeView = new BufferView(4);
     sizeView.setUint32(0, version === 3 ? size : encodeSynch(size));
     var flagsBytes = [0, 0];
@@ -5670,7 +5684,7 @@
     });
     return mergeBytes(header, data);
   }
-  function asciiFrame(value, options) {
+  function win1251Frame(value, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
@@ -5678,11 +5692,11 @@
 
     switch (version) {
       case 3:
-        strBytes = encodeString(value.replace('\\\\', '/') + '\0', 'ascii');
+        strBytes = encodeString(value.replace('\\\\', '/') + '\0');
         break;
 
       case 4:
-        strBytes = encodeString(value.replace('\\\\', '\0') + '\0', 'ascii');
+        strBytes = encodeString(value.replace('\\\\', '\0') + '\0');
         break;
     }
 
@@ -5697,13 +5711,13 @@
   function setFrame$2(value, options) {
     var version = options.version;
     if (version === 3) value = value.toString().split('\\\\')[0];else if (version === 4) value = value.toString().replace('\\\\', '\0');
-    return asciiFrame(value, options);
+    return win1251Frame(value, options);
   }
   function urlFrame$2(value, options) {
     var id = options.id,
         version = options.version,
         unsynch = options.unsynch;
-    var strBytes = encodeString(value + '\0', 'ascii');
+    var strBytes = encodeString(value + '\0');
     if (unsynch) strBytes = unsynchData(strBytes, version);
     var header = getHeaderBytes(id, strBytes.length, version, {
       unsynchronisation: unsynch,
@@ -5760,13 +5774,13 @@
         case 3:
           encoding = 1;
           descBytes = encodeString(wxxx.description + '\0', 'utf-16');
-          strBytes = encodeString(wxxx.url + '\0', 'ascii');
+          strBytes = encodeString(wxxx.url + '\0');
           break;
 
         case 4:
           encoding = 3;
           descBytes = encodeString(wxxx.description + '\0', 'utf-8');
-          strBytes = encodeString(wxxx.url + '\0', 'ascii');
+          strBytes = encodeString(wxxx.url + '\0');
           break;
       }
 
@@ -5794,7 +5808,7 @@
     var bytes = [];
     values.forEach(function (langDesc) {
       var encoding = 0;
-      var langBytes = encodeString(langDesc.language, 'ascii');
+      var langBytes = encodeString(langDesc.language);
       var descBytes, textBytes;
 
       switch (version) {
@@ -5831,7 +5845,7 @@
     var bytes = [];
     values.forEach(function (apic) {
       var encoding = 0;
-      var mimeBytes = encodeString(apic.format + '\0', 'ascii');
+      var mimeBytes = encodeString(apic.format + '\0');
       var imageBytes = new Uint8Array(apic.data);
       var strBytes = [];
 
@@ -5866,7 +5880,7 @@
         unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (geob) {
-      var mime = encodeString(geob.format + '\0', 'ascii');
+      var mime = encodeString(geob.format + '\0');
       var object = new Uint8Array(geob.object);
       var encoding, filename, description;
 
@@ -5903,7 +5917,7 @@
         unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (ufid) {
-      var ownerBytes = encodeString(ufid.ownerId + '\0', 'ascii');
+      var ownerBytes = encodeString(ufid.ownerId + '\0');
       var idBytes = new Uint8Array(ufid.id);
       var data = mergeBytes(ownerBytes, idBytes);
       if (unsynch) data = unsynchData(data, version);
@@ -5924,7 +5938,7 @@
         unsynch = options.unsynch;
     var bytes = [];
     var encoding = 0;
-    var langBytes = encodeString(value.language, 'ascii');
+    var langBytes = encodeString(value.language);
     var textBytes;
 
     switch (version) {
@@ -5956,9 +5970,9 @@
         version = options.version,
         unsynch = options.unsynch;
     var encoding = 0;
-    var codeBytes = encodeString(value.currencCode, 'ascii');
-    var priceBytes = encodeString(value.currencyPrice + '\0', 'ascii');
-    var dateBytes = encodeString(value.date, 'ascii');
+    var codeBytes = encodeString(value.currencyCode);
+    var priceBytes = encodeString(value.currencyPrice + '\0');
+    var dateBytes = encodeString(value.date);
     var sellerBytes;
 
     switch (version) {
@@ -5987,7 +6001,7 @@
         unsynch = options.unsynch;
     var bytes = [];
     values.forEach(function (priv) {
-      var ownerIdBytes = encodeString(priv.ownerId, 'ascii');
+      var ownerIdBytes = encodeString(priv.ownerId);
       var privData = new Uint8Array(priv.data);
       var data = mergeBytes(ownerIdBytes, privData);
       if (unsynch) data = unsynchData(data, version);
@@ -6029,7 +6043,7 @@
     var bytes = [];
     values.forEach(function (sylt) {
       var encoding = 0;
-      var langBytes = encodeString(sylt.language, 'ascii');
+      var langBytes = encodeString(sylt.language);
       var descBytes = [];
 
       switch (version) {
@@ -6050,7 +6064,7 @@
         if (line !== '') {
           var result = regex.exec(line);
           var time = parseInt(result[1].replace(/[^0-9]/g, ''));
-          var string = encodeString((result[2] || '') + '\n\0', 'ascii');
+          var string = encodeString((result[2] || '') + '\n\0');
           var timeBytes = new BufferView(4);
           timeBytes.setUint32(0, time);
           lyricsBytes = mergeBytes(lyricsBytes, string, timeBytes.getUint8(0, 4));
@@ -6165,7 +6179,7 @@
   var TBPM = {
     parse: textFrame,
     validate: textFrame$1,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [3, 4]
   };
   var TCOM = {
@@ -6189,43 +6203,43 @@
   var TDAT = {
     parse: textFrame,
     validate: timeFrame,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [3]
   };
   var TDEN = {
     parse: textFrame,
     validate: timeFrame,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [4]
   };
   var TDLY = {
     parse: textFrame,
     validate: textFrame$1,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [3]
   };
   var TDOR = {
     parse: textFrame,
     validate: timeFrame,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [4]
   };
   var TDRC = {
     parse: textFrame,
     validate: timeFrame,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [4]
   };
   var TDRL = {
     parse: textFrame,
     validate: timeFrame,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [4]
   };
   var TDTG = {
     parse: textFrame,
     validate: timeFrame,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [4]
   };
   var TENC = {
@@ -6249,7 +6263,7 @@
   var TIME = {
     parse: textFrame,
     validate: timeFrame,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [3]
   };
   var TIPL = {
@@ -6279,19 +6293,19 @@
   var TKEY = {
     parse: textFrame,
     validate: tkeyFrame,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [3, 4]
   };
   var TLAN = {
     parse: textFrame,
     validate: tlanFrame,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [3, 4]
   };
   var TLEN = {
     parse: textFrame,
     validate: textFrame$1,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [3, 4]
   };
   var TMCL = {
@@ -6339,7 +6353,7 @@
   var TORY = {
     parse: textFrame,
     validate: timeFrame,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [3]
   };
   var TOWN = {
@@ -6417,7 +6431,7 @@
   var TSIZ = {
     parse: textFrame,
     validate: textFrame$1,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [3]
   };
   var TSOA = {
@@ -6447,7 +6461,7 @@
   var TSRC = {
     parse: textFrame,
     validate: tsrcFrame,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [3, 4]
   };
   var TSSE = {
@@ -6465,7 +6479,7 @@
   var TYER = {
     parse: textFrame,
     validate: timeFrame,
-    write: asciiFrame,
+    write: win1251Frame,
     version: [3]
   };
   var TXXX = {
@@ -6660,7 +6674,7 @@
   function hasID3v2(buffer) {
     if (!isBuffer(buffer)) throw new TypeError('buffer is not ArrayBuffer/Buffer');
     var view = new BufferView(buffer);
-    return view.getString(0, 3, 'ascii').string === 'ID3';
+    return view.getString(0, 3).string === 'ID3';
   }
   function decode$1(buffer) {
     var tagOffset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
@@ -6924,7 +6938,7 @@
       }
 
       this.name = 'MP3Tag';
-      this.version = '2.0.2';
+      this.version = '2.0.3';
       this.verbose = verbose;
       this.error = '';
       this.errorCode = -1;
