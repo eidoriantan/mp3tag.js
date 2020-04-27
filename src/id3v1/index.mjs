@@ -91,25 +91,25 @@ export function validate (tags, strict) {
 
   if (typeof title !== 'string') {
     throw new TagError(102, 'Title is not a string')
-  } else if (title.length > 30) {
+  } else if (encodeString(title, 'utf-8').length > 30) {
     throw new TagError(102, 'Title length exceeds 30 characters')
   }
 
   if (typeof artist !== 'string') {
     throw new TagError(102, 'Artist is not a string')
-  } else if (artist.length > 30) {
+  } else if (encodeString(artist, 'utf-8').length > 30) {
     throw new TagError(102, 'Artist length exceeds 30 characters')
   }
 
   if (typeof album !== 'string') {
     throw new TagError(102, 'Album is not a string')
-  } else if (album.length > 30) {
+  } else if (encodeString(album, 'utf-8').length > 30) {
     throw new TagError(102, 'Album length exceeds 30 characters')
   }
 
   if (typeof year !== 'string') {
     throw new TagError(102, 'Year is not a string')
-  } else if (year.length > 4) {
+  } else if (encodeString(year, 'utf-8').length > 4) {
     throw new TagError(102, 'Year length exceeds 4 characters')
   }
 
@@ -124,10 +124,10 @@ export function validate (tags, strict) {
   }
 
   if (track !== '') {
-    if (comment.length > 28) {
+    if (encodeString(comment, 'utf-8').length > 28) {
       throw new TagError(102, 'Comment length exceeds 28 characters')
     }
-  } else if (comment.length > 30) {
+  } else if (encodeString(comment, 'utf-8').length > 30) {
     throw new TagError(102, 'Comment length exceeds 30 characters')
   }
 
@@ -144,26 +144,27 @@ export function encode (tags) {
   const filtered = filter(tags)
   let { title, artist, album, year, comment, track, genre } = filtered
 
-  while (title.length < 30) title += '\0'
-  while (artist.length < 30) artist += '\0'
-  while (album.length < 30) album += '\0'
-  while (year.length < 4) year += '\0'
+  title = encodeString(title, 'utf-8')
+  artist = encodeString(artist, 'utf-8')
+  album = encodeString(album, 'utf-8')
+  year = encodeString(year, 'utf-8')
+  comment = encodeString(comment, 'utf-8')
   genre = GENRES.indexOf(genre)
 
+  while (title.length < 30) title.push(0)
+  while (artist.length < 30) artist.push(0)
+  while (album.length < 30) album.push(0)
+  while (year.length < 4) year.push(0)
+
   if (track !== '') {
-    while (comment.length < 28) comment += '\0'
-    comment += '\0' + String.fromCharCode(track)
+    while (comment.length < 28) comment.push(0)
+    comment.push(0, parseInt(track))
   } else {
-    while (comment.length < 30) comment += '\0'
+    while (comment.length < 30) comment.push(0)
   }
 
   return mergeBytes(
-    0x54, 0x41, 0x47,
-    encodeString(title, 'utf-8'),
-    encodeString(artist, 'utf-8'),
-    encodeString(album, 'utf-8'),
-    encodeString(year, 'utf-8'),
-    encodeString(comment, 'utf-8'),
+    0x54, 0x41, 0x47, title, artist, album, year, comment,
     genre > -1 ? genre : 12
   ).buffer
 }
