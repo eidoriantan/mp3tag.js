@@ -32,6 +32,12 @@
     "type": "git",
     "url": "git+https://github.com/eidoriantan/mp3tag.js.git"
   },
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "lint": "eslint -c .eslintrc.json **/*.mjs --quiet --max-warnings 2",
+    "test": "npm run lint && mocha --require esm --colors"
+  },
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.9.0",
@@ -52,11 +58,5 @@
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-terser": "^5.3.0",
     "standard": "^14.3.3"
-  },
-  "scripts": {
-    "build": "rollup -c",
-    "watch": "rollup -c -w",
-    "lint": "eslint -c .eslintrc.json **/*.mjs --quiet --max-warnings 2",
-    "test": "npm run lint && mocha --require esm --colors"
   }
 }
