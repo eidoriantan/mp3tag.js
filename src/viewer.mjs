@@ -23,16 +23,19 @@ export default class BufferView extends DataView {
     super(...params)
   }
 
-  getString (offset, maxlength, format) {
+  getString (offset, maxlength, format = 'windows1251') {
     let string = ''
     let bytes = this.getUint8(offset, maxlength)
     if (!Array.isArray(bytes)) bytes = [bytes]
 
     switch (format) {
+      case 'utf8':
       case 'utf-8':
         string = decodeUTF8(bytes)
         break
 
+      case 'utf16':
+      case 'utf16be':
       case 'utf-16':
       case 'utf-16be': {
         let le = null
@@ -49,6 +52,7 @@ export default class BufferView extends DataView {
         break
       }
 
+      case 'windows1251':
       default:
         string = this.getUint8String(offset, maxlength)
     }
@@ -60,11 +64,13 @@ export default class BufferView extends DataView {
     }
   }
 
-  getCString (offset, format) {
+  getCString (offset, format = 'windows1251') {
     let bytes, bytesPerChar
     let limit = this.byteLength - offset
 
     switch (format) {
+      case 'utf16':
+      case 'utf16be':
       case 'utf-16':
       case 'utf-16be':
         bytesPerChar = 2

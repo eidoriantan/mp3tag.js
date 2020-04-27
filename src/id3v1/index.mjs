@@ -60,7 +60,7 @@ export function hasID3v1 (buffer) {
   const offset = buffer.byteLength - 128
   if (offset > -1) {
     const view = new BufferView(buffer, offset)
-    return view.getString(0, 3, 'ascii').string === 'TAG'
+    return view.getString(0, 3).string === 'TAG'
   } else return false
 }
 

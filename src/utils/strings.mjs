@@ -57,7 +57,7 @@ export function encodeUTF8 (string) {
   return bytes
 }
 
-export function encodeString (string, format) {
+export function encodeString (string, format = 'windows1251') {
   let bytes = []
   switch (format) {
     case 'utf-8':
@@ -79,6 +79,7 @@ export function encodeString (string, format) {
       break
     }
 
+    case 'windows1251':
     default:
       for (let i = 0; i < string.length; i++) {
         bytes.push(string.charCodeAt(i))

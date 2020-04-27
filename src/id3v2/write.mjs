@@ -5,7 +5,7 @@ import { setBit, encodeSynch, mergeBytes, unsynch } from '../utils/bytes.mjs'
 import { encodeString } from '../utils/strings.mjs'
 
 function getHeaderBytes (id, size, version, flags) {
-  const idBytes = encodeString(id, 'ascii')
+  const idBytes = encodeString(id)
   const sizeView = new BufferView(4)
 
   sizeView.setUint32(0, version === 3 ? size : encodeSynch(size))
@@ -64,17 +64,17 @@ export function textFrame (value, options) {
   return mergeBytes(header, data)
 }
 
-export function asciiFrame (value, options) {
+export function win1251Frame (value, options) {
   const { id, version, unsynch } = options
   let strBytes = []
 
   switch (version) {
     case 3:
-      strBytes = encodeString(value.replace('\\\\', '/') + '\0', 'ascii')
+      strBytes = encodeString(value.replace('\\\\', '/') + '\0')
       break
 
     case 4:
-      strBytes = encodeString(value.replace('\\\\', '\0') + '\0', 'ascii')
+      strBytes = encodeString(value.replace('\\\\', '\0') + '\0')
       break
   }
 
@@ -94,12 +94,12 @@ export function setFrame (value, options) {
   if (version === 3) value = value.toString().split('\\\\')[0]
   else if (version === 4) value = value.toString().replace('\\\\', '\0')
 
-  return asciiFrame(value, options)
+  return win1251Frame(value, options)
 }
 
 export function urlFrame (value, options) {
   const { id, version, unsynch } = options
-  let strBytes = encodeString(value + '\0', 'ascii')
+  let strBytes = encodeString(value + '\0')
   if (unsynch) strBytes = unsynchData(strBytes, version)
 
   const header = getHeaderBytes(id, strBytes.length, version, {
@@ -159,13 +159,13 @@ export function wxxxFrame (values, options) {
       case 3:
         encoding = 1
         descBytes = encodeString(wxxx.description + '\0', 'utf-16')
-        strBytes = encodeString(wxxx.url + '\0', 'ascii')
+        strBytes = encodeString(wxxx.url + '\0')
         break
 
       case 4:
         encoding = 3
         descBytes = encodeString(wxxx.description + '\0', 'utf-8')
-        strBytes = encodeString(wxxx.url + '\0', 'ascii')
+        strBytes = encodeString(wxxx.url + '\0')
         break
     }
 
@@ -195,7 +195,7 @@ export function langDescFrame (values, options) {
 
   values.forEach(langDesc => {
     let encoding = 0
-    const langBytes = encodeString(langDesc.language, 'ascii')
+    const langBytes = encodeString(langDesc.language)
     let descBytes, textBytes
 
     switch (version) {
@@ -233,7 +233,7 @@ export function apicFrame (values, options) {
 
   values.forEach(apic => {
     let encoding = 0
-    const mimeBytes = encodeString(apic.format + '\0', 'ascii')
+    const mimeBytes = encodeString(apic.format + '\0')
     const imageBytes = new Uint8Array(apic.data)
     let strBytes = []
 
@@ -269,7 +269,7 @@ export function geobFrame (values, options) {
   const bytes = []
 
   values.forEach(geob => {
-    const mime = encodeString(geob.format + '\0', 'ascii')
+    const mime = encodeString(geob.format + '\0')
     const object = new Uint8Array(geob.object)
     let encoding, filename, description
 
@@ -307,7 +307,7 @@ export function ufidFrame (values, options) {
   const bytes = []
 
   values.forEach(ufid => {
-    const ownerBytes = encodeString(ufid.ownerId + '\0', 'ascii')
+    const ownerBytes = encodeString(ufid.ownerId + '\0')
     const idBytes = new Uint8Array(ufid.id)
 
     let data = mergeBytes(ownerBytes, idBytes)
@@ -330,7 +330,7 @@ export function userFrame (value, options) {
   const bytes = []
 
   let encoding = 0
-  const langBytes = encodeString(value.language, 'ascii')
+  const langBytes = encodeString(value.language)
   let textBytes
 
   switch (version) {
@@ -362,9 +362,9 @@ export function userFrame (value, options) {
 export function owneFrame (value, options) {
   const { id, version, unsynch } = options
   let encoding = 0
-  const codeBytes = encodeString(value.currencCode, 'ascii')
-  const priceBytes = encodeString(value.currencyPrice + '\0', 'ascii')
-  const dateBytes = encodeString(value.date, 'ascii')
+  const codeBytes = encodeString(value.currencyCode)
+  const priceBytes = encodeString(value.currencyPrice + '\0')
+  const dateBytes = encodeString(value.date)
   let sellerBytes
 
   switch (version) {
@@ -395,7 +395,7 @@ export function privFrame (values, options) {
   const bytes = []
 
   values.forEach(priv => {
-    const ownerIdBytes = encodeString(priv.ownerId, 'ascii')
+    const ownerIdBytes = encodeString(priv.ownerId)
     const privData = new Uint8Array(priv.data)
 
     let data = mergeBytes(ownerIdBytes, privData)
@@ -441,7 +441,7 @@ export function syltFrame (values, options) {
 
   values.forEach(sylt => {
     let encoding = 0
-    const langBytes = encodeString(sylt.language, 'ascii')
+    const langBytes = encodeString(sylt.language)
     let descBytes = []
 
     switch (version) {
@@ -462,7 +462,7 @@ export function syltFrame (values, options) {
       if (line !== '') {
         const result = regex.exec(line)
         const time = parseInt(result[1].replace(/[^0-9]/g, ''))
-        const string = encodeString((result[2] || '') + '\n\0', 'ascii')
+        const string = encodeString((result[2] || '') + '\n\0')
         const timeBytes = new BufferView(4)
         timeBytes.setUint32(0, time)
         lyricsBytes = mergeBytes(lyricsBytes, string, timeBytes.getUint8(0, 4))

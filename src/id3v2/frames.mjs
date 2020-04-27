@@ -87,7 +87,7 @@ export const TALB = {
 export const TBPM = {
   parse: parsers.textFrame,
   validate: validators.textFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [3, 4]
 }
 
@@ -115,49 +115,49 @@ export const TCOP = {
 export const TDAT = {
   parse: parsers.textFrame,
   validate: validators.timeFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [3]
 }
 
 export const TDEN = {
   parse: parsers.textFrame,
   validate: validators.timeFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [4]
 }
 
 export const TDLY = {
   parse: parsers.textFrame,
   validate: validators.textFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [3]
 }
 
 export const TDOR = {
   parse: parsers.textFrame,
   validate: validators.timeFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [4]
 }
 
 export const TDRC = {
   parse: parsers.textFrame,
   validate: validators.timeFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [4]
 }
 
 export const TDRL = {
   parse: parsers.textFrame,
   validate: validators.timeFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [4]
 }
 
 export const TDTG = {
   parse: parsers.textFrame,
   validate: validators.timeFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [4]
 }
 
@@ -185,7 +185,7 @@ export const TFLT = {
 export const TIME = {
   parse: parsers.textFrame,
   validate: validators.timeFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [3]
 }
 
@@ -220,21 +220,21 @@ export const TIT3 = {
 export const TKEY = {
   parse: parsers.textFrame,
   validate: validators.tkeyFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [3, 4]
 }
 
 export const TLAN = {
   parse: parsers.textFrame,
   validate: validators.tlanFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [3, 4]
 }
 
 export const TLEN = {
   parse: parsers.textFrame,
   validate: validators.textFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [3, 4]
 }
 
@@ -290,7 +290,7 @@ export const TOPE = {
 export const TORY = {
   parse: parsers.textFrame,
   validate: validators.timeFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [3]
 }
 
@@ -381,7 +381,7 @@ export const TRSO = {
 export const TSIZ = {
   parse: parsers.textFrame,
   validate: validators.textFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [3]
 }
 
@@ -416,7 +416,7 @@ export const TSOT = {
 export const TSRC = {
   parse: parsers.textFrame,
   validate: validators.tsrcFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [3, 4]
 }
 
@@ -437,7 +437,7 @@ export const TSST = {
 export const TYER = {
   parse: parsers.textFrame,
   validate: validators.timeFrame,
-  write: writers.asciiFrame,
+  write: writers.win1251Frame,
   version: [3]
 }
 

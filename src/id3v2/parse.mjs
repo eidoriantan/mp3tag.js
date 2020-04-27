@@ -1,7 +1,7 @@
 
 import BufferView from '../viewer.mjs'
 
-const ENCODINGS = ['ascii', 'utf-16', 'utf-16be', 'utf-8']
+const ENCODINGS = ['windows1251', 'utf-16', 'utf-16be', 'utf-8']
 
 export function textFrame (buffer, version) {
   const view = new BufferView(buffer)
@@ -34,7 +34,7 @@ export function iplsFrame (buffer, version) {
 
 export function urlFrame (buffer, version) {
   const view = new BufferView(buffer)
-  return view.getCString(0, 'ascii').string
+  return view.getCString(0).string
 }
 
 export function txxxFrame (buffer, version) {
@@ -54,7 +54,7 @@ export function wxxxFrame (buffer, version) {
   const description = view.getCString(1, encoding)
   const urlOffset = description.length + 1
   const urlLength = view.byteLength - urlOffset
-  const url = view.getString(urlOffset, urlLength, 'ascii')
+  const url = view.getString(urlOffset, urlLength)
 
   return { description: description.string, url: url.string }
 }
@@ -68,7 +68,7 @@ export function langDescFrame (buffer, version) {
   const text = view.getString(textOffset, textLength, encoding)
 
   return {
-    language: view.getString(1, 3, 'ascii').string,
+    language: view.getString(1, 3).string,
     descriptor: descriptor.string,
     text: text.string
   }
@@ -77,7 +77,7 @@ export function langDescFrame (buffer, version) {
 export function apicFrame (buffer, version) {
   const view = new BufferView(buffer)
   const encoding = ENCODINGS[view.getUint8(0)]
-  const mime = view.getCString(1, 'ascii')
+  const mime = view.getCString(1)
   const type = view.getUint8(mime.length + 1)
   const desc = view.getCString(mime.length + 2, encoding)
   const dataOffset = mime.length + desc.length + 2
@@ -90,7 +90,7 @@ export function apicFrame (buffer, version) {
 export function geobFrame (buffer, version) {
   const view = new BufferView(buffer)
   const encoding = ENCODINGS[view.getUint8(0)]
-  const mime = view.getCString(1, 'ascii')
+  const mime = view.getCString(1)
   const fname = view.getCString(mime.length + 1, encoding)
   const desc = view.getCString(fname.length + mime.length + 1, encoding)
   const binOffset = mime.length + fname.length + desc.length + 1
@@ -107,7 +107,7 @@ export function geobFrame (buffer, version) {
 
 export function ufidFrame (buffer, version) {
   const view = new BufferView(buffer)
-  const ownerId = view.getCString(0, 'ascii')
+  const ownerId = view.getCString(0)
   const id = view.getUint8(ownerId.length, view.byteLength - ownerId.length)
 
   return { ownerId: ownerId.string, id }
@@ -118,7 +118,7 @@ export function userFrame (buffer, version) {
   const encoding = ENCODINGS[view.getUint8(0)]
 
   return {
-    language: view.getString(1, 3, 'ascii').string,
+    language: view.getString(1, 3).string,
     text: view.getString(4, view.byteLength - 4, encoding).string
   }
 }
@@ -126,9 +126,9 @@ export function userFrame (buffer, version) {
 export function owneFrame (buffer, version) {
   const view = new BufferView(buffer)
   const encoding = ENCODINGS[view.getUint8(0)]
-  const currencyCode = view.getString(1, 3, 'ascii')
-  const currency = view.getCString(4, 'ascii')
-  const date = view.getString(currency.length + 4, 8, 'ascii')
+  const currencyCode = view.getString(1, 3)
+  const currency = view.getCString(4)
+  const date = view.getString(currency.length + 4, 8)
   const sellerOffset = currency.length + date.length + 4
   const sellerLength = view.byteLength - sellerOffset
   const seller = view.getString(sellerOffset, sellerLength, encoding)
@@ -143,7 +143,7 @@ export function owneFrame (buffer, version) {
 
 export function privFrame (buffer, version) {
   const view = new BufferView(buffer)
-  const ownerId = view.getCString(0, 'ascii')
+  const ownerId = view.getCString(0)
   const data = view.getUint8(ownerId.length, view.byteLength - ownerId.length)
 
   return { ownerId: ownerId.string, data }
@@ -165,7 +165,7 @@ export function seekFrame (buffer, version) {
 export function syltFrame (buffer, version) {
   const view = new BufferView(buffer)
   const encoding = ENCODINGS[view.getUint8(0)]
-  const language = view.getString(1, 3, 'ascii').string
+  const language = view.getString(1, 3).string
   const format = view.getUint8(4)
   const type = view.getUint8(5)
   const descriptor = view.getCString(6, encoding)
@@ -176,7 +176,7 @@ export function syltFrame (buffer, version) {
 
   for (let i = 0; i < lyrics.length; i += 4) {
     const lyricsView = new BufferView(lyrics)
-    const line = lyricsView.getCString(i, 'ascii')
+    const line = lyricsView.getCString(i)
     const time = lyricsView.getUint32(i + line.length)
     const minutes = Math.floor(time / 60000).toString()
     let seconds = Math.floor(time % 60000 / 1000).toString()

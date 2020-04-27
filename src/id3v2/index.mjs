@@ -47,7 +47,7 @@ export function hasID3v2 (buffer) {
   if (!isBuffer(buffer)) throw new TypeError('buffer is not ArrayBuffer/Buffer')
 
   const view = new BufferView(buffer)
-  return view.getString(0, 3, 'ascii').string === 'ID3'
+  return view.getString(0, 3).string === 'ID3'
 }
 
 export function decode (buffer, tagOffset = 0) {
