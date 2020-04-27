@@ -14,7 +14,7 @@ make sure that you are following this guideline:
  * When committing, the commit message should follow the
    [Convential Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.4/)
 
-Also, take look at the
+Also, take a look at the
 [repository's board](https://github.com/eidoriantan/mp3tag.js/projects) to know
 about the project's future plans, things we should do and don't.
 
