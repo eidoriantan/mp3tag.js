@@ -60,9 +60,7 @@
   {% if page.toast == true %}
   <template id="toast-template">
     <div class="toast c-pointer" role="alert" aria-live="assertive" aria-atomic="true">
-      <header class="toast-header">
-        <i class="fas mr-2" data-temp="icon" aria-hidden="true"></i>
-        <span data-temp="title"></span>
+      <header class="toast-header" data-temp="title">
       </header>
 
       <div class="toast-body" data-temp="body">
