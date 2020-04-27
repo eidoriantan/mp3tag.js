@@ -1,6 +1,6 @@
 
 title: mp3tag.js
-tagline: MP3 tagging written in pure JavaScript
+tagline: MP3 tagging library written in pure JavaScript
 description: >-
   mp3tag.js is an open sourced JavaScript library used to edit the metadata of
   audio files.
