@@ -35,7 +35,7 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
-    "lint": "eslint -c .eslintrc.json **/*.mjs --quiet --max-warnings 2",
+    "lint": "eslint -c .eslintrc.json \"**/*.mjs\" --quiet --max-warnings 2",
     "test": "npm run lint && mocha --require esm --colors"
   },
   "dependencies": {},
