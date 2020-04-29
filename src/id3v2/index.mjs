@@ -11,33 +11,16 @@ import {
   setBit, decodeSynch, encodeSynch, synch, mergeBytes
 } from '../utils/bytes.mjs'
 
-function filter (tags, version) {
-  tags.TIT2 = tags.TIT2 || tags.title || undefined
-  tags.TPE1 = tags.TPE1 || tags.artist || undefined
-  tags.TALB = tags.TALB || tags.album || undefined
-
-  if (version === 3) {
-    tags.TYER = tags.TYER || tags.year || undefined
-  } else if (version === 4) {
-    tags.TDRC = tags.TDRC || tags.year || undefined
-  }
-
-  tags.COMM = tags.COMM || (tags.comment !== '' ? [{
-    language: 'eng',
-    descriptor: '',
-    text: tags.comment
-  }] : undefined)
-
-  tags.TRCK = tags.TRCK || tags.track || undefined
-  tags.TCON = tags.TCON || tags.genre || undefined
-
-  const ids = Object.keys(frames)
-  const tagIds = Object.keys(tags).filter(key => ids.includes(key))
+function filter (tags) {
   const filtered = {}
+  const id = /^([A-Z0-9]{4})$/
 
-  if (tagIds.length === 0) return new ArrayBuffer(0)
-  tagIds.forEach(id => {
-    if (tags[id] !== undefined) filtered[id] = tags[id]
+  Object.entries(tags).forEach(element => {
+    const name = element[0]
+    const value = element[1]
+    if (name.match(id) && value !== undefined && value !== '') {
+      filtered[name] = value
+    }
   })
 
   return filtered
@@ -104,14 +87,6 @@ export function decode (buffer, tagOffset = 0) {
     } else pushTag({ id: frame.id, value: frame.value })
   }
 
-  tags.title = tags.TIT2
-  tags.artist = tags.TPE1
-  tags.album = tags.TALB
-  tags.year = version === 3 ? tags.TYER : (tags.TDRC && tags.TDRC.substr(0, 4))
-  tags.comment = tags.COMM && tags.COMM[0].text
-  tags.track = tags.TRCK && tags.TRCK.split('/')[0]
-  tags.genre = tags.TCON
-
   return tags
 }
 
@@ -164,8 +139,8 @@ export function validate (tags, strict, options) {
   const { version } = options
   if (version !== 3 && version !== 4) throw new TagError(200, 'Unknown version')
 
-  const filtered = filter(tags, version)
-  for (const id in filtered) {
+  tags = filter(tags)
+  for (const id in tags) {
     if (!Object.keys(frames).includes(id)) continue
 
     const frameSpec = frames[id]
@@ -185,16 +160,16 @@ export function validate (tags, strict, options) {
 export function encode (tags, options) {
   const { version, padding, unsynch } = options
 
-  const filtered = filter(tags, version)
   const headerBytes = [0x49, 0x44, 0x33, version, 0]
   let flagsByte = 0
   const sizeView = new BufferView(4)
   const paddingBytes = new Uint8Array(padding)
   const framesBytes = []
 
-  for (const id in filtered) {
+  tags = filter(tags)
+  for (const id in tags) {
     const frameSpec = frames[id]
-    const bytes = frameSpec.write(filtered[id], { id, version, unsynch })
+    const bytes = frameSpec.write(tags[id], { id, version, unsynch })
     bytes.forEach(byte => framesBytes.push(byte))
   }
 
