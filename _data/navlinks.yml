@@ -7,6 +7,7 @@
 - name: Documentations
   directories:
     - /docs/
+    - /docs/frames.html
     - /docs/index.html
     - /docs/mp3tag.html
     - /docs/usage.html
