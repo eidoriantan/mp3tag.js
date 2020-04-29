@@ -3,7 +3,7 @@ const importedFiles = []
 let currentIndex = -1
 let blankImage = ''
 
-let imageBuffer = null
+let imageBytes = null
 let imageType = ''
 let mp3tag = null
 
@@ -44,13 +44,15 @@ $(document).ready(function () {
 
   $('#list-wrapper').click(resetForm)
 
-  $('#cover').on('change', function () {
-    const file = $(this).prop('files')[0]
-    loadFile(file, function (buffer) {
-      const uint8array = new Uint8Array(buffer)
-      const url = imageURL(uint8array, file.type)
-      $('#cover-preview').attr('src', url)
-    })
+  $('#cover').on('change', async function () {
+    const files = $(this).prop('files')
+    if (files.length === 0) return false
+
+    const file = files[0]
+    const buffer = await loadFile(file)
+    imageBytes = new Uint8Array(buffer)
+    const url = imageURL(imageBytes, file.type)
+    $('#cover-preview').attr('src', url)
   })
 
   $('#month').on('change', function () {
@@ -134,8 +136,9 @@ async function audioView (event) {
     displayDetails()
 
     toast('Read Successfully', 'Details was displayed', TOAST_SUCCESS)
-  } catch (e) {
-    toast('Reading Error', e.message, TOAST_DANGER)
+  } catch (error) {
+    toast('Reading Error', error.message, TOAST_DANGER)
+    throw error
   }
 }
 
@@ -149,9 +152,9 @@ function displayDetails () {
   $('#genre').val(tags.genre)
 
   if (tags.APIC) {
-    imageBuffer = tags.APIC[0].data
+    imageBytes = tags.APIC[0].data
     imageType = tags.APIC[0].format
-    $('#cover-preview').attr({ src: imageURL(imageBuffer, imageType) })
+    $('#cover-preview').attr({ src: imageURL(imageBytes, imageType) })
   }
 
   if (tags.TLAN) $('#language').val(tags.TLAN)
@@ -187,9 +190,9 @@ async function writeData () {
     writeDetails()
     mp3tag.save({ strict: true })
     if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
-  } catch (e) {
-    throw e
-    toast('Writing Error', e.message, TOAST_DANGER)
+  } catch (error) {
+    toast('Writing Error', error.message, TOAST_DANGER)
+    throw error
   }
 
   const file = importedFiles[currentIndex]
@@ -200,38 +203,23 @@ async function writeData () {
 }
 
 async function writeDetails () {
-  delete mp3tag.tags.title
-  delete mp3tag.tags.artist
-  delete mp3tag.tags.album
-  delete mp3tag.tags.year
-  delete mp3tag.tags.comment
-  delete mp3tag.tags.track
-  delete mp3tag.tags.genre
-
-  mp3tag.tags.TIT2 = $('#title').val()
-  mp3tag.tags.TPE1 = $('#artist').val()
-  mp3tag.tags.TALB = $('#album').val()
-  mp3tag.tags.TYER = $('#year').val()
+  mp3tag.tags.title = $('#title').val()
+  mp3tag.tags.artist = $('#artist').val()
+  mp3tag.tags.album = $('#album').val()
+  mp3tag.tags.year = $('#year').val()
   mp3tag.tags.TDAT = $('#day').val() + $('#month').val()
   mp3tag.tags.TRCK = $('#track').val()
-  mp3tag.tags.TCON = $('#genre').val()
+  mp3tag.tags.genre = $('#genre').val()
   mp3tag.tags.TSRC = $('#isrc').val()
   mp3tag.tags.TLAN = $('#language').val()
   mp3tag.tags.TCOM = $('#composer').val()
 
-  const cover = $('#cover').prop('files')
-  if (cover.length > 0) {
-    const imageFile = cover[0]
-    imageBuffer = await loadFile(imageFile)
-    imageType = imageFile.type
-  }
-
-  if (imageBuffer !== null) {
+  if (imageBytes !== null) {
     mp3tag.tags.APIC = [{
       format: imageType,
       type: 3,
       description: '',
-      data: imageBuffer
+      data: imageBytes
     }]
   }
 
@@ -249,7 +237,7 @@ async function writeDetails () {
 function resetForm () {
   currentIndex = -1
   mp3tag = null
-  imageBuffer = null
+  imageBytes = null
 
   $('#edit-form').trigger('reset')
   $('#edit-form').find('input, textarea, select, button').attr('disabled', true)
