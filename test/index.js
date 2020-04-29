@@ -1,9 +1,9 @@
 
-import MP3Tag from '../src/mp3tag.mjs'
-import path from 'path'
-import assert from 'assert'
+const path = require('path')
+const assert = require('assert')
 
-import { bytes } from './globals.js'
+const MP3Tag = require('../dist/mp3tag.js')
+const { bytes } = require('./globals.js')
 
 describe('MP3Tag', function () {
   it('Get audio', function () {
@@ -19,7 +19,7 @@ describe('MP3Tag', function () {
   })
 
   after(function () {
-    const extendTests = ['id3v1/index.js', 'id3v2/index.js', 'id3.js']
+    const extendTests = ['id3v1/index.js', 'id3v2/index.js', 'id3/index.js']
     const tests = this.test.parent.tests
     let failed = false
 

@@ -1,8 +1,8 @@
 
-import MP3Tag from '../../src/mp3tag.mjs'
-import assert from 'assert'
+const assert = require('assert')
 
-import { bytes } from '../globals.js'
+const MP3Tag = require('../../dist/mp3tag.js')
+const { bytes } = require('../globals.js')
 
 describe('ID3v2', function () {
   beforeEach(function () {

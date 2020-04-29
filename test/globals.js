@@ -1,5 +1,5 @@
 
-export const bytes = new Uint8Array([
+exports.bytes = new Uint8Array([
   73, 68, 51, 3, 0, 0, 0, 0, 0, 25,
   84, 73, 84, 50, 0, 0, 0, 15, 0, 0,
   1, 255, 254, 116, 0, 105, 0, 116, 0, 108, 0, 101, 0, 0, 0,
