@@ -28,7 +28,7 @@ function toast (title, message, type = TOAST_NONE) {
 function imageURL (bytes, format) {
   let encoded = ''
   bytes.forEach(function (byte) {
-    encoded += String.fromCharCode(buffer[i])
+    encoded += String.fromCharCode(byte)
   })
 
   return `data:${format};base64,${btoa(encoded)}`
