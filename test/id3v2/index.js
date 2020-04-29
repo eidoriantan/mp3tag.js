@@ -8,6 +8,7 @@ describe('ID3v2', function () {
   beforeEach(function () {
     this.mp3tag = new MP3Tag(bytes.buffer)
     this.mp3tag.read({ id3v1: false })
+    if (this.mp3tag.errorCode > -1) throw this.mp3tag.error
   })
 
   it('Read data', function () {
@@ -31,10 +32,7 @@ describe('ID3v2', function () {
 
     assert.throws(() => {
       if (this.mp3tag.errorCode > -1) throw new Error(this.mp3tag.error)
-    }, {
-      name: 'Error',
-      message: this.mp3tag.error
-    })
+    }, { name: 'Error', message: this.mp3tag.error })
   })
 
   it('Transform data', function () {
@@ -44,7 +42,10 @@ describe('ID3v2', function () {
       id3v1: { include: false },
       id3v2: { unsynch: false, version: 4 }
     })
+    if (this.mp3tag.errorCode > -1) throw this.mp3tag.error
+
     this.mp3tag.read()
+    if (this.mp3tag.errorCode > -1) throw this.mp3tag.error
 
     assert.deepStrictEqual(this.mp3tag.tags.v2Version, [4, 0])
     assert.deepStrictEqual(this.mp3tag.tags.title, 'title')
@@ -59,18 +60,21 @@ describe('ID3v2', function () {
   })
 
   it('Write data', function () {
-    this.mp3tag.tags.TIT2 = 'NEW TITLE'
-    this.mp3tag.tags.title = 'IGNORED'
+    this.mp3tag.tags.title = 'NEW TITLE'
+    this.mp3tag.tags.artist = 'NEW ARTIST'
     this.mp3tag.save({
       strict: true,
       id3v1: { include: false },
       id3v2: { unsynch: false }
     })
+    if (this.mp3tag.errorCode > -1) throw this.mp3tag.error
+
     this.mp3tag.read()
+    if (this.mp3tag.errorCode > -1) throw this.mp3tag.error
 
     assert.deepStrictEqual(this.mp3tag.tags.v2Version, [3, 0])
     assert.deepStrictEqual(this.mp3tag.tags.title, 'NEW TITLE')
-    assert.deepStrictEqual(this.mp3tag.tags.artist, '')
+    assert.deepStrictEqual(this.mp3tag.tags.artist, 'NEW ARTIST')
     assert.deepStrictEqual(this.mp3tag.tags.album, '')
     assert.deepStrictEqual(this.mp3tag.tags.year, '')
     assert.deepStrictEqual(this.mp3tag.tags.comment, '')
@@ -88,14 +92,15 @@ describe('ID3v2', function () {
     }
 
     this.mp3tag.tags.title = ''
-    this.mp3tag.tags.TIT2 = ''
     this.mp3tag.tags.GEOB = [geob]
     this.mp3tag.save({
       strict: true,
       id3v1: { include: false },
       id3v2: { padding: 0 }
     })
+    if (this.mp3tag.errorCode > -1) throw this.mp3tag.error
     this.mp3tag.read()
+    if (this.mp3tag.errorCode > -1) throw this.mp3tag.error
 
     assert.deepStrictEqual(this.mp3tag.tags.v2Version, [3, 0])
     assert.deepStrictEqual(this.mp3tag.tags.title, '')
@@ -106,19 +111,5 @@ describe('ID3v2', function () {
     assert.deepStrictEqual(this.mp3tag.tags.track, '')
     assert.deepStrictEqual(this.mp3tag.tags.genre, '')
     assert.deepStrictEqual(this.mp3tag.tags.GEOB, [geob])
-
-    const actual = new Uint8Array(this.mp3tag.buffer)
-    const expected = new Uint8Array([
-      73, 68, 51, 3, 0, 128, 0, 0, 0, 78,
-      71, 69, 79, 66, 0, 0, 0, 68, 0, 0,
-      1, 97, 112, 112, 108, 105, 99, 97, 116, 105, 111, 110, 47, 111, 99, 116,
-      101, 116, 45, 115, 116, 114, 101, 97, 109, 0,
-      255, 0, 254, 102, 0, 105, 0, 108, 0, 101, 0, 46, 0, 98, 0, 105, 0, 110, 0,
-      0, 0, 255, 0, 254, 84, 0, 69, 0, 83, 0, 84, 0, 0, 0,
-      255, 0, 254, 1, 2, 255, 0, 0,
-      255, 251, 224, 0, 0, 0, 0, 0, 170, 170, 170, 170, 170, 170
-    ])
-
-    assert.deepStrictEqual(actual, expected)
   })
 })
