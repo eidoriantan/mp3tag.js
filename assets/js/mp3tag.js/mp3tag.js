@@ -6683,7 +6683,10 @@
 	  Object.entries(tags).forEach(function (element) {
 	    var name = element[0];
 	    var value = element[1];
-	    if (name.match(id) && value !== undefined) filtered[name] = value;
+
+	    if (name.match(id) && value !== undefined && value !== '') {
+	      filtered[name] = value;
+	    }
 	  });
 	  return filtered;
 	}
@@ -6937,6 +6940,29 @@
 	  return transformed;
 	}
 
+	function mergeTags(tags) {
+	  tags = mergeObjects({}, tags);
+	  tags.TIT2 = tags.TIT2 || tags.title;
+	  tags.TPE1 = tags.TPE1 || tags.artist;
+	  tags.TALB = tags.TALB || tags.album;
+	  tags.TYER = tags.TYER || tags.TDRC && tags.TDRC.substr(0, 4) || tags.year;
+	  tags.COMM = tags.COMM || tags.comment && [{
+	    language: 'eng',
+	    descriptor: '',
+	    text: tags.comment
+	  }];
+	  tags.TRCK = tags.TRCK || tags.track;
+	  tags.TCON = tags.TCON || tags.genre;
+	  tags.title = tags.TIT2 || '';
+	  tags.artist = tags.TPE1 || '';
+	  tags.album = tags.TALB || '';
+	  tags.year = tags.TYER || '';
+	  tags.comment = tags.COMM && tags.COMM[0].text || '';
+	  tags.track = tags.TRCK && tags.TRCK.split('/')[0] || '';
+	  tags.genre = tags.TCON || '';
+	  return tags;
+	}
+
 	var MP3Tag = /*#__PURE__*/function () {
 	  function MP3Tag(buffer) {
 	    var verbose = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -6948,7 +6974,7 @@
 	    }
 
 	    this.name = 'MP3Tag';
-	    this.version = '2.0.3';
+	    this.version = '2.0.5';
 	    this.verbose = verbose;
 	    this.error = '';
 	    this.errorCode = -1;
@@ -6991,24 +7017,7 @@
 	      }
 
 	      if (this.errorCode < 0) {
-	        tags.TIT2 = tags.TIT2 || tags.title;
-	        tags.TPE1 = tags.TPE1 || tags.artist;
-	        tags.TALB = tags.TALB || tags.album;
-	        tags.TYER = tags.TYER || this.TDRC && this.TDRC.substr(0, 4) || tags.year;
-	        tags.COMM = tags.COMM || tags.comment && [{
-	          language: 'eng',
-	          descriptor: '',
-	          text: tags.comment
-	        }];
-	        tags.TRCK = tags.TRCK || tags.track;
-	        tags.TCON = tags.TCON || tags.genre;
-	        tags.title = tags.TIT2 || '';
-	        tags.artist = tags.TPE1 || '';
-	        tags.album = tags.TALB || '';
-	        tags.year = tags.TYER || '';
-	        tags.comment = tags.COMM && tags.COMM[0].text || '';
-	        tags.track = tags.TRCK && tags.TRCK.split('/')[0] || '';
-	        tags.genre = tags.TCON || '';
+	        tags = mergeTags(tags);
 	        Object.defineProperties(tags, {
 	          title: {
 	            get: function get() {
@@ -7084,6 +7093,7 @@
 	      this.error = '';
 	      this.errorCode = -1;
 	      var defaultVersion = this.tags.v2Version ? this.tags.v2Version[0] : 4;
+	      var tags = mergeTags(this.tags);
 	      options = overwriteDefault(options, {
 	        strict: false,
 	        id3v1: {
@@ -7101,21 +7111,23 @@
 	      try {
 	        if (options.id3v1.include) {
 	          this.log('Validating ID3v1...');
-	          validate(this.tags, options.strict);
+	          validate(tags, options.strict);
 	          this.log('Writing ID3v1...');
-	          var tagBytes = new Uint8Array(encode(this.tags));
+	          var encoded = encode(tags);
+	          var tagBytes = new Uint8Array(encoded);
 	          audio = mergeBytes(audio, tagBytes);
 	        }
 
 	        if (options.id3v2.include) {
 	          this.log('Transforming ID3v2...');
-	          this.tags = transform(this.tags, options.id3v2.version);
+	          tags = transform(tags, options.id3v2.version);
 	          this.log('Validating ID3v2...');
-	          validate$1(this.tags, options.strict, options.id3v2);
+	          validate$1(tags, options.strict, options.id3v2);
 	          this.log('Writing ID3v2...');
-	          var encoded = encode$1(this.tags, options.id3v2);
 
-	          var _tagBytes = new Uint8Array(encoded);
+	          var _encoded = encode$1(tags, options.id3v2);
+
+	          var _tagBytes = new Uint8Array(_encoded);
 
 	          audio = mergeBytes(_tagBytes, audio);
 	        }
