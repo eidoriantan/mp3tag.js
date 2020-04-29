@@ -60,7 +60,7 @@ keywords: mp3, id3, audio, tag, edit, write
     <h1 class="display-4 mb-3">Author and Contributors</h1>
     <div class="d-flex flex-row flex-wrap justify-content-center"></div>
       {% for author in site.data.authors %} {% assign name = author[0] %}
-      <a href="{{ name }}">
+      <a href="https://github.com/{{ name }}">
         <img src="{{ author[1].picture }}" alt="{{ name }} image" title="{{ name }}" class="rounded-circle mx-3">
       </a>
       {% endfor %}
