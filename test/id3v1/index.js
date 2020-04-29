@@ -11,17 +11,13 @@ describe('ID3v1', function () {
   })
 
   it('Read data', function () {
-    assert.deepStrictEqual(this.mp3tag.tags, {
-      v1Version: 1,
-      v1Size: 128,
-      title: 'TITLE',
-      artist: 'ARTIST',
-      album: 'ALBUM',
-      year: '2020',
-      comment: 'COMMENT',
-      track: '1',
-      genre: 'Other'
-    })
+    assert.deepStrictEqual(this.mp3tag.tags.title, 'TITLE')
+    assert.deepStrictEqual(this.mp3tag.tags.artist, 'ARTIST')
+    assert.deepStrictEqual(this.mp3tag.tags.album, 'ALBUM')
+    assert.deepStrictEqual(this.mp3tag.tags.year, '2020')
+    assert.deepStrictEqual(this.mp3tag.tags.comment, 'COMMENT')
+    assert.deepStrictEqual(this.mp3tag.tags.track, '1')
+    assert.deepStrictEqual(this.mp3tag.tags.genre, 'Other')
   })
 
   it('Validate data', function () {
@@ -47,16 +43,12 @@ describe('ID3v1', function () {
     })
     this.mp3tag.read()
 
-    assert.deepStrictEqual(this.mp3tag.tags, {
-      v1Version: 1,
-      v1Size: 128,
-      title: 'NEW TITLE',
-      artist: 'ARTIST',
-      album: 'ALBUM',
-      year: '2020',
-      comment: 'COMMENT',
-      track: '1',
-      genre: 'Other'
-    })
+    assert.deepStrictEqual(this.mp3tag.tags.title, 'NEW TITLE')
+    assert.deepStrictEqual(this.mp3tag.tags.artist, 'ARTIST')
+    assert.deepStrictEqual(this.mp3tag.tags.album, 'ALBUM')
+    assert.deepStrictEqual(this.mp3tag.tags.year, '2020')
+    assert.deepStrictEqual(this.mp3tag.tags.comment, 'COMMENT')
+    assert.deepStrictEqual(this.mp3tag.tags.track, '1')
+    assert.deepStrictEqual(this.mp3tag.tags.genre, 'Other')
   })
 })
