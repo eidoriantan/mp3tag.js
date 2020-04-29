@@ -23,14 +23,16 @@ scripts:
           const reader = new FileReader()
           reader.onload = function () {
             const buffer = this.result
+
             const mp3tag = new MP3Tag(buffer)
             mp3tag.read()
 
+            // Handle error if there's any
             if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
 
             console.log(mp3tag.tags)
-            mp3tag.tags.TIT2 = 'NEW TITLE'
-            mp3tag.tags.TPE1 = 'NEW ARTIST'
+            mp3tag.tags.title = 'NEW TITLE'
+            mp3tag.tags.artist = 'NEW ARTIST'
             mp3tag.save({ strict: true })
 
             if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
@@ -53,12 +55,11 @@ scripts:
         const buffer = fs.readFileSync('/path/to/mp3')
         const mp3tag = new MP3Tag(buffer)
         mp3tag.read()
-
         if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
 
         console.log(mp3tag.tags)
-        mp3tag.tags.TIT2 = 'NEW TITLE'
-        mp3tag.tags.TPE1 = 'NEW ARTIST'
+        mp3tag.tags.title = 'NEW TITLE'
+        mp3tag.tags.artist = 'NEW ARTIST'
         mp3tag.save({ strict: true })
 
         if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
