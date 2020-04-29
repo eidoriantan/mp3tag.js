@@ -41,7 +41,7 @@ export default class MP3Tag {
     }
 
     this.name = 'MP3Tag'
-    this.version = '2.0.3'
+    this.version = '2.0.4'
     this.verbose = verbose
     this.error = ''
     this.errorCode = -1

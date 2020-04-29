@@ -1,6 +1,6 @@
 {
   "name": "mp3tag.js",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "MP3 tagging library written in pure JavaScript",
   "keywords": [
     "node",
@@ -54,7 +54,7 @@
     "esm": "^3.2.25",
     "mocha": "^7.1.2",
     "regenerator-runtime": "^0.13.5",
-    "rollup": "^2.7.2",
+    "rollup": "^2.7.3",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-terser": "^5.3.0",
     "standard": "^14.3.3"
