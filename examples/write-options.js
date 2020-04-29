@@ -12,29 +12,12 @@ const mp3tag = new MP3Tag(buffer, true)
 mp3tag.read()
 
 // Write the tags you wanted to write
-
-/**
- *  Please note that if `mp3tag.tags.TIT2` is set or not blank,
- *  mp3tag.tags.title will be overwritten by that. So it is recommended to
- *  set the `mp3tag.tags.TIT2` instead. This also goes the same for:
- *
- *    'artist' --> 'TPE1'
- *    'album' --> 'TALB'
- *    'year' --> 'TYER'
- *    'comment' --> 'COMM'
- *    'track' --> 'TRCK'
- *    'genre' --> 'TCON'
- */
-mp3tag.tags.TIT2 = 'NEW TITLE\r\n' // title and a newline which is invalid
-mp3tag.tags.TPE1 = 'NEW ARTIST' // artist
-mp3tag.tags.TALB = 'NEW ALBUM' // album
-mp3tag.tags.COMM = [{
-  language: 'eng',
-  descriptor: '',
-  text: 'Comment'
-}]
-mp3tag.tags.TRCK = '1/2'
-mp3tag.tags.TCON = 'Pop'
+mp3tag.tags.title = 'NEW TITLE\r\n' // title and a newline which is invalid
+mp3tag.tags.artist = 'NEW ARTIST' // artist
+mp3tag.tags.album = 'NEW ALBUM' // album
+mp3tag.tags.comment = 'COMMENT'
+mp3tag.tags.track = '1'
+mp3tag.tags.genre = 'Pop'
 
 /**
  *  Save the tags with strict mode enabled and no ID3v1.
