@@ -11,23 +11,15 @@ describe('ID3v2', function () {
   })
 
   it('Read data', function () {
-    assert.deepStrictEqual(this.mp3tag.tags, {
-      title: 'title',
-      artist: '',
-      album: '',
-      year: '',
-      comment: '',
-      track: '',
-      genre: '',
-      v2Version: [3, 0],
-      v2Size: 25,
-      v2Flags: {
-        unsynchronisation: false,
-        extendedHeader: false,
-        experimentalIndicator: false
-      },
-      TIT2: 'title'
-    })
+    assert.deepStrictEqual(this.mp3tag.tags.v2Version, [3, 0])
+    assert.deepStrictEqual(this.mp3tag.tags.title, 'title')
+    assert.deepStrictEqual(this.mp3tag.tags.artist, '')
+    assert.deepStrictEqual(this.mp3tag.tags.album, '')
+    assert.deepStrictEqual(this.mp3tag.tags.year, '')
+    assert.deepStrictEqual(this.mp3tag.tags.comment, '')
+    assert.deepStrictEqual(this.mp3tag.tags.track, '')
+    assert.deepStrictEqual(this.mp3tag.tags.genre, '')
+    assert.deepStrictEqual(this.mp3tag.tags.TIT2, 'title')
   })
 
   it('Validate data', function () {
@@ -54,25 +46,16 @@ describe('ID3v2', function () {
     })
     this.mp3tag.read()
 
-    assert.deepStrictEqual(this.mp3tag.tags, {
-      title: 'title',
-      artist: '',
-      album: '',
-      year: '2020',
-      comment: '',
-      track: '',
-      genre: '',
-      v2Version: [4, 0],
-      v2Size: 33,
-      v2Flags: {
-        unsynchronisation: false,
-        extendedHeader: false,
-        footerPresent: false,
-        experimentalIndicator: false
-      },
-      TIT2: 'title',
-      TDRC: '2020'
-    })
+    assert.deepStrictEqual(this.mp3tag.tags.v2Version, [4, 0])
+    assert.deepStrictEqual(this.mp3tag.tags.title, 'title')
+    assert.deepStrictEqual(this.mp3tag.tags.artist, '')
+    assert.deepStrictEqual(this.mp3tag.tags.album, '')
+    assert.deepStrictEqual(this.mp3tag.tags.year, '2020')
+    assert.deepStrictEqual(this.mp3tag.tags.comment, '')
+    assert.deepStrictEqual(this.mp3tag.tags.track, '')
+    assert.deepStrictEqual(this.mp3tag.tags.genre, '')
+    assert.deepStrictEqual(this.mp3tag.tags.TIT2, 'title')
+    assert.deepStrictEqual(this.mp3tag.tags.TDRC, '2020')
   })
 
   it('Write data', function () {
@@ -85,23 +68,15 @@ describe('ID3v2', function () {
     })
     this.mp3tag.read()
 
-    assert.deepStrictEqual(this.mp3tag.tags, {
-      title: 'NEW TITLE',
-      artist: '',
-      album: '',
-      year: '',
-      comment: '',
-      track: '',
-      genre: '',
-      v2Version: [3, 0],
-      v2Size: 33,
-      v2Flags: {
-        unsynchronisation: false,
-        extendedHeader: false,
-        experimentalIndicator: false
-      },
-      TIT2: 'NEW TITLE'
-    })
+    assert.deepStrictEqual(this.mp3tag.tags.v2Version, [3, 0])
+    assert.deepStrictEqual(this.mp3tag.tags.title, 'NEW TITLE')
+    assert.deepStrictEqual(this.mp3tag.tags.artist, '')
+    assert.deepStrictEqual(this.mp3tag.tags.album, '')
+    assert.deepStrictEqual(this.mp3tag.tags.year, '')
+    assert.deepStrictEqual(this.mp3tag.tags.comment, '')
+    assert.deepStrictEqual(this.mp3tag.tags.track, '')
+    assert.deepStrictEqual(this.mp3tag.tags.genre, '')
+    assert.deepStrictEqual(this.mp3tag.tags.TIT2, 'NEW TITLE')
   })
 
   it('Write data (unsynched)', function () {
@@ -122,23 +97,15 @@ describe('ID3v2', function () {
     })
     this.mp3tag.read()
 
-    assert.deepStrictEqual(this.mp3tag.tags, {
-      title: '',
-      artist: '',
-      album: '',
-      year: '',
-      comment: '',
-      track: '',
-      genre: '',
-      v2Version: [3, 0],
-      v2Size: 78,
-      v2Flags: {
-        unsynchronisation: true,
-        extendedHeader: false,
-        experimentalIndicator: false
-      },
-      GEOB: [geob]
-    })
+    assert.deepStrictEqual(this.mp3tag.tags.v2Version, [3, 0])
+    assert.deepStrictEqual(this.mp3tag.tags.title, '')
+    assert.deepStrictEqual(this.mp3tag.tags.artist, '')
+    assert.deepStrictEqual(this.mp3tag.tags.album, '')
+    assert.deepStrictEqual(this.mp3tag.tags.year, '')
+    assert.deepStrictEqual(this.mp3tag.tags.comment, '')
+    assert.deepStrictEqual(this.mp3tag.tags.track, '')
+    assert.deepStrictEqual(this.mp3tag.tags.genre, '')
+    assert.deepStrictEqual(this.mp3tag.tags.GEOB, [geob])
 
     const actual = new Uint8Array(this.mp3tag.buffer)
     const expected = new Uint8Array([
