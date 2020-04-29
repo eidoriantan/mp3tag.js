@@ -10,6 +10,7 @@ import { overwriteDefault, mergeObjects } from './utils/objects.mjs'
 import { isBuffer } from './utils/types.mjs'
 
 function mergeTags (tags) {
+  tags = mergeObjects({}, tags)
   tags.TIT2 = tags.TIT2 || tags.title
   tags.TPE1 = tags.TPE1 || tags.artist
   tags.TALB = tags.TALB || tags.album
