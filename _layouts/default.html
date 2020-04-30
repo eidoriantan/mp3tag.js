@@ -7,23 +7,23 @@
   <meta name="theme-color" content="{{ site.color }}">
   <meta name="msapplication-TileColor" content="{{ site.color }}">
 
-  <link href="{{ '/LICENSE' | absolute_url }}" rel="license">
-  <link href="{{ '/site.webmanifest' | absolute_url }}" rel="manifest">
-  <link href="{{ '/assets/apple-touch-icon.png' | absolute_url }}" rel="apple-touch-icon" sizes="180x180">
-  <link href="{{ '/assets/favicon-32x32.png' | absolute_url }}" rel="icon" type="image/png" sizes="32x32">
-  <link href="{{ '/assets/favicon-16x16.png' | absolute_url }}" rel="icon" type="image/png" sizes="16x16">
-  <link href="{{ '/assets/safari-pinned-tab.svg' | absolute_url }}" rel="mask-icon" color="{{ site.color }}">
-  <link href="{{ '/assets/css/default.css' | absolute_url }}" rel="stylesheet">
+  <link href="{{ '/LICENSE' | relative_url }}" rel="license">
+  <link href="{{ '/site.webmanifest' | relative_url }}" rel="manifest">
+  <link href="{{ '/assets/apple-touch-icon.png' | relative_url }}" rel="apple-touch-icon" sizes="180x180">
+  <link href="{{ '/assets/favicon-32x32.png' | relative_url }}" rel="icon" type="image/png" sizes="32x32">
+  <link href="{{ '/assets/favicon-16x16.png' | relative_url }}" rel="icon" type="image/png" sizes="16x16">
+  <link href="{{ '/assets/safari-pinned-tab.svg' | relative_url }}" rel="mask-icon" color="{{ site.color }}">
+  <link href="{{ '/assets/css/default.css' | relative_url }}" rel="stylesheet">
 
   {% for stylesheet in page.stylesheets %}
-  <link href="{{ stylesheet | absolute_url }}" rel="stylesheet">
+  <link href="{{ stylesheet | relative_url }}" rel="stylesheet">
   {% endfor %}
 
-  <script src="{{ '/assets/js/jquery/jquery.min.js' | absolute_url }}"></script>
-  <script src="{{ '/assets/js/bootstrap/bootstrap.min.js' | absolute_url }}"></script>
-  <script src="{{ '/assets/js/default.js' | absolute_url }}"></script>
+  <script src="{{ '/assets/js/jquery/jquery.min.js' | relative_url }}"></script>
+  <script src="{{ '/assets/js/bootstrap/bootstrap.min.js' | relative_url }}"></script>
+  <script src="{{ '/assets/js/default.js' | relative_url }}"></script>
   {% for script in page.scripts %}
-  <script src="{{ script | absolute_url }}"></script>
+  <script src="{{ script | relative_url }}"></script>
   {% endfor %}
 
   {% seo title=false %}
@@ -42,7 +42,7 @@
 <body>
   <header class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
     <a href="{{ site.github.url }}" class="navbar-brand">
-      <img src="{{ site.logo | absolute_url }}" class="d-inline-block align-top" alt="{{ site.github.project_title }} Logo">
+      <img src="{{ site.logo | relative_url }}" class="d-inline-block align-top" alt="{{ site.github.project_title }} Logo">
       {{ site.github.project_title }}
     </a>
 
