@@ -18,6 +18,20 @@ describe('MP3Tag', function () {
     assert.deepStrictEqual(actual, expected)
   })
 
+  it('Remove tags', function () {
+    const mp3tag = new MP3Tag(bytes.buffer)
+    mp3tag.read()
+    mp3tag.remove()
+
+    const actual = new Uint8Array(mp3tag.buffer)
+    const expected = new Uint8Array([
+      255, 251, 224, 0, 0, 0, 0, 0, 170, 170, 170, 170, 170, 170
+    ])
+
+    assert.deepStrictEqual(actual, expected)
+    assert.deepStrictEqual(mp3tag.tags, {})
+  })
+
   after(function () {
     const extendTests = ['id3v1/index.js', 'id3v2/index.js', 'id3/index.js']
     const tests = this.test.parent.tests
