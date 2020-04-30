@@ -138,12 +138,9 @@ export default class MP3Tag {
     return this.tags
   }
 
-  save (options = {}) {
-    this.error = ''
-    this.errorCode = -1
-
-    const defaultVersion = this.tags.v2Version ? this.tags.v2Version[0] : 4
-    let tags = mergeTags(this.tags)
+  static writeBuffer (buffer, tags, options = {}, verbose = false) {
+    const defaultVersion = tags.v2Version ? tags.v2Version[0] : 4
+    tags = mergeTags(tags)
     options = overwriteDefault(options, {
       strict: false,
       id3v1: { include: true },
@@ -155,30 +152,41 @@ export default class MP3Tag {
       }
     })
 
-    let audio = new Uint8Array(this.getAudio())
+    let audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer))
+
+    if (options.id3v1.include) {
+      if (verbose) console.log('Validating ID3v1...')
+      ID3v1.validate(tags, options.strict)
+
+      if (verbose) console.log('Writing ID3v1...')
+      const encoded = ID3v1.encode(tags)
+      const tagBytes = new Uint8Array(encoded)
+      audio = mergeBytes(audio, tagBytes)
+    }
+
+    if (options.id3v2.include) {
+      if (verbose) console.log('Transforming ID3v2...')
+      tags = ID3v2.transform(tags, options.id3v2.version)
+
+      if (verbose) console.log('Validating ID3v2...')
+      ID3v2.validate(tags, options.strict, options.id3v2)
+
+      if (verbose) console.log('Writing ID3v2...')
+      const encoded = ID3v2.encode(tags, options.id3v2)
+      const tagBytes = new Uint8Array(encoded)
+      audio = mergeBytes(tagBytes, audio)
+    }
+
+    return audio.buffer
+  }
+
+  save (options = {}) {
+    this.error = ''
+    this.errorCode = -1
+    let buffer
+
     try {
-      if (options.id3v1.include) {
-        this.log('Validating ID3v1...')
-        ID3v1.validate(tags, options.strict)
-
-        this.log('Writing ID3v1...')
-        const encoded = ID3v1.encode(tags)
-        const tagBytes = new Uint8Array(encoded)
-        audio = mergeBytes(audio, tagBytes)
-      }
-
-      if (options.id3v2.include) {
-        this.log('Transforming ID3v2...')
-        tags = ID3v2.transform(tags, options.id3v2.version)
-
-        this.log('Validating ID3v2...')
-        ID3v2.validate(tags, options.strict, options.id3v2)
-
-        this.log('Writing ID3v2...')
-        const encoded = ID3v2.encode(tags, options.id3v2)
-        const tagBytes = new Uint8Array(encoded)
-        audio = mergeBytes(tagBytes, audio)
-      }
+      buffer = MP3Tag.writeBuffer(this.buffer, this.tags, options, this.verbose)
     } catch (error) {
       if (error instanceof TagError) {
         this.error = error.message
@@ -186,7 +194,7 @@ export default class MP3Tag {
       } else throw error
     }
 
-    if (this.errorCode < 0) this.buffer = audio.buffer
+    if (this.errorCode < 0) this.buffer = buffer
     return this.buffer
   }
 
