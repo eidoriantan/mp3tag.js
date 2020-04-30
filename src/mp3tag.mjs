@@ -51,10 +51,10 @@ export default class MP3Tag {
     this.tags = {}
   }
 
-  read (options = {}) {
-    this.tags = {}
-    this.error = ''
-    this.errorCode = -1
+  static readBuffer (buffer, options = {}, verbose = false) {
+    if (!isBuffer(buffer)) {
+      throw new TypeError('buffer is not ArrayBuffer/Buffer')
+    }
 
     let tags = {}
     options = overwriteDefault(options, {
@@ -62,20 +62,71 @@ export default class MP3Tag {
       id3v2: true
     })
 
-    try {
-      if (options.id3v1 && ID3v1.hasID3v1(this.buffer)) {
-        this.log('ID3v1 found, reading...')
-        const v1Tags = ID3v1.decode(this.buffer)
-        this.log('ID3v1 reading finished')
-        tags = mergeObjects(tags, v1Tags)
-      }
+    if (options.id3v1 && ID3v1.hasID3v1(buffer)) {
+      if (verbose) console.log('ID3v1 found, reading...')
+      const v1Tags = ID3v1.decode(buffer)
+      if (verbose) console.log('ID3v1 reading finished')
+      tags = mergeObjects(tags, v1Tags)
+    }
 
-      if (options.id3v2 && ID3v2.hasID3v2(this.buffer)) {
-        this.log('ID3v2 found, reading...')
-        const v2Tags = ID3v2.decode(this.buffer)
-        this.log('ID3v2 reading finished')
-        tags = mergeObjects(tags, v2Tags)
+    if (options.id3v2 && ID3v2.hasID3v2(buffer)) {
+      if (verbose) console.log('ID3v2 found, reading...')
+      const v2Tags = ID3v2.decode(buffer)
+      if (verbose) console.log('ID3v2 reading finished')
+      tags = mergeObjects(tags, v2Tags)
+    }
+
+    tags = mergeTags(tags)
+    Object.defineProperties(tags, {
+      title: {
+        get: function () { return this.TIT2 || '' },
+        set: function (value) { this.TIT2 = value }
+      },
+      artist: {
+        get: function () { return this.TPE1 || '' },
+        set: function (value) { this.TPE1 = value }
+      },
+      album: {
+        get: function () { return this.TALB || '' },
+        set: function (value) { this.TALB = value }
+      },
+      year: {
+        get: function () {
+          return this.TYER || (this.TDRC && this.TDRC.substr(0, 4)) || ''
+        },
+        set: function (value) { this.TYER = value }
+      },
+      comment: {
+        get: function () { return (this.COMM && this.COMM[0].text) || '' },
+        set: function (value) {
+          const comment = { language: 'eng', descriptor: '', text: value }
+          if (Array.isArray(this.COMM)) this.COMM[0] = comment
+          else this.COMM = [comment]
+        }
+      },
+      track: {
+        get: function () {
+          return (this.TRCK && this.TRCK.split('/')[0]) || ''
+        },
+        set: function (value) { this.TRCK = value }
+      },
+      genre: {
+        get: function () { return this.TCON || '' },
+        set: function (value) { this.TCON = value }
       }
+    })
+
+    return tags
+  }
+
+  read (options = {}) {
+    this.tags = {}
+    this.error = ''
+    this.errorCode = -1
+    let tags
+
+    try {
+      tags = MP3Tag.readBuffer(this.buffer, options, this.verbose)
     } catch (error) {
       if (error instanceof TagError) {
         this.error = error.message
@@ -83,49 +134,7 @@ export default class MP3Tag {
       } else throw error
     }
 
-    if (this.errorCode < 0) {
-      tags = mergeTags(tags)
-      Object.defineProperties(tags, {
-        title: {
-          get: function () { return this.TIT2 || '' },
-          set: function (value) { this.TIT2 = value }
-        },
-        artist: {
-          get: function () { return this.TPE1 || '' },
-          set: function (value) { this.TPE1 = value }
-        },
-        album: {
-          get: function () { return this.TALB || '' },
-          set: function (value) { this.TALB = value }
-        },
-        year: {
-          get: function () {
-            return this.TYER || (this.TDRC && this.TDRC.substr(0, 4)) || ''
-          },
-          set: function (value) { this.TYER = value }
-        },
-        comment: {
-          get: function () { return (this.COMM && this.COMM[0].text) || '' },
-          set: function (value) {
-            const comment = { language: 'eng', descriptor: '', text: value }
-            if (Array.isArray(this.COMM)) this.COMM[0] = comment
-            else this.COMM = [comment]
-          }
-        },
-        track: {
-          get: function () {
-            return (this.TRCK && this.TRCK.split('/')[0]) || ''
-          },
-          set: function (value) { this.TRCK = value }
-        },
-        genre: {
-          get: function () { return this.TCON || '' },
-          set: function (value) { this.TCON = value }
-        }
-      })
-
-      this.tags = tags
-    }
+    this.tags = tags
     return this.tags
   }
 
