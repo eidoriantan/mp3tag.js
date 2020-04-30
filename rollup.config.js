@@ -4,25 +4,26 @@ import { terser } from 'rollup-plugin-terser'
 import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
 
-export default {
-  input: 'src/mp3tag.mjs',
-  strictDeprecations: true,
-  output: [{
-    file: 'dist/mp3tag.js',
-    format: 'umd',
-    name: 'MP3Tag'
-  }, {
+const production = process.env.NODE_ENV === 'production'
+const outputs = [{
+  file: 'dist/mp3tag.js',
+  format: 'umd',
+  name: 'MP3Tag'
+}]
+
+if (production) {
+  outputs.push({
     file: 'dist/mp3tag.min.js',
     format: 'umd',
     name: 'MP3Tag',
     plugins: terser()
-  }],
-  plugins: [
-    commonjs(),
-    resolve(),
-    babel()
-  ],
-  watch: {
-    include: ['src/**/*.mjs']
-  }
+  })
+}
+
+export default {
+  input: 'src/mp3tag.mjs',
+  strictDeprecations: true,
+  output: outputs,
+  plugins: [commonjs(), resolve(), babel()],
+  watch: { include: ['src/**/*.mjs'] }
 }
