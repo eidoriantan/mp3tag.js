@@ -120,6 +120,9 @@ GEM
     jekyll-mentions (1.5.1)
       html-pipeline (~> 2.3)
       jekyll (>= 3.7, < 5.0)
+    jekyll-octicons (9.6.0)
+      jekyll (>= 3.6, < 5.0)
+      octicons (= 9.6.0)
     jekyll-optional-front-matter (0.3.2)
       jekyll (>= 3.0, < 5.0)
     jekyll-paginate (1.1.0)
@@ -203,6 +206,8 @@ GEM
     multipart-post (2.1.1)
     nokogiri (1.10.9-x64-mingw32)
       mini_portile2 (~> 2.4.0)
+    octicons (9.6.0)
+      nokogiri (>= 1.6.3.1)
     octokit (4.18.0)
       faraday (>= 0.9)
       sawyer (~> 0.8.0, >= 0.5.3)
@@ -242,8 +247,11 @@ PLATFORMS
 DEPENDENCIES
   github-pages
   jekyll (~> 3.8.5)
+  jekyll-github-metadata (~> 2.13.0)
+  jekyll-octicons
   jekyll-seo-tag (~> 2.6.1)
   jekyll-sitemap (~> 1.4.0)
+  jemoji (~> 0.11.1)
   tzinfo-data
   wdm (~> 0.1.0)
 

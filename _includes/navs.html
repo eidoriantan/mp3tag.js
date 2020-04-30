@@ -4,7 +4,7 @@
 
 <nav id="header-nav" class="collapse navbar-collapse" aria-label="Main Navigator">
   <div class="navbar-nav">
-    {% for link in site.data.navlinks %}
+    {% for link in site.navlinks %}
       {% assign active = false %}
       {% for dir in link.directories %}
         {% if dir == page.url %} {% assign active = true %} {% endif %}

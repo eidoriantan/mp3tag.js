@@ -1,33 +1,29 @@
 ---
-layout: default
+layout: documentations
 title: Installation
 description: JavaScript library documentations page. How to install the library
 keywords: mp3, id3, audio, tag, edit, write, documentations, docs, install, installation
+active: installation
+last_modified_at: 05-01-2020T02:14:00+08:00
 ---
-<main class="main row no-gutters mx-5">
-  {% include docs_aside.html active='installation' %}
+<h4 class="display-4">Installation</h4>
+<p class="lead">
+  You can install the library by downloading the distributed package and including them on your scripts.
+  This library does not require any more dependencies. <a href="/downloads/">Go to Downloads page</a>
+</p>
 
-  <div class="col offset-12 offset-md-4">
-    <h4 class="display-4">Installation</h4>
-    <p class="lead">
-      You can install the library by downloading the distributed package and including them on your scripts.
-      This library does not require any more dependencies. <a href="/downloads/">Go to Downloads page</a>
-    </p>
+<p class="lead py-2">
+  The source codes are written as an ES6 module so you can just copy the <code>src</code> folder and
+  include them on your scripts as <code>module</code>.<br>
+  <small><code class="bg-secondary text-white rounded-sm px-2 py-2">&lt;script src="/path/to/mp3tag.mjs" type="module"&gt;</code></small>
+</p>
 
-    <p class="lead py-2">
-      The source codes are written as an ES6 module so you can just copy the <code>src</code> folder and
-      include them on your scripts as <code>module</code>.<br>
-      <code class="bg-secondary text-white rounded-sm px-2 py-2">&lt;script src="/path/to/mp3tag.mjs" type="module"&gt;</code>
-    </p>
+<p class="lead py-2">
+  You can also use the CDN by including this line on your codes:<br>
+  <small><code class="bg-secondary text-white rounded-sm px-2 py-2">&lt;script src="https://cdn.jsdelivr.net/npm/mp3tag.js@latest/dist/mp3tag.min.js"&gt;</code></small>
+</p>
 
-    <p class="lead py-2">
-      You can also use the CDN by including this line codes:<br>
-      <code class="bg-secondary text-white rounded-sm px-2 py-2">&lt;script src="https://cdn.jsdelivr.net/npm/mp3tag.js@latest/dist/mp3tag.min.js"&gt;</code>
-    </p>
-
-    <p class="lead py-2">
-      If you have <a href="https://www.npmjs.com/get-npm">npm</a>, you can install the library by running the code:<br>
-      <code class="bg-secondary text-white rounded-sm px-2 py-2">npm install --save {{ site.github.project_title }}@latest</code>
-    </p>
-  </div>
-</main>
+<p class="lead py-2">
+  If you have <a href="https://www.npmjs.com/get-npm">npm</a>, you can install the library by running the code:<br>
+  <small><code class="bg-secondary text-white rounded-sm px-2 py-2">npm install --save {{ site.github.project_title }}@latest</code></small>
+</p>
