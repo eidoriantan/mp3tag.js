@@ -198,8 +198,7 @@ export default class MP3Tag {
     return true
   }
 
-  getAudio () {
-    let buffer = this.buffer
+  static getAudioBuffer (buffer) {
     if (!isBuffer(buffer)) {
       throw new TypeError('buffer is not ArrayBuffer/Buffer')
     }
@@ -220,6 +219,10 @@ export default class MP3Tag {
     }
 
     return buffer.slice(start)
+  }
+
+  getAudio () {
+    return MP3Tag.getAudioBuffer(this.buffer)
   }
 
   log (message) { if (this.verbose) console.log(message) }
