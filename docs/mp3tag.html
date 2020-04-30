@@ -4,7 +4,7 @@ title: MP3Tag
 description: JavaScript library documentations page. mp3tag.js exported class documentations
 keywords: mp3, id3, audio, tag, edit, write, documentations, docs, mp3tag
 active: mp3tag
-last_modified_at: 05-01-2020T02:14:00+08:00
+last_modified_at: 05-01-2020T03:42:00+08:00
 stylesheets:
   - /assets/css/prismjs/prism.css
 scripts:
@@ -82,6 +82,15 @@ scripts:
 </div>
 
 <div class="card border-dark shadow mb-3 my-4">
+  <header class="card-header border-dark">STATIC Method</header>
+  <div class="card-body">
+    <h5 class="card-title">readBuffer(buffer[, options, verbose])</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
+    <p class="card-text">Returns the decoded tags on the buffer. Options are the same as the non-static read method.</p>
+  </div>
+</div>
+
+<div class="card border-dark shadow mb-3 my-4">
   <header class="card-header border-dark">Method</header>
   <div class="card-body">
     <h5 class="card-title">save([options])</h5>
@@ -106,10 +115,37 @@ scripts:
 </div>
 
 <div class="card border-dark shadow mb-3 my-4">
+  <header class="card-header border-dark">STATIC Method</header>
+  <div class="card-body">
+    <h5 class="card-title">writeBuffer(buffer, tags[, options, verbose])</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
+    <p class="card-text">Writes the tags to the buffer. The options are the same as the non-static save method</p>
+  </div>
+</div>
+
+<div class="card border-dark shadow mb-3 my-4">
+  <header class="card-header border-dark">Method</header>
+  <div class="card-body">
+    <h5 class="card-title">remove()</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
+    <p class="card-text">Removes all the tags on the buffer and returns the raw audio.</p>
+  </div>
+</div>
+
+<div class="card border-dark shadow mb-3 my-4">
   <header class="card-header border-dark">Method</header>
   <div class="card-body">
     <h5 class="card-title">getAudio()</h5>
     <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
     <p class="card-text">Removed ID3v1 and ID3v2 audio buffer</p>
+  </div>
+</div>
+
+<div class="card border-dark shadow mb-3 my-4">
+  <header class="card-header border-dark">STATIC Method</header>
+  <div class="card-body">
+    <h5 class="card-title">getAudioBuffer(buffer)</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>|<a href="https://nodejs.org/api/buffer.html">Buffer</a></h6>
+    <p class="card-text">Gets the audio only from the buffer.</p>
   </div>
 </div>
