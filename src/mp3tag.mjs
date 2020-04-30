@@ -181,6 +181,14 @@ export default class MP3Tag {
     return this.buffer
   }
 
+  remove () {
+    this.tags = {}
+    this.error = ''
+    this.errorCode = -1
+    this.buffer = this.getAudio()
+    return true
+  }
+
   getAudio () {
     let buffer = this.buffer
     if (!isBuffer(buffer)) {
