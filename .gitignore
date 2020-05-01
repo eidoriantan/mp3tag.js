@@ -1,13 +1,6 @@
 
-.DS_Store
-
-# Ignore distributions, node modules and .npmrc files
-dist/
-node_modules/
-.npmrc
-
-# Ignore generated Jekyll files
 _site
+.DS_Store
 .sass-cache
 .jekyll-metadata
 Gemfile.lock
