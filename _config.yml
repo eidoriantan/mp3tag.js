@@ -5,6 +5,16 @@ exclude:
   - Gemfile.lock
   - README.md
 
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  syntax_highlighter_opts:
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
+
 sass:
   style: compressed
 

@@ -1,10 +1,22 @@
 ---
 layout: default
 ---
-<main class="main row no-gutters mx-5">
-  {% include docs_aside.html active=page.active %}
+<div class="d-md-flex flex-md-justify-around flex-md-content-around flex-items-stretch">
+  <div class="col-10 col-md-3 mx-auto mt-5">
+    {% include docs_nav.html active=page.active %}
+  </div>
 
-  <div class="col offset-12 offset-md-4">
+  <div class="col-10 col-md-8 mx-auto mt-5">
+    <div id="properties" class="Subhead">
+      <div class="Subhead-heading">{{ page.title }}</div>
+      <div class="Subhead-actions">
+        <a href="{{ site.github.repository_url }}/blob/gh-pages/{{ page.path }}" class="btn btn-sm" role="button">
+          {% octicon pencil height:20 class:'mr-2' aria-label:true %}
+          <span>Improve this page</span>
+        </a>
+      </div>
+    </div>
+
     {{ content }}
   </div>
-</main>
+</div>

@@ -4,55 +4,21 @@ title: Usage
 description: JavaScript library documentations page. How to use the library
 keywords: mp3, id3, audio, tag, edit, write, documentations, docs, usage
 active: usage
-last_modified_at: 05-01-2020T02:14:00+08:00
-stylesheets:
-  - /assets/css/prismjs/prism.css
-scripts:
-  - /assets/js/prismjs/prism.js
+last_modified_at: 05-02-2020T14:45:00+08:00
 ---
-<h4 class="display-4">Usage</h4>
-<p class="lead">Simple usage of the library</p>
+<h5 class="f3-light">Browser</h5>
+{% capture browser %}
+```javascript
+const inputFile = document.getElementById('input-file')
+inputFile.onchange = function () {
+  const reader = new FileReader()
+  reader.onload = function () {
+    const buffer = this.result
 
-<h5>Browser</h5>
-<pre class="mb-4">
-  <code class="language-javascript">
-    const inputFile = document.getElementById('input-file')
-    inputFile.onchange = function () {
-      const reader = new FileReader()
-      reader.onload = function () {
-        const buffer = this.result
-
-        const mp3tag = new MP3Tag(buffer)
-        mp3tag.read()
-
-        // Handle error if there's any
-        if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
-
-        console.log(mp3tag.tags)
-        mp3tag.tags.title = 'NEW TITLE'
-        mp3tag.tags.artist = 'NEW ARTIST'
-        mp3tag.save({ strict: true })
-
-        if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
-        mp3tag.read()
-      }
-
-      if (this.files.length > 0) {
-        reader.readAsArrayBuffer(this.files[0])
-      }
-      }
-  </code>
-</pre>
-
-<h5>Node.js</h5>
-<pre>
-  <code class="language-javascript">
-    const MP3Tag = require('mp3tag.js')
-    const fs = require('fs')
-
-    const buffer = fs.readFileSync('/path/to/mp3')
     const mp3tag = new MP3Tag(buffer)
     mp3tag.read()
+
+    // Handle error if there's any
     if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
 
     console.log(mp3tag.tags)
@@ -62,5 +28,34 @@ scripts:
 
     if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
     mp3tag.read()
-  </code>
-</pre>
+  }
+
+  if (this.files.length > 0) {
+    reader.readAsArrayBuffer(this.files[0])
+  }
+}
+```
+{% endcapture %}
+{{ browser | markdownify }}
+
+<h5 class="f1-light mt-4">Node.js</h5>
+{% capture nodejs %}
+```javascript
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+const buffer = fs.readFileSync('/path/to/mp3')
+const mp3tag = new MP3Tag(buffer)
+mp3tag.read()
+if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
+
+console.log(mp3tag.tags)
+mp3tag.tags.title = 'NEW TITLE'
+mp3tag.tags.artist = 'NEW ARTIST'
+mp3tag.save({ strict: true })
+
+if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
+mp3tag.read()
+```
+{% endcapture %}
+{{ nodejs | markdownify }}

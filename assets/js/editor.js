@@ -95,7 +95,7 @@ $(document).ready(function () {
 })
 
 function importFiles (files) {
-  $('#no-audio').remove()
+  $('#blankslate').remove()
   $('#audio-list').parent().removeClass('d-none')
 
   const temp = $('#audio-item-template').prop('content')
@@ -106,12 +106,12 @@ function importFiles (files) {
 
       $(audioItem).find('[data-temp=\'filename\']').text(files[i].name)
       $(audioItem).find('[data-temp]').removeAttr('data-temp')
-      $(audioItem).find('tr').click(audioView)
+      $(audioItem).find('[data-audio]').click(audioView)
 
       $('#audio-list').append(audioItem)
     } else {
       const message = 'MIME/Type of a file is not supported. Skipped'
-      toast('Invalid MIME', message, TOAST_WARNING)
+      toast(message, TOAST_WARNING)
     }
   }
 }
@@ -126,18 +126,18 @@ async function audioView (event) {
 
   $('#edit-form [disabled]').attr('disabled', null)
   $('#edit-form .disabled').removeClass('disabled')
-  $(audioItem).addClass('bg-primary')
+  $(audioItem).addClass('flash')
 
   try {
-    toast('Reading file', 'Reading file and tags. Please wait...', TOAST_INFO)
+    toast('Reading file and tags. Please wait...', TOAST_INFO)
 
     mp3tag = new MP3Tag(await loadFile(file))
     mp3tag.read()
     displayDetails()
 
-    toast('Read Successfully', 'Details was displayed', TOAST_SUCCESS)
+    toast('Details was displayed', TOAST_SUCCESS)
   } catch (error) {
-    toast('Reading Error', error.message, TOAST_DANGER)
+    toast(error.message, TOAST_DANGER)
     throw error
   }
 }
@@ -185,13 +185,13 @@ function displayDetails () {
 
 async function writeData () {
   try {
-    toast('Writing', 'Writing the tags to file', TOAST_INFO)
+    toast('Writing the tags to file', TOAST_INFO)
 
     writeDetails()
-    mp3tag.save({ strict: true })
+    await mp3tag.save({ strict: true })
     if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
   } catch (error) {
-    toast('Writing Error', error.message, TOAST_DANGER)
+    toast(error.message, TOAST_DANGER)
     throw error
   }
 
@@ -199,7 +199,7 @@ async function writeData () {
   const modifiedFile = new File([mp3tag.buffer], file.name, { type: file.type })
 
   importedFiles[currentIndex] = modifiedFile
-  toast('Saved!', 'Modified MP3 was saved and ready to download', TOAST_SUCCESS)
+  toast('Modified MP3 was saved and ready to download', TOAST_SUCCESS)
 }
 
 async function writeDetails () {
@@ -244,5 +244,5 @@ function resetForm () {
   $('#download').attr({ href: null, download: null })
   $('#download').addClass('disabled')
   $('#cover-preview').attr('src', blankImage)
-  $('#audio-list').find('.bg-primary').removeClass('bg-primary')
+  $('#audio-list').find('.flash').removeClass('flash')
 }

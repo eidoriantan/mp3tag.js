@@ -4,366 +4,416 @@ title: Tags and Frames
 description: JavaScript library documentations page. Learn more about the frames objects in this library
 keywords: mp3, id3, audio, tag, edit, write, documentations, docs, install, installation
 active: frames
-last_modified_at: 05-01-2020T02:14:00+08:00
-stylesheets:
-  - /assets/css/prismjs/prism.css
-scripts:
-  - /assets/js/prismjs/prism.js
+last_modified_at: 05-02-2020T14:45:00+08:00
 ---
-<h4 class="display-4">Tags and Frames</h4>
-<div class="alert alert-info" role="alert">
-  <strong>Note:</strong> ID3v1 tags such as title, artist, album, year,
-  comment, track, and genre will be overwritten by its equivalent ID3v2
-  frame if it is not blank.
+<div class="flash">
+  <a href="https://github.com/eidoriantan/mp3tag.js/issues/new?assignees=eidoriantan&labels=enhancement%2C+frame-support&template=frame-request.md&title=%5BFRAME+ID%5D+Frame" class="btn btn-sm flash-action">
+    {% octicon issue-opened height:20 class:'mr-2' aria-hidden:true %}
+    <span>Submit an issue</span>
+  </a>
+  <strong>Note:</strong> ID3v2 Frames that are not mentioned here are not
+  currently supported. Feel free to submit an issue!
 </div>
 
-<div class="alert alert-info" role="alert">
-  <strong>Note:</strong> ID3v2 Frames that are not mentioned here are
-  not currently supported. You can submit an issue at
-  <a href="https://github.com/eidoriantan/mp3tag.js/issues/new?assignees=eidoriantan&labels=enhancement%2C+frame-support&template=frame-request.md&title=%5BFRAME+ID%5D+Frame" class="alert-link">GitHub issues</a>
+<div class="flash mt-2">
+  <strong>Note:</strong> All string-typed frames are separated by '\\' and
+  should not contain newline characters.
 </div>
 
-<div class="alert alert-info" role="alert">
-  <strong>Note:</strong> All string-typed frames are separated by '\\' and should not contain newline characters.
+<div class="flash mt-2">
+  <strong>Note:</strong> If strict mode is enabled, all languages must be
+  encoded with <a href="https://www.loc.gov/standards/iso639-2/php/code_list.php">ISO 639-2</a>.
 </div>
 
-<div class="card border-info shadow mb-3 my-4">
-  <header class="card-header border-info">Text information frames</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: "T000" - "TZZZ" excluding TXXX</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: string</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.2.1" target="_blank">ID3v2.3.0 section 4.2.1</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 sections 4.2.1 - 4.2.5</a></h6>
-    <p class="card-text">
-      If strict mode is enabled, all languages must be encoded with
-      <a href="https://www.loc.gov/standards/iso639-2/php/code_list.php" class="card-link" target="_blank">ISO 639-2</a>.
-      Some of these frames have its own standards but are only applicable if the strict mode is enabled.
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Text information frames</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: "T000" - "TZZZ" excluding TXXX</div>
+    <div class="text-gray">Type: string</div>
+  </div>
+  <div class="Box-row">
+    Each of these frames have its own standards but are only applicable if the
+    strict mode is enabled.
 
-      <ul>
-        <li>Set frames such as "<i>TPOS</i>" and "<i>TRCK</i>" should follow this format: '1/2' or just '1' and can be separated '1/2\\1'.</li>
-        <li>Time frames at ID3v2.3.0 such as "<i>TDAT</i>", "<i>TIME</i>", "<i>TORY</i>", and "<i>TYER</i>" should have 4 numerical characters</li>
-        <li>
-          Time frames at ID3v2.4.0 such as "<i>TDEN</i>", "<i>TDOR</i>", "<i>TDRC</i>", "<i>TDRL</i>", and "<i>TDTG</i>" should follow this format:
-          yyyy-MM-ddTHH:mm:ss (year, "-", month, "-", day, "T", hour (out of 24), ":", minutes, ":", seconds), but the precision may be reduced by
-          removing as many time indicators as wanted. Hence valid timestamps
-          are yyyy, yyyy-MM, yyyy-MM-dd, yyyy-MM-ddTHH, yyyy-MM-ddTHH:mm and yyyy-MM-ddTHH:mm:ss.
-        </li>
-        <li>"<i>TKEY</i>" frame is represented as a string with a maximum length of three characters. The ground keys are represented with "A","B","C","D","E", "F" and "G" and halfkeys represented with "b" and "#". Minor is represented as "m". Example "Cbm". Off key is represented with an "o" only.</li>
-        <li>"<i>TSRC</i>" frame should have 12 alphanumeric characters</li>
-      </ul>
-    </p>
+    <div class="m-2">
+      <span class="text-emphasized">Set frames</span> such as "<i>TPOS</i>" and
+      "<i>TRCK</i>" should follow this format: '1/2' or just '1' and can be
+      separated '1/2\\1'.
+    </div>
+
+    <div class="m-2">
+      <span class="text-emphasized">Time frames</span> at ID3v2.3.0 such as
+      "<i>TDAT</i>", "<i>TIME</i>", "<i>TORY</i>", and "<i>TYER</i>" should have
+      4 numerical characters.
+    </div>
+
+    <div class="m-2">
+      <span class="text-emphasized">Time frames</span> at ID3v2.4.0 such as
+      "<i>TDEN</i>", "<i>TDOR</i>", "<i>TDRC</i>", "<i>TDRL</i>", and
+      "<i>TDTG</i>" should follow this format: yyyy-MM-ddTHH:mm:ss (year, "-",
+      month, "-", day, "T", hour (out of 24), ":", minutes, ":", seconds), but
+      the precision may be reduced by removing as many time indicators as wanted.
+      Hence valid timestamps are yyyy, yyyy-MM, yyyy-MM-dd, yyyy-MM-ddTHH,
+      yyyy-MM-ddTHH:mm and yyyy-MM-ddTHH:mm:ss.
+    </div>
+
+    <div class="m-2">
+      <span class="text-emphasized">"TKEY" frame</span> is represented as a
+      string with a maximum length of three characters. The ground keys are
+      represented with "A","B","C","D","E", "F" and "G" and halfkeys represented
+      with "b" and "#". Minor is represented as "m". Example "Cbm". Off key is
+      represented with an "o" only.
+    </div>
+
+    <div class="m-2">
+      <span class="text-emphasized">"TSRC" frame</span> should have 12
+      alphanumeric characters.
+    </div>
   </div>
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">User defined text information frame</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: TXXX</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.2.2" target="_blank">ID3v2.3.0 section 4.2.2</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.2.6</a></h6>
-    <p class="card-text">TXXX frames are parsed and must be saved as an array</p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">User defined text information frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: TXXX</div>
+    <div class="text-gray">Type: object[]</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // TXXX example
-      [{
-        description: 'Text description', // description
-        text: 'Any string here' // text information
-      }]
-    </code>
-  </pre>
+  <div class="Box-row">
+    TXXX frames are parsed and must be saved as an array
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // TXXX example
+  [{
+    description: 'Text description', // description
+    text: 'Any string here' // text information
+  }]
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>
 
-<div class="card border-info shadow mb-3 my-4">
-  <header class="card-header border-info">URL frames</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: "W000" - "WZZZ" excluding WXXX</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: string</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.3.1" target="_blank">ID3v2.3.0 section 4.3.1</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.3.1</a></h6>
-    <p class="card-text">If strict mode is enabled, all URLs are checked if its a valid URL. The current RegExp used is <code>/^(https?):\/\/[^\s/$.?#]+\.[^\s]*/</code></p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">URL frames</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: "W000" - "WZZZ" excluding WXXX</div>
+    <div class="text-gray">Type: string</div>
+  </div>
+  <div class="Box-row">
+    If strict mode is enabled, all URLs are checked if its a valid URL.
+    The current RegExp used is <code>/^(https?):\/\/[^\s/$.?#]+\.[^\s]*/</code>
   </div>
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">User defined URL link frame</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: WXXX</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.3.2" target="_blank">ID3v2.3.0 section 4.3.2</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.3.2</a></h6>
-    <p class="card-text">WXXX frames are parsed and must be saved as an array</p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">User defined URL link frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: WXXX</div>
+    <div class="text-gray">Type: object[]</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // WXXX example
-      [{
-        description: 'URL description', // description
-        url: 'https://github.com' // URL
-      }]
-    </code>
-  </pre>
+  <div class="Box-row">
+    WXXX frames are parsed and must be saved as an array
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // WXXX example
+  [{
+    description: 'URL description', // description
+    url: 'https://github.com' // URL
+  }]
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">Comment and Unsynchronised lyrics frames</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: COMM and USLT</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links (COMM): <a href="http://id3.org/id3v2.3.0#sec4.11" target="_blank">ID3v2.3.0 section 4.11</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.10</a></h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links (USLT): <a href="http://id3.org/id3v2.3.0#sec4.9" target="_blank">ID3v2.3.0 section 4.9</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.8</a></h6>
-    <p class="card-text">
-      COMM and USLT frames are parsed and must be saved as an array. If
-      the strict mode is enabled, there should only one frame with the
-      same language and content descriptor.
-    </p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Comment and Unsynchronised lyrics frames</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: COMM and USLT</div>
+    <div class="text-gray">Type: object[]</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // COMM and USLT example
-      [{
-        language: 'eng', // language
-        descriptor: 'Content description', // content description
-        text: 'Lyrics or comment goes here' // text
-      }]
-    </code>
-  </pre>
+  <div class="Box-row">
+    COMM and USLT frames are parsed and must be saved as an array. If the
+    strict mode is enabled, there should only one frame with the same language
+    and content descriptor.
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // COMM and USLT example
+  [{
+    language: 'eng', // language
+    descriptor: 'Content description', // content description
+    text: 'Lyrics or comment goes here' // text
+  }]
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">Attached picture frame</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: APIC</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.15" target="_blank">ID3v2.3.0 section 4.15</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.14</a></h6>
-    <p class="card-text">
-      APIC frame is parsed and must be saved as an array. If the strict
-      mode is enabled, there should only one frame with the same content
-      descriptor, types should be in range of 0 - 21, format should match
-      <code>/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/</code> regex, and
-      description should not exceed 64 characters.
-    </p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Attached picture frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: APIC</div>
+    <div class="text-gray">Type: object[]</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // APIC example
-      [{
-        format: 'image/jpeg', // Image MIME
-        type: 3, // See the APIC image types at id3.org
-        description: 'Content description', // content description
-        data: [1, 2, 3, 4, 5, 6, 7, 8] // image bytes
-      }]
-    </code>
-  </pre>
+  <div class="Box-row">
+    APIC frame is parsed and must be saved as an array. If the strict mode is
+    enabled, there should only one frame with the same content descriptor, types
+    should be in range of 0 - 21, format should match
+    <code>/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/</code> regex, and description
+    should not exceed 64 characters.
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // APIC example
+  [{
+    format: 'image/jpeg', // Image MIME
+    type: 3, // See the APIC image types at id3.org
+    description: 'Content description', // content description
+    data: [1, 2, 3, 4, 5, 6, 7, 8] // image bytes
+  }]
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">General encapsulated object frame</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: GEOB</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.16" target="_blank">ID3v2.3.0 section 4.16</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.15</a></h6>
-    <p class="card-text">
-      GEOB frame is parsed and must be saved as an array. If the strict
-      mode is enabled, there should only one frame with the same content
-      descriptor.
-    </p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">General encapsulated object frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: GEOB</div>
+    <div class="text-gray">Type: object[]</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // GEOB example
-      [{
-        format: 'application/octet-stream', // Object MIME
-        filename: 'filename.bin', // Filename
-        description: 'Content description', // Description
-        object: [1, 2, 3, 4, 5, 6, 7, 8, 9] // Object
-      }]
-    </code>
-  </pre>
+  <div class="Box-row">
+    GEOB frame is parsed and must be saved as an array. If the strict mode is
+    enabled, there should only one frame with the same content descriptor.
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // GEOB example
+  [{
+    format: 'application/octet-stream', // Object MIME
+    filename: 'filename.bin', // Filename
+    description: 'Content description', // Description
+    object: [1, 2, 3, 4, 5, 6, 7, 8, 9] // Object
+  }]
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">Unique file identifier frame</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: UFID</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.1" target="_blank">ID3v2.3.0 section 4.1</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.1</a></h6>
-    <p class="card-text">
-      UFID frame is parsed and must be saved as an array. If the strict
-      mode is enabled, there should only one frame with the same Owner
-      Identifier and it must be a non-empty string, and ID bytelength must
-      not exceed 64 bytes.
-    </p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Unique file identifier frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: UFID</div>
+    <div class="text-gray">Type: object[]</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // UFID example
-      [{
-        ownerId: 'http://www.id3.org/dummy/ufid.html', // non-empty owner ID
-        id: [1, 2, 3, 4, 5, 6, 7] // binary identifier
-      }]
-    </code>
-  </pre>
+  <div class="Box-row">
+    UFID frame is parsed and must be saved as an array. If the strict mode is
+    enabled, there should only one frame with the same Owner Identifier and it
+    must be a non-empty string, and ID bytelength must not exceed 64 bytes.
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // UFID example
+  [{
+    ownerId: 'http://www.id3.org/dummy/ufid.html', // non-empty owner ID
+    id: [1, 2, 3, 4, 5, 6, 7] // binary identifier
+  }]
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">Terms of use frame</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: USER</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.23" target="_blank">ID3v2.3.0 section 4.23</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.22</a></h6>
-    <p class="card-text">
-      USER frame is parsed and must be saved as an object. If the strict
-      mode is enabled, language must be encoded with <a href="https://www.loc.gov/standards/iso639-2/php/code_list.php" class="card-link" target="_blank">ISO 639-2</a>.
-    </p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Terms of use frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: USER</div>
+    <div class="text-gray">Type: object</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // USER example
-      {
-        language: 'eng', // language
-        text: 'Text' // terms of use text
-      }
-    </code>
-  </pre>
+  <div class="Box-row">
+    USER frame is parsed and must be saved as an object.
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // USER example
+  {
+    language: 'eng', // language
+    text: 'Text' // terms of use text
+  }
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">Ownership frame</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: OWNE</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.24" target="_blank">ID3v2.3.0 section 4.24</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.23</a></h6>
-    <p class="card-text">
-      OWNE frame is parsed and must be saved as an object. If the strict
-      mode is enabled, date must match the format <code>YYYYMMDD</code>,
-      currencyCode must be encoded with
-      <a href="https://www.xe.com/iso4217.php" class="card-link" target="_blank">ISO 4217</a>,
-      and the currencyPrice must follow the format <code>N.nn</code>.
-    </p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Ownership frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: OWNE</div>
+    <div class="text-gray">Type: object</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // OWNE example
-      {
-        currencyCode: 'USD', // US dollars
-        currencyPrice: '2.00', // 2 dollars
-        date: '20200424', // YYYYMMDD date format
-        seller: 'Seller' // Seller's name
-      }
-    </code>
-  </pre>
+  <div class="Box-row">
+    OWNE frame is parsed and must be saved as an object. If the strict mode is
+    enabled, date must match the format <code>YYYYMMDD</code>, currencyCode must
+    be encoded with
+    <a href="https://www.xe.com/iso4217.php" target="_blank">ISO 4217</a>, and
+    the currencyPrice must follow the format <code>N.nn</code>.
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // OWNE example
+  {
+    currencyCode: 'USD', // US dollars
+    currencyPrice: '2.00', // 2 dollars
+    date: '20200424', // YYYYMMDD date format
+    seller: 'Seller' // Seller's name
+  }
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">Private frame</header>
-    <div class="card-body">
-    <h5 class="card-title">ID: PRIV</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.28" target="_blank">ID3v2.3.0 section 4.28</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.27</a></h6>
-    <p class="card-text">
-      PRIV frame is parsed and must be saved as an array. If the strict
-      mode is enabled, there should only one frame with the same data
-    </p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Private frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: PRIV</div>
+    <div class="text-gray">Type: object[]</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // PRIV example
-      [{
-        ownerId: 'owner string', // owners identifier
-        data: [1, 2, 3, 4, 5, 6, 7, 8, 9] // data binary
-      }]
-    </code>
-  </pre>
+  <div class="Box-row">
+    PRIV frame is parsed and must be saved as an array. If the strict mode is
+    enabled, there should only one frame with the same data.
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // PRIV example
+  [{
+    ownerId: 'owner string', // owners identifier
+    data: [1, 2, 3, 4, 5, 6, 7, 8, 9] // data binary
+  }]
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">Signature frame</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: SIGN</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.28</a></h6>
-    <p class="card-text">
-      SIGN frame is only available in ID3v2.4.0. SIGN frame is parsed and
-      must be saved as an array. If the strict mode is enabled, all frames
-      must be unique.
-    </p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Signature frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: SIGN</div>
+    <div class="text-gray">Type: object[]</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // SIGN example
-      [{
-        group: 1, // group ID
-        signature: [1, 2, 3, 4, 5, 6, 7, 8, 9] // signature binary
-        }]
-    </code>
-  </pre>
+  <div class="Box-row">
+    SIGN frame is only available in ID3v2.4.0. SIGN frame is parsed and must be
+    saved as an array. If the strict mode is enabled, all frames must be unique.
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // SIGN example
+  [{
+    group: 1, // group ID
+    signature: [1, 2, 3, 4, 5, 6, 7, 8, 9] // signature binary
+  }]
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">Synchronised lyrics/text frame</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: SYLT</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object[]</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.8" target="_blank">ID3v2.3.0 section 4.8</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.9</a></h6>
-    <p class="card-text">
-      SYLT frame is parsed and must be saved as an array. If the strict
-      mode is enabled, there should only one frame with the same language
-      and content descriptor, language must be encoded with
-      <a href="https://www.loc.gov/standards/iso639-2/php/code_list.php" class="card-link" target="_blank">ISO 639-2</a>,
-      type should be in range of 0 - 6, format should be either 1 or 2, and
-      lyrics must follow the format for each line: [mm:ss.xxx] String to display during the time
-    </p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Synchronised lyrics/text frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: SYLT</div>
+    <div class="text-gray">Type: object[]</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // SYLT example
-      [{
-        language: 'eng', // language
-        format: 1, // Time stamp format
-        type: 1, // Content type
-        descriptor: 'Descriptions', // descriptions
-        lyrics: 'Synced lyrics' // lyrics
-      }]
-    </code>
-  </pre>
+  <div class="Box-row">
+    SYLT frame is parsed and must be saved as an array. If the strict mode is
+    enabled, there should only one frame with the same language and content
+    descriptor, language must be encoded with
+    <a href="https://www.loc.gov/standards/iso639-2/php/code_list.php" target="_blank">ISO 639-2</a>,
+    type should be in range of 0 - 6, format should be either 1 or 2, and lyrics
+    must follow the format for each line: [mm:ss.xxx] String to display during
+    the time
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // SYLT example
+  [{
+    language: 'eng', // language
+    format: 1, // Time stamp format
+    type: 1, // Content type
+    descriptor: 'Descriptions', // descriptions
+    lyrics: 'Synced lyrics' // lyrics
+  }]
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">Music CD identifier frame</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: MCDI</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.5" target="_blank">ID3v2.3.0 section 4.5</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.4</a></h6>
-    <p class="card-text">
-      MCDI frame is parsed and must be saved as an object.
-    </p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Music CD identifier frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: MCDI</div>
+    <div class="text-gray">Type: object</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // MCID example
-      {
-        data: [1, 2, 3, 4, 5, 6, 7, 8] // binary data
-      }
-    </code>
-  </pre>
+  <div class="Box-row">
+    MCDI frame is parsed and must be saved as an object.
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // MCDI example
+  {
+    data: [1, 2, 3, 4, 5, 6, 7, 8] // binary data
+  }
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>
 
-<div class="card border-dark shadow mb-3 my-4">
-  <header class="card-header border-dark">Synchronised tempo codes frame</header>
-  <div class="card-body">
-    <h5 class="card-title">ID: SYTC</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Type: object</h6>
-    <h6 class="card-subtitle mb-2 text-muted">Links: <a href="http://id3.org/id3v2.3.0#sec4.8" target="_blank">ID3v2.3.0 section 4.8</a> and <a href="http://id3.org/id3v2.4.0-frames" target="_blank">ID3v2.4.0 section 4.7</a></h6>
-    <p class="card-text">
-      SYTC frame is parsed and must be saved as an object. If strict mode
-      is enabled, format must be either 1 or 2.
-    </p>
+<div class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Synchronised tempo codes frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: SYTC</div>
+    <div class="text-gray">Type: object</div>
   </div>
-  <pre class="card-body rounded-0 mb-0">
-    <code class="language-javascript">
-      // SYTC example
-      {
-        format: 1, // Timestamp format
-        data: [1, 2, 3, 4, 5, 6, 7, 8] // binary data
-      }
-    </code>
-  </pre>
+  <div class="Box-row">
+    SYTC frame is parsed and must be saved as an object. If strict mode is
+    enabled, format must be either 1 or 2.
+  </div>
+  {% capture txxx %}
+  ```javascript
+  // SYTC example
+  {
+    format: 1, // Timestamp format
+    data: [1, 2, 3, 4, 5, 6, 7, 8] // binary data
+  }
+  ```
+  {% endcapture %}
+  {{ txxx | markdownify }}
 </div>

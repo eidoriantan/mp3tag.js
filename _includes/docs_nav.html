@@ -1,0 +1,7 @@
+
+<nav class="SideNav border rounded-2 position-sticky top-4">
+  <a href="/docs/" class="SideNav-item"{% if include.active == 'installation' %} aria-current="page"{% endif %}>Installation</a>
+  <a href="/docs/usage.html" class="SideNav-item"{% if include.active == 'usage' %} aria-current="page"{% endif %}>Usage</a>
+  <a href="/docs/mp3tag.html" class="SideNav-item"{% if include.active == 'mp3tag' %} aria-current="page"{% endif %}>MP3Tag</a>
+  <a href="/docs/frames.html" class="SideNav-item"{% if include.active == 'frames' %} aria-current="page"{% endif %}>Tags and Frames</a>
+</nav>

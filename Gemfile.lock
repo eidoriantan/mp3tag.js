@@ -252,6 +252,7 @@ DEPENDENCIES
   jekyll-seo-tag (~> 2.6.1)
   jekyll-sitemap (~> 1.4.0)
   jemoji (~> 0.11.1)
+  rouge (~> 3.13.0)
   tzinfo-data
   wdm (~> 0.1.0)
 

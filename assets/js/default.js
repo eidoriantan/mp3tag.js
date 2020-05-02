@@ -1,28 +1,27 @@
+---
+---
 
-const TOAST_NONE = ''
-const TOAST_SUCCESS = 'text-white bg-success'
-const TOAST_INFO = 'text-white bg-info'
-const TOAST_DANGER = 'text-white bg-danger'
-const TOAST_WARNING = 'text-white bg-warning'
+const TOAST_SUCCESS = ['Toast--success', '{% octicon check aria-hidden:true %}']
+const TOAST_INFO = ['', '{% octicon info aria-hidden:true %}']
+const TOAST_DANGER = ['Toast--error', '{% octicon stop aria-hidden:true %}']
+const TOAST_WARNING = ['Toast--warning', '{% octicon alert aria-hidden:true %}']
+const TOAST_NONE = TOAST_INFO
 let toastCounter = 0
 
-function toast (title, message, type = TOAST_NONE) {
+function toast (message, type = TOAST_NONE) {
   const temp = $('#toast-template').prop('content')
   const toast = $(temp).clone()
   const id = toastCounter++
 
-  $(toast).find('.toast').attr('id', `toast-${id}`)
-  $(toast).find('.toast *').addClass(type)
-  $(toast).find('[data-temp=\'title\']').text(title)
-  $(toast).find('[data-temp=\'body\']').text(message)
-  $(toast).find('[data-temp]').removeAttr('data-temp')
+  $(toast).find('.Toast').attr('id', 'toast-' + id)
+  $(toast).find('.Toast').addClass(type[0])
+  $(toast).find('.Toast-icon').html(type[1])
+  $(toast).find('.Toast-content').text(message)
 
   $('#toaster').append(toast)
-  $(`#toast-${id}`).toast({ delay: 3000 })
-  $(`#toast-${id}`).toast('show')
-  $(`#toast-${id}`).click(function () {
-    $(this).toast('hide')
-  })
+  setTimeout(function () {
+    $('#toast-' + id).remove()
+  }, 3000)
 }
 
 function imageURL (bytes, format) {

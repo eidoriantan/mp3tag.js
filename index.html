@@ -1,79 +1,79 @@
 ---
 layout: default
 keywords: mp3, id3, audio, tag, edit, write
-last_modified_at: 01-05-2020T02:15:00+08:00
+last_modified_at: 05-02-2020T14:46:00+08:00
 ---
-<main class="main container">
-  <div class="jumbotron">
-    <h1 class="display-4">{{ site.github.project_title }}</h1>
-    <p class="lead">
-      <a href="{{ site.github.repository_url }}">{{ site.github.project_title }}</a>
-      is an open sourced JavaScript library used to edit the metadata of audio files.<br>
-      Licensed under the <a href="http://choosealicense.com/licenses/{{ site.github.license.spdx_id | downcase }}">{{ site.github.license.name }}</a>.
-    </p>
-  </div>
-  <hr class="my-5">
+<div class="blankslate my-12 anim-fade-in">
+  <h1 class="h00-mktg">{{ site.github.project_title}}</h1>
+  <p class="lead">
+    <a href="{{ site.github.repository_url }}">{{ site.github.project_title }}</a>
+    is an open sourced JavaScript library used to edit the metadata of audio files.<br>
+    Licensed under the
+    <a href="http://choosealicense.com/licenses/{{ site.github.license.spdx_id | downcase }}">{{ site.github.license.name }}</a>.
+  </p>
+</div>
 
-  <div class="text-center">
-    <h1 class="display-4 mb-3">Features</h1>
-    <div class="row no-gutters justify-content-around">
-      <div class="col-md-3 mx-2 mt-3">
-        <div>
-          {% octicon code height:72 class:"mx-auto" fill:"#cccccc" aria-hidden:true %}
-        </div>
-        <h3>Open Source</h3>
-        <p class="lead">
-          It is an open-sourced project and free for everyone to use! You can view the source codes at
-          <a href="{{ site.github.repository_url }}">GitHub</a>.
-        </p>
-      </div>
+<hr class="col-6 mx-auto">
 
-      <div class="col-md-3 mx-2 mt-3">
-        <div>
-          {% octicon browser height:72 class:"mx-auto" fill:"#cccccc" aria-hidden:true %}
-        </div>
-        <h3>Node & Browser</h3>
-        <p class="lead">
-          It can run on both <a href="https://nodejs.org">Node.js</a> and browsers. It was transpiled
-          with <a href="https://babeljs.io/">Babel</a> to support the older browsers.
-        </p>
-      </div>
+<div class="col-9 text-center mx-auto my-8">
+  <h1 class="h0 mx-auto mb-5">Features</h1>
+  <div class="d-flex flex-justify-around flex-content-around">
+    <div class="col-12 col-md-3 hover-grow">
+      {% octicon code height:72 aria-hidden:true %}
+      <h3>Open Source</h3>
+      <p class="lead">
+        It is an open-sourced project and free for everyone to use! You can view
+        the source codes at <a href="{{ site.github.repository_url }}">GitHub</a>
+      </p>
+    </div>
 
-      <div class="col-md-3 mx-2 mt-3">
-        <div>
-          {% octicon shield-check height:72 class:"mx-auto" fill:"#cccccc" aria-hidden:true %}
-        </div>
-        <h3>Standards Compliant</h3>
-        <p class="lead">
-          It follows the <a href="http://id3.org">ID3 Specifications</a> and can validate the user's
-          inputs to comply with the standards.
-        </p>
-      </div>
+    <div class="col-12 col-md-3 hover-grow">
+      {% octicon browser height:72 aria-hidden:true %}
+      <h3>Node & Browser</h3>
+      <p class="lead">
+        It can run on both <a href="https://nodejs.org">Node.js</a> and browsers.
+        It was transpiled with <a href="https://babeljs.io/">Babel</a> to support
+        the older browsers
+      </p>
+    </div>
+
+    <div class="col-12 col-md-3 hover-grow">
+      {% octicon shield-check height:72 aria-hidden:true %}
+      <h3>Standards Compliant</h3>
+      <p class="lead">
+        It follows the <a href="http://id3.org">ID3 Specifications</a> and can
+        validate the user's inputs to comply with the standards
+      </p>
     </div>
   </div>
-  <hr class="my-5">
+</div>
 
-  <div class="text-center">
-    <div>
-      {% octicon browser height:128 class:"mx-auto" fill:"#cccccc" aria-hidden:true %}
-    </div>
-    <h1 class="display-4 mb-3">Editor</h1>
-    <p class="lead mx-auto w-75">
-      You can use this editor as a live demonstration on how to use the library. The source codes are available at
-      <a href="https://github.com/eidoriantan/mp3tag.js/tree/gh-pages/">GitHub</a>. It also works offline so no worries
-      about uploading your files.
-    </p>
-    <a href="/editor/" class="btn btn-lg btn-primary" role="button">Editor</a>
-  </div>
-  <hr class="my-5">
+<hr class="col-6 mx-auto">
 
-  <div class="text-center mb-5">
-    <h1 class="display-4 mb-3">Support</h1>
-    <p class="lead mx-auto w-75">
-      If you really like the project and wanted to support, you can become a patreon or donate to use to support
-      the project.
-    </p>
+<div class="col-6 text-center mx-auto my-8">
+  <h1 class="h0 mx-auto mb-3">Editor</h1>
+  <p class="lead">
+    You can use this editor as a live demonstration on how to use the library.
+    The source codes are available at
+    <a href="https://github.com/eidoriantan/mp3tag.js/tree/gh-pages/">GitHub</a>.
+    It also works offline so no worries about uploading your files.
+  </p>
+  <a href="/editor/" class="btn btn-large btn-outline" role="button">
+    {% octicon pencil height:20 class:'mr-2' aria-hidden:true %}
+    <span>Editor</span>
+  </a>
+</div>
 
-    <a href="https://www.patreon.com/{{ site.github.owner_name }}"><img src="https://c5.patreon.com/external/logo/become_a_patron_button.png"></a>
-  </div>
-</main>
+<hr class="col-6 mx-auto">
+
+<div class="col-6 text-center mx-auto my-8">
+  <h1 class="h0 mx-auto mb-5">Support</h1>
+  <p class="lead">
+    If you really like the project and wanted to support, you can become a
+    patreon or donate to support the project.
+  </p>
+
+  <a href="https://www.patreon.com/{{ site.github.owner.login }}">
+    <img src="https://c5.patreon.com/external/logo/become_a_patron_button.png">
+  </a>
+</div>

@@ -1,9 +1,8 @@
 ---
 ---
 
-.edit-column {
-  margin-top: 56px;
-  height: calc(100vh - 56px);
-  min-height: calc(100vh - 56px);
-  overflow-y: scroll;
+.editor {
+  max-height: calc(100vh - 66px);
+
+  & > * { overflow-y: scroll; }
 }
