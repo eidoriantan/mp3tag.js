@@ -3,7 +3,7 @@ layout: default
 title: Downloads
 description: JavaScript library download page
 keywords: mp3, id3, audio, tag, edit, write, downloads
-last_modified_at: 05-02-2020T14:45:00+08:00
+last_modified_at: 05-02-2020T18:09:00+08:00
 ---
 <div class="Subhead mx-6 my-5">
   <div class="Subhead-heading">{{ site.github.project_title }} Releases</div>
@@ -14,27 +14,18 @@ last_modified_at: 05-02-2020T14:45:00+08:00
 </div>
 
 <div class="Box mx-6 my-5">
-  <div class="Box-header d-flex flex-items-baseline">
-    <div class="col-4">
-      <h3 class="h3">Version</h3>
-    </div>
-
-    <h3 class="h3">Downloads</h3>
-  </div>
-
   {% for release in site.github.releases limit:5 %}
-  <div class="Box-row d-flex flex-items-baseline">
-    <div class="col-4">
+  <div class="Box-row d-flex flex-wrap flex-items-baseline">
+    <div class="col-12 col-md-4">
       <a href="{{ release.html_url }}" class="Box-link h4">{{ release.name }}</a>
       {% if forloop.first %}<span class="Label Label--outline Label--outline-green" title="Latest release">Latest</span>{% endif %}
       <div class="text-gray">Published at: {{ release.published_at | date: '%a, %b %d %Y' }}</div>
     </div>
-    <a href="{{ release.zipball_url }}" download="{{ release.name }}" class="btn btn-primary" role="button">
+    <a href="{{ release.zipball_url }}" download="{{ release.name }}" class="btn btn-primary mx-auto mx-md-2 my-1" role="button">
       {% octicon code height:20 class:'mr-2' aria-hidden:true %}
       <span>Source Codes</span>
     </a>
-
-    <a href="{{ release.assets[0].browser_download_url }}" download="{{ release.assets[0].name }}" class="btn ml-2" role="button">
+    <a href="{{ release.assets[0].browser_download_url }}" download="{{ release.assets[0].name }}" class="btn mx-auto mx-md-2 my-1" role="button">
       {% octicon package height:20 class:'mr-2' aria-hidden:true %}
       <span>Built Package</span>
     </a>
