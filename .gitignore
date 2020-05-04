@@ -1,5 +1,7 @@
 
+.DS_Store
+
+# Ignore Node-generated files
 dist/
 node_modules/
-.DS_Store
 .npmrc
