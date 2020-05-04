@@ -13,15 +13,15 @@
   <link href="{{ '/assets/favicon-32x32.png' | relative_url }}" rel="icon" type="image/png" sizes="32x32">
   <link href="{{ '/assets/favicon-16x16.png' | relative_url }}" rel="icon" type="image/png" sizes="16x16">
   <link href="{{ '/assets/safari-pinned-tab.svg' | relative_url }}" rel="mask-icon" color="{{ site.color }}">
-  <link href="{{ '/assets/css/default.css' | relative_url }}" rel="stylesheet">
+  <link href="{{ '/assets/css/default.css?v=' | append: site.github.build_revision | relative_url }}" rel="stylesheet">
   {% for stylesheet in page.stylesheets %}
-  <link href="{{ stylesheet | relative_url }}" rel="stylesheet">
+  <link href="{{ stylesheet | append: '?v=' | append: site.github.build_revision | relative_url }}" rel="stylesheet">
   {% endfor %}
 
   <script src="{{ '/assets/js/jquery/jquery.min.js' | relative_url }}"></script>
   <script src="{{ '/assets/js/default.js' | relative_url }}"></script>
   {% for script in page.scripts %}
-  <script src="{{ script | relative_url }}"></script>
+  <script src="{{ script | append: '?v=' | append: site.github.build_revision | relative_url }}"></script>
   {% endfor %}
 
   {% seo title=false %}
