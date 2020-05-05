@@ -1,35 +1,4 @@
 
-$fonts-path: "/assets/fonts/";
-
-$font-weight-bold: 600 !default;
-$font-weight-semibold: 500 !default;
-$font-weight-normal: 400 !default;
-$font-weight-light: 300 !default;
-
-@font-face {
-  font-family: Inter;
-  font-style: normal;
-  font-weight: $font-weight-normal;
-  src: local("Inter"), local("Inter-Regular"), url("#{$fonts-path}Inter-Regular.woff") format("woff");
-  font-display: swap;
-}
-
-@font-face {
-  font-family: Inter;
-  font-style: normal;
-  font-weight: $font-weight-semibold;
-  src: local("Inter Medium"), local("Inter-Medium"), url("#{$fonts-path}Inter-Medium.woff") format("woff");
-  font-display: swap;
-}
-
-@font-face {
-  font-family: Inter;
-  font-style: normal;
-  font-weight: $font-weight-bold;
-  src: local("Inter Bold"), local("Inter-Bold"), url("#{$fonts-path}Inter-Bold.woff") format("woff");
-  font-display: swap;
-}
-
 $cursors:
   alias, all-scroll, auto, cell, context-menu, col-resize, copy, crosshair,
   default, e-resize, ew-resize, grab, grabbing, help, move, n-resize, ne-resize,
@@ -53,26 +22,23 @@ $cursors:
     position: absolute;
     top: 18px;
     right: 28px;
-    width: 200px;
 
     & > * {
-      margin: 4px 0;
-      float: right;
-      width: 200px;
+      max-width: 200px;
     }
   }
 }
 
-div.highlight { overflow-x: scroll; }
-
-.highlight {
-  padding: 12px;
+pre.highlight {
+  margin-bottom: 8px;
+  padding: 24px;
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
   border-bottom-left-radius: inherit;
   border-bottom-right-radius: inherit;
   color: #fdce93;
   background-color: #3f3f3f;
+  overflow-x: scroll;
 
   .rouge-code {
     padding-left: 24px;

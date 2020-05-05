@@ -1,10 +1,13 @@
 ---
 layout: documentations
 title: Tags and Frames
-description: JavaScript library documentations page. Learn more about the frames objects in this library
-keywords: mp3, id3, audio, tag, edit, write, documentations, docs, install, installation
+description: >-
+  JavaScript library documentations page. Learn more about the frames objects in
+  this library
+keywords: >-
+  mp3, id3, audio, tag, edit, write, documentations, docs, install, installation
 active: frames
-last_modified_at: 05-02-2020T14:45:00+08:00
+last_modified_at: 05-05-2020T16:17:00+08:00
 ---
 <div class="flash">
   <a href="https://github.com/eidoriantan/mp3tag.js/issues/new?assignees=eidoriantan&labels=enhancement%2C+frame-support&template=frame-request.md&title=%5BFRAME+ID%5D+Frame" class="btn btn-sm flash-action">
@@ -94,7 +97,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }]
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ txxx | markdownify }}</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -122,7 +125,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   <div class="Box-row">
     WXXX frames are parsed and must be saved as an array
   </div>
-  {% capture txxx %}
+  {% capture wxxx %}
   ```javascript
   // WXXX example
   [{
@@ -131,7 +134,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }]
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ wxxx | markdownify }}</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -147,7 +150,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
     strict mode is enabled, there should only one frame with the same language
     and content descriptor.
   </div>
-  {% capture txxx %}
+  {% capture langDesc %}
   ```javascript
   // COMM and USLT example
   [{
@@ -157,7 +160,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }]
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ langDesc | markdownify }}</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -175,7 +178,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
     <code>/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/</code> regex, and description
     should not exceed 64 characters.
   </div>
-  {% capture txxx %}
+  {% capture apic %}
   ```javascript
   // APIC example
   [{
@@ -186,7 +189,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }]
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ apic | markdownify }}</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -201,7 +204,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
     GEOB frame is parsed and must be saved as an array. If the strict mode is
     enabled, there should only one frame with the same content descriptor.
   </div>
-  {% capture txxx %}
+  {% capture geob %}
   ```javascript
   // GEOB example
   [{
@@ -212,7 +215,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }]
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ geob | markdownify }}</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -228,7 +231,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
     enabled, there should only one frame with the same Owner Identifier and it
     must be a non-empty string, and ID bytelength must not exceed 64 bytes.
   </div>
-  {% capture txxx %}
+  {% capture ufid %}
   ```javascript
   // UFID example
   [{
@@ -237,7 +240,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }]
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ ufid | markdownify }}</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -251,7 +254,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   <div class="Box-row">
     USER frame is parsed and must be saved as an object.
   </div>
-  {% capture txxx %}
+  {% capture user %}
   ```javascript
   // USER example
   {
@@ -260,7 +263,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ user | markdownify }}</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -278,7 +281,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
     <a href="https://www.xe.com/iso4217.php" target="_blank">ISO 4217</a>, and
     the currencyPrice must follow the format <code>N.nn</code>.
   </div>
-  {% capture txxx %}
+  {% capture owne %}
   ```javascript
   // OWNE example
   {
@@ -289,7 +292,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ owne | markdownify }}</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -304,7 +307,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
     PRIV frame is parsed and must be saved as an array. If the strict mode is
     enabled, there should only one frame with the same data.
   </div>
-  {% capture txxx %}
+  {% capture priv %}
   ```javascript
   // PRIV example
   [{
@@ -313,7 +316,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }]
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ priv | markdownify }}</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -328,7 +331,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
     SIGN frame is only available in ID3v2.4.0. SIGN frame is parsed and must be
     saved as an array. If the strict mode is enabled, all frames must be unique.
   </div>
-  {% capture txxx %}
+  {% capture sign %}
   ```javascript
   // SIGN example
   [{
@@ -337,7 +340,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }]
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ sign | markdownify }}</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -357,7 +360,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
     must follow the format for each line: [mm:ss.xxx] String to display during
     the time
   </div>
-  {% capture txxx %}
+  {% capture sylt %}
   ```javascript
   // SYLT example
   [{
@@ -369,7 +372,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }]
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ sylt | markdownify }}</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -383,7 +386,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   <div class="Box-row">
     MCDI frame is parsed and must be saved as an object.
   </div>
-  {% capture txxx %}
+  {% capture mcdi %}
   ```javascript
   // MCDI example
   {
@@ -391,7 +394,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ mcdi | markdownify }}</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -406,7 +409,7 @@ last_modified_at: 05-02-2020T14:45:00+08:00
     SYTC frame is parsed and must be saved as an object. If strict mode is
     enabled, format must be either 1 or 2.
   </div>
-  {% capture txxx %}
+  {% capture sytc %}
   ```javascript
   // SYTC example
   {
@@ -415,5 +418,5 @@ last_modified_at: 05-02-2020T14:45:00+08:00
   }
   ```
   {% endcapture %}
-  {{ txxx | markdownify }}
+  <div class="mb-n2">{{ sytc | markdownify }}</div>
 </div>
