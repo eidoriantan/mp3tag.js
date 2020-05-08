@@ -1,5 +1,5 @@
 
-[![mp3tag.js Banner](./assets/mp3tag-banner.png)](https://mp3tag.js.org)
+[![mp3tag.js Banner](https://github.com/eidoriantan/mp3tag.js/raw/gh-pages/assets/images/banner.png)](https://mp3tag.js.org)
 
 [![Node.js CI](https://github.com/eidoriantan/mp3tag.js/workflows/Node.js%20CI/badge.svg)](https://github.com/eidoriantan/mp3tag.js/actions?query=workflow%3A%22Node.js+CI%22)
 [![Build Status](https://travis-ci.com/eidoriantan/mp3tag.js.svg?branch=master)](https://travis-ci.com/eidoriantan/mp3tag.js)
