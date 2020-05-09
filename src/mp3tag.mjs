@@ -205,6 +205,7 @@ export default class MP3Tag {
 
     const view = new BufferView(buffer)
     let start = 0
+    let end = view.byteLength
     let i = 0
 
     while (i < view.byteLength) {
@@ -214,7 +215,16 @@ export default class MP3Tag {
       } else i++
     }
 
-    return buffer.slice(start)
+    i = start
+    while (i < view.byteLength) {
+      if (view.getUint8(i) === 0x33 && view.getUint8(i + 1) === 0x44 &&
+        view.getUint8(i + 2) === 0x49) {
+        end = i
+        break
+      } else i++
+    }
+
+    return buffer.slice(start, end)
   }
 
   getAudio () {
