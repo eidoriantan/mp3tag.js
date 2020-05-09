@@ -9,32 +9,6 @@ import { mergeBytes } from './utils/bytes.mjs'
 import { overwriteDefault, mergeObjects } from './utils/objects.mjs'
 import { isBuffer } from './utils/types.mjs'
 
-function mergeTags (tags) {
-  tags = mergeObjects({}, tags)
-  tags.TIT2 = tags.TIT2 || tags.title
-  tags.TPE1 = tags.TPE1 || tags.artist
-  tags.TALB = tags.TALB || tags.album
-  tags.TYER = tags.TYER || (tags.TDRC && tags.TDRC.substr(0, 4)) ||
-    tags.year
-  tags.COMM = tags.COMM || (tags.comment && [{
-    language: 'eng',
-    descriptor: '',
-    text: tags.comment
-  }])
-  tags.TRCK = tags.TRCK || tags.track
-  tags.TCON = tags.TCON || tags.genre
-
-  tags.title = tags.TIT2 || ''
-  tags.artist = tags.TPE1 || ''
-  tags.album = tags.TALB || ''
-  tags.year = tags.TYER || ''
-  tags.comment = (tags.COMM && tags.COMM[0].text) || ''
-  tags.track = (tags.TRCK && tags.TRCK.split('/')[0]) || ''
-  tags.genre = tags.TCON || ''
-
-  return tags
-}
-
 export default class MP3Tag {
   constructor (buffer, verbose = false) {
     if (!isBuffer(buffer)) {
@@ -234,4 +208,30 @@ export default class MP3Tag {
   }
 
   log (message) { if (this.verbose) console.log(message) }
+}
+
+function mergeTags (tags) {
+  tags = mergeObjects({}, tags)
+  tags.TIT2 = tags.TIT2 || tags.title
+  tags.TPE1 = tags.TPE1 || tags.artist
+  tags.TALB = tags.TALB || tags.album
+  tags.TYER = tags.TYER || (tags.TDRC && tags.TDRC.substr(0, 4)) ||
+    tags.year
+  tags.COMM = tags.COMM || (tags.comment && [{
+    language: 'eng',
+    descriptor: '',
+    text: tags.comment
+  }])
+  tags.TRCK = tags.TRCK || tags.track
+  tags.TCON = tags.TCON || tags.genre
+
+  tags.title = tags.TIT2 || ''
+  tags.artist = tags.TPE1 || ''
+  tags.album = tags.TALB || ''
+  tags.year = tags.TYER || ''
+  tags.comment = (tags.COMM && tags.COMM[0].text) || ''
+  tags.track = (tags.TRCK && tags.TRCK.split('/')[0]) || ''
+  tags.genre = tags.TCON || ''
+
+  return tags
 }
