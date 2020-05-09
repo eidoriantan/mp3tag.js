@@ -6829,7 +6829,8 @@
 	function encode$1(tags, options) {
 	  var version = options.version,
 	      padding = options.padding,
-	      unsynch = options.unsynch;
+	      unsynch = options.unsynch,
+	      footer = options.footer;
 	  var headerBytes = [0x49, 0x44, 0x33, version, 0];
 	  var flagsByte = 0;
 	  var sizeView = new BufferView(4);
@@ -6851,7 +6852,19 @@
 
 	  if (unsynch) flagsByte = setBit(flagsByte, 7);
 	  sizeView.setUint32(0, encodeSynch(framesBytes.length));
-	  return mergeBytes(headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes).buffer;
+
+	  if (version === 4 && footer) {
+	    var footerBytes = [0x33, 0x44, 0x49, version, 0];
+	    flagsByte = setBit(flagsByte, 4);
+	    var header = mergeBytes(headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes).buffer;
+	    var _footer = mergeBytes(footerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes).buffer;
+	    return {
+	      header: header,
+	      footer: _footer
+	    };
+	  } else {
+	    return mergeBytes(headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes).buffer;
+	  }
 	}
 	function transform(tags, version) {
 	  if (version === 3) return transformv4tov3(tags);else if (version === 4) return transformv3tov4(tags);else return new TagError(200, 'Unknown version');
@@ -6940,6 +6953,279 @@
 	  return transformed;
 	}
 
+	var MP3Tag = /*#__PURE__*/function () {
+	  function MP3Tag(buffer) {
+	    var verbose = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+	    _classCallCheck(this, MP3Tag);
+
+	    if (!isBuffer(buffer)) {
+	      throw new TypeError('buffer is not ArrayBuffer/Buffer');
+	    }
+
+	    this.name = 'MP3Tag';
+	    this.version = '2.2.0';
+	    this.verbose = verbose;
+	    this.error = '';
+	    this.errorCode = -1;
+	    this.buffer = buffer;
+	    this.tags = {};
+	  }
+
+	  _createClass(MP3Tag, [{
+	    key: "read",
+	    value: function read() {
+	      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	      this.tags = {};
+	      this.error = '';
+	      this.errorCode = -1;
+	      var tags;
+
+	      try {
+	        tags = MP3Tag.readBuffer(this.buffer, options, this.verbose);
+	      } catch (error) {
+	        if (error instanceof TagError) {
+	          this.error = error.message;
+	          this.errorCode = error.code;
+	        } else throw error;
+	      }
+
+	      this.tags = tags;
+	      return this.tags;
+	    }
+	  }, {
+	    key: "save",
+	    value: function save() {
+	      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	      this.error = '';
+	      this.errorCode = -1;
+	      var buffer;
+
+	      try {
+	        buffer = MP3Tag.writeBuffer(this.buffer, this.tags, options, this.verbose);
+	      } catch (error) {
+	        if (error instanceof TagError) {
+	          this.error = error.message;
+	          this.errorCode = error.code;
+	        } else throw error;
+	      }
+
+	      if (this.errorCode < 0) this.buffer = buffer;
+	      return this.buffer;
+	    }
+	  }, {
+	    key: "remove",
+	    value: function remove() {
+	      this.tags = {};
+	      this.error = '';
+	      this.errorCode = -1;
+	      this.buffer = this.getAudio();
+	      return true;
+	    }
+	  }, {
+	    key: "getAudio",
+	    value: function getAudio() {
+	      return MP3Tag.getAudioBuffer(this.buffer);
+	    }
+	  }, {
+	    key: "log",
+	    value: function log(message) {
+	      if (this.verbose) console.log(message);
+	    }
+	  }], [{
+	    key: "readBuffer",
+	    value: function readBuffer(buffer) {
+	      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	      var verbose = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+	      if (!isBuffer(buffer)) {
+	        throw new TypeError('buffer is not ArrayBuffer/Buffer');
+	      }
+
+	      var tags = {};
+	      options = overwriteDefault(options, {
+	        id3v1: true,
+	        id3v2: true
+	      });
+
+	      if (options.id3v1 && hasID3v1(buffer)) {
+	        if (verbose) console.log('ID3v1 found, reading...');
+	        var v1Tags = decode(buffer);
+	        if (verbose) console.log('ID3v1 reading finished');
+	        tags = mergeObjects(tags, v1Tags);
+	      }
+
+	      if (options.id3v2 && hasID3v2(buffer)) {
+	        if (verbose) console.log('ID3v2 found, reading...');
+	        var v2Tags = decode$1(buffer);
+	        if (verbose) console.log('ID3v2 reading finished');
+	        tags = mergeObjects(tags, v2Tags);
+	      }
+
+	      tags = mergeTags(tags);
+	      Object.defineProperties(tags, {
+	        title: {
+	          get: function get() {
+	            return this.TIT2 || '';
+	          },
+	          set: function set(value) {
+	            this.TIT2 = value;
+	          }
+	        },
+	        artist: {
+	          get: function get() {
+	            return this.TPE1 || '';
+	          },
+	          set: function set(value) {
+	            this.TPE1 = value;
+	          }
+	        },
+	        album: {
+	          get: function get() {
+	            return this.TALB || '';
+	          },
+	          set: function set(value) {
+	            this.TALB = value;
+	          }
+	        },
+	        year: {
+	          get: function get() {
+	            return this.TYER || this.TDRC && this.TDRC.substr(0, 4) || '';
+	          },
+	          set: function set(value) {
+	            this.TYER = value;
+	          }
+	        },
+	        comment: {
+	          get: function get() {
+	            return this.COMM && this.COMM[0].text || '';
+	          },
+	          set: function set(value) {
+	            var comment = {
+	              language: 'eng',
+	              descriptor: '',
+	              text: value
+	            };
+	            if (Array.isArray(this.COMM)) this.COMM[0] = comment;else this.COMM = [comment];
+	          }
+	        },
+	        track: {
+	          get: function get() {
+	            return this.TRCK && this.TRCK.split('/')[0] || '';
+	          },
+	          set: function set(value) {
+	            this.TRCK = value;
+	          }
+	        },
+	        genre: {
+	          get: function get() {
+	            return this.TCON || '';
+	          },
+	          set: function set(value) {
+	            this.TCON = value;
+	          }
+	        }
+	      });
+	      return tags;
+	    }
+	  }, {
+	    key: "writeBuffer",
+	    value: function writeBuffer(buffer, tags) {
+	      var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+	      var verbose = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+	      var defaultVersion = tags.v2Version ? tags.v2Version[0] : 4;
+	      tags = mergeTags(tags);
+	      options = overwriteDefault(options, {
+	        strict: false,
+	        id3v1: {
+	          include: true
+	        },
+	        id3v2: {
+	          include: true,
+	          unsynch: true,
+	          version: defaultVersion,
+	          padding: 2048,
+	          footer: true
+	        }
+	      });
+	      var audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer));
+
+	      if (options.id3v1.include) {
+	        if (verbose) console.log('Validating ID3v1...');
+	        validate(tags, options.strict);
+	        if (verbose) console.log('Writing ID3v1...');
+	        var encoded = encode(tags);
+	        var tagBytes = new Uint8Array(encoded);
+	        audio = mergeBytes(audio, tagBytes);
+	      }
+
+	      if (options.id3v2.include) {
+	        if (verbose) console.log('Transforming ID3v2...');
+	        tags = transform(tags, options.id3v2.version);
+	        if (verbose) console.log('Validating ID3v2...');
+	        validate$1(tags, options.strict, options.id3v2);
+	        if (verbose) console.log('Writing ID3v2...');
+
+	        var _encoded = encode$1(tags, options.id3v2);
+
+	        if (options.id3v2.version === 4 && options.id3v2.footer) {
+	          var header = new Uint8Array(_encoded.header);
+	          var footer = new Uint8Array(_encoded.footer);
+	          audio = mergeBytes(header, audio);
+
+	          if (hasID3v1(audio.buffer)) {
+	            var id3v1 = audio.subarray(audio.length - 128);
+	            var notId3v1 = audio.subarray(0, audio.length - 128);
+	            audio = mergeBytes(notId3v1, footer, id3v1);
+	          } else audio = mergeBytes(audio, footer);
+	        } else {
+	          var _tagBytes = new Uint8Array(_encoded);
+
+	          audio = mergeBytes(_tagBytes, audio);
+	        }
+	      }
+
+	      return audio.buffer;
+	    }
+	  }, {
+	    key: "getAudioBuffer",
+	    value: function getAudioBuffer(buffer) {
+	      if (!isBuffer(buffer)) {
+	        throw new TypeError('buffer is not ArrayBuffer/Buffer');
+	      }
+
+	      if (hasID3v1(buffer)) {
+	        buffer = buffer.slice(0, buffer.byteLength - 128);
+	      }
+
+	      var view = new BufferView(buffer);
+	      var start = 0;
+	      var end = view.byteLength;
+	      var i = 0;
+
+	      while (i < view.byteLength) {
+	        if (view.getUint8(i) === 0xff && view.getUint8(i + 1) === 0xfb) {
+	          start = i;
+	          break;
+	        } else i++;
+	      }
+
+	      i = start;
+
+	      while (i < view.byteLength) {
+	        if (view.getUint8(i) === 0x33 && view.getUint8(i + 1) === 0x44 && view.getUint8(i + 2) === 0x49) {
+	          end = i;
+	          break;
+	        } else i++;
+	      }
+
+	      return buffer.slice(start, end);
+	    }
+	  }]);
+
+	  return MP3Tag;
+	}();
+
 	function mergeTags(tags) {
 	  tags = mergeObjects({}, tags);
 	  tags.TIT2 = tags.TIT2 || tags.title;
@@ -6962,220 +7248,6 @@
 	  tags.genre = tags.TCON || '';
 	  return tags;
 	}
-
-	var MP3Tag = /*#__PURE__*/function () {
-	  function MP3Tag(buffer) {
-	    var verbose = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-	    _classCallCheck(this, MP3Tag);
-
-	    if (!isBuffer(buffer)) {
-	      throw new TypeError('buffer is not ArrayBuffer/Buffer');
-	    }
-
-	    this.name = 'MP3Tag';
-	    this.version = '2.0.5';
-	    this.verbose = verbose;
-	    this.error = '';
-	    this.errorCode = -1;
-	    this.buffer = buffer;
-	    this.tags = {};
-	  }
-
-	  _createClass(MP3Tag, [{
-	    key: "read",
-	    value: function read() {
-	      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-	      this.tags = {};
-	      this.error = '';
-	      this.errorCode = -1;
-	      var tags = {};
-	      options = overwriteDefault(options, {
-	        id3v1: true,
-	        id3v2: true
-	      });
-
-	      try {
-	        if (options.id3v1 && hasID3v1(this.buffer)) {
-	          this.log('ID3v1 found, reading...');
-	          var v1Tags = decode(this.buffer);
-	          this.log('ID3v1 reading finished');
-	          tags = mergeObjects(tags, v1Tags);
-	        }
-
-	        if (options.id3v2 && hasID3v2(this.buffer)) {
-	          this.log('ID3v2 found, reading...');
-	          var v2Tags = decode$1(this.buffer);
-	          this.log('ID3v2 reading finished');
-	          tags = mergeObjects(tags, v2Tags);
-	        }
-	      } catch (error) {
-	        if (error instanceof TagError) {
-	          this.error = error.message;
-	          this.errorCode = error.code;
-	        } else throw error;
-	      }
-
-	      if (this.errorCode < 0) {
-	        tags = mergeTags(tags);
-	        Object.defineProperties(tags, {
-	          title: {
-	            get: function get() {
-	              return this.TIT2 || '';
-	            },
-	            set: function set(value) {
-	              this.TIT2 = value;
-	            }
-	          },
-	          artist: {
-	            get: function get() {
-	              return this.TPE1 || '';
-	            },
-	            set: function set(value) {
-	              this.TPE1 = value;
-	            }
-	          },
-	          album: {
-	            get: function get() {
-	              return this.TALB || '';
-	            },
-	            set: function set(value) {
-	              this.TALB = value;
-	            }
-	          },
-	          year: {
-	            get: function get() {
-	              return this.TYER || this.TDRC && this.TDRC.substr(0, 4) || '';
-	            },
-	            set: function set(value) {
-	              this.TYER = value;
-	            }
-	          },
-	          comment: {
-	            get: function get() {
-	              return this.COMM && this.COMM[0].text || '';
-	            },
-	            set: function set(value) {
-	              var comment = {
-	                language: 'eng',
-	                descriptor: '',
-	                text: value
-	              };
-	              if (Array.isArray(this.COMM)) this.COMM[0] = comment;else this.COMM = [comment];
-	            }
-	          },
-	          track: {
-	            get: function get() {
-	              return this.TRCK && this.TRCK.split('/')[0] || '';
-	            },
-	            set: function set(value) {
-	              this.TRCK = value;
-	            }
-	          },
-	          genre: {
-	            get: function get() {
-	              return this.TCON || '';
-	            },
-	            set: function set(value) {
-	              this.TCON = value;
-	            }
-	          }
-	        });
-	        this.tags = tags;
-	      }
-
-	      return this.tags;
-	    }
-	  }, {
-	    key: "save",
-	    value: function save() {
-	      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-	      this.error = '';
-	      this.errorCode = -1;
-	      var defaultVersion = this.tags.v2Version ? this.tags.v2Version[0] : 4;
-	      var tags = mergeTags(this.tags);
-	      options = overwriteDefault(options, {
-	        strict: false,
-	        id3v1: {
-	          include: true
-	        },
-	        id3v2: {
-	          include: true,
-	          unsynch: true,
-	          version: defaultVersion,
-	          padding: 2048
-	        }
-	      });
-	      var audio = new Uint8Array(this.getAudio());
-
-	      try {
-	        if (options.id3v1.include) {
-	          this.log('Validating ID3v1...');
-	          validate(tags, options.strict);
-	          this.log('Writing ID3v1...');
-	          var encoded = encode(tags);
-	          var tagBytes = new Uint8Array(encoded);
-	          audio = mergeBytes(audio, tagBytes);
-	        }
-
-	        if (options.id3v2.include) {
-	          this.log('Transforming ID3v2...');
-	          tags = transform(tags, options.id3v2.version);
-	          this.log('Validating ID3v2...');
-	          validate$1(tags, options.strict, options.id3v2);
-	          this.log('Writing ID3v2...');
-
-	          var _encoded = encode$1(tags, options.id3v2);
-
-	          var _tagBytes = new Uint8Array(_encoded);
-
-	          audio = mergeBytes(_tagBytes, audio);
-	        }
-	      } catch (error) {
-	        if (error instanceof TagError) {
-	          this.error = error.message;
-	          this.errorCode = error.code;
-	        } else throw error;
-	      }
-
-	      if (this.errorCode < 0) this.buffer = audio.buffer;
-	      return this.buffer;
-	    }
-	  }, {
-	    key: "getAudio",
-	    value: function getAudio() {
-	      var buffer = this.buffer;
-
-	      if (!isBuffer(buffer)) {
-	        throw new TypeError('buffer is not ArrayBuffer/Buffer');
-	      }
-
-	      if (hasID3v1(buffer)) {
-	        buffer = buffer.slice(0, buffer.byteLength - 128);
-	      }
-
-	      var view = new BufferView(buffer);
-	      var start = 0;
-	      var i = 0;
-
-	      while (i < view.byteLength) {
-	        if (view.getUint8(i) === 0xff && view.getUint8(i + 1) === 0xfb) {
-	          start = i;
-	          break;
-	        } else i++;
-	      }
-
-	      return buffer.slice(start);
-	    }
-	  }, {
-	    key: "log",
-	    value: function log(message) {
-	      if (this.verbose) console.log(message);
-	    }
-	  }]);
-
-	  return MP3Tag;
-	}();
 
 	return MP3Tag;
 
