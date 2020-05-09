@@ -122,7 +122,8 @@ export default class MP3Tag {
         include: true,
         unsynch: true,
         version: defaultVersion,
-        padding: 2048
+        padding: 2048,
+        footer: true
       }
     })
 
@@ -147,8 +148,21 @@ export default class MP3Tag {
 
       if (verbose) console.log('Writing ID3v2...')
       const encoded = ID3v2.encode(tags, options.id3v2)
-      const tagBytes = new Uint8Array(encoded)
-      audio = mergeBytes(tagBytes, audio)
+
+      if (options.id3v2.version === 4 && options.id3v2.footer) {
+        const header = new Uint8Array(encoded.header)
+        const footer = new Uint8Array(encoded.footer)
+        audio = mergeBytes(header, audio)
+
+        if (ID3v1.hasID3v1(audio.buffer)) {
+          const id3v1 = audio.subarray(audio.length - 128)
+          const notId3v1 = audio.subarray(0, audio.length - 128)
+          audio = mergeBytes(notId3v1, footer, id3v1)
+        } else audio = mergeBytes(audio, footer)
+      } else {
+        const tagBytes = new Uint8Array(encoded)
+        audio = mergeBytes(tagBytes, audio)
+      }
     }
 
     return audio.buffer

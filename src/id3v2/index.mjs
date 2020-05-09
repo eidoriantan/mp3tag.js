@@ -158,7 +158,7 @@ export function validate (tags, strict, options) {
 }
 
 export function encode (tags, options) {
-  const { version, padding, unsynch } = options
+  const { version, padding, unsynch, footer } = options
 
   const headerBytes = [0x49, 0x44, 0x33, version, 0]
   let flagsByte = 0
@@ -176,9 +176,23 @@ export function encode (tags, options) {
   if (unsynch) flagsByte = setBit(flagsByte, 7)
   sizeView.setUint32(0, encodeSynch(framesBytes.length))
 
-  return mergeBytes(
-    headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes
-  ).buffer
+  if (version === 4 && footer) {
+    const footerBytes = [0x33, 0x44, 0x49, version, 0]
+    flagsByte = setBit(flagsByte, 4)
+
+    const header = mergeBytes(
+      headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes
+    ).buffer
+    const footer = mergeBytes(
+      footerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes
+    ).buffer
+
+    return { header, footer }
+  } else {
+    return mergeBytes(
+      headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes
+    ).buffer
+  }
 }
 
 export function transform (tags, version) {
