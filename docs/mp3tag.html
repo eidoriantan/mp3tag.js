@@ -5,7 +5,7 @@ description: >-
   JavaScript library documentations page. mp3tag.js exported class documentation
 keywords: mp3, id3, audio, tag, edit, write, documentations, docs, mp3tag
 active: mp3tag
-last_modified_at: 2020-05-07T17:04:00+08:00
+last_modified_at: 2020-05-10T01:56:00+08:00
 ---
 <div id="properties" class="Subhead bg-white position-sticky top-0">
   <div class="Subhead-heading">Properties</div>
@@ -128,7 +128,8 @@ last_modified_at: 2020-05-07T17:04:00+08:00
       include: true, // Add ID3v2 tags to buffer
       unsynch: true, // Use unsynchronisation scheme
       version: defaultVersion, // ID3v2 major version
-      padding: 2048 // Number of null bytes added after ID3v2
+      padding: 2048, // Number of null bytes added after ID3v2
+      footer: true // Also writes footer at the end of the audio data
     }
   }
   ```
