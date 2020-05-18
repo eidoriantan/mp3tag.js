@@ -17,7 +17,10 @@ layout: default
           </a>
         </div>
         <div class="flex-self-end">
-          <span class="text-gray">Last Modified: {{ page.last_modified_at | date: '%A, %b %d %Y' }}</span>
+          <span class="text-gray">Last Modified:</span>
+        </div>
+        <div class="flex-self-end">
+          <span class="text-gray">{{ page.last_modified_at | date: '%A, %b %d %Y' }}</span>
         </div>
       </div>
     </div>
