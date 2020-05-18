@@ -45,8 +45,8 @@ function filter (tags) {
   tags.title = tags.TIT2 || tags.title || ''
   tags.artist = tags.TPE1 || tags.artist || ''
   tags.album = tags.TALB || tags.album || ''
-  tags.year = tags.TYER || (tags.TDRC ? tags.TDRC.substr(0, 4) : '') ||
-    tags.year || ''
+  tags.year = tags.TYER || (tags.TDRC && tags.TDRC.substr(0, 4)) || tags.year ||
+    ''
   tags.comment = (tags.COMM ? tags.COMM[0].text : '') || tags.comment || ''
   tags.track = (tags.TRCK ? tags.TRCK.split('/')[0] : '') || tags.track || ''
   tags.genre = tags.TCON || tags.genre || ''
