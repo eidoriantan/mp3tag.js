@@ -10,11 +10,12 @@
 audio files. It currently supports ID3v1, ID3v2.3, and ID3v2.4 tags.
 
 Visit [https://mp3tag.js.org](https://mp3tag.js.org) to learn more about the
-library and view it in action through an [editor](https://mp3tag.js.org/editor).
-You can also explore the [examples](https://github.com/eidoriantan/mp3tag.js/tree/master/examples)
-directory.
+library or view it in action through an [editor](https://mp3tag.js.org/editor).
+You can also explore the
+[examples](https://github.com/eidoriantan/mp3tag.js/tree/master/examples)
+directory for examples.
 
-The website is also open sourced and can be viewed at the
+The website is also open sourced and can be viewed at
 [gh-pages](https://github.com/eidoriantan/mp3tag.js/tree/gh-pages) branch.
 
 ### Features
@@ -25,17 +26,8 @@ The website is also open sourced and can be viewed at the
 
 ## Installation
 You can download the ready-to-use script at
-[GitHub releases](https://github.com/eidoriantan/mp3tag.js/releases) or you can
-build your own by cloning this repository using `git` then build it.
-
-```shell
-git clone https://github.com/eidoriantan/mp3tag.js
-cd ./mp3tag.js
-npm install
-npm run build
-```
-
-You can also install this package by using `npm`:
+[GitHub releases](https://github.com/eidoriantan/mp3tag.js/releases). You can
+also install this package by using [npm](https://www.npmjs.com/):
 
 ```shell
 npm install --save mp3tag.js@latest
