@@ -1,9 +1,11 @@
+---
+---
 {
     "name": "mp3tag.js",
     "short_name": "mp3tag.js",
     "display": "standalone",
-    "theme_color": "#2b594c",
-    "background_color": "#2b594c",
+    "theme_color": "{{ site.color }}",
+    "background_color": "{{ site.color }}",
     "icons": [{
         "src": "/assets/android-chrome-192x192.png",
         "sizes": "192x192",
