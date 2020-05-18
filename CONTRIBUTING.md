@@ -1,7 +1,7 @@
 
 ### Contributing
-This library is open to contributions from anyone who are interested but please
-make sure that you are following this guideline:
+This library is open for contributions from anyone who are interested but please
+make sure that you are following these guidelines:
 
  * When editting JavaScript (`*.js`, `*.mjs`) files, please follow the
    [standard.js styleguide](https://standardjs.com/rules.html);
@@ -12,11 +12,10 @@ make sure that you are following this guideline:
    sure that you are following the styleguide and not breaking any codes;
 
  * When committing, the commit message should follow the
-   [Convential Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.4/).
-   This might be useful in the future for automations.
+   [Convential Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
-Also, take a look at the
-[repository's board](https://github.com/eidoriantan/mp3tag.js/projects) to know
-about the project's future plans, things we should do and don't.
+Also, please take a look at the
+[repository's projects](https://github.com/eidoriantan/mp3tag.js/projects) to
+know the library's future plans.
 
-Any contributions to this project is greatly appreciated.
+Any contributions to this library is greatly appreciated. Thank you
