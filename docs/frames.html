@@ -7,8 +7,26 @@ description: >-
 keywords: >-
   mp3, id3, audio, tag, edit, write, documentations, docs, install, installation
 active: frames
-last_modified_at: 2020-05-07T17:04:00+08:00
+last_modified_at: 2020-05-18T01:12:00+08:00
 ---
+<div class="Subhead bg-white position-sticky top-0">
+  <div class="Subhead-heading">Special Tags</div>
+</div>
+
+<div class="Box Box--blue Box--condensed my-3">
+  <div class="Box-row"><strong>title</strong> (ID3v2: TIT2)</div>
+  <div class="Box-row"><strong>artist</strong> (ID3v2: TPE1)</div>
+  <div class="Box-row"><strong>album</strong> (ID3v2: TALB)</div>
+  <div class="Box-row"><strong>year</strong> (ID3v2: TYER)</div>
+  <div class="Box-row"><strong>comment</strong> (ID3v2: COMM)</div>
+  <div class="Box-row"><strong>track</strong> (ID3v2: TRCK)</div>
+  <div class="Box-row"><strong>genre</strong> (ID3v2: TCON)</div>
+</div>
+
+<div class="Subhead bg-white position-sticky top-0">
+  <div class="Subhead-heading">ID3v2 Frames</div>
+</div>
+
 <div class="flash">
   <a href="https://github.com/eidoriantan/mp3tag.js/issues/new?assignees=eidoriantan&labels=enhancement%2C+frame-support&template=frame-request.md&title=%5BFRAME+ID%5D+Frame" class="btn btn-sm flash-action">
     {% octicon issue-opened height:20 class:'mr-2' aria-hidden:true %}
@@ -174,8 +192,8 @@ last_modified_at: 2020-05-07T17:04:00+08:00
   <div class="Box-row">
     APIC frame is parsed and must be saved as an array. If the strict mode is
     enabled, there should only one frame with the same content descriptor, types
-    should be in range of 0 - 21, format should match
-    <code>/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/</code> regex, and description
+    should be in range of 0 - 21, format should be a valid MIME type
+    (<code>/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/</code>), and description
     should not exceed 64 characters.
   </div>
   {% capture apic %}
