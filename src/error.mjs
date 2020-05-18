@@ -1,7 +1,6 @@
 
 const E_CODES = {
   0: 'Unknown error',
-  1: 'This format is not yet supported',
   100: 'ID3v1 Error: This file is not an ID3v1',
   101: 'ID3v1 Error: Malform tag',
   102: 'ID3v1 Error: Frame validation failed',
