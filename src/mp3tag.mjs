@@ -227,9 +227,7 @@ export default class MP3Tag {
     return buffer.slice(start, end)
   }
 
-  getAudio () {
-    return MP3Tag.getAudioBuffer(this.buffer)
-  }
+  getAudio () { return MP3Tag.getAudioBuffer(this.buffer) }
 
   log (message) { if (this.verbose) console.log(message) }
 }
