@@ -239,8 +239,7 @@ function mergeTags (tags) {
   tags.TIT2 = tags.TIT2 || tags.title
   tags.TPE1 = tags.TPE1 || tags.artist
   tags.TALB = tags.TALB || tags.album
-  tags.TYER = tags.TYER || (tags.TDRC && tags.TDRC.substr(0, 4)) ||
-    tags.year
+  tags.TYER = tags.TYER || (tags.TDRC && tags.TDRC.substr(0, 4)) || tags.year
   tags.COMM = tags.COMM || (tags.comment && [{
     language: 'eng',
     descriptor: '',
