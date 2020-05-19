@@ -188,7 +188,7 @@ async function writeData () {
     toast('Writing the tags to file', TOAST_INFO)
 
     writeDetails()
-    await mp3tag.save({ strict: true })
+    mp3tag.save({ strict: true })
     if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
   } catch (error) {
     toast(error.message, TOAST_DANGER)
