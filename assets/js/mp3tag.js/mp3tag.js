@@ -3321,7 +3321,6 @@
 
 	var E_CODES = {
 	  0: 'Unknown error',
-	  1: 'This format is not yet supported',
 	  100: 'ID3v1 Error: This file is not an ID3v1',
 	  101: 'ID3v1 Error: Malform tag',
 	  102: 'ID3v1 Error: Frame validation failed',
@@ -4214,7 +4213,7 @@
 	  tags.title = tags.TIT2 || tags.title || '';
 	  tags.artist = tags.TPE1 || tags.artist || '';
 	  tags.album = tags.TALB || tags.album || '';
-	  tags.year = tags.TYER || (tags.TDRC ? tags.TDRC.substr(0, 4) : '') || tags.year || '';
+	  tags.year = tags.TYER || tags.TDRC && tags.TDRC.substr(0, 4) || tags.year || '';
 	  tags.comment = (tags.COMM ? tags.COMM[0].text : '') || tags.comment || '';
 	  tags.track = (tags.TRCK ? tags.TRCK.split('/')[0] : '') || tags.track || '';
 	  tags.genre = tags.TCON || tags.genre || '';
@@ -6964,7 +6963,7 @@
 	    }
 
 	    this.name = 'MP3Tag';
-	    this.version = '2.2.0';
+	    this.version = '2.2.1';
 	    this.verbose = verbose;
 	    this.error = '';
 	    this.errorCode = -1;
