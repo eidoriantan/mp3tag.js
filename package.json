@@ -24,6 +24,7 @@
     "url": "https://patreon.com/eidoriantan"
   },
   "main": "dist/mp3tag.js",
+  "module": "src/mp3tag.mjs",
   "directories": {
     "example": "examples",
     "test": "test"
