@@ -26,13 +26,13 @@ $(document).ready(function () {
     importFiles(event.originalEvent.dataTransfer.files)
   })
 
+  $('#list-wrapper').click(resetForm)
+
   $('#file-audios').on('change', function () {
     const files = $(this).prop('files')
     importFiles(files)
     $(this).val('')
   })
-
-  $('#list-wrapper').click(resetForm)
 
   $('#cover').on('change', async function () {
     const files = $(this).prop('files')
@@ -57,6 +57,19 @@ $(document).ready(function () {
       href: URL.createObjectURL(file),
       download: file.name
     })
+  })
+
+  $('#track, #year').on('input', function (event) {
+    const validity = $(this).prop('validity')
+    const note = $(this).parent().parent().children('.note')
+
+    if (validity.valid) {
+      $(note).text('')
+      $(note).parent().removeClass('position-relative errored')
+    } else {
+      $(note).text('Invalid value')
+      $(note).parent().addClass('position-relative errored')
+    }
   })
 })
 
@@ -191,6 +204,7 @@ function resetForm () {
 
   $('#edit-form').trigger('reset')
   $('#edit-form').find('input, textarea, select, button').attr('disabled', true)
+  $('#edit-form .form-group').removeClass('position-relative errored')
   $('#download').attr({ href: null, download: null })
   $('#download').addClass('disabled')
   $('#cover-preview').attr('src', blankImage)
