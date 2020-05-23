@@ -4,58 +4,74 @@ title: Usage
 description: JavaScript library documentations page. How to use the library
 keywords: mp3, id3, audio, tag, edit, write, documentations, docs, usage
 active: usage
-last_modified_at: 2020-05-07T17:04:00+08:00
+last_modified_at: 2020-05-23T00:56:00+08:00
 ---
-<h5 class="f3-light">Browser</h5>
-{% capture browser %}
+<h5 class="f3-light my-2">Simple Usage</h5>
+{% capture simple %}
 ```javascript
-const inputFile = document.getElementById('input-file')
-inputFile.onchange = function () {
-  const reader = new FileReader()
-  reader.onload = function () {
-    const buffer = this.result
 
-    const mp3tag = new MP3Tag(buffer)
-    mp3tag.read()
+const buffer = null // Replace this with the mp3 file's buffer
+const verbose = true // Logs all processes using `console.log`
+const mp3tag = new MP3Tag(buffer, verbose)
 
-    // Handle error if there's any
-    if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
+// Read the tags from the buffer
+mp3tag.read()
 
-    console.log(mp3tag.tags)
-    mp3tag.tags.title = 'NEW TITLE'
-    mp3tag.tags.artist = 'NEW ARTIST'
-    mp3tag.save({ strict: true })
+// Handle error if there's any
+if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
 
-    if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
-    mp3tag.read()
-  }
+console.log(mp3tag.tags)
 
-  if (this.files.length > 0) {
-    reader.readAsArrayBuffer(this.files[0])
-  }
-}
+// Please see `Tags and Frames`
+mp3tag.tags.title = 'New Title'
+mp3tag.tags.artist = 'New Artist'
+mp3tag.tags.album = 'New Album'
+
+mp3tag.save() // Saves the new changes
+
 ```
 {% endcapture %}
-{{ browser | markdownify }}
+{{ simple | markdownify }}
 
-<h5 class="f1-light mt-4">Node.js</h5>
-{% capture nodejs %}
+<h5 class="f3-light my-2">Advanced Usage</h5>
+{% capture advanced %}
 ```javascript
+
 const MP3Tag = require('mp3tag.js')
 const fs = require('fs')
 
 const buffer = fs.readFileSync('/path/to/mp3')
-const mp3tag = new MP3Tag(buffer)
-mp3tag.read()
+const verbose = true // Logs all processes using `console.log`
+const mp3tag = new MP3Tag(buffer, verbose)
+
+// Read the tags from the buffer
+mp3tag.read({
+  id3v2: false // Ignore ID3v2 tags when reading
+})
+
+// Handle error if there's any
 if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
 
 console.log(mp3tag.tags)
-mp3tag.tags.title = 'NEW TITLE'
-mp3tag.tags.artist = 'NEW ARTIST'
-mp3tag.save({ strict: true })
 
-if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
-mp3tag.read()
+mp3tag.tags.title = 'New Title'
+mp3tag.tags.artist = 'New Artist'
+mp3tag.tags.album = 'New Album'
+
+mp3tag.save({
+  strict: true, // Strict mode, validates all inputs against the standards. See id3.org
+  // ID3v2 Options
+  id3v2: {
+    padding: 4096,
+    footer: false
+  }
+})
+
 ```
 {% endcapture %}
-{{ nodejs | markdownify }}
+{{ advanced | markdownify }}
+
+<div class="flash my-2">
+  You can browse more examples at the
+  <a href="{{ site.github.repository_url }}/tree/master/examples">GitHub Repository</a>
+</div>
