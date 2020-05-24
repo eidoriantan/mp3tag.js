@@ -7,13 +7,13 @@ exclude:
 
 markdown: kramdown
 highlighter: rouge
+
 kramdown:
+  input: GFM
+  line_width: 80
+  syntax_highlighter: rouge
   syntax_highlighter_opts:
-    span:
-      line_numbers: false
-    block:
-      line_numbers: true
-      start_line: 1
+    css_class: ''
 
 sass:
   style: compressed
