@@ -9,9 +9,9 @@
 **mp3tag.js** is an open sourced JavaScript library used to edit the metadata of
 audio files. It currently supports ID3v1, ID3v2.3, and ID3v2.4 tags.
 
-Visit [https://mp3tag.js.org](https://mp3tag.js.org) to learn more about the
-library or view it in action through an [editor](https://mp3tag.js.org/editor).
-You can also explore the
+Visit [mp3tag.js.org](https://mp3tag.js.org) to learn more about the library or
+view it in action through an [editor](https://mp3tag.js.org/editor). You can
+also explore the
 [examples](https://github.com/eidoriantan/mp3tag.js/tree/master/examples)
 directory for examples.
 
