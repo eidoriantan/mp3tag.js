@@ -5,15 +5,15 @@ description: Edit your audio files easily with this mp3tagger!
 keywords: mp3, id3, audio, tag, edit, write, editor, demo, online
 footer: false
 toast: true
-last_modified_at: 2020-05-30T22:39:00+08:00
+last_modified_at: 2020-05-30T22:50:00+08:00
 stylesheets:
   - /assets/css/editor.css
 scripts:
   - /assets/js/mp3tag.js/mp3tag.min.js
   - /assets/js/editor.js
 ---
-<div class="editor d-md-flex flex-items-stretch">
-  <form id="edit-form" action="/editor/" method="get" class="col-12 col-md-3 p-5">
+<div class="editor d-sm-flex flex-items-stretch">
+  <form id="edit-form" action="/editor/" method="get" class="col-12 col-sm-5 col-md-3 p-5">
     <img id="cover-preview" src="/assets/images/blank.jpg" alt="Album Cover Preview" width="120" height="120" class="d-block box-shadow border mx-auto my-3">
 
     <div class="form-group">
@@ -112,7 +112,7 @@ scripts:
     </footer>
   </form>
 
-  <div id="list-wrapper" class="col-12 col-md-9">
+  <div id="list-wrapper" class="col-12 col-sm-7 col-md-9">
     <div id="blankslate" class="blankslate col-6 mx-auto mt-7">
       {% octicon cloud-upload height:72 aria-hidden:true %}
       <h3 class="mb-3">No audio imported</h3>
