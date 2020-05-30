@@ -36,8 +36,8 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
+    "lint": "eslint -c .eslintrc.json . --ext .js,.mjs",
     "commitlint": "git log -1 --format=%B | commitlint",
-    "lint": "eslint -c .eslintrc.json . --ext .js,.mjs && npm run commitlint",
     "pretest": "npm run build",
     "test": "npm run lint && mocha --colors",
     "clean": "rm -rf dist"

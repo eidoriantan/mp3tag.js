@@ -12,7 +12,8 @@ make sure that you are following these guidelines:
    sure that you are following the styleguide and not breaking any codes;
 
  * When committing, the commit message should follow the
-   [Convential Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+   [Convential Commits](https://www.conventionalcommits.org/en/v1.0.0/). You can
+   run `npm run commitlint` to test your commit message.
 
 Also, please take a look at the
 [repository's projects](https://github.com/eidoriantan/mp3tag.js/projects) to
