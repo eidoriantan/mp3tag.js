@@ -6,8 +6,18 @@
 
 	var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
-	function createCommonjsModule(fn, module) {
-		return module = { exports: {} }, fn(module, module.exports), module.exports;
+	function createCommonjsModule(fn, basedir, module) {
+		return module = {
+		  path: basedir,
+		  exports: {},
+		  require: function (path, base) {
+	      return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
+	    }
+		}, fn(module, module.exports), module.exports;
+	}
+
+	function commonjsRequire () {
+		throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
 	}
 
 	var check = function (it) {
@@ -3270,11 +3280,13 @@
 	}
 
 	function _createSuper(Derived) {
-	  return function () {
+	  var hasNativeReflectConstruct = _isNativeReflectConstruct();
+
+	  return function _createSuperInternal() {
 	    var Super = _getPrototypeOf(Derived),
 	        result;
 
-	    if (_isNativeReflectConstruct()) {
+	    if (hasNativeReflectConstruct) {
 	      var NewTarget = _getPrototypeOf(this).constructor;
 
 	      result = Reflect.construct(Super, arguments, NewTarget);
@@ -3303,7 +3315,7 @@
 	  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
 	  var n = Object.prototype.toString.call(o).slice(8, -1);
 	  if (n === "Object" && o.constructor) n = o.constructor.name;
-	  if (n === "Map" || n === "Set") return Array.from(n);
+	  if (n === "Map" || n === "Set") return Array.from(o);
 	  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
 	}
 
@@ -6963,7 +6975,7 @@
 	    }
 
 	    this.name = 'MP3Tag';
-	    this.version = '2.2.1';
+	    this.version = '2.3.0';
 	    this.verbose = verbose;
 	    this.error = '';
 	    this.errorCode = -1;
@@ -7219,6 +7231,11 @@
 	      }
 
 	      return buffer.slice(start, end);
+	    }
+	  }, {
+	    key: "genres",
+	    get: function get() {
+	      return GENRES;
 	    }
 	  }]);
 
