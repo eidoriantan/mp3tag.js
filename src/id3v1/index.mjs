@@ -6,7 +6,7 @@ import { mergeBytes } from '../utils/bytes.mjs'
 import { encodeString } from '../utils/strings.mjs'
 import { isBuffer } from '../utils/types.mjs'
 
-const GENRES = [
+export const GENRES = [
   'Blues', 'Classic Rock', 'Country', 'Dance', 'Disco', 'Funk', 'Grunge',
   'Hip-Hop', 'Jazz', 'Metal', 'New Age', 'Oldies', 'Other', 'Pop', 'R&B',
   'Reggae', 'Rock', 'Techno', 'Industrial', 'Alternative', 'Ska', 'Death Metal',

@@ -25,6 +25,8 @@ export default class MP3Tag {
     this.tags = {}
   }
 
+  static get genres () { return ID3v1.GENRES }
+
   static readBuffer (buffer, options = {}, verbose = false) {
     if (!isBuffer(buffer)) {
       throw new TypeError('buffer is not ArrayBuffer/Buffer')
