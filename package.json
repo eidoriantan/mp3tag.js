@@ -39,7 +39,7 @@
     "lint": "eslint -c .eslintrc.json . --ext .js,.mjs",
     "commitlint": "git log -1 --format=%B | commitlint",
     "pretest": "npm run build",
-    "test": "npm run lint && mocha --colors",
+    "test": "npm run lint && mocha",
     "clean": "rm -rf dist"
   },
   "dependencies": {},
