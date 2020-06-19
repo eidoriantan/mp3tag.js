@@ -3,16 +3,21 @@
 {
     "name": "mp3tag.js",
     "short_name": "mp3tag.js",
+    "start_url": "./",
     "display": "standalone",
-    "theme_color": "{{ site.color }}",
+    "description": "{{ site.tagline }}",
     "background_color": "{{ site.color }}",
-    "icons": [{
-        "src": "/assets/android-chrome-192x192.png",
-        "sizes": "192x192",
-        "type": "image/png"
-    }, {
-        "src": "/assets/android-chrome-512x512.png",
-        "sizes": "512x512",
-        "type": "image/png"
-    }]
+    "theme_color": "{{ site.color }}",
+    "icons": [
+        {
+            "src": "/assets/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/assets/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
 }
