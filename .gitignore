@@ -1,9 +1,10 @@
 
 .DS_Store
 
-# Ignore Jekyll-generated files
-_site
-.sass-cache
+# Jekyll-generated files
+_site/
+.sass-cache/
+.jekyll-cache/
 .jekyll-metadata
 
 Gemfile.lock
