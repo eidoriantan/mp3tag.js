@@ -24,19 +24,6 @@ google_site_verification: pygHTY6j2sle4JJ1YmSCYlf8nxIxnq4u9bHe48Mc9do
 logo: "/assets/images/logo.png"
 color: "#2b594c"
 
-links:
-  - name: GitHub Repository
-    icon: repo
-    link: "https://github.com/eidoriantan/mp3tag.js"
-
-  - name: Contact
-    icon: mail
-    link: mailto:eidoriantan@gmail.com
-
-  - name: Sitemap
-    icon: list-unordered
-    link: /sitemap.xml
-
 navlinks:
   - name: Home
     directories:
