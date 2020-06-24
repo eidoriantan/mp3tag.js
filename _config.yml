@@ -6,12 +6,9 @@ exclude:
   - README.md
 
 markdown: kramdown
-highlighter: rouge
-
 kramdown:
   input: GFM
   line_width: 80
-  syntax_highlighter: rouge
   syntax_highlighter_opts:
     css_class: ''
 
