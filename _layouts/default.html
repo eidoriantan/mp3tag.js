@@ -7,6 +7,8 @@
   <meta name="theme-color" content="{{ site.color }}">
   <meta name="msapplication-TileColor" content="{{ site.color }}">
 
+  {% seo title=false %}
+
   <link href="{{ '/LICENSE.txt' | relative_url }}" rel="license">
   <link href="{{ '/site.webmanifest' | relative_url }}" rel="manifest">
   <link href="{{ '/assets/apple-touch-icon.png' | relative_url }}" rel="apple-touch-icon" sizes="180x180">
@@ -23,8 +25,6 @@
   {% for script in page.scripts %}
   <script src="{{ script | append: '?v=' | append: site.github.build_revision | relative_url }}"></script>
   {% endfor %}
-
-  {% seo title=false %}
 
   <title>{% if page.title %}{{ page.title }} | {% endif %}mp3tag.js</title>
 </head>
