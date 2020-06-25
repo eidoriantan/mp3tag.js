@@ -1,0 +1,5 @@
+{% for link in site.navlinks %}
+<div class="Header-item{% if forloop.last %} Header-item--full{% endif %} my-2 my-md-0">
+  <a href="{{ link.directories[0] }}" class="Header-link" aria-label="{{ link.name }}">{{ link.name }}</a>
+</div>
+{% endfor %}
