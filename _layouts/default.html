@@ -7,24 +7,24 @@
   <meta name="theme-color" content="{{ site.color }}">
   <meta name="msapplication-TileColor" content="{{ site.color }}">
 
-  {% seo title=false %}
-
-  <link href="{{ '/LICENSE.txt' | relative_url }}" rel="license">
-  <link href="{{ '/site.webmanifest' | relative_url }}" rel="manifest">
-  <link href="{{ '/assets/apple-touch-icon.png' | relative_url }}" rel="apple-touch-icon" sizes="180x180">
-  <link href="{{ '/assets/favicon-32x32.png' | relative_url }}" rel="icon" type="image/png" sizes="32x32">
-  <link href="{{ '/assets/favicon-16x16.png' | relative_url }}" rel="icon" type="image/png" sizes="16x16">
-  <link href="{{ '/assets/safari-pinned-tab.svg' | relative_url }}" rel="mask-icon" color="{{ site.color }}">
-  <link href="{{ '/assets/css/default.css?v=' | append: site.github.build_revision | relative_url }}" rel="stylesheet">
+  <link href="/LICENSE.txt" rel="license">
+  <link href="/site.webmanifest" rel="manifest">
+  <link href="/assets/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180">
+  <link href="/assets/favicon-32x32.png" rel="icon" type="image/png" sizes="32x32">
+  <link href="/assets/favicon-16x16.png" rel="icon" type="image/png" sizes="16x16">
+  <link href="/assets/safari-pinned-tab.svg" rel="mask-icon" color="{{ site.color }}">
+  <link href="/assets/css/default.css?v={{ site.github.build_revision }}" rel="stylesheet">
   {% for stylesheet in page.stylesheets %}
-  <link href="{{ stylesheet | append: '?v=' | append: site.github.build_revision | relative_url }}" rel="stylesheet">
+  <link href="{{ stylesheet | append: '?v=' | append: site.github.build_revision }}" rel="stylesheet">
   {% endfor %}
 
-  <script src="{{ '/assets/js/jquery/jquery.min.js' | relative_url }}"></script>
-  <script src="{{ '/assets/js/default.js' | relative_url }}"></script>
+  <script src="/assets/js/jquery/jquery.min.js"></script>
+  <script src="/assets/js/default.js"></script>
   {% for script in page.scripts %}
-  <script src="{{ script | append: '?v=' | append: site.github.build_revision | relative_url }}"></script>
+  <script src="{{ script | append: '?v=' | append: site.github.build_revision }}"></script>
   {% endfor %}
+
+  {% seo title=false %}
 
   <title>{% if page.title %}{{ page.title }} | {% endif %}mp3tag.js</title>
 </head>
@@ -34,7 +34,7 @@
   <header class="Header d-block d-md-flex">
     <div class="Header-item my-2 my-md-0">
       <a href="{{ site.github.url }}" class="Header-link d-flex flex-items-center">
-        <img src="{{ site.logo | relative_url }}" alt="mp3tag.js Logo" width="32" height="32" class="mr-2">
+        <img src="{{ site.logo }}" alt="mp3tag.js Logo" width="32" height="32" class="mr-2">
         <span class="f4">mp3tag.js</span>
       </a>
     </div>
