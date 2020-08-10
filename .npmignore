@@ -1,5 +1,5 @@
 /examples
 /test
-/rollup.config.js
 /.*
-/CONTRIBUTING.md
+/commitlint.config.js
+/rollup.config.js
