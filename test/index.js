@@ -35,13 +35,11 @@ describe('MP3Tag', function () {
   after(function () {
     const extendTests = ['id3v1/index.js', 'id3v2/index.js', 'id3/index.js']
     const tests = this.test.parent.tests
-    let failed = false
 
-    for (let i = 0; !failed && i < tests.length; i++) {
-      failed = tests[i].state === 'failed'
+    for (let i = 0; i < tests.length; i++) {
+      if (tests[i].state === 'failed') return false
     }
 
-    if (failed) return false
     extendTests.forEach(test => {
       const filepath = path.resolve(__dirname, test)
       require(filepath)
