@@ -5,7 +5,7 @@ node_js:
   - 12
 
 script:
-  - npm run commitlint
+  - npm run lint
 
 git:
   quiet: true
