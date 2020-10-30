@@ -16,12 +16,7 @@ if (production) {
     file: 'dist/mp3tag.min.js',
     format: 'umd',
     name: 'MP3Tag',
-    plugins: [
-      commonjs(),
-      resolve(),
-      babel({ babelHelpers: 'bundled' }),
-      terser()
-    ]
+    plugins: [terser()]
   })
 }
 
