@@ -1,5 +1,6 @@
-/examples
-/test
-/.*
-/commitlint.config.js
-/rollup.config.js
+examples/
+test/
+.*
+commitlint.config.js
+rollup.config.js
+debug.log
