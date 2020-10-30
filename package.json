@@ -36,10 +36,10 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
-    "lint": "npm run commitlint && eslint -c .eslintrc.json . --ext .js,.mjs",
-    "commitlint": "git log -1 --format=%B | commitlint",
+    "lint": "eslint -c .eslintrc.json .",
+    "postlint": "git log -1 --format=%B | commitlint",
     "pretest": "npm run build",
-    "test": "mocha test/index.js",
+    "test": "npm run lint && mocha test/index.js",
     "clean": "rm -rf dist"
   },
   "dependencies": {},
