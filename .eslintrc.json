@@ -8,7 +8,8 @@
   },
   "env": {
     "es6": true,
-    "mocha": true
+    "browser": true,
+    "node": true
   },
   "extends": "standard",
   "rules": {
@@ -16,5 +17,5 @@
     "max-len": ["error", 80]
   },
   "noInlineConfig": true,
-  "ignorePatterns": ["dist", "node_modules"]
+  "ignorePatterns": ["dist"]
 }
