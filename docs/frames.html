@@ -7,10 +7,10 @@ description: >-
 keywords: >-
   mp3, id3, audio, tag, edit, write, documentations, docs, install, installation
 active: frames
-last_modified_at: 2020-06-08T13:58:00+08:00
+last_modified_at: 2020-11-12T00:09:00+08:00
 ---
 <div class="Subhead bg-white position-sticky top-0">
-  <div class="Subhead-heading">Special Tags</div>
+  <div class="Subhead-heading">`tags` Properties</div>
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
@@ -18,7 +18,7 @@ last_modified_at: 2020-06-08T13:58:00+08:00
     <h2 class="Box-title">title</h2>
   </div>
   <div class="Box-row">
-    <div><strong>ID3v2:</strong> TIT2</div>
+    <p>Reads ID3v2 TIT2 tag value first, ID3v1 title tag otherwise an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -28,7 +28,7 @@ last_modified_at: 2020-06-08T13:58:00+08:00
     <h2 class="Box-title">artist</h2>
   </div>
   <div class="Box-row">
-    <div><strong>ID3v2:</strong> TPE1</div>
+    <p>Reads ID3v2 TPE1 tag value first, ID3v1 artist tag otherwise an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -38,7 +38,7 @@ last_modified_at: 2020-06-08T13:58:00+08:00
     <h2 class="Box-title">album</h2>
   </div>
   <div class="Box-row">
-    <div><strong>ID3v2:</strong> TALB</div>
+    <p>Reads ID3v2 TALB tag value first, ID3v1 album tag otherwise an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -48,7 +48,7 @@ last_modified_at: 2020-06-08T13:58:00+08:00
     <h2 class="Box-title">year</h2>
   </div>
   <div class="Box-row">
-    <div><strong>ID3v2:</strong> TYER</div>
+    <p>Reads ID3v2 TYER or TDRC tag value first, ID3v1 year tag otherwise an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -58,7 +58,7 @@ last_modified_at: 2020-06-08T13:58:00+08:00
     <h2 class="Box-title">comment</h2>
   </div>
   <div class="Box-row">
-    <div><strong>ID3v2:</strong> COMM</div>
+    <p>Reads ID3v2 COMM tag value first, ID3v1 comment tag otherwise an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -68,7 +68,7 @@ last_modified_at: 2020-06-08T13:58:00+08:00
     <h2 class="Box-title">track</h2>
   </div>
   <div class="Box-row">
-    <div><strong>ID3v2:</strong> TRCK</div>
+    <p>Reads ID3v2 TRCK tag value first, ID3v1 track tag otherwise an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -78,13 +78,120 @@ last_modified_at: 2020-06-08T13:58:00+08:00
     <h2 class="Box-title">genre</h2>
   </div>
   <div class="Box-row">
-    <div><strong>ID3v2:</strong> TCON</div>
+    <p>Reads ID3v2 TCON tag value first, ID3v1 genre tag otherwise an empty string</p>
+    <div class="text-gray"><strong>Type:</strong> string</div>
+  </div>
+</div>
+
+<div class="Box Box--blue Box--condensed my-3">
+  <div class="Box-header Box-header--blue">
+    <h2 class="Box-title">v1</h2>
+  </div>
+  <div class="Box-row">
+    <p>Contains all ID3v1 tags</p>
+    <div class="text-gray"><strong>Type:</strong> object | undefined</div>
+  </div>
+</div>
+
+<div class="Box Box--blue Box--condensed my-3">
+  <div class="Box-header Box-header--blue">
+    <h2 class="Box-title">v1Details</h2>
+  </div>
+  <div class="Box-row">
+    <p>ID3v1 tag details object containing the <code>size</code> and <code>version</code></p>
+    <div class="text-gray"><strong>Type:</strong> object | undefined</div>
+  </div>
+</div>
+
+<div class="Box Box--blue Box--condensed my-3">
+  <div class="Box-header Box-header--blue">
+    <h2 class="Box-title">v2</h2>
+  </div>
+  <div class="Box-row">
+    <p>Contains all ID3v2 tags</p>
+    <div class="text-gray"><strong>Type:</strong> object | undefined</div>
+  </div>
+</div>
+
+<div class="Box Box--blue Box--condensed my-3">
+  <div class="Box-header Box-header--blue">
+    <h2 class="Box-title">v2Details</h2>
+  </div>
+  <div class="Box-row">
+    <p>ID3v2 tag details object containing the <code>size</code>, <code>flags</code>, and <code>version</code></p>
+    <div class="text-gray"><strong>Type:</strong> object | undefined</div>
+  </div>
+</div>
+
+<div class="Subhead bg-white position-sticky top-0">
+  <div class="Subhead-heading">`tags.v1` ID3v1 Frames</div>
+</div>
+
+<div class="Box Box--blue Box--condensed my-3">
+  <div class="Box-header Box-header--blue">
+    <h2 class="Box-title">title</h2>
+  </div>
+  <div class="Box-row">
+    <div class="text-gray"><strong>Type:</strong> string</div>
+  </div>
+</div>
+
+<div class="Box Box--blue Box--condensed my-3">
+  <div class="Box-header Box-header--blue">
+    <h2 class="Box-title">artist</h2>
+  </div>
+  <div class="Box-row">
+    <div class="text-gray"><strong>Type:</strong> string</div>
+  </div>
+</div>
+
+<div class="Box Box--blue Box--condensed my-3">
+  <div class="Box-header Box-header--blue">
+    <h2 class="Box-title">album</h2>
+  </div>
+  <div class="Box-row">
+    <div class="text-gray"><strong>Type:</strong> string</div>
+  </div>
+</div>
+
+<div class="Box Box--blue Box--condensed my-3">
+  <div class="Box-header Box-header--blue">
+    <h2 class="Box-title">year</h2>
+  </div>
+  <div class="Box-row">
+    <div class="text-gray"><strong>Type:</strong> string</div>
+  </div>
+</div>
+
+<div class="Box Box--blue Box--condensed my-3">
+  <div class="Box-header Box-header--blue">
+    <h2 class="Box-title">comment</h2>
+  </div>
+  <div class="Box-row">
+    <div class="text-gray"><strong>Type:</strong> string</div>
+  </div>
+</div>
+
+<div class="Box Box--blue Box--condensed my-3">
+  <div class="Box-header Box-header--blue">
+    <h2 class="Box-title">track</h2>
+  </div>
+  <div class="Box-row">
+    <div class="text-gray"><strong>Type:</strong> string</div>
+  </div>
+</div>
+
+<div class="Box Box--blue Box--condensed my-3">
+  <div class="Box-header Box-header--blue">
+    <h2 class="Box-title">genre</h2>
+  </div>
+  <div class="Box-row">
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
 
 <div class="Subhead bg-white position-sticky top-0">
-  <div class="Subhead-heading">ID3v2 Frames</div>
+  <div class="Subhead-heading">`tags.v2` ID3v2 Frames</div>
 </div>
 
 <div class="flash">
@@ -102,8 +209,8 @@ last_modified_at: 2020-06-08T13:58:00+08:00
 </div>
 
 <div class="flash mt-2">
-  <strong>Note:</strong> If strict mode is enabled, all languages must be
-  encoded with <a href="https://www.loc.gov/standards/iso639-2/php/code_list.php">ISO 639-2</a>.
+  <strong>Note:</strong> If strict mode is enabled, all languages must be follow
+  <a href="https://www.loc.gov/standards/iso639-2/php/code_list.php">ISO 639-2</a>.
 </div>
 
 <div class="Box Box--blue Box--condensed my-3">
