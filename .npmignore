@@ -1,6 +1,6 @@
-/examples
-/test
-/rollup.config.js
-/.*
-/CODE_OF_CONDUCT.md
-/CONTRIBUTING.md
+examples/
+test/
+.*
+commitlint.config.js
+rollup.config.js
+debug.log
