@@ -12,5 +12,5 @@ const mp3tag = new MP3Tag(buffer, true)
 mp3tag.read()
 
 // Handle error if there's any
-if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
 console.log(mp3tag.tags)
