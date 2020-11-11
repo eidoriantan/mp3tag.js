@@ -47,8 +47,7 @@ $(document).ready(function () {
 
   $('#edit-form').submit(function (event) {
     event.preventDefault()
-    if (currentIndex < 0) return false
-    writeData()
+    if (currentIndex >= 0) writeData()
   })
 
   $('#download').click(function () {
@@ -107,18 +106,15 @@ async function audioView (event) {
   $('#edit-form .disabled').removeClass('disabled')
   $(audioItem).addClass('flash')
 
-  try {
-    toast('Reading file and tags. Please wait...', TOAST_INFO)
+  toast('Reading file and tags. Please wait...', TOAST_INFO)
 
-    mp3tag = new MP3Tag(await loadFile(file))
-    mp3tag.read()
+  mp3tag = new MP3Tag(await loadFile(file))
+  mp3tag.read()
+
+  if (mp3tag.error === '') {
     displayDetails()
-
     toast('Details was displayed', TOAST_SUCCESS)
-  } catch (error) {
-    toast(error.message, TOAST_DANGER)
-    throw error
-  }
+  } else toast(mp3tag.error, TOAST_DANGER)
 }
 
 function displayDetails () {
@@ -130,55 +126,51 @@ function displayDetails () {
   $('#track').val(tags.track)
   $('#genre').val(tags.genre)
 
-  if (tags.APIC) {
-    imageBytes = tags.APIC[0].data
-    imageType = tags.APIC[0].format
-    $('#cover-preview').attr({ src: imageURL(imageBytes, imageType) })
-  }
+  if (tags.v2) {
+    if (tags.v2.APIC && tags.v2.APIC.length > 0) {
+      const image = tags.v2.APIC[0]
+      $('#cover-preview').attr({
+        src: imageURL(image.data, image.format)
+      })
+    }
 
-  if (tags.TRCK) $('#track').val(tags.TRCK)
-  if (tags.TCOM) $('#composer').val(tags.TCOM)
-  if (tags.USLT) {
-    $('#lyrics').val(
-      tags.USLT[0].language + '|' +
-      tags.USLT[0].descriptor + '|' +
-      tags.USLT[0].text
-    )
+    if (tags.v2.TCOM) $('#composer').val(tags.v2.TCOM)
+    if (tags.v2.USLT && tags.v2.USLT.length > 0) {
+      $('#lyrics').val(tags.v2.USLT[0].text)
+    }
   }
-
-  if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
 }
 
 async function writeData () {
-  try {
-    toast('Writing the tags to file', TOAST_INFO)
+  toast('Writing the tags to file', TOAST_INFO)
+  writeDetails()
 
-    writeDetails()
-    mp3tag.save({ strict: true })
-    if (mp3tag.errorCode > -1) throw new Error(mp3tag.error)
-  } catch (error) {
-    toast(error.message, TOAST_DANGER)
-    throw error
-  }
+  mp3tag.save()
+  if (mp3tag.error === '') {
+    const file = importedFiles[currentIndex]
+    const modifiedFile = new File([mp3tag.buffer], file.name, {
+      type: file.type
+    })
 
-  const file = importedFiles[currentIndex]
-  const modifiedFile = new File([mp3tag.buffer], file.name, { type: file.type })
-
-  importedFiles[currentIndex] = modifiedFile
-  toast('Modified MP3 was saved and ready to download', TOAST_SUCCESS)
+    importedFiles[currentIndex] = modifiedFile
+    toast('MP3 was modified and ready to download', TOAST_SUCCESS)
+  } else toast(mp3tag.error, TOAST_DANGER)
 }
 
 async function writeDetails () {
+  mp3tag.tags.v1 = mp3tag.tags.v1 || {}
+  mp3tag.tags.v2 = mp3tag.tags.v2 || {}
+
   mp3tag.tags.title = $('#title').val()
   mp3tag.tags.artist = $('#artist').val()
   mp3tag.tags.album = $('#album').val()
   mp3tag.tags.year = $('#year').val()
-  mp3tag.tags.TRCK = $('#track').val()
+  mp3tag.tags.track = $('#track').val()
   mp3tag.tags.genre = $('#genre').val()
-  mp3tag.tags.TCOM = $('#composer').val()
+  mp3tag.tags.v2.TCOM = $('#composer').val()
 
   if (imageBytes !== null) {
-    mp3tag.tags.APIC = [{
+    mp3tag.tags.v2.APIC = [{
       format: imageType,
       type: 3,
       description: '',
@@ -188,11 +180,10 @@ async function writeDetails () {
 
   const lyrics = $('#lyrics').val()
   if (lyrics !== '') {
-    const splitted = lyrics.split('|')
-    mp3tag.tags.USLT = [{
-      language: splitted[0],
-      descriptor: splitted[1],
-      text: splitted[2]
+    mp3tag.tags.v2.USLT = [{
+      language: 'eng',
+      descriptor: '',
+      text: lyrics
     }]
   }
 }
