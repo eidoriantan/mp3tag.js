@@ -1,10 +1,8 @@
 
-import TagError from '../error.mjs'
 import BufferView from '../viewer.mjs'
 
 import { mergeBytes } from '../utils/bytes.mjs'
 import { encodeString } from '../utils/strings.mjs'
-import { isBuffer } from '../utils/types.mjs'
 
 const GENRES = [
   'Blues', 'Classic Rock', 'Country', 'Dance', 'Disco', 'Funk', 'Grunge',
@@ -41,22 +39,7 @@ const GENRES = [
   'Garage Rock', 'Psybient'
 ]
 
-function filter (tags) {
-  tags.title = tags.TIT2 || tags.title || ''
-  tags.artist = tags.TPE1 || tags.artist || ''
-  tags.album = tags.TALB || tags.album || ''
-  tags.year = tags.TYER || (tags.TDRC ? tags.TDRC.substr(0, 4) : '') ||
-    tags.year || ''
-  tags.comment = (tags.COMM ? tags.COMM[0].text : '') || tags.comment || ''
-  tags.track = (tags.TRCK ? tags.TRCK.split('/')[0] : '') || tags.track || ''
-  tags.genre = tags.TCON || tags.genre || ''
-
-  return tags
-}
-
 export function hasID3v1 (buffer) {
-  if (!isBuffer(buffer)) throw new TypeError('buffer is not ArrayBuffer/Buffer')
-
   const offset = buffer.byteLength - 128
   if (offset > -1) {
     const view = new BufferView(buffer, offset)
@@ -65,8 +48,6 @@ export function hasID3v1 (buffer) {
 }
 
 export function decode (buffer) {
-  if (!hasID3v1(buffer)) throw new TagError(100)
-
   const view = new BufferView(buffer, buffer.byteLength - 128)
 
   const title = view.getString(3, 30, 'utf-8').string.replace(/\0/g, '')
@@ -79,70 +60,67 @@ export function decode (buffer) {
   const genre = GENRES[view.getUint8(127)] || ''
 
   const tags = { title, artist, album, year, track, comment, genre }
-  tags.v1Version = track ? 1 : 0
-  tags.v1Size = 128
+  const details = { version: track ? 1 : 0, size: 128 }
 
-  return tags
+  return { tags, details }
 }
 
 export function validate (tags, strict) {
-  const filtered = filter(tags)
-  const { title, artist, album, year, comment, track, genre } = filtered
+  const { title, artist, album, year, comment, track, genre } = tags
 
   if (typeof title !== 'string') {
-    throw new TagError(102, 'Title is not a string')
+    throw new Error('Title is not a string')
   } else if (encodeString(title, 'utf-8').length > 30) {
-    throw new TagError(102, 'Title length exceeds 30 characters')
+    throw new Error('Title length exceeds 30 characters')
   }
 
   if (typeof artist !== 'string') {
-    throw new TagError(102, 'Artist is not a string')
+    throw new Error('Artist is not a string')
   } else if (encodeString(artist, 'utf-8').length > 30) {
-    throw new TagError(102, 'Artist length exceeds 30 characters')
+    throw new Error('Artist length exceeds 30 characters')
   }
 
   if (typeof album !== 'string') {
-    throw new TagError(102, 'Album is not a string')
+    throw new Error('Album is not a string')
   } else if (encodeString(album, 'utf-8').length > 30) {
-    throw new TagError(102, 'Album length exceeds 30 characters')
+    throw new Error('Album length exceeds 30 characters')
   }
 
   if (typeof year !== 'string') {
-    throw new TagError(102, 'Year is not a string')
+    throw new Error('Year is not a string')
   } else if (encodeString(year, 'utf-8').length > 4) {
-    throw new TagError(102, 'Year length exceeds 4 characters')
+    throw new Error('Year length exceeds 4 characters')
   }
 
   if (typeof comment !== 'string') {
-    throw new TagError(102, 'Comment is not a string')
+    throw new Error('Comment is not a string')
   }
 
   if (typeof track !== 'string') {
-    throw new TagError(102, 'Track is not a string')
+    throw new Error('Track is not a string')
   } else if (parseInt(track) > 255 || parseInt(track) < 0) {
-    throw new TagError(102, 'Track should be in range 255 - 0')
+    throw new Error('Track should be in range 255 - 0')
   }
 
   if (track !== '') {
     if (encodeString(comment, 'utf-8').length > 28) {
-      throw new TagError(102, 'Comment length exceeds 28 characters')
+      throw new Error('Comment length exceeds 28 characters')
     }
   } else if (encodeString(comment, 'utf-8').length > 30) {
-    throw new TagError(102, 'Comment length exceeds 30 characters')
+    throw new Error('Comment length exceeds 30 characters')
   }
 
   if (typeof genre !== 'string') {
-    throw new TagError(102, 'Genre is not a string')
+    throw new Error('Genre is not a string')
   } else if (strict && (!GENRES.includes(genre) && genre !== '')) {
-    throw new TagError(102, 'Unknown genre')
+    throw new Error('Unknown genre')
   }
 
   return true
 }
 
 export function encode (tags) {
-  const filtered = filter(tags)
-  let { title, artist, album, year, comment, track, genre } = filtered
+  let { title, artist, album, year, comment, track, genre } = tags
 
   title = encodeString(title, 'utf-8')
   artist = encodeString(artist, 'utf-8')

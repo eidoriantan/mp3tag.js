@@ -1,39 +1,12 @@
 
-import TagError from './error.mjs'
 import BufferView from './viewer.mjs'
 
 import * as ID3v1 from './id3v1/index.mjs'
 import * as ID3v2 from './id3v2/index.mjs'
 
 import { mergeBytes } from './utils/bytes.mjs'
-import { overwriteDefault, mergeObjects } from './utils/objects.mjs'
+import { overwriteDefault } from './utils/objects.mjs'
 import { isBuffer } from './utils/types.mjs'
-
-function mergeTags (tags) {
-  tags = mergeObjects({}, tags)
-  tags.TIT2 = tags.TIT2 || tags.title
-  tags.TPE1 = tags.TPE1 || tags.artist
-  tags.TALB = tags.TALB || tags.album
-  tags.TYER = tags.TYER || (tags.TDRC && tags.TDRC.substr(0, 4)) ||
-    tags.year
-  tags.COMM = tags.COMM || (tags.comment && [{
-    language: 'eng',
-    descriptor: '',
-    text: tags.comment
-  }])
-  tags.TRCK = tags.TRCK || tags.track
-  tags.TCON = tags.TCON || tags.genre
-
-  tags.title = tags.TIT2 || ''
-  tags.artist = tags.TPE1 || ''
-  tags.album = tags.TALB || ''
-  tags.year = tags.TYER || ''
-  tags.comment = (tags.COMM && tags.COMM[0].text) || ''
-  tags.track = (tags.TRCK && tags.TRCK.split('/')[0]) || ''
-  tags.genre = tags.TCON || ''
-
-  return tags
-}
 
 export default class MP3Tag {
   constructor (buffer, verbose = false) {
@@ -42,13 +15,12 @@ export default class MP3Tag {
     }
 
     this.name = 'MP3Tag'
-    this.version = '2.1.0'
+    this.version = '3.0.0-alpha'
     this.verbose = verbose
-    this.error = ''
-    this.errorCode = -1
 
     this.buffer = buffer
     this.tags = {}
+    this.error = ''
   }
 
   static readBuffer (buffer, options = {}, verbose = false) {
@@ -56,7 +28,7 @@ export default class MP3Tag {
       throw new TypeError('buffer is not ArrayBuffer/Buffer')
     }
 
-    let tags = {}
+    const tags = {}
     options = overwriteDefault(options, {
       id3v1: true,
       id3v2: true
@@ -64,55 +36,100 @@ export default class MP3Tag {
 
     if (options.id3v1 && ID3v1.hasID3v1(buffer)) {
       if (verbose) console.log('ID3v1 found, reading...')
-      const v1Tags = ID3v1.decode(buffer)
+      const { tags: v1Tags, details } = ID3v1.decode(buffer)
       if (verbose) console.log('ID3v1 reading finished')
-      tags = mergeObjects(tags, v1Tags)
+      tags.v1 = { ...v1Tags }
+      tags.v1Details = details
     }
 
     if (options.id3v2 && ID3v2.hasID3v2(buffer)) {
       if (verbose) console.log('ID3v2 found, reading...')
-      const v2Tags = ID3v2.decode(buffer)
+      const { tags: v2Tags, details } = ID3v2.decode(buffer)
       if (verbose) console.log('ID3v2 reading finished')
-      tags = mergeObjects(tags, v2Tags)
+      tags.v2 = { ...v2Tags }
+      tags.v2Details = details
     }
 
-    tags = mergeTags(tags)
     Object.defineProperties(tags, {
       title: {
-        get: function () { return this.TIT2 || '' },
-        set: function (value) { this.TIT2 = value }
+        get: function () {
+          return (this.v2 && this.v2.TIT2) || (this.v1 && this.v1.title) || ''
+        },
+        set: function (value) {
+          if (this.v2) this.v2.TIT2 = value
+          if (this.v1) this.v1.title = value
+        }
       },
       artist: {
-        get: function () { return this.TPE1 || '' },
-        set: function (value) { this.TPE1 = value }
+        get: function () {
+          return (this.v2 && this.v2.TPE1) || (this.v1 && this.v1.artist) || ''
+        },
+        set: function (value) {
+          if (this.v2) this.v2.TPE1 = value
+          if (this.v1) this.v1.artist = value
+        }
       },
       album: {
-        get: function () { return this.TALB || '' },
-        set: function (value) { this.TALB = value }
+        get: function () {
+          return (this.v2 && this.v2.TALB) || (this.v1 && this.v1.album) || ''
+        },
+        set: function (value) {
+          if (this.v2) this.v2.TALB = value
+          if (this.v1) this.v1.album = value
+        }
       },
       year: {
         get: function () {
-          return this.TYER || (this.TDRC && this.TDRC.substr(0, 4)) || ''
+          return (this.v2 && (this.v2.TYER || this.v2.TDRC)) ||
+            (this.v1 && this.v1.year) || ''
         },
-        set: function (value) { this.TYER = value }
+        set: function (value) {
+          if (this.v2) {
+            const version = this.v2Details.version[0]
+            if (version === 3) this.v2.TYER = value
+            else if (version === 4) this.v2.TDRC = value
+          }
+          if (this.v1) this.v1.year = value
+        }
       },
       comment: {
-        get: function () { return (this.COMM && this.COMM[0].text) || '' },
+        get: function () {
+          let text = ''
+          if (this.v2 && this.v2.COMM) {
+            const comm = this.v2.COMM
+            if (Array.isArray(comm) && comm.length > 0) text = comm[0].text
+          } else if (this.v1 && this.v1.comment) text = this.v1.comment
+          return text
+        },
         set: function (value) {
-          const comment = { language: 'eng', descriptor: '', text: value }
-          if (Array.isArray(this.COMM)) this.COMM[0] = comment
-          else this.COMM = [comment]
+          if (this.v2) {
+            this.v2.COMM = [{
+              language: 'eng',
+              descriptor: '',
+              text: value
+            }]
+          }
+          if (this.v1) this.v1.comment = value
         }
       },
       track: {
         get: function () {
-          return (this.TRCK && this.TRCK.split('/')[0]) || ''
+          return (this.v2 && this.v2.TRCK && this.v2.TRCK.split('/')[0]) ||
+            (this.v1 && this.v1.track) || ''
         },
-        set: function (value) { this.TRCK = value }
+        set: function (value) {
+          if (this.v2) this.v2.TRCK = value
+          if (this.v1) this.v1.track = value
+        }
       },
       genre: {
-        get: function () { return this.TCON || '' },
-        set: function (value) { this.TCON = value }
+        get: function () {
+          return (this.v2 && this.v2.TCON) || (this.v1 && this.v1.genre) || ''
+        },
+        set: function (value) {
+          if (this.v2) this.v2.TCON = value
+          if (this.v1) this.v1.genre = value
+        }
       }
     })
 
@@ -122,57 +139,47 @@ export default class MP3Tag {
   read (options = {}) {
     this.tags = {}
     this.error = ''
-    this.errorCode = -1
-    let tags
 
     try {
-      tags = MP3Tag.readBuffer(this.buffer, options, this.verbose)
+      this.tags = MP3Tag.readBuffer(this.buffer, options, this.verbose)
     } catch (error) {
-      if (error instanceof TagError) {
-        this.error = error.message
-        this.errorCode = error.code
-      } else throw error
+      this.error = error.message
     }
 
-    this.tags = tags
     return this.tags
   }
 
   static writeBuffer (buffer, tags, options = {}, verbose = false) {
-    const defaultVersion = tags.v2Version ? tags.v2Version[0] : 4
-    tags = mergeTags(tags)
+    const defaultVersion = tags.v2Details ? tags.v2Details.version[0] : 3
+    let audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer))
+
     options = overwriteDefault(options, {
       strict: false,
-      id3v1: { include: true },
+      id3v1: { include: false },
       id3v2: {
         include: true,
-        unsynch: true,
+        unsynch: false,
         version: defaultVersion,
         padding: 2048
       }
     })
 
-    let audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer))
-
     if (options.id3v1.include) {
       if (verbose) console.log('Validating ID3v1...')
-      ID3v1.validate(tags, options.strict)
+      ID3v1.validate(tags.v1, options.strict)
 
       if (verbose) console.log('Writing ID3v1...')
-      const encoded = ID3v1.encode(tags)
+      const encoded = ID3v1.encode(tags.v1)
       const tagBytes = new Uint8Array(encoded)
       audio = mergeBytes(audio, tagBytes)
     }
 
     if (options.id3v2.include) {
-      if (verbose) console.log('Transforming ID3v2...')
-      tags = ID3v2.transform(tags, options.id3v2.version)
-
       if (verbose) console.log('Validating ID3v2...')
-      ID3v2.validate(tags, options.strict, options.id3v2)
+      ID3v2.validate(tags.v2, options.strict, options.id3v2)
 
       if (verbose) console.log('Writing ID3v2...')
-      const encoded = ID3v2.encode(tags, options.id3v2)
+      const encoded = ID3v2.encode(tags.v2, options.id3v2)
       const tagBytes = new Uint8Array(encoded)
       audio = mergeBytes(tagBytes, audio)
     }
@@ -182,26 +189,21 @@ export default class MP3Tag {
 
   save (options = {}) {
     this.error = ''
-    this.errorCode = -1
-    let buffer
+    let buffer = this.buffer
 
     try {
       buffer = MP3Tag.writeBuffer(this.buffer, this.tags, options, this.verbose)
     } catch (error) {
-      if (error instanceof TagError) {
-        this.error = error.message
-        this.errorCode = error.code
-      } else throw error
+      this.error = error.message
     }
 
-    if (this.errorCode < 0) this.buffer = buffer
+    if (this.error === '') this.buffer = buffer
     return this.buffer
   }
 
   remove () {
     this.tags = {}
     this.error = ''
-    this.errorCode = -1
     this.buffer = this.getAudio()
     return true
   }
@@ -229,9 +231,5 @@ export default class MP3Tag {
     return buffer.slice(start)
   }
 
-  getAudio () {
-    return MP3Tag.getAudioBuffer(this.buffer)
-  }
-
-  log (message) { if (this.verbose) console.log(message) }
+  getAudio () { return MP3Tag.getAudioBuffer(this.buffer) }
 }

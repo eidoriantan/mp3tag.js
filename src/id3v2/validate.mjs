@@ -1,5 +1,4 @@
 
-import TagError from '../error.mjs'
 import BufferView from '../viewer.mjs'
 
 import { timeRegex, year, month, day } from '../utils/date.mjs'
@@ -14,11 +13,11 @@ const syltRegex = /^((\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)|)/
 
 export function textFrame (value, version, strict) {
   if (typeof value !== 'string') {
-    throw new TagError(201, 'Value is not a string')
+    throw new Error('Value is not a string')
   }
 
   if (strict && !value.match(stringRegex)) {
-    throw new TagError(201, 'Newlines are not allowed')
+    throw new Error('Newlines are not allowed')
   }
 
   return true
@@ -32,17 +31,17 @@ export function setFrame (value, version, strict) {
     textFrame(set, version, strict)
 
     if (typeof set !== 'string' && typeof set !== 'number') {
-      throw new TagError(201, 'Value is not a string/number')
+      throw new Error('Value is not a string/number')
     }
 
     const match = set.match(setRegex)
     if (strict && typeof set === 'string') {
-      if (match === null) throw new TagError(201, 'Invalid format (eg. 1/2)')
+      if (match === null) throw new Error('Invalid format (eg. 1/2)')
 
       const position = parseInt(match[1])
       const total = match[2] ? parseInt(match[2].substr(1)) : null
       if (total !== null && position > total) {
-        throw new TagError(201, 'Position is greater then total')
+        throw new Error('Position is greater then total')
       }
     }
   })
@@ -58,11 +57,11 @@ export function timeFrame (value, version, strict) {
     textFrame(time, version, strict)
 
     if (version === 3 && strict && !time.match(/^(\d{4})$/)) {
-      throw new TagError(201, 'Value is not 4 numeric characters')
+      throw new Error('Value is not 4 numeric characters')
     }
 
     if (version === 4 && strict && !time.match(timeRegex)) {
-      throw new TagError(201, 'Time frames must follow ISO 8601')
+      throw new Error('Time frames must follow ISO 8601')
     }
   })
 
@@ -77,7 +76,7 @@ export function tkeyFrame (value, version, strict) {
     textFrame(tkey, version, strict)
 
     if (strict && !tkey.match(/^([A-Gb#mo]{1,3})$/)) {
-      throw new TagError(201, 'Invalid TKEY Format (eg Cbm)')
+      throw new Error('Invalid TKEY Format (eg Cbm)')
     }
   })
 
@@ -92,7 +91,7 @@ export function tlanFrame (value, version, strict) {
     textFrame(tlan, version, strict)
 
     if (strict && !tlan.match(langRegex)) {
-      throw new TagError(201, 'Language must follow ISO 639-2')
+      throw new Error('Language must follow ISO 639-2')
     }
   })
 
@@ -107,7 +106,7 @@ export function tsrcFrame (value, version, strict) {
     textFrame(tsrc, version, strict)
 
     if (strict && !tsrc.match(/^([A-Z0-9]{12})$/)) {
-      throw new TagError(201, 'Invalid ISRC format')
+      throw new Error('Invalid ISRC format')
     }
   })
 
@@ -116,7 +115,7 @@ export function tsrcFrame (value, version, strict) {
 
 export function urlFrame (value, version, strict) {
   textFrame(value, version, strict)
-  if (strict && !value.match(urlRegex)) throw new TagError(201, 'Invalid URL')
+  if (strict && !value.match(urlRegex)) throw new Error('Invalid URL')
 
   return true
 }
@@ -128,7 +127,7 @@ export function txxxFrame (values, version, strict) {
     textFrame(value.text, version, strict)
 
     if (strict && includes(descriptions, value.description)) {
-      throw new TagError(201, 'Description should not duplicate')
+      throw new Error('Description should not duplicate')
     } else descriptions.push(value.description)
   })
 
@@ -142,7 +141,7 @@ export function wxxxFrame (values, version, strict) {
     urlFrame(value.url, version, strict)
 
     if (strict && includes(descriptions, value.description)) {
-      throw new TagError(201, 'Description should not duplicate')
+      throw new Error('Description should not duplicate')
     } else descriptions.push(value.description)
   })
 
@@ -156,11 +155,11 @@ export function langDescFrame (values, version, strict) {
     textFrame(langDesc.descriptor, version, strict)
 
     if (typeof langDesc.text !== 'string') {
-      throw new TagError(201, 'Text is not a string')
+      throw new Error('Text is not a string')
     }
 
     if (strict && !langDesc.language.match(langRegex)) {
-      throw new TagError(201, 'Language must follow ISO 639-2')
+      throw new Error('Language must follow ISO 639-2')
     }
 
     const checkObj = {
@@ -169,7 +168,7 @@ export function langDescFrame (values, version, strict) {
     }
 
     if (strict && includes(langDescs, checkObj)) {
-      throw new TagError(201, 'Language and descriptor should not duplicate')
+      throw new Error('Language and descriptor should not duplicate')
     } else langDescs.push(checkObj)
   })
 
@@ -183,32 +182,32 @@ export function apicFrame (values, version, strict) {
     textFrame(apic.description, version, strict)
 
     if (typeof apic.type !== 'number') {
-      throw new TagError(201, 'Type is not a number')
+      throw new Error('Type is not a number')
     }
 
     if (apic.type > 255 || apic.type < 0) {
-      throw new TagError(201, 'Type should be in range of 0 - 255')
+      throw new Error('Type should be in range of 0 - 255')
     }
 
     if (!BufferView.isViewable(apic.data)) {
-      throw new TagError(201, 'Image data should be viewable')
+      throw new Error('Image data should be viewable')
     }
 
     if (strict) {
       if (apic.type > 21 || apic.type < 0) {
-        throw new TagError(201, 'Type should be in range of 0 - 21')
+        throw new Error('Type should be in range of 0 - 21')
       }
 
       if (!apic.format.match(imageRegex)) {
-        throw new TagError(201, 'Format should be an image MIME')
+        throw new Error('Format should be an image MIME')
       }
 
       if (apic.description.length > 64) {
-        throw new TagError(201, 'Description should not exceed 64')
+        throw new Error('Description should not exceed 64')
       }
 
       if (includes(descriptions, apic.description)) {
-        throw new TagError(201, 'Description should not duplicate')
+        throw new Error('Description should not duplicate')
       } else descriptions.push(apic.description)
     }
   })
@@ -224,11 +223,11 @@ export function geobFrame (values, version, strict) {
     textFrame(geob.description, version, strict)
 
     if (!BufferView.isViewable(geob.object)) {
-      throw new TagError(201, 'Object data should be viewable')
+      throw new Error('Object data should be viewable')
     }
 
     if (strict && includes(descriptions, geob.description)) {
-      throw new TagError(201, 'GEOB description should not duplicate')
+      throw new Error('GEOB description should not duplicate')
     } else descriptions.push(geob.description)
   })
 
@@ -241,21 +240,21 @@ export function ufidFrame (values, version, strict) {
     textFrame(ufid.ownerId, version, strict)
 
     if (!BufferView.isViewable(ufid.id)) {
-      throw new TagError(201, 'ID should be viewable')
+      throw new Error('ID should be viewable')
     }
 
     if (strict) {
       if (ufid.ownerId === '') {
-        throw new TagError(201, 'ownerId should not be blank')
+        throw new Error('ownerId should not be blank')
       }
 
       const idLength = ufid.id.byteLength || ufid.id.length || 0
       if (idLength > 64) {
-        throw new TagError(201, 'ID bytelength should not exceed 64 bytes')
+        throw new Error('ID bytelength should not exceed 64 bytes')
       }
 
       if (includes(ownerIds, ufid.ownerId)) {
-        throw new TagError(201, 'ownerId should not duplicate')
+        throw new Error('ownerId should not duplicate')
       } else ownerIds.push(ufid.ownerId)
     }
   })
@@ -268,11 +267,11 @@ export function userFrame (values, version, strict) {
     textFrame(user.language, version, strict)
 
     if (typeof user.text !== 'string') {
-      throw new TagError(201, 'Text is not a string')
+      throw new Error('Text is not a string')
     }
 
     if (strict && !user.language.match(langRegex)) {
-      throw new TagError(201, 'Language must follow ISO 639-2')
+      throw new Error('Language must follow ISO 639-2')
     }
   })
 
@@ -287,15 +286,15 @@ export function owneFrame (value, version, strict) {
 
   if (strict) {
     if (!value.date.match(`${year}${month}${day}`)) {
-      throw new TagError(201, 'Date is not valid (format: YYYYMMDD)')
+      throw new Error('Date is not valid (format: YYYYMMDD)')
     }
 
     if (!value.currencyCode.match(/^([A-Z]{3})$/)) {
-      throw new TagError(201, 'Currency code is not valid (eg. USD)')
+      throw new Error('Currency code is not valid (eg. USD)')
     }
 
     if (!value.currencyPrice.match(/^(\d*)\.(\d+)$/)) {
-      throw new TagError(201, 'Currency price is not valid (eg. 2.00)')
+      throw new Error('Currency price is not valid (eg. 2.00)')
     }
   }
 
@@ -308,11 +307,11 @@ export function privFrame (values, version, strict) {
     textFrame(priv.ownerId, version, strict)
 
     if (!BufferView.isViewable(priv.data)) {
-      throw new TagError(201, 'Data should be viewable')
+      throw new Error('Data should be viewable')
     }
 
     if (strict && includes(contents, priv.data)) {
-      throw new TagError(201, 'Data should not duplicate')
+      throw new Error('Data should not duplicate')
     } else contents.push(priv.data)
   })
 
@@ -323,19 +322,19 @@ export function signFrame (values, version, strict) {
   const signs = []
   values.forEach(sign => {
     if (typeof sign.group !== 'number') {
-      throw new TagError(201, 'Group ID is not a number')
+      throw new Error('Group ID is not a number')
     }
 
     if (sign.group < 0 || sign.group > 255) {
-      throw new TagError(201, 'Group ID should be in the range of 0 - 255')
+      throw new Error('Group ID should be in the range of 0 - 255')
     }
 
     if (!BufferView.isViewable(sign.signature)) {
-      throw new TagError(201, 'Signature should be viewable')
+      throw new Error('Signature should be viewable')
     }
 
     if (strict && includes(signs, sign)) {
-      throw new TagError(201, 'SIGN contents should not be identical to others')
+      throw new Error('SIGN contents should not be identical to others')
     } else signs.push(sign)
   })
 
@@ -349,36 +348,36 @@ export function syltFrame (values, version, strict) {
     textFrame(sylt.descriptor, version, strict)
 
     if (typeof sylt.lyrics !== 'string') {
-      throw new TagError(201, 'Lyrics is not a string')
+      throw new Error('Lyrics is not a string')
     }
 
     if (typeof sylt.type !== 'number') {
-      throw new TagError(201, 'Type is not a number')
+      throw new Error('Type is not a number')
     } else if (sylt.type > 255 || sylt.type < 0) {
-      throw new TagError(201, 'Type should be in range of 0 - 255')
+      throw new Error('Type should be in range of 0 - 255')
     }
 
     if (typeof sylt.format !== 'number') {
-      throw new TagError(201, 'Format is not a number')
+      throw new Error('Format is not a number')
     } else if (sylt.format > 255 || sylt.format < 0) {
-      throw new TagError(201, 'Format should be in range of 0 - 255')
+      throw new Error('Format should be in range of 0 - 255')
     }
 
     if (strict) {
       if (!sylt.language.match(langRegex)) {
-        throw new TagError(201, 'Language must follow ISO 639-2')
+        throw new Error('Language must follow ISO 639-2')
       }
 
       if (sylt.type > 6 || sylt.type < 0) {
-        throw new TagError(201, 'Type should be in range of 0 - 6')
+        throw new Error('Type should be in range of 0 - 6')
       }
 
       if (sylt.format > 2 || sylt.format < 1) {
-        throw new TagError(201, 'Format should be either 1 or 2')
+        throw new Error('Format should be either 1 or 2')
       }
 
       if (sylt.lyrics.split('\n').every(entry => syltRegex.test(entry))) {
-        throw new TagError(201, 'Lyrics must follow this format: [mm:ss.xxx]')
+        throw new Error('Lyrics must follow this format: [mm:ss.xxx]')
       }
 
       const checkObj = {
@@ -387,7 +386,7 @@ export function syltFrame (values, version, strict) {
       }
 
       if (includes(sylts, checkObj)) {
-        throw new TagError(201, '1 SYLT with same language and descriptor only')
+        throw new Error('1 SYLT with same language and descriptor only')
       } else sylts.push(checkObj)
     }
   })
@@ -397,7 +396,7 @@ export function syltFrame (values, version, strict) {
 
 export function mcdiFrame (value, version, strict) {
   if (!BufferView.isViewable(value.data)) {
-    throw new TagError(201, 'Data should be viewable')
+    throw new Error('Data should be viewable')
   }
 
   return true
@@ -405,17 +404,17 @@ export function mcdiFrame (value, version, strict) {
 
 export function sytcFrame (value, version, strict) {
   if (!BufferView.isViewable(value.data)) {
-    throw new TagError(201, 'Data should be viewable')
+    throw new Error('Data should be viewable')
   }
 
   if (typeof value.format !== 'number') {
-    throw new TagError(201, 'Format is not a number')
+    throw new Error('Format is not a number')
   } else if (value.format > 255 || value.format < 0) {
-    throw new TagError(201, 'Format should be in range of 0 - 255')
+    throw new Error('Format should be in range of 0 - 255')
   }
 
   if (strict && (value.format > 2 || value.format < 1)) {
-    throw new TagError(201, 'Invalid timestamp')
+    throw new Error('Invalid timestamp')
   }
 
   return true
