@@ -1,5 +1,5 @@
 
-[![mp3tag.js Banner](./assets/mp3tag-banner.png)](https://mp3tag.js.org)
+[![mp3tag.js Banner](https://mp3tag.js.org/assets/images/banner.png)](https://mp3tag.js.org)
 
 [![Node.js CI](https://github.com/eidoriantan/mp3tag.js/workflows/Node.js%20CI/badge.svg)](https://github.com/eidoriantan/mp3tag.js/actions?query=workflow%3A%22Node.js+CI%22)
 [![Build Status](https://travis-ci.com/eidoriantan/mp3tag.js.svg?branch=master)](https://travis-ci.com/eidoriantan/mp3tag.js)
@@ -18,8 +18,7 @@ The website is also open sourced and can be viewed at the
 [gh-pages](https://github.com/eidoriantan/mp3tag.js/tree/gh-pages) branch.
 
 ### Features
- * Read ID3v1 and ID3v2 tags synchronously
- * Write ID3v1 and ID3v2 tags synchronously
+ * Read, write, and remove ID3 tags
  * Supports unsynchronisation
  * Standards compliant. See [id3.org](http://id3.org)
 
