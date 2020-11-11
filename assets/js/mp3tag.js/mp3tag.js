@@ -1,18 +1,18 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
-	(global = global || self, global.MP3Tag = factory());
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.MP3Tag = factory());
 }(this, (function () { 'use strict';
 
 	var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 	function createCommonjsModule(fn, basedir, module) {
 		return module = {
-		  path: basedir,
-		  exports: {},
-		  require: function (path, base) {
-	      return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
-	    }
+			path: basedir,
+			exports: {},
+			require: function (path, base) {
+				return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
+			}
 		}, fn(module, module.exports), module.exports;
 	}
 
@@ -27,7 +27,9 @@
 
 	var global_1 = // eslint-disable-next-line no-undef
 	check(typeof globalThis == 'object' && globalThis) || check(typeof window == 'object' && window) || check(typeof self == 'object' && self) || check(typeof commonjsGlobal == 'object' && commonjsGlobal) || // eslint-disable-next-line no-new-func
-	Function('return this')();
+	function () {
+	  return this;
+	}() || Function('return this')();
 
 	var fails = function (exec) {
 	  try {
@@ -219,7 +221,7 @@
 	  (module.exports = function (key, value) {
 	    return sharedStore[key] || (sharedStore[key] = value !== undefined ? value : {});
 	  })('versions', []).push({
-	    version: '3.6.5',
+	    version: '3.7.0',
 	    mode:  'global',
 	    copyright: '© 2020 Denis Pushkarev (zloirock.ru)'
 	  });
@@ -260,12 +262,13 @@
 	};
 
 	if (nativeWeakMap) {
-	  var store$1 = new WeakMap$1();
+	  var store$1 = sharedStore.state || (sharedStore.state = new WeakMap$1());
 	  var wmget = store$1.get;
 	  var wmhas = store$1.has;
 	  var wmset = store$1.set;
 
 	  set = function (it, metadata) {
+	    metadata.facade = it;
 	    wmset.call(store$1, it, metadata);
 	    return metadata;
 	  };
@@ -282,6 +285,7 @@
 	  hiddenKeys[STATE] = true;
 
 	  set = function (it, metadata) {
+	    metadata.facade = it;
 	    createNonEnumerableProperty(it, STATE, metadata);
 	    return metadata;
 	  };
@@ -311,10 +315,18 @@
 	    var unsafe = options ? !!options.unsafe : false;
 	    var simple = options ? !!options.enumerable : false;
 	    var noTargetGet = options ? !!options.noTargetGet : false;
+	    var state;
 
 	    if (typeof value == 'function') {
-	      if (typeof key == 'string' && !has(value, 'name')) createNonEnumerableProperty(value, 'name', key);
-	      enforceInternalState(value).source = TEMPLATE.join(typeof key == 'string' ? key : '');
+	      if (typeof key == 'string' && !has(value, 'name')) {
+	        createNonEnumerableProperty(value, 'name', key);
+	      }
+
+	      state = enforceInternalState(value);
+
+	      if (!state.source) {
+	        state.source = TEMPLATE.join(typeof key == 'string' ? key : '');
+	      }
 	    }
 
 	    if (O === global_1) {
@@ -3164,6 +3176,55 @@
 	  return Constructor;
 	}
 
+	function _defineProperty(obj, key, value) {
+	  if (key in obj) {
+	    Object.defineProperty(obj, key, {
+	      value: value,
+	      enumerable: true,
+	      configurable: true,
+	      writable: true
+	    });
+	  } else {
+	    obj[key] = value;
+	  }
+
+	  return obj;
+	}
+
+	function ownKeys$1(object, enumerableOnly) {
+	  var keys = Object.keys(object);
+
+	  if (Object.getOwnPropertySymbols) {
+	    var symbols = Object.getOwnPropertySymbols(object);
+	    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+	      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+	    });
+	    keys.push.apply(keys, symbols);
+	  }
+
+	  return keys;
+	}
+
+	function _objectSpread2(target) {
+	  for (var i = 1; i < arguments.length; i++) {
+	    var source = arguments[i] != null ? arguments[i] : {};
+
+	    if (i % 2) {
+	      ownKeys$1(Object(source), true).forEach(function (key) {
+	        _defineProperty(target, key, source[key]);
+	      });
+	    } else if (Object.getOwnPropertyDescriptors) {
+	      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+	    } else {
+	      ownKeys$1(Object(source)).forEach(function (key) {
+	        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+	      });
+	    }
+	  }
+
+	  return target;
+	}
+
 	function _inherits(subClass, superClass) {
 	  if (typeof superClass !== "function" && superClass !== null) {
 	    throw new TypeError("Super expression must either be null or a function");
@@ -3331,50 +3392,6 @@
 	  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 	}
 
-	var E_CODES = {
-	  0: 'Unknown error',
-	  100: 'ID3v1 Error: This file is not an ID3v1',
-	  101: 'ID3v1 Error: Malform tag',
-	  102: 'ID3v1 Error: Frame validation failed',
-	  200: 'ID3v2 Error: This file is not an ID3v2',
-	  201: 'ID3v2 Error: Malform tag',
-	  202: 'ID3v2 Error: Frame validation failed',
-	  203: 'ID3v2 Error: This frame is not existing in this version of ID3v2'
-	};
-
-	var TagError = /*#__PURE__*/function (_Error) {
-	  _inherits(TagError, _Error);
-
-	  var _super = _createSuper(TagError);
-
-	  function TagError(code) {
-	    var _this;
-
-	    var extra = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
-	    _classCallCheck(this, TagError);
-
-	    _this = _super.call(this, E_CODES[code]);
-	    _this.name = 'MP3TagError';
-	    _this.code = code;
-	    _this.extra = extra;
-
-	    _this.parseMessage();
-
-	    return _this;
-	  }
-
-	  _createClass(TagError, [{
-	    key: "parseMessage",
-	    value: function parseMessage() {
-	      this.message = E_CODES[this.code];
-	      if (this.extra) this.message += " \"".concat(this.extra, "\"");
-	    }
-	  }]);
-
-	  return TagError;
-	}( /*#__PURE__*/_wrapNativeSuper(Error));
-
 	var IS_CONCAT_SPREADABLE = wellKnownSymbol('isConcatSpreadable');
 	var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
 	var MAXIMUM_ALLOWED_INDEX_EXCEEDED = 'Maximum allowed index exceeded'; // We can't use this feature detection in V8 since it causes
@@ -3477,11 +3494,11 @@
 
 	  try {
 	    '/./'[METHOD_NAME](regexp);
-	  } catch (e) {
+	  } catch (error1) {
 	    try {
 	      regexp[MATCH$1] = false;
 	      return '/./'[METHOD_NAME](regexp);
-	    } catch (f) {
+	    } catch (error2) {
 	      /* empty */
 	    }
 	  }
@@ -3697,8 +3714,7 @@
 	}
 
 	function isBuffer(param) {
-	  if (param instanceof ArrayBuffer) return true;else if (typeof Buffer !== 'undefined' && param instanceof Buffer) return true;
-	  return false;
+	  return param instanceof ArrayBuffer || typeof Buffer !== 'undefined' && param instanceof Buffer;
 	}
 
 	var BufferView = /*#__PURE__*/function (_DataView) {
@@ -4220,20 +4236,7 @@
 	}
 
 	var GENRES = ['Blues', 'Classic Rock', 'Country', 'Dance', 'Disco', 'Funk', 'Grunge', 'Hip-Hop', 'Jazz', 'Metal', 'New Age', 'Oldies', 'Other', 'Pop', 'R&B', 'Reggae', 'Rock', 'Techno', 'Industrial', 'Alternative', 'Ska', 'Death Metal', 'Pranks', 'Soundtrack', 'Euro-Techno', 'Ambient', 'Trip-Hop', 'Vocal', 'Jazz+Funk', 'Fusion', 'Trance', 'Classical', 'Instrumental', 'Acid', 'House', 'Game', 'Sound Clip', 'Gospel', 'Noise', 'Alt. Rock', 'Bass', 'Soul', 'Punk', 'Space', 'Meditative', 'Instrumental Pop', 'Instrumental Rock', 'Ethnic', 'Gothic', 'Darkwave', 'Techno-Industrial', 'Electronic', 'Pop-Folk', 'Eurodance', 'Dream', 'Southern Rock', 'Comedy', 'Cult', 'Gangsta Rap', 'Top 40', 'Christian Rap', 'Pop/Funk', 'Jungle', 'Native American', 'Cabaret', 'New Wave', 'Psychedelic', 'Rave', 'Showtunes', 'Trailer', 'Lo-Fi', 'Tribal', 'Acid Punk', 'Acid Jazz', 'Polka', 'Retro', 'Musical', 'Rock & Roll', 'Hard Rock', 'Folk', 'Folk-Rock', 'National Folk', 'Swing', 'Fast-Fusion', 'Bebop', 'Latin', 'Revival', 'Celtic', 'Bluegrass', 'Avantgarde', 'Gothic Rock', 'Progressive Rock', 'Psychedelic Rock', 'Symphonic Rock', 'Slow Rock', 'Big Band', 'Chorus', 'Easy Listening', 'Acoustic', 'Humour', 'Speech', 'Chanson', 'Opera', 'Chamber Music', 'Sonata', 'Symphony', 'Booty Bass', 'Primus', 'Porn Groove', 'Satire', 'Slow Jam', 'Club', 'Tango', 'Samba', 'Folklore', 'Ballad', 'Power Ballad', 'Rhythmic Soul', 'Freestyle', 'Duet', 'Punk Rock', 'Drum Solo', 'A Cappella', 'Euro-House', 'Dance Hall', 'Goa', 'Drum & Bass', 'Club-House', 'Hardcore', 'Terror', 'Indie', 'BritPop', 'Afro-Punk', 'Polsk Punk', 'Beat', 'Christian Gangsta Rap', 'Heavy Metal', 'Black Metal', 'Crossover', 'Contemporary Christian', 'Christian Rock', 'Merengue', 'Salsa', 'Thrash Metal', 'Anime', 'JPop', 'Synthpop', 'Abstract', 'Art Rock', 'Baroque', 'Bhangra', 'Big Beat', 'Breakbeat', 'Chillout', 'Downtempo', 'Dub', 'EBM', 'Eclectic', 'Electro', 'Electroclash', 'Emo', 'Experimental', 'Garage', 'Global', 'IDM', 'Illbient', 'Industro-Goth', 'Jam Band', 'Krautrock', 'Leftfield', 'Lounge', 'Math Rock', 'New Romantic', 'Nu-Breakz', 'Post-Punk', 'Post-Rock', 'Psytrance', 'Shoegaze', 'Space Rock', 'Trop Rock', 'World Music', 'Neoclassical', 'Audiobook', 'Audio Theatre', 'Neue Deutsche Welle', 'Podcast', 'Indie Rock', 'G-Funk', 'Dubstep', 'Garage Rock', 'Psybient'];
-
-	function filter(tags) {
-	  tags.title = tags.TIT2 || tags.title || '';
-	  tags.artist = tags.TPE1 || tags.artist || '';
-	  tags.album = tags.TALB || tags.album || '';
-	  tags.year = tags.TYER || tags.TDRC && tags.TDRC.substr(0, 4) || tags.year || '';
-	  tags.comment = (tags.COMM ? tags.COMM[0].text : '') || tags.comment || '';
-	  tags.track = (tags.TRCK ? tags.TRCK.split('/')[0] : '') || tags.track || '';
-	  tags.genre = tags.TCON || tags.genre || '';
-	  return tags;
-	}
-
 	function hasID3v1(buffer) {
-	  if (!isBuffer(buffer)) throw new TypeError('buffer is not ArrayBuffer/Buffer');
 	  var offset = buffer.byteLength - 128;
 
 	  if (offset > -1) {
@@ -4242,7 +4245,6 @@
 	  } else return false;
 	}
 	function decode(buffer) {
-	  if (!hasID3v1(buffer)) throw new TagError(100);
 	  var view = new BufferView(buffer, buffer.byteLength - 128);
 	  var title = view.getString(3, 30, 'utf-8').string.replace(/\0/g, '');
 	  var artist = view.getString(33, 30, 'utf-8').string.replace(/\0/g, '');
@@ -4260,79 +4262,82 @@
 	    comment: comment,
 	    genre: genre
 	  };
-	  tags.v1Version = track ? 1 : 0;
-	  tags.v1Size = 128;
-	  return tags;
+	  var details = {
+	    version: track ? 1 : 0,
+	    size: 128
+	  };
+	  return {
+	    tags: tags,
+	    details: details
+	  };
 	}
 	function validate(tags, strict) {
-	  var filtered = filter(tags);
-	  var title = filtered.title,
-	      artist = filtered.artist,
-	      album = filtered.album,
-	      year = filtered.year,
-	      comment = filtered.comment,
-	      track = filtered.track,
-	      genre = filtered.genre;
+	  var title = tags.title,
+	      artist = tags.artist,
+	      album = tags.album,
+	      year = tags.year,
+	      comment = tags.comment,
+	      track = tags.track,
+	      genre = tags.genre;
 
 	  if (typeof title !== 'string') {
-	    throw new TagError(102, 'Title is not a string');
+	    throw new Error('Title is not a string');
 	  } else if (encodeString(title, 'utf-8').length > 30) {
-	    throw new TagError(102, 'Title length exceeds 30 characters');
+	    throw new Error('Title length exceeds 30 characters');
 	  }
 
 	  if (typeof artist !== 'string') {
-	    throw new TagError(102, 'Artist is not a string');
+	    throw new Error('Artist is not a string');
 	  } else if (encodeString(artist, 'utf-8').length > 30) {
-	    throw new TagError(102, 'Artist length exceeds 30 characters');
+	    throw new Error('Artist length exceeds 30 characters');
 	  }
 
 	  if (typeof album !== 'string') {
-	    throw new TagError(102, 'Album is not a string');
+	    throw new Error('Album is not a string');
 	  } else if (encodeString(album, 'utf-8').length > 30) {
-	    throw new TagError(102, 'Album length exceeds 30 characters');
+	    throw new Error('Album length exceeds 30 characters');
 	  }
 
 	  if (typeof year !== 'string') {
-	    throw new TagError(102, 'Year is not a string');
+	    throw new Error('Year is not a string');
 	  } else if (encodeString(year, 'utf-8').length > 4) {
-	    throw new TagError(102, 'Year length exceeds 4 characters');
+	    throw new Error('Year length exceeds 4 characters');
 	  }
 
 	  if (typeof comment !== 'string') {
-	    throw new TagError(102, 'Comment is not a string');
+	    throw new Error('Comment is not a string');
 	  }
 
 	  if (typeof track !== 'string') {
-	    throw new TagError(102, 'Track is not a string');
+	    throw new Error('Track is not a string');
 	  } else if (parseInt(track) > 255 || parseInt(track) < 0) {
-	    throw new TagError(102, 'Track should be in range 255 - 0');
+	    throw new Error('Track should be in range 255 - 0');
 	  }
 
 	  if (track !== '') {
 	    if (encodeString(comment, 'utf-8').length > 28) {
-	      throw new TagError(102, 'Comment length exceeds 28 characters');
+	      throw new Error('Comment length exceeds 28 characters');
 	    }
 	  } else if (encodeString(comment, 'utf-8').length > 30) {
-	    throw new TagError(102, 'Comment length exceeds 30 characters');
+	    throw new Error('Comment length exceeds 30 characters');
 	  }
 
 	  if (typeof genre !== 'string') {
-	    throw new TagError(102, 'Genre is not a string');
+	    throw new Error('Genre is not a string');
 	  } else if (strict && !GENRES.includes(genre) && genre !== '') {
-	    throw new TagError(102, 'Unknown genre');
+	    throw new Error('Unknown genre');
 	  }
 
 	  return true;
 	}
 	function encode(tags) {
-	  var filtered = filter(tags);
-	  var title = filtered.title,
-	      artist = filtered.artist,
-	      album = filtered.album,
-	      year = filtered.year,
-	      comment = filtered.comment,
-	      track = filtered.track,
-	      genre = filtered.genre;
+	  var title = tags.title,
+	      artist = tags.artist,
+	      album = tags.album,
+	      year = tags.year,
+	      comment = tags.comment,
+	      track = tags.track,
+	      genre = tags.genre;
 	  title = encodeString(title, 'utf-8');
 	  artist = encodeString(artist, 'utf-8');
 	  album = encodeString(album, 'utf-8');
@@ -4370,50 +4375,6 @@
 
 	  return mergeBytes(0x54, 0x41, 0x47, title, artist, album, year, comment, genre > -1 ? genre : 12).buffer;
 	}
-
-	var propertyIsEnumerable = objectPropertyIsEnumerable.f; // `Object.{ entries, values }` methods implementation
-
-	var createMethod$5 = function (TO_ENTRIES) {
-	  return function (it) {
-	    var O = toIndexedObject(it);
-	    var keys = objectKeys(O);
-	    var length = keys.length;
-	    var i = 0;
-	    var result = [];
-	    var key;
-
-	    while (length > i) {
-	      key = keys[i++];
-
-	      if (!descriptors || propertyIsEnumerable.call(O, key)) {
-	        result.push(TO_ENTRIES ? [key, O[key]] : O[key]);
-	      }
-	    }
-
-	    return result;
-	  };
-	};
-
-	var objectToArray = {
-	  // `Object.entries` method
-	  // https://tc39.github.io/ecma262/#sec-object.entries
-	  entries: createMethod$5(true),
-	  // `Object.values` method
-	  // https://tc39.github.io/ecma262/#sec-object.values
-	  values: createMethod$5(false)
-	};
-
-	var $entries = objectToArray.entries; // `Object.entries` method
-	// https://tc39.github.io/ecma262/#sec-object.entries
-
-	_export({
-	  target: 'Object',
-	  stat: true
-	}, {
-	  entries: function entries(O) {
-	    return $entries(O);
-	  }
-	});
 
 	var FAILS_ON_PRIMITIVES = fails(function () {
 	  objectKeys(1);
@@ -4453,38 +4414,6 @@
 	  ) {
 	    return !!~String(requireObjectCoercible(this)).indexOf(notARegexp(searchString), arguments.length > 1 ? arguments[1] : undefined);
 	  }
-	});
-
-	fixRegexpWellKnownSymbolLogic('match', 1, function (MATCH, nativeMatch, maybeCallNative) {
-	  return [// `String.prototype.match` method
-	  // https://tc39.github.io/ecma262/#sec-string.prototype.match
-	  function match(regexp) {
-	    var O = requireObjectCoercible(this);
-	    var matcher = regexp == undefined ? undefined : regexp[MATCH];
-	    return matcher !== undefined ? matcher.call(regexp, O) : new RegExp(regexp)[MATCH](String(O));
-	  }, // `RegExp.prototype[@@match]` method
-	  // https://tc39.github.io/ecma262/#sec-regexp.prototype-@@match
-	  function (regexp) {
-	    var res = maybeCallNative(nativeMatch, regexp, this);
-	    if (res.done) return res.value;
-	    var rx = anObject(regexp);
-	    var S = String(this);
-	    if (!rx.global) return regexpExecAbstract(rx, S);
-	    var fullUnicode = rx.unicode;
-	    rx.lastIndex = 0;
-	    var A = [];
-	    var n = 0;
-	    var result;
-
-	    while ((result = regexpExecAbstract(rx, S)) !== null) {
-	      var matchStr = String(result[0]);
-	      A[n] = matchStr;
-	      if (matchStr === '') rx.lastIndex = advanceStringIndex(S, toLength(rx.lastIndex), fullUnicode);
-	      n++;
-	    }
-
-	    return n === 0 ? null : A;
-	  }];
 	});
 
 	function getHeaderFlags(_byte, version) {
@@ -5144,6 +5073,38 @@
 	  }
 	});
 
+	fixRegexpWellKnownSymbolLogic('match', 1, function (MATCH, nativeMatch, maybeCallNative) {
+	  return [// `String.prototype.match` method
+	  // https://tc39.github.io/ecma262/#sec-string.prototype.match
+	  function match(regexp) {
+	    var O = requireObjectCoercible(this);
+	    var matcher = regexp == undefined ? undefined : regexp[MATCH];
+	    return matcher !== undefined ? matcher.call(regexp, O) : new RegExp(regexp)[MATCH](String(O));
+	  }, // `RegExp.prototype[@@match]` method
+	  // https://tc39.github.io/ecma262/#sec-regexp.prototype-@@match
+	  function (regexp) {
+	    var res = maybeCallNative(nativeMatch, regexp, this);
+	    if (res.done) return res.value;
+	    var rx = anObject(regexp);
+	    var S = String(this);
+	    if (!rx.global) return regexpExecAbstract(rx, S);
+	    var fullUnicode = rx.unicode;
+	    rx.lastIndex = 0;
+	    var A = [];
+	    var n = 0;
+	    var result;
+
+	    while ((result = regexpExecAbstract(rx, S)) !== null) {
+	      var matchStr = String(result[0]);
+	      A[n] = matchStr;
+	      if (matchStr === '') rx.lastIndex = advanceStringIndex(S, toLength(rx.lastIndex), fullUnicode);
+	      n++;
+	    }
+
+	    return n === 0 ? null : A;
+	  }];
+	});
+
 	var defineProperty$7 = objectDefineProperty.f;
 	var getOwnPropertyNames$1 = objectGetOwnPropertyNames.f;
 	var setInternalState$3 = internalState.set;
@@ -5238,16 +5199,6 @@
 
 	  return included;
 	}
-	function mergeObjects(obj1, obj2) {
-	  var filtered = obj1;
-
-	  for (var key in obj2) {
-	    if (obj1[key] !== undefined && obj1[key] !== '') filtered[key] = obj1[key];
-	    if (obj2[key] !== undefined && obj2[key] !== '') filtered[key] = obj2[key];
-	  }
-
-	  return filtered;
-	}
 	function objectEqual(obj1, obj2) {
 	  for (var prop in obj1) {
 	    if (_typeof(obj1[prop]) !== _typeof(obj2[prop])) return false;
@@ -5305,11 +5256,11 @@
 	var syltRegex = /^((\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)|)/;
 	function textFrame$1(value, version, strict) {
 	  if (typeof value !== 'string') {
-	    throw new TagError(201, 'Value is not a string');
+	    throw new Error('Value is not a string');
 	  }
 
 	  if (strict && !value.match(stringRegex)) {
-	    throw new TagError(201, 'Newlines are not allowed');
+	    throw new Error('Newlines are not allowed');
 	  }
 
 	  return true;
@@ -5320,18 +5271,18 @@
 	    textFrame$1(set, version, strict);
 
 	    if (typeof set !== 'string' && typeof set !== 'number') {
-	      throw new TagError(201, 'Value is not a string/number');
+	      throw new Error('Value is not a string/number');
 	    }
 
 	    var match = set.match(setRegex);
 
 	    if (strict && typeof set === 'string') {
-	      if (match === null) throw new TagError(201, 'Invalid format (eg. 1/2)');
+	      if (match === null) throw new Error('Invalid format (eg. 1/2)');
 	      var position = parseInt(match[1]);
 	      var total = match[2] ? parseInt(match[2].substr(1)) : null;
 
 	      if (total !== null && position > total) {
-	        throw new TagError(201, 'Position is greater then total');
+	        throw new Error('Position is greater then total');
 	      }
 	    }
 	  });
@@ -5343,11 +5294,11 @@
 	    textFrame$1(time, version, strict);
 
 	    if (version === 3 && strict && !time.match(/^(\d{4})$/)) {
-	      throw new TagError(201, 'Value is not 4 numeric characters');
+	      throw new Error('Value is not 4 numeric characters');
 	    }
 
 	    if (version === 4 && strict && !time.match(timeRegex)) {
-	      throw new TagError(201, 'Time frames must follow ISO 8601');
+	      throw new Error('Time frames must follow ISO 8601');
 	    }
 	  });
 	  return true;
@@ -5358,7 +5309,7 @@
 	    textFrame$1(tkey, version, strict);
 
 	    if (strict && !tkey.match(/^([A-Gb#mo]{1,3})$/)) {
-	      throw new TagError(201, 'Invalid TKEY Format (eg Cbm)');
+	      throw new Error('Invalid TKEY Format (eg Cbm)');
 	    }
 	  });
 	  return true;
@@ -5369,7 +5320,7 @@
 	    textFrame$1(tlan, version, strict);
 
 	    if (strict && !tlan.match(langRegex)) {
-	      throw new TagError(201, 'Language must follow ISO 639-2');
+	      throw new Error('Language must follow ISO 639-2');
 	    }
 	  });
 	  return true;
@@ -5380,14 +5331,14 @@
 	    textFrame$1(tsrc, version, strict);
 
 	    if (strict && !tsrc.match(/^([A-Z0-9]{12})$/)) {
-	      throw new TagError(201, 'Invalid ISRC format');
+	      throw new Error('Invalid ISRC format');
 	    }
 	  });
 	  return true;
 	}
 	function urlFrame$1(value, version, strict) {
 	  textFrame$1(value, version, strict);
-	  if (strict && !value.match(urlRegex)) throw new TagError(201, 'Invalid URL');
+	  if (strict && !value.match(urlRegex)) throw new Error('Invalid URL');
 	  return true;
 	}
 	function txxxFrame$1(values, version, strict) {
@@ -5397,7 +5348,7 @@
 	    textFrame$1(value.text, version, strict);
 
 	    if (strict && includes(descriptions, value.description)) {
-	      throw new TagError(201, 'Description should not duplicate');
+	      throw new Error('Description should not duplicate');
 	    } else descriptions.push(value.description);
 	  });
 	  return true;
@@ -5409,7 +5360,7 @@
 	    urlFrame$1(value.url, version, strict);
 
 	    if (strict && includes(descriptions, value.description)) {
-	      throw new TagError(201, 'Description should not duplicate');
+	      throw new Error('Description should not duplicate');
 	    } else descriptions.push(value.description);
 	  });
 	  return true;
@@ -5421,11 +5372,11 @@
 	    textFrame$1(langDesc.descriptor, version, strict);
 
 	    if (typeof langDesc.text !== 'string') {
-	      throw new TagError(201, 'Text is not a string');
+	      throw new Error('Text is not a string');
 	    }
 
 	    if (strict && !langDesc.language.match(langRegex)) {
-	      throw new TagError(201, 'Language must follow ISO 639-2');
+	      throw new Error('Language must follow ISO 639-2');
 	    }
 
 	    var checkObj = {
@@ -5434,7 +5385,7 @@
 	    };
 
 	    if (strict && includes(langDescs, checkObj)) {
-	      throw new TagError(201, 'Language and descriptor should not duplicate');
+	      throw new Error('Language and descriptor should not duplicate');
 	    } else langDescs.push(checkObj);
 	  });
 	  return true;
@@ -5446,32 +5397,32 @@
 	    textFrame$1(apic.description, version, strict);
 
 	    if (typeof apic.type !== 'number') {
-	      throw new TagError(201, 'Type is not a number');
+	      throw new Error('Type is not a number');
 	    }
 
 	    if (apic.type > 255 || apic.type < 0) {
-	      throw new TagError(201, 'Type should be in range of 0 - 255');
+	      throw new Error('Type should be in range of 0 - 255');
 	    }
 
 	    if (!BufferView.isViewable(apic.data)) {
-	      throw new TagError(201, 'Image data should be viewable');
+	      throw new Error('Image data should be viewable');
 	    }
 
 	    if (strict) {
 	      if (apic.type > 21 || apic.type < 0) {
-	        throw new TagError(201, 'Type should be in range of 0 - 21');
+	        throw new Error('Type should be in range of 0 - 21');
 	      }
 
 	      if (!apic.format.match(imageRegex)) {
-	        throw new TagError(201, 'Format should be an image MIME');
+	        throw new Error('Format should be an image MIME');
 	      }
 
 	      if (apic.description.length > 64) {
-	        throw new TagError(201, 'Description should not exceed 64');
+	        throw new Error('Description should not exceed 64');
 	      }
 
 	      if (includes(descriptions, apic.description)) {
-	        throw new TagError(201, 'Description should not duplicate');
+	        throw new Error('Description should not duplicate');
 	      } else descriptions.push(apic.description);
 	    }
 	  });
@@ -5485,11 +5436,11 @@
 	    textFrame$1(geob.description, version, strict);
 
 	    if (!BufferView.isViewable(geob.object)) {
-	      throw new TagError(201, 'Object data should be viewable');
+	      throw new Error('Object data should be viewable');
 	    }
 
 	    if (strict && includes(descriptions, geob.description)) {
-	      throw new TagError(201, 'GEOB description should not duplicate');
+	      throw new Error('GEOB description should not duplicate');
 	    } else descriptions.push(geob.description);
 	  });
 	  return true;
@@ -5500,22 +5451,22 @@
 	    textFrame$1(ufid.ownerId, version, strict);
 
 	    if (!BufferView.isViewable(ufid.id)) {
-	      throw new TagError(201, 'ID should be viewable');
+	      throw new Error('ID should be viewable');
 	    }
 
 	    if (strict) {
 	      if (ufid.ownerId === '') {
-	        throw new TagError(201, 'ownerId should not be blank');
+	        throw new Error('ownerId should not be blank');
 	      }
 
 	      var idLength = ufid.id.byteLength || ufid.id.length || 0;
 
 	      if (idLength > 64) {
-	        throw new TagError(201, 'ID bytelength should not exceed 64 bytes');
+	        throw new Error('ID bytelength should not exceed 64 bytes');
 	      }
 
 	      if (includes(ownerIds, ufid.ownerId)) {
-	        throw new TagError(201, 'ownerId should not duplicate');
+	        throw new Error('ownerId should not duplicate');
 	      } else ownerIds.push(ufid.ownerId);
 	    }
 	  });
@@ -5526,11 +5477,11 @@
 	    textFrame$1(user.language, version, strict);
 
 	    if (typeof user.text !== 'string') {
-	      throw new TagError(201, 'Text is not a string');
+	      throw new Error('Text is not a string');
 	    }
 
 	    if (strict && !user.language.match(langRegex)) {
-	      throw new TagError(201, 'Language must follow ISO 639-2');
+	      throw new Error('Language must follow ISO 639-2');
 	    }
 	  });
 	  return true;
@@ -5543,15 +5494,15 @@
 
 	  if (strict) {
 	    if (!value.date.match("".concat(year).concat(month).concat(day))) {
-	      throw new TagError(201, 'Date is not valid (format: YYYYMMDD)');
+	      throw new Error('Date is not valid (format: YYYYMMDD)');
 	    }
 
 	    if (!value.currencyCode.match(/^([A-Z]{3})$/)) {
-	      throw new TagError(201, 'Currency code is not valid (eg. USD)');
+	      throw new Error('Currency code is not valid (eg. USD)');
 	    }
 
 	    if (!value.currencyPrice.match(/^(\d*)\.(\d+)$/)) {
-	      throw new TagError(201, 'Currency price is not valid (eg. 2.00)');
+	      throw new Error('Currency price is not valid (eg. 2.00)');
 	    }
 	  }
 
@@ -5563,11 +5514,11 @@
 	    textFrame$1(priv.ownerId, version, strict);
 
 	    if (!BufferView.isViewable(priv.data)) {
-	      throw new TagError(201, 'Data should be viewable');
+	      throw new Error('Data should be viewable');
 	    }
 
 	    if (strict && includes(contents, priv.data)) {
-	      throw new TagError(201, 'Data should not duplicate');
+	      throw new Error('Data should not duplicate');
 	    } else contents.push(priv.data);
 	  });
 	  return true;
@@ -5576,19 +5527,19 @@
 	  var signs = [];
 	  values.forEach(function (sign) {
 	    if (typeof sign.group !== 'number') {
-	      throw new TagError(201, 'Group ID is not a number');
+	      throw new Error('Group ID is not a number');
 	    }
 
 	    if (sign.group < 0 || sign.group > 255) {
-	      throw new TagError(201, 'Group ID should be in the range of 0 - 255');
+	      throw new Error('Group ID should be in the range of 0 - 255');
 	    }
 
 	    if (!BufferView.isViewable(sign.signature)) {
-	      throw new TagError(201, 'Signature should be viewable');
+	      throw new Error('Signature should be viewable');
 	    }
 
 	    if (strict && includes(signs, sign)) {
-	      throw new TagError(201, 'SIGN contents should not be identical to others');
+	      throw new Error('SIGN contents should not be identical to others');
 	    } else signs.push(sign);
 	  });
 	  return true;
@@ -5600,38 +5551,38 @@
 	    textFrame$1(sylt.descriptor, version, strict);
 
 	    if (typeof sylt.lyrics !== 'string') {
-	      throw new TagError(201, 'Lyrics is not a string');
+	      throw new Error('Lyrics is not a string');
 	    }
 
 	    if (typeof sylt.type !== 'number') {
-	      throw new TagError(201, 'Type is not a number');
+	      throw new Error('Type is not a number');
 	    } else if (sylt.type > 255 || sylt.type < 0) {
-	      throw new TagError(201, 'Type should be in range of 0 - 255');
+	      throw new Error('Type should be in range of 0 - 255');
 	    }
 
 	    if (typeof sylt.format !== 'number') {
-	      throw new TagError(201, 'Format is not a number');
+	      throw new Error('Format is not a number');
 	    } else if (sylt.format > 255 || sylt.format < 0) {
-	      throw new TagError(201, 'Format should be in range of 0 - 255');
+	      throw new Error('Format should be in range of 0 - 255');
 	    }
 
 	    if (strict) {
 	      if (!sylt.language.match(langRegex)) {
-	        throw new TagError(201, 'Language must follow ISO 639-2');
+	        throw new Error('Language must follow ISO 639-2');
 	      }
 
 	      if (sylt.type > 6 || sylt.type < 0) {
-	        throw new TagError(201, 'Type should be in range of 0 - 6');
+	        throw new Error('Type should be in range of 0 - 6');
 	      }
 
 	      if (sylt.format > 2 || sylt.format < 1) {
-	        throw new TagError(201, 'Format should be either 1 or 2');
+	        throw new Error('Format should be either 1 or 2');
 	      }
 
 	      if (sylt.lyrics.split('\n').every(function (entry) {
 	        return syltRegex.test(entry);
 	      })) {
-	        throw new TagError(201, 'Lyrics must follow this format: [mm:ss.xxx]');
+	        throw new Error('Lyrics must follow this format: [mm:ss.xxx]');
 	      }
 
 	      var checkObj = {
@@ -5640,7 +5591,7 @@
 	      };
 
 	      if (includes(sylts, checkObj)) {
-	        throw new TagError(201, '1 SYLT with same language and descriptor only');
+	        throw new Error('1 SYLT with same language and descriptor only');
 	      } else sylts.push(checkObj);
 	    }
 	  });
@@ -5648,24 +5599,24 @@
 	}
 	function mcdiFrame$1(value, version, strict) {
 	  if (!BufferView.isViewable(value.data)) {
-	    throw new TagError(201, 'Data should be viewable');
+	    throw new Error('Data should be viewable');
 	  }
 
 	  return true;
 	}
 	function sytcFrame$1(value, version, strict) {
 	  if (!BufferView.isViewable(value.data)) {
-	    throw new TagError(201, 'Data should be viewable');
+	    throw new Error('Data should be viewable');
 	  }
 
 	  if (typeof value.format !== 'number') {
-	    throw new TagError(201, 'Format is not a number');
+	    throw new Error('Format is not a number');
 	  } else if (value.format > 255 || value.format < 0) {
-	    throw new TagError(201, 'Format should be in range of 0 - 255');
+	    throw new Error('Format should be in range of 0 - 255');
 	  }
 
 	  if (strict && (value.format > 2 || value.format < 1)) {
-	    throw new TagError(201, 'Invalid timestamp');
+	    throw new Error('Invalid timestamp');
 	  }
 
 	  return true;
@@ -6688,40 +6639,25 @@
 		WXXX: WXXX
 	});
 
-	function filter$1(tags) {
-	  var filtered = {};
-	  var id = /^([A-Z0-9]{4})$/;
-	  Object.entries(tags).forEach(function (element) {
-	    var name = element[0];
-	    var value = element[1];
-
-	    if (name.match(id) && value !== undefined && value !== '') {
-	      filtered[name] = value;
-	    }
-	  });
-	  return filtered;
-	}
-
 	function hasID3v2(buffer) {
-	  if (!isBuffer(buffer)) throw new TypeError('buffer is not ArrayBuffer/Buffer');
 	  var view = new BufferView(buffer);
 	  return view.getString(0, 3).string === 'ID3';
 	}
 	function decode$1(buffer) {
 	  var tagOffset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 	  var view = new BufferView(buffer, tagOffset);
-	  if (!hasID3v2(view.buffer)) throw new TagError(200);
 	  var version = view.getUint8(3, 2);
 	  var size = decodeSynch(view.getUint32(6));
 	  var flags = getHeaderFlags(view.getUint8(5), version[0]);
-	  var tags = {
-	    v2Version: version,
-	    v2Size: size,
-	    v2Flags: flags
+	  var details = {
+	    version: version,
+	    flags: flags,
+	    size: size
 	  };
+	  var tags = {};
 
 	  if (version[0] !== 3 && version[0] !== 4) {
-	    throw new TagError(200, 'Unknown version');
+	    throw new Error('Unknown ID3v2 major version');
 	  }
 
 	  var offset = 10;
@@ -6770,7 +6706,10 @@
 	    });
 	  }
 
-	  return tags;
+	  return {
+	    tags: tags,
+	    details: details
+	  };
 	}
 
 	function decodeFrame(bytes, options) {
@@ -6779,9 +6718,9 @@
 	  var frame = {};
 	  var version = options.version,
 	      flags = options.flags;
+	  var sizeByte = view.getUint32(4);
 	  frame.id = view.getUint8String(0, 4);
 	  frame.flags = getFrameFlags(view.getUint8(8, 2), version[0]);
-	  var sizeByte = view.getUint32(4);
 	  frame.size = version[0] === 4 ? decodeSynch(sizeByte) : sizeByte;
 	  var frameSpec = frames[frame.id];
 	  var offset = 10;
@@ -6819,19 +6758,23 @@
 
 	function validate$1(tags, strict, options) {
 	  var version = options.version;
-	  if (version !== 3 && version !== 4) throw new TagError(200, 'Unknown version');
-	  tags = filter$1(tags);
+
+	  if (version !== 3 && version !== 4) {
+	    throw new Error('Unknown provided version');
+	  }
 
 	  for (var id in tags) {
 	    if (!Object.keys(frames).includes(id)) continue;
 	    var frameSpec = frames[id];
-	    if (strict && !frameSpec.version.includes(version)) throw new TagError(203);
+
+	    if (strict && !frameSpec.version.includes(version)) {
+	      throw new Error("".concat(id, " is not supported in ID3v2.").concat(version));
+	    }
 
 	    try {
 	      frameSpec.validate(tags[id], version, strict);
 	    } catch (error) {
-	      if (error instanceof TagError) error.message = "".concat(error.message, " at ").concat(id);
-	      throw error;
+	      throw new Error("".concat(error.message, " at ").concat(id));
 	    }
 	  }
 
@@ -6840,14 +6783,12 @@
 	function encode$1(tags, options) {
 	  var version = options.version,
 	      padding = options.padding,
-	      unsynch = options.unsynch,
-	      footer = options.footer;
+	      unsynch = options.unsynch;
 	  var headerBytes = [0x49, 0x44, 0x33, version, 0];
 	  var flagsByte = 0;
 	  var sizeView = new BufferView(4);
 	  var paddingBytes = new Uint8Array(padding);
 	  var framesBytes = [];
-	  tags = filter$1(tags);
 
 	  for (var id in tags) {
 	    var frameSpec = frames[id];
@@ -6863,105 +6804,7 @@
 
 	  if (unsynch) flagsByte = setBit(flagsByte, 7);
 	  sizeView.setUint32(0, encodeSynch(framesBytes.length));
-
-	  if (version === 4 && footer) {
-	    var footerBytes = [0x33, 0x44, 0x49, version, 0];
-	    flagsByte = setBit(flagsByte, 4);
-	    var header = mergeBytes(headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes).buffer;
-	    var _footer = mergeBytes(footerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes).buffer;
-	    return {
-	      header: header,
-	      footer: _footer
-	    };
-	  } else {
-	    return mergeBytes(headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes).buffer;
-	  }
-	}
-	function transform(tags, version) {
-	  if (version === 3) return transformv4tov3(tags);else if (version === 4) return transformv3tov4(tags);else return new TagError(200, 'Unknown version');
-	}
-
-	function transformv4tov3(tags) {
-	  var transformed = {};
-
-	  for (var id in tags) {
-	    switch (id) {
-	      case 'TIPL':
-	        transformed.IPLS = tags[id];
-	        break;
-
-	      case 'TDRC':
-	        {
-	          var date = timeRegex.exec(tags[id]);
-	          if (date[2]) transformed.TYER = date[2];
-	          if (date[4] && date[6]) transformed.TDAT = date[6] + date[4];
-	          if (date[8] && date[10]) transformed.TIME = date[8] + date[10];
-	          break;
-	        }
-
-	      case 'TDOR':
-	        transformed.TORY = tags[id];
-	        break;
-
-	      case 'SIGN':
-	        break;
-
-	      default:
-	        transformed[id] = tags[id];
-	    }
-	  }
-
-	  return transformed;
-	}
-
-	function transformv3tov4(tags) {
-	  var transformed = {};
-	  var tdrc = {};
-
-	  for (var id in tags) {
-	    switch (id) {
-	      case 'IPLS':
-	        transformed.TIPL = tags[id];
-	        break;
-
-	      case 'TDAT':
-	        tdrc.date = tags[id];
-	        break;
-
-	      case 'TIME':
-	        tdrc.time = tags[id];
-	        break;
-
-	      case 'TORY':
-	        transformed.TDOR = tags[id];
-	        break;
-
-	      case 'TRDA':
-	      case 'TSIZ':
-	        break;
-
-	      case 'TYER':
-	        tdrc.year = tags[id];
-	        break;
-
-	      default:
-	        transformed[id] = tags[id];
-	    }
-	  }
-
-	  var dateStr = '';
-	  if (tdrc.year) dateStr += tdrc.year;
-
-	  if (tdrc.date) {
-	    dateStr += '-' + tdrc.date.substr(2, 4) + '-' + tdrc.date.substr(0, 2);
-	  }
-
-	  if (tdrc.time) {
-	    dateStr += 'T' + tdrc.time.substr(0, 2) + ':' + tdrc.time.substr(2, 4) + ':00';
-	  }
-
-	  if (dateStr !== '') transformed.TDRC = dateStr;
-	  return transformed;
+	  return mergeBytes(headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes).buffer;
 	}
 
 	var MP3Tag = /*#__PURE__*/function () {
@@ -6975,12 +6818,11 @@
 	    }
 
 	    this.name = 'MP3Tag';
-	    this.version = '2.3.0';
+	    this.version = '3.0.0';
 	    this.verbose = verbose;
-	    this.error = '';
-	    this.errorCode = -1;
 	    this.buffer = buffer;
 	    this.tags = {};
+	    this.error = '';
 	  }
 
 	  _createClass(MP3Tag, [{
@@ -6989,19 +6831,13 @@
 	      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	      this.tags = {};
 	      this.error = '';
-	      this.errorCode = -1;
-	      var tags;
 
 	      try {
-	        tags = MP3Tag.readBuffer(this.buffer, options, this.verbose);
+	        this.tags = MP3Tag.readBuffer(this.buffer, options, this.verbose);
 	      } catch (error) {
-	        if (error instanceof TagError) {
-	          this.error = error.message;
-	          this.errorCode = error.code;
-	        } else throw error;
+	        this.error = error.message;
 	      }
 
-	      this.tags = tags;
 	      return this.tags;
 	    }
 	  }, {
@@ -7009,19 +6845,15 @@
 	    value: function save() {
 	      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	      this.error = '';
-	      this.errorCode = -1;
-	      var buffer;
+	      var buffer = this.buffer;
 
 	      try {
 	        buffer = MP3Tag.writeBuffer(this.buffer, this.tags, options, this.verbose);
 	      } catch (error) {
-	        if (error instanceof TagError) {
-	          this.error = error.message;
-	          this.errorCode = error.code;
-	        } else throw error;
+	        this.error = error.message;
 	      }
 
-	      if (this.errorCode < 0) this.buffer = buffer;
+	      if (this.error === '') this.buffer = buffer;
 	      return this.buffer;
 	    }
 	  }, {
@@ -7029,7 +6861,6 @@
 	    value: function remove() {
 	      this.tags = {};
 	      this.error = '';
-	      this.errorCode = -1;
 	      this.buffer = this.getAudio();
 	      return true;
 	    }
@@ -7037,11 +6868,6 @@
 	    key: "getAudio",
 	    value: function getAudio() {
 	      return MP3Tag.getAudioBuffer(this.buffer);
-	    }
-	  }, {
-	    key: "log",
-	    value: function log(message) {
-	      if (this.verbose) console.log(message);
 	    }
 	  }], [{
 	    key: "readBuffer",
@@ -7061,79 +6887,108 @@
 
 	      if (options.id3v1 && hasID3v1(buffer)) {
 	        if (verbose) console.log('ID3v1 found, reading...');
-	        var v1Tags = decode(buffer);
+
+	        var _ID3v1$decode = decode(buffer),
+	            v1Tags = _ID3v1$decode.tags,
+	            details = _ID3v1$decode.details;
+
 	        if (verbose) console.log('ID3v1 reading finished');
-	        tags = mergeObjects(tags, v1Tags);
+	        tags.v1 = _objectSpread2({}, v1Tags);
+	        tags.v1Details = details;
 	      }
 
 	      if (options.id3v2 && hasID3v2(buffer)) {
 	        if (verbose) console.log('ID3v2 found, reading...');
-	        var v2Tags = decode$1(buffer);
+
+	        var _ID3v2$decode = decode$1(buffer),
+	            v2Tags = _ID3v2$decode.tags,
+	            _details = _ID3v2$decode.details;
+
 	        if (verbose) console.log('ID3v2 reading finished');
-	        tags = mergeObjects(tags, v2Tags);
+	        tags.v2 = _objectSpread2({}, v2Tags);
+	        tags.v2Details = _details;
 	      }
 
-	      tags = mergeTags(tags);
 	      Object.defineProperties(tags, {
 	        title: {
 	          get: function get() {
-	            return this.TIT2 || '';
+	            return this.v2 && this.v2.TIT2 || this.v1 && this.v1.title || '';
 	          },
 	          set: function set(value) {
-	            this.TIT2 = value;
+	            if (this.v2) this.v2.TIT2 = value;
+	            if (this.v1) this.v1.title = value;
 	          }
 	        },
 	        artist: {
 	          get: function get() {
-	            return this.TPE1 || '';
+	            return this.v2 && this.v2.TPE1 || this.v1 && this.v1.artist || '';
 	          },
 	          set: function set(value) {
-	            this.TPE1 = value;
+	            if (this.v2) this.v2.TPE1 = value;
+	            if (this.v1) this.v1.artist = value;
 	          }
 	        },
 	        album: {
 	          get: function get() {
-	            return this.TALB || '';
+	            return this.v2 && this.v2.TALB || this.v1 && this.v1.album || '';
 	          },
 	          set: function set(value) {
-	            this.TALB = value;
+	            if (this.v2) this.v2.TALB = value;
+	            if (this.v1) this.v1.album = value;
 	          }
 	        },
 	        year: {
 	          get: function get() {
-	            return this.TYER || this.TDRC && this.TDRC.substr(0, 4) || '';
+	            return this.v2 && (this.v2.TYER || this.v2.TDRC) || this.v1 && this.v1.year || '';
 	          },
 	          set: function set(value) {
-	            this.TYER = value;
+	            if (this.v2) {
+	              var version = this.v2Details.version[0];
+	              if (version === 3) this.v2.TYER = value;else if (version === 4) this.v2.TDRC = value;
+	            }
+
+	            if (this.v1) this.v1.year = value;
 	          }
 	        },
 	        comment: {
 	          get: function get() {
-	            return this.COMM && this.COMM[0].text || '';
+	            var text = '';
+
+	            if (this.v2 && this.v2.COMM) {
+	              var comm = this.v2.COMM;
+	              if (Array.isArray(comm) && comm.length > 0) text = comm[0].text;
+	            } else if (this.v1 && this.v1.comment) text = this.v1.comment;
+
+	            return text;
 	          },
 	          set: function set(value) {
-	            var comment = {
-	              language: 'eng',
-	              descriptor: '',
-	              text: value
-	            };
-	            if (Array.isArray(this.COMM)) this.COMM[0] = comment;else this.COMM = [comment];
+	            if (this.v2) {
+	              this.v2.COMM = [{
+	                language: 'eng',
+	                descriptor: '',
+	                text: value
+	              }];
+	            }
+
+	            if (this.v1) this.v1.comment = value;
 	          }
 	        },
 	        track: {
 	          get: function get() {
-	            return this.TRCK && this.TRCK.split('/')[0] || '';
+	            return this.v2 && this.v2.TRCK && this.v2.TRCK.split('/')[0] || this.v1 && this.v1.track || '';
 	          },
 	          set: function set(value) {
-	            this.TRCK = value;
+	            if (this.v2) this.v2.TRCK = value;
+	            if (this.v1) this.v1.track = value;
 	          }
 	        },
 	        genre: {
 	          get: function get() {
-	            return this.TCON || '';
+	            return this.v2 && this.v2.TCON || this.v1 && this.v1.genre || '';
 	          },
 	          set: function set(value) {
-	            this.TCON = value;
+	            if (this.v2) this.v2.TCON = value;
+	            if (this.v1) this.v1.genre = value;
 	          }
 	        }
 	      });
@@ -7144,56 +6999,40 @@
 	    value: function writeBuffer(buffer, tags) {
 	      var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 	      var verbose = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-	      var defaultVersion = tags.v2Version ? tags.v2Version[0] : 4;
-	      tags = mergeTags(tags);
+	      var defaultVersion = tags.v2Details ? tags.v2Details.version[0] : 3;
+	      var audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer));
 	      options = overwriteDefault(options, {
 	        strict: false,
 	        id3v1: {
-	          include: true
+	          include: false
 	        },
 	        id3v2: {
 	          include: true,
-	          unsynch: true,
+	          unsynch: false,
 	          version: defaultVersion,
-	          padding: 2048,
-	          footer: true
+	          padding: 2048
 	        }
 	      });
-	      var audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer));
 
 	      if (options.id3v1.include) {
 	        if (verbose) console.log('Validating ID3v1...');
-	        validate(tags, options.strict);
+	        validate(tags.v1, options.strict);
 	        if (verbose) console.log('Writing ID3v1...');
-	        var encoded = encode(tags);
+	        var encoded = encode(tags.v1);
 	        var tagBytes = new Uint8Array(encoded);
 	        audio = mergeBytes(audio, tagBytes);
 	      }
 
 	      if (options.id3v2.include) {
-	        if (verbose) console.log('Transforming ID3v2...');
-	        tags = transform(tags, options.id3v2.version);
 	        if (verbose) console.log('Validating ID3v2...');
-	        validate$1(tags, options.strict, options.id3v2);
+	        validate$1(tags.v2, options.strict, options.id3v2);
 	        if (verbose) console.log('Writing ID3v2...');
 
-	        var _encoded = encode$1(tags, options.id3v2);
+	        var _encoded = encode$1(tags.v2, options.id3v2);
 
-	        if (options.id3v2.version === 4 && options.id3v2.footer) {
-	          var header = new Uint8Array(_encoded.header);
-	          var footer = new Uint8Array(_encoded.footer);
-	          audio = mergeBytes(header, audio);
+	        var _tagBytes = new Uint8Array(_encoded);
 
-	          if (hasID3v1(audio.buffer)) {
-	            var id3v1 = audio.subarray(audio.length - 128);
-	            var notId3v1 = audio.subarray(0, audio.length - 128);
-	            audio = mergeBytes(notId3v1, footer, id3v1);
-	          } else audio = mergeBytes(audio, footer);
-	        } else {
-	          var _tagBytes = new Uint8Array(_encoded);
-
-	          audio = mergeBytes(_tagBytes, audio);
-	        }
+	        audio = mergeBytes(_tagBytes, audio);
 	      }
 
 	      return audio.buffer;
@@ -7211,7 +7050,6 @@
 
 	      var view = new BufferView(buffer);
 	      var start = 0;
-	      var end = view.byteLength;
 	      var i = 0;
 
 	      while (i < view.byteLength) {
@@ -7221,49 +7059,12 @@
 	        } else i++;
 	      }
 
-	      i = start;
-
-	      while (i < view.byteLength) {
-	        if (view.getUint8(i) === 0x33 && view.getUint8(i + 1) === 0x44 && view.getUint8(i + 2) === 0x49) {
-	          end = i;
-	          break;
-	        } else i++;
-	      }
-
-	      return buffer.slice(start, end);
-	    }
-	  }, {
-	    key: "genres",
-	    get: function get() {
-	      return GENRES;
+	      return buffer.slice(start);
 	    }
 	  }]);
 
 	  return MP3Tag;
 	}();
-
-	function mergeTags(tags) {
-	  tags = mergeObjects({}, tags);
-	  tags.TIT2 = tags.TIT2 || tags.title;
-	  tags.TPE1 = tags.TPE1 || tags.artist;
-	  tags.TALB = tags.TALB || tags.album;
-	  tags.TYER = tags.TYER || tags.TDRC && tags.TDRC.substr(0, 4) || tags.year;
-	  tags.COMM = tags.COMM || tags.comment && [{
-	    language: 'eng',
-	    descriptor: '',
-	    text: tags.comment
-	  }];
-	  tags.TRCK = tags.TRCK || tags.track;
-	  tags.TCON = tags.TCON || tags.genre;
-	  tags.title = tags.TIT2 || '';
-	  tags.artist = tags.TPE1 || '';
-	  tags.album = tags.TALB || '';
-	  tags.year = tags.TYER || '';
-	  tags.comment = tags.COMM && tags.COMM[0].text || '';
-	  tags.track = tags.TRCK && tags.TRCK.split('/')[0] || '';
-	  tags.genre = tags.TCON || '';
-	  return tags;
-	}
 
 	return MP3Tag;
 
