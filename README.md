@@ -18,9 +18,9 @@ The website is also open sourced and can be viewed at the
 [gh-pages](https://github.com/eidoriantan/mp3tag.js/tree/gh-pages) branch.
 
 ### Features
- * Read, write, and remove ID3 tags
- * Supports unsynchronisation
- * Standards compliant. See [id3.org](http://id3.org)
+* Read, write, and remove ID3 tags
+* Supports unsynchronisation
+* Standards compliant. See [id3.org](http://id3.org)
 
 ## Installation
 You can download the ready-to-use script at
