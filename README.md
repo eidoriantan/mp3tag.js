@@ -8,8 +8,8 @@ Public repository of the library's [homepage]. The website was automatically
 built by [Jekyll] and was deployed using [GitHub Pages].
 
 So before running this on a local server, make sure that you'd already installed
-[Ruby](https://www.ruby-lang.org/), [Bundler](https://bundler.io/), and the
-dependencies specified in `Gemfile` using `bundle install`.
+[Ruby](https://www.ruby-lang.org/), [Bundler](https://bundler.io/), [Jekyll],
+and the dependencies specified in `Gemfile` using `bundle install`.
 
 If you have any suggestions or questions, feel free to file an issue.
 
