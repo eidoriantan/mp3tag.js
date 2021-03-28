@@ -6799,7 +6799,7 @@
       }
 
       this.name = 'MP3Tag';
-      this.version = '3.0.0';
+      this.version = '3.1.1';
       this.verbose = verbose;
       this.buffer = buffer;
       this.tags = {};
