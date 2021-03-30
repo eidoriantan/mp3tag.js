@@ -8,3 +8,4 @@ group :jekyll_plugins do
   gem "jekyll-octicons", "~> 9.6.0"
 end
 
+gem "tzinfo-data", platforms: [:mingw, :mswin, :x64_mingw, :jruby]
