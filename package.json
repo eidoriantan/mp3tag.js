@@ -51,7 +51,7 @@
     "@rollup/plugin-commonjs": "^19.0.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
     "core-js": "^3.7.0",
-    "mocha": "^8.2.1",
+    "mocha": "^9.0.0",
     "regenerator-runtime": "0.13.7",
     "rollup": "^2.33.1",
     "rollup-plugin-terser": "^7.0.2",
