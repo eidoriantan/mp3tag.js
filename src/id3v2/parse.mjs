@@ -152,7 +152,7 @@ export function privFrame (buffer, version) {
 export function signFrame (buffer, version) {
   const view = new BufferView(buffer)
   return {
-    group: view.getUint8,
+    group: view.getUint8(0),
     signature: view.getUint8(1, view.byteLength - 1)
   }
 }
