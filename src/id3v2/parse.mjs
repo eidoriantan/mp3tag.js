@@ -180,7 +180,7 @@ export function syltFrame (buffer, version) {
     const time = lyricsView.getUint32(i + line.length)
     const minutes = Math.floor(time / 60000).toString()
     let seconds = Math.floor(time % 60000 / 1000).toString()
-    seconds = seconds.length === 1 ? '0' + seconds.length : seconds
+    seconds = seconds.length === 1 ? '0' + seconds : seconds
     let ms = (time % 1000).toString()
     while (ms.length < 3) ms = '0' + ms
     text += `[${minutes}:${seconds}.${ms}] ${line.string}`
