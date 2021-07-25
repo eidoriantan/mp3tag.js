@@ -2,7 +2,7 @@
 [![mp3tag.js Banner](https://mp3tag.js.org/assets/images/banner.png)](https://mp3tag.js.org)
 
 [![Node.js CI](https://github.com/eidoriantan/mp3tag.js/workflows/Node.js%20CI/badge.svg)](https://github.com/eidoriantan/mp3tag.js/actions?query=workflow%3A%22Node.js+CI%22)
-[![npm](https://img.shields.io/npm/v/mp3tag.js/latest?registry_uri=https%3A%2F%2Fregistry.npmjs.com%2Fmp3tag.js&label=mp3tag.js@latest)](https://npmjs.com/mp3tag.js)
+[![npm](https://img.shields.io/npm/v/mp3tag.js/latest?registry_uri=https%3A%2F%2Fregistry.npmjs.com%2Fmp3tag.js&label=mp3tag.js@latest)](https://npmjs.com/package/mp3tag.js)
 ![Maintenance](https://img.shields.io/maintenance/yes/2021)
 
 **mp3tag.js** is an open sourced JavaScript library used to edit the metadata of
