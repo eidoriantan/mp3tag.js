@@ -279,7 +279,7 @@ export function sytcFrame (buffer, version) {
   }
 }
 
-export function wfedFrame (buffer, version) {
+export function win1251Frame (buffer, version) {
   const view = new BufferView(buffer)
   const encoding = ENCODINGS[view.getUint8(0)]
   const length = view.byteLength - 1

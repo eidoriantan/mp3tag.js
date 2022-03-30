@@ -498,10 +498,17 @@ export const WCOP = {
 }
 
 /**
- *  WFED is not a standard and undocumented frame used by Apple iTunes
+ *  WFED and TGID is not a standard and undocumented frame used by Apple iTunes
  */
 export const WFED = {
-  parse: parsers.wfedFrame,
+  parse: parsers.win1251Frame,
+  validate: validators.urlFrame,
+  write: writers.win1251Frame,
+  version: [3, 4]
+}
+
+export const TGID = {
+  parse: parsers.win1251Frame,
   validate: validators.urlFrame,
   write: writers.win1251Frame,
   version: [3, 4]
