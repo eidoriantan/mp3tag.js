@@ -1,5 +1,6 @@
 
 import BufferView from '../viewer.mjs'
+import { isBitSet } from '../utils/bytes.mjs'
 
 const ENCODINGS = ['windows1251', 'utf-16', 'utf-16be', 'utf-8']
 
@@ -147,6 +148,46 @@ export function privFrame (buffer, version) {
   const data = view.getUint8(ownerId.length, view.byteLength - ownerId.length)
 
   return { ownerId: ownerId.string, data }
+}
+
+export function rvadFrame (buffer, version) {
+  const view = new BufferView(buffer)
+  const incdec = view.getUint8(0)
+  const bitsvolume = view.getUint8(1)
+  const datablocks = []
+  const blocklength = Math.ceil(bitsvolume / 8)
+
+  for (let i = 2; i < view.byteLength; i += blocklength) {
+    datablocks.push(view.getUint8(i, blocklength))
+  }
+
+  return {
+    bitsvolume: bitsvolume,
+    incdec: {
+      right: isBitSet(incdec, 0),
+      left: isBitSet(incdec, 1),
+      rightrear: isBitSet(incdec, 2),
+      leftrear: isBitSet(incdec, 3),
+      center: isBitSet(incdec, 4),
+      bass: isBitSet(incdec, 5)
+    },
+    volumechange: {
+      right: typeof datablocks[0] !== 'undefined' ? datablocks[0] : [],
+      left: typeof datablocks[1] !== 'undefined' ? datablocks[1] : [],
+      rightrear: typeof datablocks[4] !== 'undefined' ? datablocks[4] : [],
+      leftrear: typeof datablocks[5] !== 'undefined' ? datablocks[5] : [],
+      center: typeof datablocks[8] !== 'undefined' ? datablocks[8] : [],
+      bass: typeof datablocks[10] !== 'undefined' ? datablocks[10] : []
+    },
+    peakvolume: {
+      right: typeof datablocks[2] !== 'undefined' ? datablocks[2] : [],
+      left: typeof datablocks[3] !== 'undefined' ? datablocks[3] : [],
+      rightrear: typeof datablocks[6] !== 'undefined' ? datablocks[6] : [],
+      leftrear: typeof datablocks[7] !== 'undefined' ? datablocks[7] : [],
+      center: typeof datablocks[9] !== 'undefined' ? datablocks[9] : [],
+      bass: typeof datablocks[11] !== 'undefined' ? datablocks[11] : []
+    }
+  }
 }
 
 export function signFrame (buffer, version) {

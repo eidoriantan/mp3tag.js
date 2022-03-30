@@ -73,3 +73,15 @@ export function unsynch (synch) {
 
   return bytes
 }
+
+export function dataBlock (data, max) {
+  data = data || []
+  const bytes = []
+  const length = data.length
+  const offset = max - length
+
+  for (let i = 0; i < offset; i++) bytes.push(0)
+  for (let i = 0; i < length; i++) bytes.push(data[i])
+
+  return bytes
+}

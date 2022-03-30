@@ -318,6 +318,49 @@ export function privFrame (values, version, strict) {
   return true
 }
 
+function checkRvadData (object, props, limit, name) {
+  for (let i = 0; i < props.length; i++) {
+    const prop = props[i]
+    const data = object[prop]
+
+    if (data) {
+      if (!BufferView.isViewable(data)) {
+        throw new Error(`${name}.${prop} must be viewable`)
+      }
+
+      const length = data.length || data.byteLength
+      if (length > limit) {
+        throw new Error(`${name}.${prop} exceeds bit limit`)
+      }
+    }
+  }
+}
+
+export function rvadFrame (values, version, strict) {
+  if (typeof values !== 'object') {
+    throw new Error('Values must be an object')
+  }
+
+  const volumechange = values.volumechange
+  const peakvolume = values.peakvolume
+  const bitsvolume = values.bitsvolume || 0x10
+  const limit = Math.ceil(bitsvolume / 8)
+
+  if (bitsvolume && (bitsvolume < 0 || bitsvolume > 255)) {
+    throw new Error('Bits volume should be in the range of 0 - 255')
+  }
+
+  if (strict && bitsvolume === 0) {
+    throw new Error('Bits used for volume description may not be 0')
+  }
+
+  const props = ['right', 'left', 'rightrear', 'leftrear', 'center', 'bass']
+  if (volumechange) checkRvadData(volumechange, props, limit, 'volumechange')
+  if (peakvolume) checkRvadData(peakvolume, props, limit, 'peakvolume')
+
+  return true
+}
+
 export function signFrame (values, version, strict) {
   const signs = []
   values.forEach(sign => {

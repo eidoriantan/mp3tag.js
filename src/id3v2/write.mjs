@@ -1,7 +1,13 @@
 
 import BufferView from '../viewer.mjs'
 
-import { setBit, encodeSynch, mergeBytes, unsynch } from '../utils/bytes.mjs'
+import {
+  setBit,
+  encodeSynch,
+  mergeBytes,
+  unsynch,
+  dataBlock
+} from '../utils/bytes.mjs'
 import { encodeString } from '../utils/strings.mjs'
 
 function getHeaderBytes (id, size, version, flags) {
@@ -411,6 +417,78 @@ export function privFrame (values, options) {
   })
 
   return bytes
+}
+
+export function rvadFrame (values, options) {
+  const { id, version, unsynch } = options
+  const bytes = []
+
+  const bitsvolume = values.bitsvolume || 0x10
+  const limit = Math.ceil(bitsvolume / 8)
+  let incdec = 0
+
+  if (values.incdec) {
+    if (values.incdec.right) incdec = setBit(incdec, 0)
+    if (values.incdec.left) incdec = setBit(incdec, 1)
+    if (values.incdec.rightrear) incdec = setBit(incdec, 2)
+    if (values.incdec.leftrear) incdec = setBit(incdec, 3)
+    if (values.incdec.center) incdec = setBit(incdec, 4)
+    if (values.incdec.bass) incdec = setBit(incdec, 5)
+  }
+
+  bytes.push(incdec)
+  bytes.push(bitsvolume)
+
+  const volumechange = values.volumechange || {}
+  const peakvolume = values.peakvolume || {}
+  const rightChangeBlock = dataBlock(volumechange.right, limit)
+  const leftChangeBlock = dataBlock(volumechange.left, limit)
+  const rightPeakBlock = dataBlock(peakvolume.right, limit)
+  const leftPeakBlock = dataBlock(peakvolume.left, limit)
+  rightChangeBlock.forEach(byte => bytes.push(byte))
+  leftChangeBlock.forEach(byte => bytes.push(byte))
+  rightPeakBlock.forEach(byte => bytes.push(byte))
+  leftPeakBlock.forEach(byte => bytes.push(byte))
+
+  if (
+    volumechange.rightrear || volumechange.leftrear ||
+    peakvolume.rightrear || peakvolume.leftrear ||
+    volumechange.center || peakvolume.center ||
+    volumechange.bass || peakvolume.bass
+  ) {
+    const rightRearChangeBlock = dataBlock(volumechange.rightrear, limit)
+    const leftRearChangeBlock = dataBlock(volumechange.leftrear, limit)
+    const rightRearPeakBlock = dataBlock(peakvolume.rightrear, limit)
+    const leftRearPeakBlock = dataBlock(peakvolume.leftrear, limit)
+    rightRearChangeBlock.forEach(byte => bytes.push(byte))
+    leftRearChangeBlock.forEach(byte => bytes.push(byte))
+    rightRearPeakBlock.forEach(byte => bytes.push(byte))
+    leftRearPeakBlock.forEach(byte => bytes.push(byte))
+  }
+
+  if (
+    volumechange.center || peakvolume.center ||
+    volumechange.bass || peakvolume.bass
+  ) {
+    const centerChangeBlock = dataBlock(volumechange.center, limit)
+    const centerPeakBlock = dataBlock(peakvolume.center, limit)
+    centerChangeBlock.forEach(byte => bytes.push(byte))
+    centerPeakBlock.forEach(byte => bytes.push(byte))
+  }
+
+  if (volumechange.bass || peakvolume.bass) {
+    const bassChangeBlock = dataBlock(volumechange.bass, limit)
+    const bassPeakBlock = dataBlock(peakvolume.bass, limit)
+    bassChangeBlock.forEach(byte => bytes.push(byte))
+    bassPeakBlock.forEach(byte => bytes.push(byte))
+  }
+
+  const header = getHeaderBytes(id, bytes.length, version, {
+    unsynchronisation: unsynch,
+    dataLengthIndicator: unsynch
+  })
+
+  return mergeBytes(header, bytes)
 }
 
 export function signFrame (values, options) {

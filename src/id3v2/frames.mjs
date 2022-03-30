@@ -52,6 +52,13 @@ export const PRIV = {
   version: [3, 4]
 }
 
+export const RVAD = {
+  parse: parsers.rvadFrame,
+  validate: validators.rvadFrame,
+  write: writers.rvadFrame,
+  version: [3]
+}
+
 export const SEEK = {
   parse: parsers.seekFrame
 }
