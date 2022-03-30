@@ -59,6 +59,13 @@ export const RVAD = {
   version: [3]
 }
 
+export const RVA2 = {
+  parse: parsers.rva2Frame,
+  validate: validators.rva2Frame,
+  write: writers.rva2Frame,
+  version: [4]
+}
+
 export const SEEK = {
   parse: parsers.seekFrame
 }

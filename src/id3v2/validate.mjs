@@ -331,7 +331,7 @@ function checkRvadData (object, props, limit, name) {
       const view = new BufferView(data)
       const length = view.byteLength
       if (length > limit) {
-        throw new Error(`${name}.${prop} exceeds bit limit`)
+        throw new Error(`${name}.${prop} exceeds bits limit`)
       }
     }
   }
@@ -360,6 +360,55 @@ export function rvadFrame (values, version, strict) {
   if (peakvolume) checkRvadData(peakvolume, props, limit, 'peakvolume')
 
   return true
+}
+
+export function rva2Frame (values, version, strict) {
+  const frames = []
+  values.forEach(value => {
+    if (!Array.isArray(value.channels)) {
+      throw new Error('Channels should be an array')
+    }
+
+    for (let i = 0; i < value.channels.length; i++) {
+      const channel = value.channels[i]
+      if (typeof channel.type !== 'number') {
+        throw new Error('Type of channel should be a number')
+      }
+
+      if (strict && (channel.type < 0 || channel.type > 8)) {
+        throw new Error('Type of channel should be in the range of 0 - 8')
+      }
+
+      if (typeof channel.volumeadjust !== 'number') {
+        throw new Error('Volume adjustment should be a number')
+      }
+
+      if (typeof channel.bitspeak !== 'number') {
+        throw new Error('Bits representing peak should be a number')
+      }
+
+      if (channel.bitspeak < 0 || channel.bitspeak > 255) {
+        throw new Error('Bits representing peak should be in range of 0 - 255')
+      }
+
+      if (!BufferView.isViewable(channel.peakvolume)) {
+        throw new Error('Peak volume must be viewable')
+      }
+
+      const view = new BufferView(channel.peakvolume)
+      const length = view.byteLength
+      const limit = Math.ceil(channel.bitspeak / 8)
+
+      if (length > limit) {
+        throw new Error('Peak volume exceeds bits limit')
+      }
+    }
+
+    const checkObj = { identification: value.identification }
+    if (strict && includes(frames, checkObj)) {
+      throw new Error('RVA2 identification should be unique')
+    } else frames.push(checkObj)
+  })
 }
 
 export function signFrame (values, version, strict) {

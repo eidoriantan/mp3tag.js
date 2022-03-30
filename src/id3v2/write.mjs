@@ -492,6 +492,38 @@ export function rvadFrame (values, options) {
   return mergeBytes(header, data)
 }
 
+export function rva2Frame (values, options) {
+  const { id, version, unsynch } = options
+  const bytes = []
+
+  values.forEach(value => {
+    const identification = encodeString(value.identification + '\0')
+    let data = identification
+
+    for (let i = 0; i < value.channels.length; i++) {
+      const channel = value.channels[i]
+      const type = channel.type
+      const volumeadjust = new Int16Array([channel.volumeadjust])
+      const volumeadjust8 = new Uint8Array(volumeadjust.buffer)
+      const bitspeak = channel.bitspeak
+      const limit = Math.ceil(bitspeak / 8)
+      const peakvolume = dataBlock(channel.peakvolume, limit)
+
+      data = mergeBytes(data, type, volumeadjust8, bitspeak, peakvolume)
+    }
+
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
+    merged.forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}
+
 export function signFrame (values, options) {
   const { id, version, unsynch } = options
   const bytes = []

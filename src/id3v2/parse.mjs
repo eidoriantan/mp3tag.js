@@ -190,6 +190,35 @@ export function rvadFrame (buffer, version) {
   }
 }
 
+export function rva2Frame (buffer, version) {
+  const view = new BufferView(buffer)
+  const identification = view.getCString(0)
+  const channels = []
+  let read = identification.length
+
+  while (read < view.byteLength) {
+    const type = view.getUint8(read)
+    const volumeadjust = view.getInt16(read + 1, true)
+    const bitspeak = view.getUint8(read + 3)
+    const length = Math.ceil(bitspeak / 8)
+    const peakvolume = view.getUint8(read + 4, length)
+
+    channels.push({
+      type: type,
+      volumeadjust: volumeadjust,
+      bitspeak: bitspeak,
+      peakvolume: Array.isArray(peakvolume) ? peakvolume : [peakvolume]
+    })
+
+    read += 4 + length
+  }
+
+  return {
+    identification: identification.string,
+    channels: channels
+  }
+}
+
 export function signFrame (buffer, version) {
   const view = new BufferView(buffer)
   return {
