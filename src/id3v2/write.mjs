@@ -483,12 +483,13 @@ export function rvadFrame (values, options) {
     bassPeakBlock.forEach(byte => bytes.push(byte))
   }
 
-  const header = getHeaderBytes(id, bytes.length, version, {
+  const data = unsynch ? unsynchData(bytes) : bytes
+  const header = getHeaderBytes(id, data.length, version, {
     unsynchronisation: unsynch,
     dataLengthIndicator: unsynch
   })
 
-  return mergeBytes(header, bytes)
+  return mergeBytes(header, data)
 }
 
 export function signFrame (values, options) {
