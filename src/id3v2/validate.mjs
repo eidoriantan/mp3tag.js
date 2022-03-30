@@ -354,7 +354,7 @@ export function rvadFrame (values, version, strict) {
     throw new Error('Bits used for volume description may not be 0')
   }
 
-  const props = ['right', 'left', 'rightrear', 'leftrear', 'center', 'bass']
+  const props = ['right', 'left', 'rightback', 'leftback', 'center', 'bass']
   if (volumechange) checkRvadData(volumechange, props, limit, 'volumechange')
   if (peakvolume) checkRvadData(peakvolume, props, limit, 'peakvolume')
 

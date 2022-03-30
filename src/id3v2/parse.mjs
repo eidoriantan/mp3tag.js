@@ -166,24 +166,24 @@ export function rvadFrame (buffer, version) {
     incdec: {
       right: isBitSet(incdec, 0),
       left: isBitSet(incdec, 1),
-      rightrear: isBitSet(incdec, 2),
-      leftrear: isBitSet(incdec, 3),
+      rightback: isBitSet(incdec, 2),
+      leftback: isBitSet(incdec, 3),
       center: isBitSet(incdec, 4),
       bass: isBitSet(incdec, 5)
     },
     volumechange: {
       right: typeof datablocks[0] !== 'undefined' ? datablocks[0] : [],
       left: typeof datablocks[1] !== 'undefined' ? datablocks[1] : [],
-      rightrear: typeof datablocks[4] !== 'undefined' ? datablocks[4] : [],
-      leftrear: typeof datablocks[5] !== 'undefined' ? datablocks[5] : [],
+      rightback: typeof datablocks[4] !== 'undefined' ? datablocks[4] : [],
+      leftback: typeof datablocks[5] !== 'undefined' ? datablocks[5] : [],
       center: typeof datablocks[8] !== 'undefined' ? datablocks[8] : [],
       bass: typeof datablocks[10] !== 'undefined' ? datablocks[10] : []
     },
     peakvolume: {
       right: typeof datablocks[2] !== 'undefined' ? datablocks[2] : [],
       left: typeof datablocks[3] !== 'undefined' ? datablocks[3] : [],
-      rightrear: typeof datablocks[6] !== 'undefined' ? datablocks[6] : [],
-      leftrear: typeof datablocks[7] !== 'undefined' ? datablocks[7] : [],
+      rightback: typeof datablocks[6] !== 'undefined' ? datablocks[6] : [],
+      leftback: typeof datablocks[7] !== 'undefined' ? datablocks[7] : [],
       center: typeof datablocks[9] !== 'undefined' ? datablocks[9] : [],
       bass: typeof datablocks[11] !== 'undefined' ? datablocks[11] : []
     }

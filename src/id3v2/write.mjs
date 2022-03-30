@@ -430,8 +430,8 @@ export function rvadFrame (values, options) {
   if (values.incdec) {
     if (values.incdec.right) incdec = setBit(incdec, 0)
     if (values.incdec.left) incdec = setBit(incdec, 1)
-    if (values.incdec.rightrear) incdec = setBit(incdec, 2)
-    if (values.incdec.leftrear) incdec = setBit(incdec, 3)
+    if (values.incdec.rightback) incdec = setBit(incdec, 2)
+    if (values.incdec.leftback) incdec = setBit(incdec, 3)
     if (values.incdec.center) incdec = setBit(incdec, 4)
     if (values.incdec.bass) incdec = setBit(incdec, 5)
   }
@@ -451,19 +451,19 @@ export function rvadFrame (values, options) {
   leftPeakBlock.forEach(byte => bytes.push(byte))
 
   if (
-    volumechange.rightrear || volumechange.leftrear ||
-    peakvolume.rightrear || peakvolume.leftrear ||
+    volumechange.rightback || volumechange.leftback ||
+    peakvolume.rightback || peakvolume.leftback ||
     volumechange.center || peakvolume.center ||
     volumechange.bass || peakvolume.bass
   ) {
-    const rightRearChangeBlock = dataBlock(volumechange.rightrear, limit)
-    const leftRearChangeBlock = dataBlock(volumechange.leftrear, limit)
-    const rightRearPeakBlock = dataBlock(peakvolume.rightrear, limit)
-    const leftRearPeakBlock = dataBlock(peakvolume.leftrear, limit)
-    rightRearChangeBlock.forEach(byte => bytes.push(byte))
-    leftRearChangeBlock.forEach(byte => bytes.push(byte))
-    rightRearPeakBlock.forEach(byte => bytes.push(byte))
-    leftRearPeakBlock.forEach(byte => bytes.push(byte))
+    const rightBackChangeBlock = dataBlock(volumechange.rightback, limit)
+    const leftBackChangeBlock = dataBlock(volumechange.leftback, limit)
+    const rightBackPeakBlock = dataBlock(peakvolume.rightback, limit)
+    const leftBackPeakBlock = dataBlock(peakvolume.leftback, limit)
+    rightBackChangeBlock.forEach(byte => bytes.push(byte))
+    leftBackChangeBlock.forEach(byte => bytes.push(byte))
+    rightBackPeakBlock.forEach(byte => bytes.push(byte))
+    leftBackPeakBlock.forEach(byte => bytes.push(byte))
   }
 
   if (
