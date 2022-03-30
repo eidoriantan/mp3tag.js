@@ -328,7 +328,8 @@ function checkRvadData (object, props, limit, name) {
         throw new Error(`${name}.${prop} must be viewable`)
       }
 
-      const length = data.length || data.byteLength
+      const view = new BufferView(data)
+      const length = view.byteLength
       if (length > limit) {
         throw new Error(`${name}.${prop} exceeds bit limit`)
       }
