@@ -497,6 +497,16 @@ export const WCOP = {
   version: [3, 4]
 }
 
+/**
+ *  WFED is not a standard and undocumented frame used by Apple iTunes
+ */
+export const WFED = {
+  parse: parsers.wfedFrame,
+  validate: validators.urlFrame,
+  write: writers.win1251Frame,
+  version: [3, 4]
+}
+
 export const WOAF = {
   parse: parsers.urlFrame,
   validate: validators.urlFrame,

@@ -278,3 +278,11 @@ export function sytcFrame (buffer, version) {
     data: view.getUint8(1, view.byteLength - 1)
   }
 }
+
+export function wfedFrame (buffer, version) {
+  const view = new BufferView(buffer)
+  const encoding = ENCODINGS[view.getUint8(0)]
+  const length = view.byteLength - 1
+
+  return view.getString(1, length, encoding).string
+}
