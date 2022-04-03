@@ -504,6 +504,53 @@ last_modified_at: 2020-11-14T00:04:00+08:00
   <div class="mb-n2">{{ priv | markdownify }}</div>
 </div>
 
+<div id="v2-rvad" class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Relative Volume Adjustment frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: RVAD</div>
+    <div class="text-gray">Type: object</div>
+  </div>
+  <div class="Box-row">
+    RVAD frame is only available in ID3v2.3.0. RVAD frame is parsed and must be
+    saved as an object.
+  </div>
+  {% capture rvad %}
+  ```javascript
+  // RVAD example
+  {
+    bitsvolume: 16,
+    incdec: {
+      right: true,
+      left: true,
+      rightback: false,
+      leftback: false,
+      center: false,
+      bass: false
+    },
+    volumechange: {
+      right: [0, 1],
+      left: [0, 1],
+      rightback: [],
+      leftback: [],
+      center: [],
+      bass: []
+    },
+    peakvolume: {
+      right: [0, 1],
+      left: [0, 1],
+      rightback: [],
+      leftback: [],
+      center: [],
+      bass: []
+    }
+  }
+  ```
+  {% endcapture %}
+  <div class="mb-n2">{{ rvad | markdownify }}</div>
+</div>
+
 <div id="v2-sign" class="Box Box--blue Box--condensed my-3">
   <header class="Box-header Box-header--blue">
     <h2 class="Box-title">Signature frame</h2>
