@@ -357,7 +357,7 @@ last_modified_at: 2020-11-14T00:04:00+08:00
     <div class="text-gray">Type: object[]</div>
   </div>
   <div class="Box-row">
-    APIC frame is parsed and must be saved as an array. If the strict mode is
+    APIC frame is parsed and must be saved as an array. If strict mode is
     enabled, there should only one frame with the same content descriptor, types
     should be in range of 0 - 21, format should be a valid MIME type
     (<code>/(image\/[a-z0-9!#$&.+\-^_]+){0,129}/</code>), and description
@@ -386,7 +386,7 @@ last_modified_at: 2020-11-14T00:04:00+08:00
     <div class="text-gray">Type: object[]</div>
   </div>
   <div class="Box-row">
-    GEOB frame is parsed and must be saved as an array. If the strict mode is
+    GEOB frame is parsed and must be saved as an array. If strict mode is
     enabled, there should only one frame with the same content descriptor.
   </div>
   {% capture geob %}
@@ -412,7 +412,7 @@ last_modified_at: 2020-11-14T00:04:00+08:00
     <div class="text-gray">Type: object[]</div>
   </div>
   <div class="Box-row">
-    UFID frame is parsed and must be saved as an array. If the strict mode is
+    UFID frame is parsed and must be saved as an array. If strict mode is
     enabled, there should only one frame with the same Owner Identifier and it
     must be a non-empty string, and ID bytelength must not exceed 64 bytes.
   </div>
@@ -460,7 +460,7 @@ last_modified_at: 2020-11-14T00:04:00+08:00
     <div class="text-gray">Type: object</div>
   </div>
   <div class="Box-row">
-    OWNE frame is parsed and must be saved as an object. If the strict mode is
+    OWNE frame is parsed and must be saved as an object. If strict mode is
     enabled, date must match the format <code>YYYYMMDD</code>, currencyCode must
     be encoded with
     <a href="https://www.xe.com/iso4217.php" target="_blank">ISO 4217</a>, and
@@ -489,7 +489,7 @@ last_modified_at: 2020-11-14T00:04:00+08:00
     <div class="text-gray">Type: object[]</div>
   </div>
   <div class="Box-row">
-    PRIV frame is parsed and must be saved as an array. If the strict mode is
+    PRIV frame is parsed and must be saved as an array. If strict mode is
     enabled, there should only one frame with the same data.
   </div>
   {% capture priv %}
@@ -591,7 +591,7 @@ last_modified_at: 2020-11-14T00:04:00+08:00
   </div>
   <div class="Box-row">
     SIGN frame is only available in ID3v2.4.0. SIGN frame is parsed and must be
-    saved as an array. If the strict mode is enabled, all frames must be unique.
+    saved as an array. If strict mode is enabled, all frames must be unique.
   </div>
   {% capture sign %}
   ```javascript
@@ -614,7 +614,7 @@ last_modified_at: 2020-11-14T00:04:00+08:00
     <div class="text-gray">Type: object[]</div>
   </div>
   <div class="Box-row">
-    SYLT frame is parsed and must be saved as an array. If the strict mode is
+    SYLT frame is parsed and must be saved as an array. If strict mode is
     enabled, there should only one frame with the same language and content
     descriptor, language must be encoded with
     <a href="https://www.loc.gov/standards/iso639-2/php/code_list.php" target="_blank">ISO 639-2</a>,
