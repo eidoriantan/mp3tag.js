@@ -551,6 +551,36 @@ last_modified_at: 2020-11-14T00:04:00+08:00
   <div class="mb-n2">{{ rvad | markdownify }}</div>
 </div>
 
+<div id="v2-rva2" class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Relative Volume Adjustment 2 frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: RVA2</div>
+    <div class="text-gray">Type: object</div>
+  </div>
+  <div class="Box-row">
+    RVA2 frame is only available in ID3v2.4.0. RVAD frame is parsed and must be
+    saved as an array. If strict mode is enabled, there should only one frame
+    with the same identification string.
+  </div>
+  {% capture rva2 %}
+  ```javascript
+  // RVA2 example
+  [{
+    identification: 'identification',
+    channels: [{
+      type: 1,           // Master volume
+      volumeadjust: 16,
+      bitspeak: 16,
+      peakvolume: [0, 1]
+    }]
+  }]
+  ```
+  {% endcapture %}
+  <div class="mb-n2">{{ rva2 | markdownify }}</div>
+</div>
+
 <div id="v2-sign" class="Box Box--blue Box--condensed my-3">
   <header class="Box-header Box-header--blue">
     <h2 class="Box-title">Signature frame</h2>
