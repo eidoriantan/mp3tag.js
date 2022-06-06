@@ -46,6 +46,8 @@ If you are using browser, you can just install the library through a CDN:
 ```
 
 ## Usage
+
+For browsers:
 ```html
 <input type="file" id="input-file" accept="audio/mpeg">
 <script>
@@ -58,7 +60,10 @@ inputFile.onchange = function () {
     // MP3Tag Usage
     const mp3tag = new MP3Tag(buffer)
     mp3tag.read()
-    console.log(mp3tag.tags)
+
+    // Handle error if there's any
+    if (mp3tag.error !== '') throw new Error(mp3tag.error)
+    else console.log(mp3tag.tags)
   }
 
   if (this.files.length > 0) {
@@ -66,6 +71,21 @@ inputFile.onchange = function () {
   }
 }
 </script>
+```
+
+For Node.js:
+```javascript
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+const buffer = fs.readFileSync('/path/to/audio.mp3')
+const mp3tag = new MP3Tag(buffer)
+
+mp3tag.read()
+
+// Handle error if there's any
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+else console.log(mp3tag.tags)
 ```
 
 If you want a detailed documentations, please visit the documentations page at
