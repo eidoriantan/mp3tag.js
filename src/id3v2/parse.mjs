@@ -162,7 +162,7 @@ export function rvadFrame (buffer, version) {
   }
 
   return {
-    bitsvolume: bitsvolume,
+    bitsvolume,
     incdec: {
       right: isBitSet(incdec, 0),
       left: isBitSet(incdec, 1),
@@ -204,9 +204,9 @@ export function rva2Frame (buffer, version) {
     const peakvolume = view.getUint8(read + 4, length)
 
     channels.push({
-      type: type,
-      volumeadjust: volumeadjust,
-      bitspeak: bitspeak,
+      type,
+      volumeadjust,
+      bitspeak,
       peakvolume: Array.isArray(peakvolume) ? peakvolume : [peakvolume]
     })
 
@@ -215,7 +215,7 @@ export function rva2Frame (buffer, version) {
 
   return {
     identification: identification.string,
-    channels: channels
+    channels
   }
 }
 
