@@ -9,7 +9,7 @@ const setRegex = /^([0-9]+)(\/[0-9]+)?$/
 const urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/
 const langRegex = /^([a-z]{3}|XXX)$/
 const imageRegex = /(image\/[a-z0-9!#$&.+\-^_]+){0,129}/
-const syltRegex = /^((\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)|)/
+const syltRegex = /^((\[\d{1,}:\d{2}\.\d{3}\]) (.*))/
 
 export function textFrame (value, version, strict) {
   if (typeof value !== 'string') {
@@ -469,7 +469,7 @@ export function syltFrame (values, version, strict) {
         throw new Error('Format should be either 1 or 2')
       }
 
-      if (sylt.lyrics.split('\n').every(entry => syltRegex.test(entry))) {
+      if (!sylt.lyrics.split('\n').every(entry => syltRegex.test(entry))) {
         throw new Error('Lyrics must follow this format: [mm:ss.xxx]')
       }
 
