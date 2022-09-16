@@ -7069,7 +7069,7 @@
   var urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/;
   var langRegex = /^([a-z]{3}|XXX)$/;
   var imageRegex = /(image\/[a-z0-9!#$&.+\-^_]+){0,129}/;
-  var syltRegex = /^((\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)|)/;
+  var syltRegex = /^((\[\d{1,}:\d{2}\.\d{3}\]) (.*))/;
   function textFrame$1(value, version, strict) {
     if (typeof value !== 'string') {
       throw new Error('Value is not a string');
@@ -7491,7 +7491,7 @@
           throw new Error('Format should be either 1 or 2');
         }
 
-        if (sylt.lyrics.split('\n').every(function (entry) {
+        if (!sylt.lyrics.split('\n').every(function (entry) {
           return syltRegex.test(entry);
         })) {
           throw new Error('Lyrics must follow this format: [mm:ss.xxx]');
@@ -8889,7 +8889,7 @@
       }
 
       this.name = 'MP3Tag';
-      this.version = '3.3.1';
+      this.version = '3.3.2';
       this.verbose = verbose;
       this.buffer = buffer;
       this.tags = {};
