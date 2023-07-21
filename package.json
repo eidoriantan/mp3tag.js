@@ -19,10 +19,6 @@
     "url": "https://eidoriantan.me"
   },
   "contributors": [],
-  "funding": {
-    "type": "patreon",
-    "url": "https://patreon.com/eidoriantan"
-  },
   "main": "dist/mp3tag.js",
   "directories": {
     "example": "examples",
