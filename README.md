@@ -97,6 +97,3 @@ through [GitHub issues](https://github.com/eidoriantan/mp3tag.js/issues). If you
 wanted to contribute to this repository, please refer to
 [CONTRIBUTING.md](https://github.com/eidoriantan/mp3tag.js/blob/master/CONTRIBUTING.md).
 
-You can also show your support by becoming a patron!
-
-[![Patreon](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/eidoriantan)
