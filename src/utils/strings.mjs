@@ -1,4 +1,6 @@
 
+export const ENCODINGS = ['windows1251', 'utf-16', 'utf-16be', 'utf-8']
+
 export function decodeUTF8 (bytes) {
   let string = ''
   let i = 0

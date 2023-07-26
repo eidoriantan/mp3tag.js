@@ -8,7 +8,7 @@ import {
   unsynch,
   dataBlock
 } from '../utils/bytes.mjs'
-import { encodeString } from '../utils/strings.mjs'
+import { encodeString, ENCODINGS } from '../utils/strings.mjs'
 
 function getHeaderBytes (id, size, version, flags) {
   const idBytes = encodeString(id)
@@ -546,42 +546,48 @@ export function signFrame (values, options) {
   return bytes
 }
 
+function timeBytes (time) {
+  const timeBytes = new BufferView(4)
+  timeBytes.setUint32(0, time)
+  return timeBytes.getUint8(0, 4)
+}
+
+function parseLyrics (lyrics, encodingString) {
+  const regex = /^\[(\d{1,}):(\d{2})\.(\d{3})\] ?(.*)/
+  let lyricsBytes = []
+  lyrics.replace(/\r\n/, '\n').split('\n').forEach(line => {
+    if (line !== '') {
+      const result = regex.exec(line)
+      const time = parseInt(result[1]) * 60000 + parseInt(result[2]) * 1000 + parseInt(result[3])
+      const string = encodeString((result[4] || '') + '\0', encodingString)
+      lyricsBytes = mergeBytes(lyricsBytes, string, timeBytes(time))
+    }
+  })
+  return lyricsBytes
+}
+
 export function syltFrame (values, options) {
   const { id, version, unsynch } = options
   const bytes = []
+  const encoding = version === 3 ? 1 : version === 4 ? 3 : 0
+  const encodingString = ENCODINGS[encoding]
 
   values.forEach(sylt => {
-    let encoding = 0
     const langBytes = encodeString(sylt.language)
-    let descBytes = []
+    const descBytes = encodeString(sylt.descriptor + '\0', encodingString)
 
-    switch (version) {
-      case 3:
-        encoding = 1
-        descBytes = encodeString(sylt.descriptor + '\0', 'utf-16')
-        break
-
-      case 4:
-        encoding = 3
-        descBytes = encodeString(sylt.descriptor + '\0', 'utf-8')
-        break
+    let dataBytes = []
+    if (sylt.data) {
+      sylt.data.forEach(({ time, line }) => {
+        const string = encodeString(line + '\0', encodingString)
+        dataBytes = mergeBytes(dataBytes, string, timeBytes(time))
+      })
+    } else if (sylt.lyrics) {
+      dataBytes = parseLyrics(sylt.lyrics, encodingString)
     }
 
-    const regex = /^(\[\d{1,}:\d{2}\.\d{3}\]) ?(.*)/
-    let lyricsBytes = []
-    sylt.lyrics.replace(/\r\n/, '\n').split('\n').forEach(function (line) {
-      if (line !== '') {
-        const result = regex.exec(line)
-        const time = parseInt(result[1].replace(/[^0-9]/g, ''))
-        const string = encodeString((result[2] || '') + '\n\0')
-        const timeBytes = new BufferView(4)
-        timeBytes.setUint32(0, time)
-        lyricsBytes = mergeBytes(lyricsBytes, string, timeBytes.getUint8(0, 4))
-      }
-    })
-
     let data = mergeBytes(encoding, langBytes, sylt.format, sylt.type,
-      descBytes, lyricsBytes)
+      descBytes, dataBytes)
     if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
@@ -611,7 +617,23 @@ export function mcdiFrame (value, options) {
 export function sytcFrame (value, options) {
   const { id, version, unsynch } = options
 
-  let data = mergeBytes(value.format, value.data)
+  const array = value.data.flatMap(({ bpm, time }) => bpm >= 255 ? [255, bpm - 255, ...timeBytes(time)] : [bpm, ...timeBytes(time)])
+  let data = mergeBytes(value.format, array)
+  if (unsynch) data = unsynchData(data, version)
+
+  const header = getHeaderBytes(id, data.length, version, {
+    unsynchronisation: unsynch,
+    dataLengthIndicator: unsynch
+  })
+
+  return mergeBytes(header, data)
+}
+
+export function etcoFrame (value, options) {
+  const { id, version, unsynch } = options
+
+  const array = value.data.flatMap(({ event, time }) => [event, ...timeBytes(time)])
+  let data = mergeBytes(value.format, array)
   if (unsynch) data = unsynchData(data, version)
 
   const header = getHeaderBytes(id, data.length, version, {
