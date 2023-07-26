@@ -59,7 +59,7 @@ export default class BufferView extends DataView {
 
     return {
       string: string.endsWith('\0')
-        ? string.substr(0, string.length - 1)
+        ? string.substring(0, string.length - 1)
         : string,
       length: bytes.length
     }

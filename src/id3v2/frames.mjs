@@ -17,6 +17,13 @@ export const COMM = {
   version: [3, 4]
 }
 
+export const ETCO = {
+  parse: parsers.etcoFrame,
+  validate: validators.etcoFrame,
+  write: writers.etcoFrame,
+  version: [3, 4]
+}
+
 export const GEOB = {
   parse: parsers.geobFrame,
   validate: validators.geobFrame,
