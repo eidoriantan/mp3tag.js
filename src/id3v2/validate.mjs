@@ -444,12 +444,14 @@ export function syltFrame (values, version, strict) {
       throw new Error('Lyrics is not a string')
     }
 
-    if (data) for (const { time, line } of data) {
-      if (typeof line !== 'string') {
-        throw new Error('Line is not a string')
-      }
-      if (typeof time !== 'number') {
-        throw new Error('Timestamp is not a number')
+    if (data) {
+      for (const { time, line } of data) {
+        if (typeof line !== 'string') {
+          throw new Error('Line is not a string')
+        }
+        if (typeof time !== 'number') {
+          throw new Error('Timestamp is not a number')
+        }
       }
     }
 
