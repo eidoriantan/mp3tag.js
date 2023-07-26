@@ -39,7 +39,7 @@ export function setFrame (value, version, strict) {
       if (match === null) throw new Error('Invalid format (eg. 1/2)')
 
       const position = parseInt(match[1])
-      const total = match[2] ? parseInt(match[2].substr(1)) : null
+      const total = match[2] ? parseInt(match[2].substring(1)) : null
       if (total !== null && position > total) {
         throw new Error('Position is greater then total')
       }
@@ -436,46 +436,54 @@ export function signFrame (values, version, strict) {
 
 export function syltFrame (values, version, strict) {
   const sylts = []
-  values.forEach(sylt => {
-    textFrame(sylt.language, version, strict)
-    textFrame(sylt.descriptor, version, strict)
+  values.forEach(({ language, descriptor, type, format, lyrics, data }) => {
+    textFrame(language, version, strict)
+    textFrame(descriptor, version, strict)
 
-    if (typeof sylt.lyrics !== 'string') {
+    if (lyrics && typeof lyrics !== 'string') {
       throw new Error('Lyrics is not a string')
     }
 
-    if (typeof sylt.type !== 'number') {
+    if (data) for (const { time, line } of data) {
+      if (typeof line !== 'string') {
+        throw new Error('Line is not a string')
+      }
+      if (typeof time !== 'number') {
+        throw new Error('Timestamp is not a number')
+      }
+    }
+
+    if (typeof type !== 'number') {
       throw new Error('Type is not a number')
-    } else if (sylt.type > 255 || sylt.type < 0) {
+    } else if (type > 255 || type < 0) {
       throw new Error('Type should be in range of 0 - 255')
     }
 
-    if (typeof sylt.format !== 'number') {
+    if (typeof format !== 'number') {
       throw new Error('Format is not a number')
-    } else if (sylt.format > 255 || sylt.format < 0) {
+    } else if (format > 255 || format < 0) {
       throw new Error('Format should be in range of 0 - 255')
     }
 
     if (strict) {
-      if (!sylt.language.match(langRegex)) {
+      if (!language.match(langRegex)) {
         throw new Error('Language must follow ISO 639-2')
       }
 
-      if (sylt.type > 6 || sylt.type < 0) {
-        throw new Error('Type should be in range of 0 - 6')
+      if (type > 6 || type < 0) {
+        throw new Error('Type should be in range of 0 - 8')
       }
 
-      if (sylt.format > 2 || sylt.format < 1) {
+      if (format > 2 || format < 1) {
         throw new Error('Format should be either 1 or 2')
       }
 
-      if (!sylt.lyrics.split('\n').every(entry => syltRegex.test(entry))) {
+      if (lyrics && !lyrics.split('\n').every(entry => syltRegex.test(entry))) {
         throw new Error('Lyrics must follow this format: [mm:ss.xxx]')
       }
-
       const checkObj = {
-        language: sylt.language,
-        descriptor: sylt.descriptor
+        language,
+        descriptor
       }
 
       if (includes(sylts, checkObj)) {
@@ -496,10 +504,31 @@ export function mcdiFrame (value, version, strict) {
 }
 
 export function sytcFrame (value, version, strict) {
-  if (!BufferView.isViewable(value.data)) {
-    throw new Error('Data should be viewable')
+  if (typeof value.format !== 'number') {
+    throw new Error('Timestamp format is not a number')
+  } else if (value.format > 255 || value.format < 0) {
+    throw new Error('Timestamp format should be in range of 0 - 255')
   }
 
+  if (strict && (value.format > 2 || value.format < 1)) {
+    throw new Error('Invalid timestamp format (should be 1 or 2)')
+  }
+
+  for (const { bpm, time } of value.data) {
+    if (typeof bpm !== 'number') {
+      throw new Error('BPM is not a number')
+    } else if (bpm > 510 || bpm < 0) {
+      throw new Error('BPM should be in range of 0 - 510')
+    }
+
+    if (typeof time !== 'number') {
+      throw new Error('Timestamp is not a number')
+    }
+  }
+  return true
+}
+
+export function etcoFrame (value, version, strict) {
   if (typeof value.format !== 'number') {
     throw new Error('Format is not a number')
   } else if (value.format > 255 || value.format < 0) {
@@ -507,7 +536,18 @@ export function sytcFrame (value, version, strict) {
   }
 
   if (strict && (value.format > 2 || value.format < 1)) {
-    throw new Error('Invalid timestamp')
+    throw new Error('Invalid timestamp format (should be 1 or 2)')
+  }
+  for (const { event, time } of value.data) {
+    if (typeof event !== 'number') {
+      throw new Error('Event is not a number')
+    } else if (event > 255 || event < 0) {
+      throw new Error('Event should be in range of 0 - 255')
+    }
+
+    if (typeof time !== 'number') {
+      throw new Error('Timestamp is not a number')
+    }
   }
 
   return true

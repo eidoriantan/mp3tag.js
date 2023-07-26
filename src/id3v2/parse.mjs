@@ -1,8 +1,7 @@
 
 import BufferView from '../viewer.mjs'
 import { isBitSet } from '../utils/bytes.mjs'
-
-const ENCODINGS = ['windows1251', 'utf-16', 'utf-16be', 'utf-8']
+import { ENCODINGS } from '../utils/strings.mjs'
 
 export function textFrame (buffer, version) {
   const view = new BufferView(buffer)
@@ -232,37 +231,46 @@ export function seekFrame (buffer, version) {
   return view.getUint32(0)
 }
 
+function formatted (time, line) {
+  const minutes = Math.floor(time / 60000).toString()
+  let seconds = Math.floor(time % 60000 / 1000).toString()
+  seconds = seconds.length === 1 ? '0' + seconds : seconds
+  let ms = (time % 1000).toString()
+  while (ms.length < 3) ms = '0' + ms
+  return `[${minutes}:${seconds}.${ms}] ${line}\n`
+}
+
 export function syltFrame (buffer, version) {
   const view = new BufferView(buffer)
   const encoding = ENCODINGS[view.getUint8(0)]
   const language = view.getString(1, 3).string
   const format = view.getUint8(4)
   const type = view.getUint8(5)
-  const descriptor = view.getCString(6, encoding)
-  const lyricsOffset = descriptor.length + 6
-  const lyricsLength = view.byteLength - lyricsOffset
-  const lyrics = view.getUint8(lyricsOffset, lyricsLength)
-  let text = ''
+  const _descriptor = view.getCString(6, encoding)
+  const descriptor = _descriptor.string
+  const dataOffset = _descriptor.length + 6
+  const length = view.byteLength - dataOffset
 
-  for (let i = 0; i < lyrics.length; i += 4) {
-    const lyricsView = new BufferView(lyrics)
-    const line = lyricsView.getCString(i)
-    const time = lyricsView.getUint32(i + line.length)
-    const minutes = Math.floor(time / 60000).toString()
-    let seconds = Math.floor(time % 60000 / 1000).toString()
-    seconds = seconds.length === 1 ? '0' + seconds : seconds
-    let ms = (time % 1000).toString()
-    while (ms.length < 3) ms = '0' + ms
-    text += `[${minutes}:${seconds}.${ms}] ${line.string}`
-    i += line.length
+  const raw = view.getUint8(dataOffset, length)
+  const rview = new BufferView(raw)
+  const data = []
+  let lyrics = ''
+  for (let i = 0; i < raw.length; i += 4) {
+    const _line = rview.getCString(i, encoding)
+    const line = _line.string
+    const time = rview.getUint32(i + _line.length)
+    data.push({ time, line })
+    lyrics += formatted(time, line)
+    i += _line.length
   }
 
   return {
     language,
     format,
     type,
-    descriptor: descriptor.string,
-    lyrics: text
+    descriptor,
+    data,
+    lyrics
   }
 }
 
@@ -273,9 +281,38 @@ export function mcdiFrame (buffer, version) {
 
 export function sytcFrame (buffer, version) {
   const view = new BufferView(buffer)
+  const format = view.getUint8(0)
+  const raw = view.getUint8(1, view.byteLength - 1)
+  const rview = new BufferView(raw)
+  const data = []
+  for (let i = 0; i < raw.length; i += 5) {
+    let bpm = rview.getUint8(i)
+    if (bpm === 255) {
+      bpm += rview.getUint8(++i)
+    }
+    const time = rview.getUint32(i + 1)
+    data.push({ bpm, time })
+  }
   return {
-    format: view.getUint8(0),
-    data: view.getUint8(1, view.byteLength - 1)
+    format,
+    data
+  }
+}
+
+export function etcoFrame (buffer, version) {
+  const view = new BufferView(buffer)
+  const format = view.getUint8(0)
+  const raw = view.getUint8(1, view.byteLength - 1)
+  const rview = new BufferView(raw)
+  const data = []
+  for (let i = 0; i < raw.length; i += 5) {
+    const event = rview.getUint8(i)
+    const time = rview.getUint32(i + 1)
+    data.push({ event, time })
+  }
+  return {
+    format,
+    data
   }
 }
 

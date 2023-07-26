@@ -61,6 +61,102 @@ describe('ID3v2', function () {
     assert.deepStrictEqual(this.mp3tag.tags.genre, '')
   })
 
+  it('Write complex single tags', function () {
+    this.mp3tag.tags.v2.SYTC = {
+      format: 2,
+      data: [
+        { bpm: 0, time: 200 },
+        { bpm: 130, time: 10000 },
+        { bpm: 260, time: 2000000 }
+      ]
+    }
+    this.mp3tag.tags.v2.ETCO = {
+      format: 2,
+      data: [
+        { event: 1, time: 200 },
+        { event: 2, time: 10000 },
+        { event: 3, time: 2000000 }
+      ]
+    }
+    this.mp3tag.save({ strict: true })
+    if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+    this.mp3tag.read()
+    if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+    assert.deepStrictEqual(this.mp3tag.tags.v2.SYTC, {
+      format: 2,
+      data: [
+        { bpm: 0, time: 200 },
+        { bpm: 130, time: 10000 },
+        { bpm: 260, time: 2000000 }
+      ]
+    })
+    assert.deepStrictEqual(this.mp3tag.tags.v2.ETCO, {
+      format: 2,
+      data: [
+        { event: 1, time: 200 },
+        { event: 2, time: 10000 },
+        { event: 3, time: 2000000 }
+      ]
+    })
+  })
+
+  it('Write complex multi tag', function () {
+    this.mp3tag.tags.v2.SYLT = [
+      {
+        format: 2,
+        type: 3,
+        descriptor: 'DESCRIPTOR',
+        language: 'deu',
+        data: [
+          { line: 'LINE1', time: 200 },
+          { line: 'LINE2', time: 10000 },
+          { line: 'LINE3', time: 2000000 }
+        ]
+      },
+      {
+        format: 2,
+        type: 4,
+        descriptor: 'DESCRIPTOR2',
+        language: 'eng',
+        lyrics: '[0:00.200] LINE4\n[0:10.000] LINE5\n[33:20.000] LINE6\n'
+      }
+    ]
+    this.mp3tag.save({ strict: true })
+    if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+    this.mp3tag.read()
+    if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+    assert.deepStrictEqual(this.mp3tag.tags.v2.SYLT, [
+      {
+        format: 2,
+        type: 3,
+        descriptor: 'DESCRIPTOR',
+        language: 'deu',
+        data: [
+          { line: 'LINE1', time: 200 },
+          { line: 'LINE2', time: 10000 },
+          { line: 'LINE3', time: 2000000 }
+        ],
+        lyrics: '[0:00.200] LINE1\n[0:10.000] LINE2\n[33:20.000] LINE3\n'
+      },
+      {
+        format: 2,
+        type: 4,
+        descriptor: 'DESCRIPTOR2',
+        language: 'eng',
+        data: [
+          { line: 'LINE4', time: 200 },
+          { line: 'LINE5', time: 10000 },
+          { line: 'LINE6', time: 2000000 }
+        ],
+        lyrics: '[0:00.200] LINE4\n[0:10.000] LINE5\n[33:20.000] LINE6\n'
+      }
+    ])
+  })
+
   it('Write data (unsynched)', function () {
     const geob = {
       format: 'application/octet-stream',
