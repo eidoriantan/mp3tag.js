@@ -3,13 +3,15 @@ updates:
 - package-ecosystem: npm
   directory: "/"
   schedule:
-    interval: daily
+    interval: "daily"
     time: "21:00"
   open-pull-requests-limit: 10
   reviewers:
   - eidoriantan
   ignore:
-  - dependency-name: rollup
+  - dependency-name: "*"
+    update-types: ["version-update:semver-major", "version-update:semver-minor"]
+  - dependency-name: "rollup"
     versions:
     - 2.41.5
     - 2.42.3
