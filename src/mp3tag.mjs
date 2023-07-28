@@ -15,7 +15,7 @@ export default class MP3Tag {
     }
 
     this.name = 'MP3Tag'
-    this.version = '3.3.2'
+    this.version = '3.4.0'
     this.verbose = verbose
 
     this.buffer = buffer
