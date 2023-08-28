@@ -7,7 +7,7 @@ description: >-
 keywords: >-
   mp3, id3, audio, tag, edit, write, documentations, docs, install, installation
 active: frames
-last_modified_at: 2023-08-29T01:40:00+08:00
+last_modified_at: 2023-08-29T01:49:00+08:00
 ---
 <div id="tags" class="Subhead bg-white position-sticky top-0">
   <div class="Subhead-heading">`tags` Properties</div>
@@ -275,11 +275,12 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture txxx %}
   ```javascript
-  // TXXX example
-  [{
-    description: 'Text description', // description
-    text: 'Any string here' // text information
-  }]
+  [
+    {
+      description: 'Text description',
+      text: 'Any string here'
+    }
+  ]
   ```
   {% endcapture %}
   <div class="mb-n2">{{ txxx | markdownify }}</div>
@@ -312,11 +313,12 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture wxxx %}
   ```javascript
-  // WXXX example
-  [{
-    description: 'URL description', // description
-    url: 'https://github.com' // URL
-  }]
+  [
+    {
+      description: 'URL description',
+      url: 'https://github.com'
+    }
+  ]
   ```
   {% endcapture %}
   <div class="mb-n2">{{ wxxx | markdownify }}</div>
@@ -337,12 +339,13 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture langDesc %}
   ```javascript
-  // COMM and USLT example
-  [{
-    language: 'eng', // language
-    descriptor: 'Content description', // content description
-    text: 'Lyrics or comment goes here' // text
-  }]
+  [
+    {
+      language: 'eng',
+      descriptor: 'Content description',
+      text: 'Lyrics or comment goes here'
+    }
+  ]
   ```
   {% endcapture %}
   <div class="mb-n2">{{ langDesc | markdownify }}</div>
@@ -365,13 +368,14 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture apic %}
   ```javascript
-  // APIC example
-  [{
-    format: 'image/jpeg', // Image MIME
-    type: 3, // See the APIC image types at id3.org
-    description: 'Content description', // content description
-    data: [1, 2, 3, 4, 5, 6, 7, 8] // image bytes
-  }]
+  [
+    {
+      format: 'image/jpeg',                // Image MIME
+      type: 3,                             // See the APIC image types at id3.org
+      description: 'Content description',
+      data: [1, 2, 3, 4, 5, 6, 7, 8]       // Image bytes
+    }
+  ]
   ```
   {% endcapture %}
   <div class="mb-n2">{{ apic | markdownify }}</div>
@@ -391,13 +395,14 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture geob %}
   ```javascript
-  // GEOB example
-  [{
-    format: 'application/octet-stream', // Object MIME
-    filename: 'filename.bin', // Filename
-    description: 'Content description', // Description
-    object: [1, 2, 3, 4, 5, 6, 7, 8, 9] // Object
-  }]
+  [
+    {
+      format: 'application/octet-stream',  // Object MIME
+      filename: 'filename.bin',
+      description: 'Content description',
+      object: [1, 2, 3, 4, 5, 6, 7, 8, 9]  // Object bytes
+    }
+  ]
   ```
   {% endcapture %}
   <div class="mb-n2">{{ geob | markdownify }}</div>
@@ -418,11 +423,12 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture ufid %}
   ```javascript
-  // UFID example
-  [{
-    ownerId: 'http://www.id3.org/dummy/ufid.html', // non-empty owner ID
-    id: [1, 2, 3, 4, 5, 6, 7] // binary identifier
-  }]
+  [
+    {
+      ownerId: 'http://www.id3.org/dummy/ufid.html', // Non-empty owner ID
+      id: [1, 2, 3, 4, 5, 6, 7]                      // Binary identifier
+    }
+  ]
   ```
   {% endcapture %}
   <div class="mb-n2">{{ ufid | markdownify }}</div>
@@ -441,10 +447,9 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture user %}
   ```javascript
-  // USER example
   {
-    language: 'eng', // language
-    text: 'Text' // terms of use text
+    language: 'eng',
+    text: 'Text'
   }
   ```
   {% endcapture %}
@@ -468,12 +473,11 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture owne %}
   ```javascript
-  // OWNE example
   {
-    currencyCode: 'USD', // US dollars
-    currencyPrice: '2.00', // 2 dollars
-    date: '20200424', // YYYYMMDD date format
-    seller: 'Seller' // Seller's name
+    currencyCode: 'USD',
+    currencyPrice: '2.00',
+    date: '20200424',       // YYYYMMDD date format
+    seller: 'Seller'        // Seller's name
   }
   ```
   {% endcapture %}
@@ -494,11 +498,12 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture priv %}
   ```javascript
-  // PRIV example
-  [{
-    ownerId: 'owner string', // owners identifier
-    data: [1, 2, 3, 4, 5, 6, 7, 8, 9] // data binary
-  }]
+  [
+    {
+      ownerId: 'owner string',
+      data: [1, 2, 3, 4, 5, 6, 7, 8, 9] // Data bytes
+    }
+  ]
   ```
   {% endcapture %}
   <div class="mb-n2">{{ priv | markdownify }}</div>
@@ -518,7 +523,6 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture rvad %}
   ```javascript
-  // RVAD example
   {
     bitsvolume: 16,
     incdec: {
@@ -566,11 +570,10 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture rva2 %}
   ```javascript
-  // RVA2 example
   [{
     identification: 'identification',
     channels: [{
-      type: 1,           // Master volume
+      type: 1,
       volumeadjust: 16,
       bitspeak: 16,
       peakvolume: [0, 1]
@@ -595,11 +598,12 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture sign %}
   ```javascript
-  // SIGN example
-  [{
-    group: 1, // group ID
-    signature: [1, 2, 3, 4, 5, 6, 7, 8, 9] // signature binary
-  }]
+  [
+    {
+      group: 1,
+      signature: [1, 2, 3, 4, 5, 6, 7, 8, 9] // Signature bytes
+    }
+  ]
   ```
   {% endcapture %}
   <div class="mb-n2">{{ sign | markdownify }}</div>
@@ -624,28 +628,31 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture sylt %}
   ```javascript
-  // SYLT example
-  [{
-    language: 'eng', // language
-    format: 1, // Time stamp format
-    type: 1, // Content type
-    descriptor: 'Descriptions', // descriptions
-    lyrics: 'Synced lyrics' // lyrics
-  }]
+  [
+    {
+      language: 'eng',
+      format: 1,
+      type: 1,
+      descriptor: 'Descriptions',
+      lyrics: '[mm:ss.xxx] Synced lyrics'
+    }
+  ]
 
   // OR
 
-  [{
-    language: 'eng', // language
-    format: 1, // Time stamp format
-    type: 1, // Content type
-    descriptor: 'Descriptions', // descriptions
-    data: [ // Parsed lyrics
-      { line: 'LINE1', time: 200 },
-      { line: 'LINE2', time: 10000 },
-      { line: 'LINE3', time: 2000000 }
-    ]
-  }]
+  [
+    {
+      language: 'eng',
+      format: 1,
+      type: 1,
+      descriptor: 'Descriptions',
+      data: [
+        { line: 'LINE1', time: 200 },
+        { line: 'LINE2', time: 10000 },
+        { line: 'LINE3', time: 2000000 }
+      ]
+    }
+  ]
   ```
   {% endcapture %}
   <div class="mb-n2">{{ sylt | markdownify }}</div>
@@ -664,9 +671,8 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture mcdi %}
   ```javascript
-  // MCDI example
   {
-    data: [1, 2, 3, 4, 5, 6, 7, 8] // binary data
+    data: [1, 2, 3, 4, 5, 6, 7, 8] // Binary bytes
   }
   ```
   {% endcapture %}
@@ -687,16 +693,16 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture sytc %}
   ```javascript
-  // SYTC example
   {
-    format: 1, // Timestamp format
-    data: [1, 2, 3, 4, 5, 6, 7, 8] // binary data
+    format: 1,
+    data: [1, 2, 3, 4, 5, 6, 7, 8] // Binary bytes
   }
 
   // OR
+
   {
-    format: 1, // Timestamp format
-    data: [ // Parsed data
+    format: 1,
+    data: [
       { bpm: 0, time: 200 },
       { bpm: 130, time: 10000 },
       { bpm: 260, time: 2000000 }
@@ -721,9 +727,8 @@ last_modified_at: 2023-08-29T01:40:00+08:00
   </div>
   {% capture etco %}
   ```javascript
-  // ETCO example
   {
-    format: 1, // Timestamp format
+    format: 1,
     data: [
       { event: 0, time: 200 },
       { event: 130, time: 10000 },
