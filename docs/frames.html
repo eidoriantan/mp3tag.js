@@ -7,7 +7,7 @@ description: >-
 keywords: >-
   mp3, id3, audio, tag, edit, write, documentations, docs, install, installation
 active: frames
-last_modified_at: 2023-08-29T01:31:00+08:00
+last_modified_at: 2023-08-29T01:40:00+08:00
 ---
 <div id="tags" class="Subhead bg-white position-sticky top-0">
   <div class="Subhead-heading">`tags` Properties</div>
@@ -632,6 +632,20 @@ last_modified_at: 2023-08-29T01:31:00+08:00
     descriptor: 'Descriptions', // descriptions
     lyrics: 'Synced lyrics' // lyrics
   }]
+
+  // OR
+
+  [{
+    language: 'eng', // language
+    format: 1, // Time stamp format
+    type: 1, // Content type
+    descriptor: 'Descriptions', // descriptions
+    data: [ // Parsed lyrics
+      { line: 'LINE1', time: 200 },
+      { line: 'LINE2', time: 10000 },
+      { line: 'LINE3', time: 2000000 }
+    ]
+  }]
   ```
   {% endcapture %}
   <div class="mb-n2">{{ sylt | markdownify }}</div>
@@ -678,6 +692,16 @@ last_modified_at: 2023-08-29T01:31:00+08:00
     format: 1, // Timestamp format
     data: [1, 2, 3, 4, 5, 6, 7, 8] // binary data
   }
+
+  // OR
+  {
+    format: 1, // Timestamp format
+    data: [ // Parsed data
+      { bpm: 0, time: 200 },
+      { bpm: 130, time: 10000 },
+      { bpm: 260, time: 2000000 }
+    ]
+  }
   ```
   {% endcapture %}
   <div class="mb-n2">{{ sytc | markdownify }}</div>
@@ -701,9 +725,9 @@ last_modified_at: 2023-08-29T01:31:00+08:00
   {
     format: 1, // Timestamp format
     data: [
-      { bpm: 0, time: 200 },
-      { bpm: 130, time: 10000 },
-      { bpm: 260, time: 2000000 }
+      { event: 0, time: 200 },
+      { event: 130, time: 10000 },
+      { event: 260, time: 2000000 }
     ]
   }
   ```
