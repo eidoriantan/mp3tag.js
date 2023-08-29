@@ -2,8 +2,10 @@
 const MP3Tag = require('mp3tag.js')
 const fs = require('fs')
 
+const audioPath = 'audio.mp3'
+
 // Read the buffer of an audio file
-const buffer = fs.readFileSync('audio.mp3')
+const buffer = fs.readFileSync(audioPath)
 
 // Now, pass it to MP3Tag
 const mp3tag = new MP3Tag(buffer, true)
@@ -28,3 +30,6 @@ if (mp3tag.error !== '') throw new Error(mp3tag.error)
 // Read the new buffer again
 mp3tag.read()
 console.log(mp3tag.tags)
+
+// Write the new buffer to file
+fs.writeFileSync(audioPath, mp3tag.buffer)
