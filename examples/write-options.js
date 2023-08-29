@@ -22,7 +22,7 @@ mp3tag.tags.track = '1'
 mp3tag.tags.genre = 'Pop'
 
 // Save the tags with strict mode enabled.
-mp3tag.tags.save({ strict: true })
+mp3tag.save({ strict: true })
 
 // There should be an error since newlines are not allowed in title
 if (mp3tag.error !== '') {

@@ -22,7 +22,7 @@ mp3tag.tags.track = '1'
 mp3tag.tags.genre = 'Pop'
 
 // Save the tags
-mp3tag.tags.save()
+mp3tag.save()
 
 // Handle error if there's any
 if (mp3tag.error !== '') throw new Error(mp3tag.error)
