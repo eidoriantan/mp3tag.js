@@ -184,7 +184,7 @@ export default class MP3Tag {
       audio = mergeBytes(tagBytes, audio)
     }
 
-    return audio.buffer
+    return typeof Buffer !== 'undefined' ? Buffer.from(audio.buffer) : audio.buffer
   }
 
   save (options = {}) {
@@ -228,7 +228,8 @@ export default class MP3Tag {
       } else i++
     }
 
-    return buffer.slice(start)
+    const sliced = buffer.slice(start)
+    return typeof Buffer !== 'undefined' ? Buffer.from(sliced) : sliced
   }
 
   getAudio () { return MP3Tag.getAudioBuffer(this.buffer) }
