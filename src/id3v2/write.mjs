@@ -50,12 +50,12 @@ export function textFrame (value, options) {
   switch (version) {
     case 3:
       encoding = 1
-      strBytes = encodeString(value.replace('\\\\', '/') + '\0', 'utf-16')
+      strBytes = encodeString(value.replace(/\\\\/g, '/') + '\0', 'utf-16')
       break
 
     case 4:
       encoding = 3
-      strBytes = encodeString(value.replace('\\\\', '\0') + '\0', 'utf-8')
+      strBytes = encodeString(value.replace(/\\\\/g, '\0') + '\0', 'utf-8')
       break
   }
 
@@ -76,11 +76,11 @@ export function win1251Frame (value, options) {
 
   switch (version) {
     case 3:
-      strBytes = encodeString(value.replace('\\\\', '/') + '\0')
+      strBytes = encodeString(value.replace(/\\\\/g, '/') + '\0')
       break
 
     case 4:
-      strBytes = encodeString(value.replace('\\\\', '\0') + '\0')
+      strBytes = encodeString(value.replace(/\\\\/g, '\0') + '\0')
       break
   }
 
@@ -98,7 +98,7 @@ export function win1251Frame (value, options) {
 export function setFrame (value, options) {
   const { version } = options
   if (version === 3) value = value.toString().split('\\\\')[0]
-  else if (version === 4) value = value.toString().replace('\\\\', '\0')
+  else if (version === 4) value = value.toString().replace(/\\\\/g, '\0')
 
   return win1251Frame(value, options)
 }
@@ -555,7 +555,7 @@ function timeBytes (time) {
 function parseLyrics (lyrics, encodingString) {
   const regex = /^\[(\d{1,}):(\d{2})\.(\d{3})\] ?(.*)/
   let lyricsBytes = []
-  lyrics.replace(/\r\n/, '\n').split('\n').forEach(line => {
+  lyrics.replace(/\r\n/g, '\n').split('\n').forEach(line => {
     if (line !== '') {
       const result = regex.exec(line)
       const time = parseInt(result[1]) * 60000 + parseInt(result[2]) * 1000 + parseInt(result[3])
