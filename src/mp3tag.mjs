@@ -217,9 +217,15 @@ export default class MP3Tag {
       buffer = buffer.slice(0, buffer.byteLength - 128)
     }
 
+    let i = 0
+    if (ID3v2.hasID3v2(buffer)) {
+      const { details } = ID3v2.decode(buffer)
+      const { size } = details
+      i = size
+    }
+
     const view = new BufferView(buffer)
     let start = 0
-    let i = 0
 
     while (i < view.byteLength) {
       if (view.getUint8(i) === 0xff && view.getUint8(i + 1) >= 0xf0) {
