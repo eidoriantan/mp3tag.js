@@ -8140,22 +8140,6 @@
     write: urlFrame,
     version: [3, 4]
   };
-
-  /**
-   *  WFED and TGID is not a standard and undocumented frame used by Apple iTunes
-   */
-  var WFED = {
-    parse: win1251Frame$1,
-    validate: urlFrame$1,
-    write: win1251Frame,
-    version: [3, 4]
-  };
-  var TGID = {
-    parse: win1251Frame$1,
-    validate: urlFrame$1,
-    write: win1251Frame,
-    version: [3, 4]
-  };
   var WOAF = {
     parse: urlFrame$2,
     validate: urlFrame$1,
@@ -8196,6 +8180,22 @@
     parse: wxxxFrame$2,
     validate: wxxxFrame$1,
     write: wxxxFrame,
+    version: [3, 4]
+  };
+
+  /**
+   *  WFED and TGID is not a standard and undocumented frame used by Apple iTunes
+   */
+  var WFED = {
+    parse: win1251Frame$1,
+    validate: urlFrame$1,
+    write: win1251Frame,
+    version: [3, 4]
+  };
+  var TGID = {
+    parse: win1251Frame$1,
+    validate: urlFrame$1,
+    write: win1251Frame,
     version: [3, 4]
   };
 
@@ -8273,15 +8273,15 @@
     USLT: USLT,
     WCOM: WCOM,
     WCOP: WCOP,
-    WFED: WFED,
-    TGID: TGID,
     WOAF: WOAF,
     WOAR: WOAR,
     WOAS: WOAS,
     WORS: WORS,
     WPAY: WPAY,
     WPUB: WPUB,
-    WXXX: WXXX
+    WXXX: WXXX,
+    WFED: WFED,
+    TGID: TGID
   });
 
   function hasID3v2(buffer) {
@@ -8434,7 +8434,7 @@
         throw new TypeError('buffer is not ArrayBuffer/Buffer');
       }
       this.name = 'MP3Tag';
-      this.version = '3.4.2';
+      this.version = '3.5.0';
       this.verbose = verbose;
       this.buffer = buffer;
       this.tags = {};
@@ -8638,11 +8638,17 @@
         if (hasID3v1(buffer)) {
           buffer = buffer.slice(0, buffer.byteLength - 128);
         }
+        var i = 0;
+        if (hasID3v2(buffer)) {
+          var _ID3v2$decode2 = decode(buffer),
+            details = _ID3v2$decode2.details;
+          var size = details.size;
+          i = size;
+        }
         var view = new BufferView(buffer);
         var start = 0;
-        var i = 0;
         while (i < view.byteLength) {
-          if (view.getUint8(i) === 0xff && view.getUint8(i + 1) === 0xfb) {
+          if (view.getUint8(i) === 0xff && view.getUint8(i + 1) >= 0xf0) {
             start = i;
             break;
           } else i++;
