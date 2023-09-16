@@ -222,7 +222,7 @@ export default class MP3Tag {
     let i = 0
 
     while (i < view.byteLength) {
-      if (view.getUint8(i) === 0xff && view.getUint8(i + 1) === 0xfb) {
+      if (view.getUint8(i) === 0xff && view.getUint8(i + 1) >= 0xf0) {
         start = i
         break
       } else i++
