@@ -556,7 +556,6 @@ export function etcoFrame (value, version, strict) {
 }
 
 export function pcntFrame (value, version, strict) {
-  console.log(value, version, strict)
   if (isNaN(value) || isNaN(parseFloat(value))) {
     throw new Error('Value is not numerical')
   }
