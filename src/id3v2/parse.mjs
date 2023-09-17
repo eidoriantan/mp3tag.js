@@ -329,3 +329,20 @@ export function pcntFrame (buffer, version) {
   const data = view.getUint8(0, view.byteLength)
   return bytesToLong(data).toString()
 }
+
+export function popmFrame (buffer, version) {
+  const view = new BufferView(buffer)
+  const encoding = ENCODINGS[0]
+  const email = view.getCString(0, encoding)
+  const rating = view.getUint8(email.length)
+  const counterOffset = email.length + 1
+  const counterLimit = buffer.byteLength - counterOffset
+  let counter = 0
+
+  if (counterLimit > 0) {
+    const counterBytes = view.getUint8(counterOffset, counterLimit)
+    counter = bytesToLong(counterBytes)
+  }
+
+  return { email: email.string, rating, counter }
+}

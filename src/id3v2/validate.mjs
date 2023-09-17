@@ -9,6 +9,7 @@ const setRegex = /^([0-9]+)(\/[0-9]+)?$/
 const urlRegex = /^(https?):\/\/[^\s/$.?#]+\.[^\s]*/
 const langRegex = /^([a-z]{3}|XXX)$/
 const imageRegex = /(image\/[a-z0-9!#$&.+\-^_]+){0,129}/
+const emailRegex = /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/
 const syltRegex = /^((\[\d{1,}:\d{2}\.\d{3}\]) (.*))/
 
 export function textFrame (value, version, strict) {
@@ -559,6 +560,36 @@ export function pcntFrame (value, version, strict) {
   if (isNaN(value) || isNaN(parseFloat(value))) {
     throw new Error('Value is not numerical')
   }
+
+  return true
+}
+
+export function popmFrame (values, version, strict) {
+  const popms = []
+  values.forEach(({ email, rating, counter }) => {
+    textFrame(email, version, strict)
+
+    if (typeof rating !== 'number') {
+      throw new Error('Rating is not a number')
+    } else if (rating > 255 || rating < 0) {
+      throw new Error('Rating should be in range of 0 - 255')
+    }
+
+    if (typeof counter !== 'number') {
+      throw new Error('Counter is not a number')
+    }
+
+    if (strict) {
+      if (!email.match(emailRegex)) {
+        throw new Error('Email is not a valid email')
+      }
+
+      const checkObj = { email }
+      if (includes(popms, checkObj)) {
+        throw new Error('1 POPM with same email only')
+      } else popms.push(checkObj)
+    }
+  })
 
   return true
 }

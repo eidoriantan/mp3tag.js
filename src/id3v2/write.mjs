@@ -661,3 +661,27 @@ export function pcntFrame (value, options) {
 
   return mergeBytes(header, data)
 }
+
+export function popmFrame (values, options) {
+  const { id, version, unsynch } = options
+  const bytes = []
+
+  values.forEach(popm => {
+    const emailBytes = encodeString(popm.email + '\0')
+    const counterBytes = longToBytes(popm.counter)
+    while (counterBytes.length < 4) counterBytes.unshift(0)
+
+    let data = mergeBytes(emailBytes, popm.rating, counterBytes)
+    if (unsynch) data = unsynchData(data, version)
+
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, data)
+    merged.forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}

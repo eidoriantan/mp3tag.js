@@ -59,6 +59,13 @@ export const PCNT = {
   version: [3, 4]
 }
 
+export const POPM = {
+  parse: parsers.popmFrame,
+  validate: validators.popmFrame,
+  write: writers.popmFrame,
+  version: [3, 4]
+}
+
 export const PRIV = {
   parse: parsers.privFrame,
   validate: validators.privFrame,
