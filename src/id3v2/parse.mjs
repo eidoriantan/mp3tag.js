@@ -74,6 +74,14 @@ export function langDescFrame (buffer, version) {
   }
 }
 
+export function win1251Frame (buffer, version) {
+  const view = new BufferView(buffer)
+  const encoding = ENCODINGS[view.getUint8(0)]
+  const length = view.byteLength - 1
+
+  return view.getString(1, length, encoding).string
+}
+
 export function apicFrame (buffer, version) {
   const view = new BufferView(buffer)
   const encoding = ENCODINGS[view.getUint8(0)]
@@ -314,12 +322,4 @@ export function etcoFrame (buffer, version) {
     format,
     data
   }
-}
-
-export function win1251Frame (buffer, version) {
-  const view = new BufferView(buffer)
-  const encoding = ENCODINGS[view.getUint8(0)]
-  const length = view.byteLength - 1
-
-  return view.getString(1, length, encoding).string
 }
