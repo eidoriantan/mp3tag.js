@@ -10,6 +10,7 @@ export interface MP3TagTagsV2Defined {
     IPLS?: Array<string>;
     MCDI?: frames.MP3TagMCDIFRame;
     OWNE?: frames.MP3TagOWNEFrame;
+    PCNT?: frames.MP3TagTextFrame;
     PRIV?: Array<frames.MP3TagPRIVFrame>;
     RVAD?: frames.MP3TagRVADFrame;
     RVA2?: Array<frames.MP3TagRVA2Frame>;
