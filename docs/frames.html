@@ -7,7 +7,7 @@ description: >-
 keywords: >-
   mp3, id3, audio, tag, edit, write, documentations, docs, install, installation
 active: frames
-last_modified_at: 2023-09-16T14:00:00+08:00
+last_modified_at: 2023-09-17T19:40:00+08:00
 ---
 <div id="tags" class="Subhead bg-white position-sticky top-0">
   <div class="Subhead-heading">`tags` Properties</div>
@@ -501,6 +501,32 @@ last_modified_at: 2023-09-16T14:00:00+08:00
   ```
   {% endcapture %}
   <div class="mb-n2">{{ pcnt | markdownify }}</div>
+</div>
+
+<div id="v2-popm" class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Popularimeter frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: POPM</div>
+    <div class="text-gray">Type: object[]</div>
+  </div>
+  <div class="Box-row">
+    POPM frame is parsed and must be saved as an array. If strict mode is
+    enabled, there should only one frame with the same email
+  </div>
+  {% capture popm %}
+  ```javascript
+  [
+    {
+      email: 'john@example.com',
+      rating: 255,                // 0 is unknown, 1 is worst, and 255 is best ratings
+      counter: 0                  // number of times the user played this
+    }
+  ]
+  ```
+  {% endcapture %}
+  <div class="mb-n2">{{ popm | markdownify }}</div>
 </div>
 
 <div id="v2-priv" class="Box Box--blue Box--condensed my-3">
