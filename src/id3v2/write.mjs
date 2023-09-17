@@ -6,7 +6,8 @@ import {
   encodeSynch,
   mergeBytes,
   unsynch,
-  dataBlock
+  dataBlock,
+  longToBytes
 } from '../utils/bytes.mjs'
 import { encodeString, ENCODINGS } from '../utils/strings.mjs'
 
@@ -647,14 +648,8 @@ export function etcoFrame (value, options) {
 export function pcntFrame (value, options) {
   const { id, version, unsynch } = options
 
-  let data = []
-  let count = parseInt(value)
-
-  while (count > 0) {
-    const byte = count & 0xff
-    data.unshift(byte)
-    count = (count - byte) / 256
-  }
+  const count = parseInt(value)
+  let data = longToBytes(count)
 
   while (data.length < 4) data.unshift(0)
   if (unsynch) data = unsynchData(data, version)

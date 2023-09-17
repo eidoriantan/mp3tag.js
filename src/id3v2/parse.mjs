@@ -1,6 +1,6 @@
 
 import BufferView from '../viewer.mjs'
-import { isBitSet } from '../utils/bytes.mjs'
+import { isBitSet, bytesToLong } from '../utils/bytes.mjs'
 import { ENCODINGS } from '../utils/strings.mjs'
 
 export function textFrame (buffer, version) {
@@ -327,11 +327,5 @@ export function etcoFrame (buffer, version) {
 export function pcntFrame (buffer, version) {
   const view = new BufferView(buffer)
   const data = view.getUint8(0, view.byteLength)
-  let value = 0
-
-  for (let i = 0; i < data.length; i++) {
-    value = (value * 256) + data[i]
-  }
-
-  return value.toString()
+  return bytesToLong(data).toString()
 }
