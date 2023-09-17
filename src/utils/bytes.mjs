@@ -88,7 +88,7 @@ export function dataBlock (data, max) {
 
 export function bytesToLong (bytes) {
   let value = 0
-  for (let i = 0; i < bytes.length; i++) {
+  for (let i = bytes.length - 1; i >= 0; i--) {
     value = (value * 256) + bytes[i]
   }
   return value
@@ -98,7 +98,7 @@ export function longToBytes (long) {
   const bytes = []
   while (long > 0) {
     const byte = long & 0xff
-    bytes.unshift(byte)
+    bytes.push(byte)
     long = (long - byte) / 256
   }
   return bytes
