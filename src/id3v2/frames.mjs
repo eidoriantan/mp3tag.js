@@ -52,6 +52,13 @@ export const OWNE = {
   version: [3, 4]
 }
 
+export const PCNT = {
+  parse: parsers.pcntFrame,
+  validate: validators.pcntFrame,
+  write: writers.pcntFrame,
+  version: [3, 4]
+}
+
 export const PRIV = {
   parse: parsers.privFrame,
   validate: validators.privFrame,

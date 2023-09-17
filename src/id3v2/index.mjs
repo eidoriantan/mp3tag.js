@@ -30,13 +30,16 @@ export function decode (buffer, tagOffset = 0) {
   let limit = size
 
   const pushTag = (tag) => {
-    const singleFrame = ['USER', 'OWNE', 'MCDI', 'RVAD', 'SYTC', 'ETCO']
+    const singleFrame = ['USER', 'OWNE', 'MCDI', 'RVAD', 'SYTC', 'ETCO', 'PCNT']
     switch (typeof tag.value) {
       case 'number':
       case 'string':
         tag.value = tag.value.toString()
-        if (tags[tag.id]) tags[tag.id] += '\\\\' + tag.value
-        else tags[tag.id] = tag.value
+        if (tags[tag.id] && !singleFrame.includes(tag.id)) {
+          tags[tag.id] += '\\\\' + tag.value
+        } else {
+          tags[tag.id] = tag.value
+        }
         break
 
       case 'object':

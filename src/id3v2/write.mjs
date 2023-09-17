@@ -643,3 +643,25 @@ export function etcoFrame (value, options) {
 
   return mergeBytes(header, data)
 }
+
+export function pcntFrame (value, options) {
+  const { id, version, unsynch } = options
+
+  const data = []
+  let count = parseInt(value)
+
+  while (count > 0) {
+    const byte = count & 0xff
+    data.unshift(byte)
+    count = (count - byte) / 256
+  }
+
+  while (data.length < 4) data.unshift(0)
+
+  const header = getHeaderBytes(id, data.length, version, {
+    unsynchronisation: unsynch,
+    dataLengthIndicator: unsynch
+  })
+
+  return mergeBytes(header, data)
+}

@@ -323,3 +323,15 @@ export function etcoFrame (buffer, version) {
     data
   }
 }
+
+export function pcntFrame (buffer, version) {
+  const view = new BufferView(buffer)
+  const data = view.getUint8(0, view.byteLength)
+  let value = 0
+
+  for (let i = 0; i < data.length; i++) {
+    value = (value * 256) + data[i]
+  }
+
+  return value.toString()
+}

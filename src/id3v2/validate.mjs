@@ -554,3 +554,16 @@ export function etcoFrame (value, version, strict) {
 
   return true
 }
+
+export function pcntFrame (value, version, strict) {
+  console.log(value, version, strict)
+  if (isNaN(value) || isNaN(parseFloat(value))) {
+    throw new Error('Value is not numerical')
+  }
+
+  if (strict && typeof value !== 'number') {
+    throw new Error('Value is not a number')
+  }
+
+  return true
+}
