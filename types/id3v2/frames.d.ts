@@ -40,6 +40,12 @@ export interface MP3TagOWNEFrame {
   seller: string;
 }
 
+export interface MP3TagPOPMFrame {
+  email: string;
+  rating: number;
+  counter: number;
+}
+
 export interface MP3TagPRIVFrame {
   ownerId: string;
   data: Array<number>;
