@@ -647,7 +647,7 @@ export function etcoFrame (value, options) {
 export function pcntFrame (value, options) {
   const { id, version, unsynch } = options
 
-  const data = []
+  let data = []
   let count = parseInt(value)
 
   while (count > 0) {
@@ -657,6 +657,7 @@ export function pcntFrame (value, options) {
   }
 
   while (data.length < 4) data.unshift(0)
+  if (unsynch) data = unsynchData(data, version)
 
   const header = getHeaderBytes(id, data.length, version, {
     unsynchronisation: unsynch,
