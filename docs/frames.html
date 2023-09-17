@@ -484,6 +484,25 @@ last_modified_at: 2023-09-16T14:00:00+08:00
   <div class="mb-n2">{{ owne | markdownify }}</div>
 </div>
 
+<div id="v2-pcnt" class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Play Count frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: PCNT</div>
+    <div class="text-gray">Type: string</div>
+  </div>
+  <div class="Box-row">
+    PCNT frame is parsed and must be saved as a numerical string
+  </div>
+  {% capture pcnt %}
+  ```javascript
+  '4294967296' // Numerical string
+  ```
+  {% endcapture %}
+  <div class="mb-n2">{{ pcnt | markdownify }}</div>
+</div>
+
 <div id="v2-priv" class="Box Box--blue Box--condensed my-3">
   <header class="Box-header Box-header--blue">
     <h2 class="Box-title">Private frame</h2>
