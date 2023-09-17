@@ -651,7 +651,7 @@ export function pcntFrame (value, options) {
   const count = parseInt(value)
   let data = longToBytes(count)
 
-  while (data.length < 4) data.push(0)
+  while (data.length < 4) data.unshift(0)
   if (unsynch) data = unsynchData(data, version)
 
   const header = getHeaderBytes(id, data.length, version, {
