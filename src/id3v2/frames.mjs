@@ -420,6 +420,13 @@ export const TSIZ = {
   version: [3]
 }
 
+export const TSO2 = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [4]
+}
+
 export const TSOA = {
   parse: parsers.textFrame,
   validate: validators.textFrame,
