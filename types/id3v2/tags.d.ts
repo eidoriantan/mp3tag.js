@@ -62,6 +62,7 @@ export interface MP3TagTagsV2Defined {
     TRSN?: frames.MP3TagTextFrame;
     TRSO?: frames.MP3TagTextFrame;
     TSIZ?: frames.MP3TagTextFrame;
+    TSO2?: frames.MP3TagTextFrame;
     TSOA?: frames.MP3TagTextFrame;
     TSOC?: frames.MP3TagTextFrame;
     TSOP?: frames.MP3TagTextFrame;
