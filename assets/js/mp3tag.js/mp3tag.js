@@ -8343,7 +8343,7 @@
   };
 
   /**
-   *  WFED and TGID is not a standard and undocumented frame used by Apple iTunes
+   *  Non-standard frames
    */
   var WFED = {
     parse: win1251Frame$1,
@@ -8355,6 +8355,12 @@
     parse: win1251Frame$1,
     validate: urlFrame$1,
     write: win1251Frame,
+    version: [3, 4]
+  };
+  var TSO2 = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
     version: [3, 4]
   };
 
@@ -8442,7 +8448,8 @@
     WPUB: WPUB,
     WXXX: WXXX,
     WFED: WFED,
-    TGID: TGID
+    TGID: TGID,
+    TSO2: TSO2
   });
 
   function hasID3v2(buffer) {
@@ -8599,7 +8606,7 @@
         throw new TypeError('buffer is not ArrayBuffer/Buffer');
       }
       this.name = 'MP3Tag';
-      this.version = '3.6.0';
+      this.version = '3.7.0';
       this.verbose = verbose;
       this.buffer = buffer;
       this.tags = {};
