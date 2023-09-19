@@ -420,13 +420,6 @@ export const TSIZ = {
   version: [3]
 }
 
-export const TSO2 = {
-  parse: parsers.textFrame,
-  validate: validators.textFrame,
-  write: writers.textFrame,
-  version: [4]
-}
-
 export const TSOA = {
   parse: parsers.textFrame,
   validate: validators.textFrame,
@@ -575,7 +568,7 @@ export const WXXX = {
 }
 
 /**
- *  WFED and TGID is not a standard and undocumented frame used by Apple iTunes
+ *  Non-standard frames
  */
 export const WFED = {
   parse: parsers.win1251Frame,
@@ -588,5 +581,12 @@ export const TGID = {
   parse: parsers.win1251Frame,
   validate: validators.urlFrame,
   write: writers.win1251Frame,
+  version: [3, 4]
+}
+
+export const TSO2 = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
   version: [3, 4]
 }
