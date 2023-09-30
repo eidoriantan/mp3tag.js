@@ -5446,11 +5446,12 @@
     var dataOffset = mime.length + desc.length + 2;
     var dataLength = view.byteLength - dataOffset;
     var data = view.getUint8(dataOffset, dataLength);
+    var dataArr = Array.isArray(data) ? data : [data];
     return {
       format: mime.string,
       type: type,
       description: desc.string,
-      data: data
+      data: dataArr
     };
   }
   function geobFrame$2(buffer, version) {
@@ -5462,20 +5463,22 @@
     var binOffset = mime.length + fname.length + desc.length + 1;
     var binLength = view.byteLength - binOffset;
     var object = view.getUint8(binOffset, binLength);
+    var dataArr = Array.isArray(object) ? object : [object];
     return {
       format: mime.string,
       filename: fname.string,
       description: desc.string,
-      object: object
+      object: dataArr
     };
   }
   function ufidFrame$2(buffer, version) {
     var view = new BufferView(buffer);
     var ownerId = view.getCString(0);
     var id = view.getUint8(ownerId.length, view.byteLength - ownerId.length);
+    var dataArr = Array.isArray(id) ? id : [id];
     return {
       ownerId: ownerId.string,
-      id: id
+      id: dataArr
     };
   }
   function userFrame$2(buffer, version) {
@@ -5506,9 +5509,10 @@
     var view = new BufferView(buffer);
     var ownerId = view.getCString(0);
     var data = view.getUint8(ownerId.length, view.byteLength - ownerId.length);
+    var dataArr = Array.isArray(data) ? data : [data];
     return {
       ownerId: ownerId.string,
-      data: data
+      data: dataArr
     };
   }
   function rvadFrame$2(buffer, version) {
@@ -5574,9 +5578,11 @@
   }
   function signFrame$2(buffer, version) {
     var view = new BufferView(buffer);
+    var data = view.getUint8(1, view.byteLength - 1);
+    var dataArr = Array.isArray(data) ? data : [data];
     return {
       group: view.getUint8(0),
-      signature: view.getUint8(1, view.byteLength - 1)
+      signature: dataArr
     };
   }
   function seekFrame(buffer, version) {
@@ -5602,7 +5608,7 @@
     var dataOffset = _descriptor.length + 6;
     var length = view.byteLength - dataOffset;
     var raw = view.getUint8(dataOffset, length);
-    var rview = new BufferView(raw);
+    var rview = new BufferView(Array.isArray(raw) ? raw : [raw]);
     var data = [];
     var lyrics = '';
     for (var i = 0; i < raw.length; i += 4) {
@@ -5627,15 +5633,17 @@
   }
   function mcdiFrame$2(buffer, version) {
     var view = new BufferView(buffer);
+    var data = view.getUint8(0, view.byteLength);
+    var dataArr = Array.isArray(data) ? data : [data];
     return {
-      data: view.getUint8(0, view.byteLength)
+      data: dataArr
     };
   }
   function sytcFrame$2(buffer, version) {
     var view = new BufferView(buffer);
     var format = view.getUint8(0);
     var raw = view.getUint8(1, view.byteLength - 1);
-    var rview = new BufferView(raw);
+    var rview = new BufferView(Array.isArray(raw) ? raw : [raw]);
     var data = [];
     for (var i = 0; i < raw.length; i += 5) {
       var bpm = rview.getUint8(i);
@@ -5657,7 +5665,7 @@
     var view = new BufferView(buffer);
     var format = view.getUint8(0);
     var raw = view.getUint8(1, view.byteLength - 1);
-    var rview = new BufferView(raw);
+    var rview = new BufferView(Array.isArray(raw) ? raw : [raw]);
     var data = [];
     for (var i = 0; i < raw.length; i += 5) {
       var event = rview.getUint8(i);
@@ -5675,7 +5683,8 @@
   function pcntFrame$2(buffer, version) {
     var view = new BufferView(buffer);
     var data = view.getUint8(0, view.byteLength);
-    return bytesToLong(data).toString();
+    var dataArr = Array.isArray(data) ? data : [data];
+    return bytesToLong(dataArr).toString();
   }
   function popmFrame$2(buffer, version) {
     var view = new BufferView(buffer);
@@ -5687,7 +5696,8 @@
     var counter = 0;
     if (counterLimit > 0) {
       var counterBytes = view.getUint8(counterOffset, counterLimit);
-      counter = bytesToLong(counterBytes);
+      var counterBytesArr = Array.isArray(counterBytes) ? counterBytes : [counterBytes];
+      counter = bytesToLong(counterBytesArr);
     }
     return {
       email: email.string,
@@ -8606,7 +8616,7 @@
         throw new TypeError('buffer is not ArrayBuffer/Buffer');
       }
       this.name = 'MP3Tag';
-      this.version = '3.7.0';
+      this.version = '3.7.1';
       this.verbose = verbose;
       this.buffer = buffer;
       this.tags = {};
