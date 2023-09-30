@@ -91,8 +91,14 @@ export function apicFrame (buffer, version) {
   const dataOffset = mime.length + desc.length + 2
   const dataLength = view.byteLength - dataOffset
   const data = view.getUint8(dataOffset, dataLength)
+  const dataArr = Array.isArray(data) ? data : [data]
 
-  return { format: mime.string, type, description: desc.string, data }
+  return {
+    format: mime.string,
+    type,
+    description: desc.string,
+    data: dataArr
+  }
 }
 
 export function geobFrame (buffer, version) {
@@ -104,12 +110,13 @@ export function geobFrame (buffer, version) {
   const binOffset = mime.length + fname.length + desc.length + 1
   const binLength = view.byteLength - binOffset
   const object = view.getUint8(binOffset, binLength)
+  const dataArr = Array.isArray(object) ? object : [object]
 
   return {
     format: mime.string,
     filename: fname.string,
     description: desc.string,
-    object
+    object: dataArr
   }
 }
 
@@ -117,8 +124,9 @@ export function ufidFrame (buffer, version) {
   const view = new BufferView(buffer)
   const ownerId = view.getCString(0)
   const id = view.getUint8(ownerId.length, view.byteLength - ownerId.length)
+  const dataArr = Array.isArray(id) ? id : [id]
 
-  return { ownerId: ownerId.string, id }
+  return { ownerId: ownerId.string, id: dataArr }
 }
 
 export function userFrame (buffer, version) {
@@ -153,8 +161,9 @@ export function privFrame (buffer, version) {
   const view = new BufferView(buffer)
   const ownerId = view.getCString(0)
   const data = view.getUint8(ownerId.length, view.byteLength - ownerId.length)
+  const dataArr = Array.isArray(data) ? data : [data]
 
-  return { ownerId: ownerId.string, data }
+  return { ownerId: ownerId.string, data: dataArr }
 }
 
 export function rvadFrame (buffer, version) {
@@ -228,9 +237,12 @@ export function rva2Frame (buffer, version) {
 
 export function signFrame (buffer, version) {
   const view = new BufferView(buffer)
+  const data = view.getUint8(1, view.byteLength - 1)
+  const dataArr = Array.isArray(data) ? data : [data]
+
   return {
     group: view.getUint8(0),
-    signature: view.getUint8(1, view.byteLength - 1)
+    signature: dataArr
   }
 }
 
@@ -260,7 +272,7 @@ export function syltFrame (buffer, version) {
   const length = view.byteLength - dataOffset
 
   const raw = view.getUint8(dataOffset, length)
-  const rview = new BufferView(raw)
+  const rview = new BufferView(Array.isArray(raw) ? raw : [raw])
   const data = []
   let lyrics = ''
   for (let i = 0; i < raw.length; i += 4) {
@@ -284,14 +296,16 @@ export function syltFrame (buffer, version) {
 
 export function mcdiFrame (buffer, version) {
   const view = new BufferView(buffer)
-  return { data: view.getUint8(0, view.byteLength) }
+  const data = view.getUint8(0, view.byteLength)
+  const dataArr = Array.isArray(data) ? data : [data]
+  return { data: dataArr }
 }
 
 export function sytcFrame (buffer, version) {
   const view = new BufferView(buffer)
   const format = view.getUint8(0)
   const raw = view.getUint8(1, view.byteLength - 1)
-  const rview = new BufferView(raw)
+  const rview = new BufferView(Array.isArray(raw) ? raw : [raw])
   const data = []
   for (let i = 0; i < raw.length; i += 5) {
     let bpm = rview.getUint8(i)
@@ -311,7 +325,7 @@ export function etcoFrame (buffer, version) {
   const view = new BufferView(buffer)
   const format = view.getUint8(0)
   const raw = view.getUint8(1, view.byteLength - 1)
-  const rview = new BufferView(raw)
+  const rview = new BufferView(Array.isArray(raw) ? raw : [raw])
   const data = []
   for (let i = 0; i < raw.length; i += 5) {
     const event = rview.getUint8(i)
@@ -327,7 +341,8 @@ export function etcoFrame (buffer, version) {
 export function pcntFrame (buffer, version) {
   const view = new BufferView(buffer)
   const data = view.getUint8(0, view.byteLength)
-  return bytesToLong(data).toString()
+  const dataArr = Array.isArray(data) ? data : [data]
+  return bytesToLong(dataArr).toString()
 }
 
 export function popmFrame (buffer, version) {
@@ -341,7 +356,8 @@ export function popmFrame (buffer, version) {
 
   if (counterLimit > 0) {
     const counterBytes = view.getUint8(counterOffset, counterLimit)
-    counter = bytesToLong(counterBytes)
+    const counterBytesArr = Array.isArray(counterBytes) ? counterBytes : [counterBytes]
+    counter = bytesToLong(counterBytesArr)
   }
 
   return { email: email.string, rating, counter }
