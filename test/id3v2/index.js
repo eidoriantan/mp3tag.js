@@ -205,7 +205,7 @@ describe('ID3v2', function () {
           version: 4,
           skipUnsupported: false
         }
-      });
+      })
 
       assert.throws(() => {
         const error = this.mp3tag.error
@@ -224,7 +224,7 @@ describe('ID3v2', function () {
           include: true,
           version: 4
         }
-      });
+      })
 
       this.mp3tag.read({ id3v1: false })
       if (this.mp3tag.errorCode > -1) throw this.mp3tag.error
