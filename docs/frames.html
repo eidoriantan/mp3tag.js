@@ -7,7 +7,7 @@ description: >-
 keywords: >-
   mp3, id3, audio, tag, edit, write, documentations, docs, install, installation
 active: frames
-last_modified_at: 2023-09-17T19:40:00+08:00
+last_modified_at: 2024-02-12T03:39+08:00
 ---
 <div id="tags" class="Subhead bg-white position-sticky top-0">
   <div class="Subhead-heading">`tags` Properties</div>
@@ -18,7 +18,7 @@ last_modified_at: 2023-09-17T19:40:00+08:00
     <h2 class="Box-title">title</h2>
   </div>
   <div class="Box-row">
-    <p>Reads ID3v2 TIT2 tag value first, ID3v1 title tag otherwise an empty string</p>
+    <p>Returns <strong>ID3v2 TIT2</strong> or <strong>ID3v1 title</strong> or an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -28,7 +28,7 @@ last_modified_at: 2023-09-17T19:40:00+08:00
     <h2 class="Box-title">artist</h2>
   </div>
   <div class="Box-row">
-    <p>Reads ID3v2 TPE1 tag value first, ID3v1 artist tag otherwise an empty string</p>
+    <p>Returns <strong>ID3v2 TPE1</strong> or <strong>ID3v1 artist</strong> or an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -38,7 +38,7 @@ last_modified_at: 2023-09-17T19:40:00+08:00
     <h2 class="Box-title">album</h2>
   </div>
   <div class="Box-row">
-    <p>Reads ID3v2 TALB tag value first, ID3v1 album tag otherwise an empty string</p>
+    <p>Returns <strong>ID3v2 TALB</strong> or <strong>ID3v1 album</strong> or an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -48,7 +48,7 @@ last_modified_at: 2023-09-17T19:40:00+08:00
     <h2 class="Box-title">year</h2>
   </div>
   <div class="Box-row">
-    <p>Reads ID3v2 TYER or TDRC tag value first, ID3v1 year tag otherwise an empty string</p>
+    <p>Returns <strong>ID3v2 TYER or TDRC</strong> or <strong>ID3v1 year</strong> or an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -58,7 +58,7 @@ last_modified_at: 2023-09-17T19:40:00+08:00
     <h2 class="Box-title">comment</h2>
   </div>
   <div class="Box-row">
-    <p>Reads ID3v2 COMM tag value first, ID3v1 comment tag otherwise an empty string</p>
+    <p>Returns <strong>ID3v2 COMM</strong> or <strong>ID3v1 comment</strong> or an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -68,7 +68,7 @@ last_modified_at: 2023-09-17T19:40:00+08:00
     <h2 class="Box-title">track</h2>
   </div>
   <div class="Box-row">
-    <p>Reads ID3v2 TRCK tag value first, ID3v1 track tag otherwise an empty string</p>
+    <p>Returns <strong>ID3v2 TRCK</strong> or <strong>ID3v1 track</strong> or an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -78,7 +78,7 @@ last_modified_at: 2023-09-17T19:40:00+08:00
     <h2 class="Box-title">genre</h2>
   </div>
   <div class="Box-row">
-    <p>Reads ID3v2 TCON tag value first, ID3v1 genre tag otherwise an empty string</p>
+    <p>Returns <strong>ID3v2 TCON</strong> or <strong>ID3v1 genre</strong> or an empty string</p>
     <div class="text-gray"><strong>Type:</strong> string</div>
   </div>
 </div>
@@ -88,7 +88,7 @@ last_modified_at: 2023-09-17T19:40:00+08:00
     <h2 class="Box-title">v1</h2>
   </div>
   <div class="Box-row">
-    <p>Contains all ID3v1 tags</p>
+    <p>Contains all ID3v1 tags. Please refer below</p>
     <div class="text-gray"><strong>Type:</strong> object | undefined</div>
   </div>
 </div>
@@ -108,7 +108,7 @@ last_modified_at: 2023-09-17T19:40:00+08:00
     <h2 class="Box-title">v2</h2>
   </div>
   <div class="Box-row">
-    <p>Contains all ID3v2 tags</p>
+    <p>Contains all ID3v2 tags. Please refer below</p>
     <div class="text-gray"><strong>Type:</strong> object | undefined</div>
   </div>
 </div>
@@ -243,8 +243,9 @@ last_modified_at: 2023-09-17T19:40:00+08:00
       "<i>TDTG</i>" should follow this format: yyyy-MM-ddTHH:mm:ss (year, "-",
       month, "-", day, "T", hour (out of 24), ":", minutes, ":", seconds), but
       the precision may be reduced by removing as many time indicators as wanted.
-      Hence valid timestamps are yyyy, yyyy-MM, yyyy-MM-dd, yyyy-MM-ddTHH,
-      yyyy-MM-ddTHH:mm and yyyy-MM-ddTHH:mm:ss.
+      Hence valid timestamps are <code>yyyy</code>, <code>yyyy-MM</code>,
+      <code>yyyy-MM-dd</code>, <code>yyyy-MM-ddTHH</code>,
+      <code>yyyy-MM-ddTHH:mm</code>, and <code>yyyy-MM-ddTHH:mm:ss</code>.
     </div>
 
     <div class="m-2">
