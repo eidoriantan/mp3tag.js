@@ -8565,18 +8565,22 @@
     return frame;
   }
   function validate(tags, strict, options) {
-    var version = options.version;
+    var version = options.version,
+      skipUnsupported = options.skipUnsupported;
     if (version !== 3 && version !== 4) {
       throw new Error('Unknown provided version');
     }
     for (var id in tags) {
       if (!Object.keys(frames).includes(id)) continue;
       var frameSpec = frames[id];
-      if (strict && !frameSpec.version.includes(version)) {
+      var isSupported = frameSpec.version.includes(version);
+      if (strict && !isSupported && !skipUnsupported) {
         throw new Error("".concat(id, " is not supported in ID3v2.").concat(version));
       }
       try {
-        frameSpec.validate(tags[id], version, strict);
+        if (isSupported || !skipUnsupported) {
+          frameSpec.validate(tags[id], version, strict);
+        }
       } catch (error) {
         throw new Error("".concat(error.message, " at ").concat(id));
       }
@@ -8586,7 +8590,8 @@
   function encode(tags, options) {
     var version = options.version,
       padding = options.padding,
-      unsynch = options.unsynch;
+      unsynch = options.unsynch,
+      skipUnsupported = options.skipUnsupported;
     var headerBytes = [0x49, 0x44, 0x33, version, 0];
     var flagsByte = 0;
     var sizeView = new BufferView(4);
@@ -8594,6 +8599,8 @@
     var framesBytes = [];
     for (var id in tags) {
       var frameSpec = frames[id];
+      var isSupported = frameSpec.version.includes(version);
+      if (!isSupported && skipUnsupported) continue;
       var bytes = frameSpec.write(tags[id], {
         id: id,
         version: version,
@@ -8616,7 +8623,7 @@
         throw new TypeError('buffer is not ArrayBuffer/Buffer');
       }
       this.name = 'MP3Tag';
-      this.version = '3.7.1';
+      this.version = '3.8.0';
       this.verbose = verbose;
       this.buffer = buffer;
       this.tags = {};
@@ -8790,7 +8797,8 @@
             include: true,
             unsynch: false,
             version: defaultVersion,
-            padding: 2048
+            padding: 2048,
+            skipUnsupported: true
           }
         });
         if (options.id3v1.include) {
