@@ -11,7 +11,7 @@ describe('ID3v2', function () {
     beforeEach(function () {
       this.mp3tag = new MP3Tag(bytes.buffer)
       this.mp3tag.read({ id3v1: false })
-      if (this.mp3tag.errorCode > -1) throw this.mp3tag.error
+      if (this.mp3tag.error) throw this.mp3tag.error
     })
 
     it('Read data', function () {
@@ -193,7 +193,7 @@ describe('ID3v2', function () {
     beforeEach(function () {
       this.mp3tag = new MP3Tag(bytesUnsupported.buffer)
       this.mp3tag.read({ id3v1: false })
-      if (this.mp3tag.errorCode > -1) throw this.mp3tag.error
+      if (this.mp3tag.error) throw this.mp3tag.error
     })
 
     it('Throws error with unsupported frames', function () {
@@ -227,7 +227,7 @@ describe('ID3v2', function () {
       })
 
       this.mp3tag.read({ id3v1: false })
-      if (this.mp3tag.errorCode > -1) throw this.mp3tag.error
+      if (this.mp3tag.error) throw this.mp3tag.error
 
       assert.strictEqual(this.mp3tag.tags.v2.TDRC, '2024')
       assert.strictEqual(this.mp3tag.tags.v2.TYER, undefined)
