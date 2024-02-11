@@ -3,7 +3,7 @@ import type * as frames from './frames';
 
 export interface MP3TagTagsV2Defined {
   v2: {
-    APIC?: frames.MP3TagAPICFrame;
+    APIC?: Array<frames.MP3TagAPICFrame>;
     COMM?: Array<frames.MP3TagLangDescFrame>;
     ETCO?: frames.MP3TagETCOFrame;
     GEOB?: Array<frames.MP3TagGEOBFrame>;
