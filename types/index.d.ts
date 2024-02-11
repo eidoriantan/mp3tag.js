@@ -28,7 +28,7 @@ export type MP3TagWriteOptions = Partial<MP3TagDefaultWriteOptions>;
 
 export class MP3Tag {
   readonly name: 'MP3Tag';
-  readonly version: '3.7.1';
+  readonly version: '3.7.2';
 
   verbose: boolean;
   buffer: MP3Buffer;
