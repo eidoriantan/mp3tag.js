@@ -5,7 +5,7 @@ description: >-
   JavaScript library documentations page. mp3tag.js exported class documentation
 keywords: mp3, id3, audio, tag, edit, write, documentations, docs, mp3tag
 active: mp3tag
-last_modified_at: 2020-11-14T00:03:00+08:00
+last_modified_at: 2024-02-12T00:03:27+08:00
 ---
 <div id="properties" class="Subhead bg-white position-sticky top-0">
   <div class="Subhead-heading">Properties</div>
@@ -65,9 +65,9 @@ last_modified_at: 2020-11-14T00:03:00+08:00
   <div class="Box-body">
     <small class="text-gray mb-2">Return type: object</small>
     <p>
-      Reads the tags in a buffer. If the decoding was successful, this sets the
-      <code>tags</code> with the new decoded tags otherwise this sets the
-      <code>error</code> to output the error. This always returns the <code>tags</code>.
+      Reads the tags from the buffer. If the decoding was successful, this sets the
+      <code>tags</code> with the decoded tags otherwise this sets the
+      <code>error</code> property with error. This always returns the <code>tags</code>.
     </p>
   </div>
   {% capture read %}
@@ -104,7 +104,7 @@ last_modified_at: 2020-11-14T00:03:00+08:00
     <p>
       Writes the <code>tags</code> to the buffer. If the encoding was successful,
       this writes the tags to the buffer then returns it otherwise this sets the
-      <code>error</code> to output the error. This always returns the <code>buffer</code>.
+      <code>error</code> property with error. This always returns the <code>buffer</code>.
     </p>
   </div>
   {% capture save %}
