@@ -118,7 +118,7 @@ export default class MP3Tag {
             (this.v1 && this.v1.track) || ''
         },
         set: function (value) {
-          if (this.v2) this.v2.TRCK = value
+          if (this.v2 && value !== '') this.v2.TRCK = value
           if (this.v1) this.v1.track = value
         }
       },
