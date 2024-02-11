@@ -115,7 +115,7 @@ function decodeFrame (bytes, options) {
 }
 
 export function validate (tags, strict, options) {
-  const { version } = options
+  const { version, skipUnsupported } = options
   if (version !== 3 && version !== 4) {
     throw new Error('Unknown provided version')
   }
@@ -124,12 +124,16 @@ export function validate (tags, strict, options) {
     if (!Object.keys(frames).includes(id)) continue
 
     const frameSpec = frames[id]
-    if (strict && !frameSpec.version.includes(version)) {
+    const isSupported = frameSpec.version.includes(version)
+
+    if (strict && !isSupported && !skipUnsupported) {
       throw new Error(`${id} is not supported in ID3v2.${version}`)
     }
 
     try {
-      frameSpec.validate(tags[id], version, strict)
+      if (isSupported || !skipUnsupported) {
+        frameSpec.validate(tags[id], version, strict)
+      }
     } catch (error) {
       throw new Error(`${error.message} at ${id}`)
     }
@@ -139,7 +143,7 @@ export function validate (tags, strict, options) {
 }
 
 export function encode (tags, options) {
-  const { version, padding, unsynch } = options
+  const { version, padding, unsynch, skipUnsupported } = options
 
   const headerBytes = [0x49, 0x44, 0x33, version, 0]
   let flagsByte = 0
@@ -149,6 +153,9 @@ export function encode (tags, options) {
 
   for (const id in tags) {
     const frameSpec = frames[id]
+    const isSupported = frameSpec.version.includes(version)
+    if (!isSupported && skipUnsupported) continue
+
     const bytes = frameSpec.write(tags[id], { id, version, unsynch })
     bytes.forEach(byte => framesBytes.push(byte))
   }

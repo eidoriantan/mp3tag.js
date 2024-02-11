@@ -20,6 +20,7 @@ export interface MP3TagDefaultWriteOptions {
     unsynch: boolean;
     version: MP3TagV2Versions;
     padding: number;
+    skipUnsupported: boolean;
   };
 }
 

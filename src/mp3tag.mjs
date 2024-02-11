@@ -160,7 +160,8 @@ export default class MP3Tag {
         include: true,
         unsynch: false,
         version: defaultVersion,
-        padding: 2048
+        padding: 2048,
+        skipUnsupported: true
       }
     })
 
