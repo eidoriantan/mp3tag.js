@@ -6,7 +6,7 @@
 ![Maintenance](https://img.shields.io/maintenance/yes/2024)
 
 **mp3tag.js** is an open sourced JavaScript library used to edit the metadata of
-audio files. It currently supports ID3v1, ID3v2.3, and ID3v2.4 tags.
+audio files. It currently supports ID3v1, ID3v2.2, ID3v2.3, and ID3v2.4 tags.
 
 Visit [https://mp3tag.js.org](https://mp3tag.js.org) to learn more about the
 library and view it in action through an [editor](https://mp3tag.js.org/editor).
@@ -17,7 +17,7 @@ The website is also open sourced and can be viewed at the
 [gh-pages](https://github.com/eidoriantan/mp3tag.js/tree/gh-pages) branch.
 
 ### Features
-* Read, write, and remove ID3 tags
+* Read, write, and remove ID3 tags (Supports ID3v1, ID3v2.2, ID3v2.3, and ID3v2.4)
 * Supports unsynchronisation
 * Standards compliant. See [id3.org](http://id3.org)
 
