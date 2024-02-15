@@ -1,6 +1,6 @@
 {
   "name": "mp3tag.js",
-  "version": "3.8.0",
+  "version": "3.9.0",
   "description": "MP3 tagging library written in pure JavaScript",
   "keywords": [
     "node",
@@ -8,7 +8,12 @@
     "audio",
     "mp3",
     "tag",
-    "id3"
+    "id3",
+    "id3v1",
+    "id3v2",
+    "id3v2.2",
+    "id3v2.3",
+    "id3v2.4"
   ],
   "homepage": "https://mp3tag.js.org",
   "bugs": "https://github.com/eidoriantan/mp3tag.js/issues",
