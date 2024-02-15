@@ -590,3 +590,18 @@ export const TSO2 = {
   write: writers.textFrame,
   version: [3, 4]
 }
+
+/* ID3v2.2 Tags */
+export const TT2 = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TP1 = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}

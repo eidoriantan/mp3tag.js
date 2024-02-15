@@ -146,4 +146,32 @@ export default class BufferView extends DataView {
 
     return bytes.length === 1 ? bytes[0] : bytes
   }
+
+  getUint24 (offset, length = 3, le = false) {
+    while (length % 3 !== 0) length -= 1
+    const limit = offset + length
+    const bytes = []
+
+    if (this.byteLength - limit < 0 || length <= 0) return false
+    for (let i = offset; i < limit; i += 3) {
+      const a = DataView.prototype.getUint16.call(this, i, le)
+      const b = DataView.prototype.getUint8.call(this, i + 2)
+      const byte = le ? (b << 16) + a : (a << 8) + b
+      bytes.push(byte)
+    }
+
+    return bytes.length === 1 ? bytes[0] : bytes
+  }
+
+  setUint24 (offset, value, le = false) {
+    if (value > 16777215) return false
+
+    if (le) {
+      DataView.prototype.setUint16.call(this, offset + 1, value >> 8, le)
+      DataView.prototype.setUint8.call(this, offset, value & 0xFF)
+    } else {
+      DataView.prototype.setUint16.call(this, offset, value >> 8, le)
+      DataView.prototype.setUint8.call(this, offset + 2, value & 0xFF)
+    }
+  }
 }

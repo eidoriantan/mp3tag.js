@@ -2,16 +2,21 @@
 import { isBitSet } from '../utils/bytes.mjs'
 
 export function getHeaderFlags (byte, version) {
-  const flags = {}
+  const flags = {
+    unsynchronisation: isBitSet(byte, 7)
+  }
+
   switch (version) {
+    case 2:
+      flags.compression = isBitSet(byte, 6)
+      break
+
     case 3:
-      flags.unsynchronisation = isBitSet(byte, 7)
       flags.extendedHeader = isBitSet(byte, 6)
       flags.experimentalIndicator = isBitSet(byte, 5)
       break
 
     case 4:
-      flags.unsynchronisation = isBitSet(byte, 7)
       flags.extendedHeader = isBitSet(byte, 6)
       flags.experimentalIndicator = isBitSet(byte, 5)
       flags.footerPresent = isBitSet(byte, 4)
