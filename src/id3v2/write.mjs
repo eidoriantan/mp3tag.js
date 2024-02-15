@@ -85,6 +85,7 @@ export function win1251Frame (value, options) {
   let strBytes = []
 
   switch (version) {
+    case 2:
     case 3:
       strBytes = encodeString(value.replace(/\\\\/g, '/') + '\0')
       break
@@ -107,7 +108,7 @@ export function win1251Frame (value, options) {
 
 export function setFrame (value, options) {
   const { version } = options
-  if (version === 3) value = value.toString().split('\\\\')[0]
+  if (version === 2 || version === 3) value = value.toString().split('\\\\')[0]
   else if (version === 4) value = value.toString().replace(/\\\\/g, '\0')
 
   return win1251Frame(value, options)
@@ -135,6 +136,7 @@ export function txxxFrame (values, options) {
     let descBytes, strBytes
 
     switch (version) {
+      case 2:
       case 3:
         encoding = 1
         descBytes = encodeString(txxx.description + '\0', 'utf-16')
@@ -172,6 +174,7 @@ export function wxxxFrame (values, options) {
     let descBytes, strBytes
 
     switch (version) {
+      case 2:
       case 3:
         encoding = 1
         descBytes = encodeString(wxxx.description + '\0', 'utf-16')
@@ -215,6 +218,7 @@ export function langDescFrame (values, options) {
     let descBytes, textBytes
 
     switch (version) {
+      case 2:
       case 3:
         encoding = 1
         descBytes = encodeString(langDesc.descriptor + '\0', 'utf-16')
@@ -254,6 +258,7 @@ export function apicFrame (values, options) {
     let strBytes = []
 
     switch (version) {
+      case 2:
       case 3:
         encoding = 1
         strBytes = encodeString(apic.description + '\0', 'utf-16')
@@ -290,6 +295,7 @@ export function geobFrame (values, options) {
     let encoding, filename, description
 
     switch (version) {
+      case 2:
       case 3:
         encoding = 1
         filename = encodeString(geob.filename + '\0', 'utf-16')
@@ -350,6 +356,7 @@ export function userFrame (value, options) {
   let textBytes
 
   switch (version) {
+    case 2:
     case 3:
       encoding = 1
       textBytes = encodeString(value.text + '\0', 'utf-16')
@@ -384,6 +391,7 @@ export function owneFrame (value, options) {
   let sellerBytes
 
   switch (version) {
+    case 2:
     case 3:
       encoding = 1
       sellerBytes = encodeString(value.seller, 'utf-16')
@@ -579,7 +587,7 @@ function parseLyrics (lyrics, encodingString) {
 export function syltFrame (values, options) {
   const { id, version, unsynch } = options
   const bytes = []
-  const encoding = version === 3 ? 1 : version === 4 ? 3 : 0
+  const encoding = version === 3 || version === 2 ? 1 : version === 4 ? 3 : 0
   const encodingString = ENCODINGS[encoding]
 
   values.forEach(sylt => {

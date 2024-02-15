@@ -831,3 +831,143 @@ export const TOR = {
   write: writers.win1251Frame,
   version: [2]
 }
+
+export const TXX = {
+  parse: parsers.txxxFrame,
+  validate: validators.txxxFrame,
+  write: writers.txxxFrame,
+  version: [2]
+}
+
+export const WAF = {
+  parse: parsers.urlFrame,
+  validate: validators.urlFrame,
+  write: writers.urlFrame,
+  version: [2]
+}
+
+export const WAR = {
+  parse: parsers.urlFrame,
+  validate: validators.urlFrame,
+  write: writers.urlFrame,
+  version: [2]
+}
+
+export const WAS = {
+  parse: parsers.urlFrame,
+  validate: validators.urlFrame,
+  write: writers.urlFrame,
+  version: [2]
+}
+
+export const WCM = {
+  parse: parsers.urlFrame,
+  validate: validators.urlFrame,
+  write: writers.urlFrame,
+  version: [2]
+}
+
+export const WCP = {
+  parse: parsers.urlFrame,
+  validate: validators.urlFrame,
+  write: writers.urlFrame,
+  version: [2]
+}
+
+export const WPB = {
+  parse: parsers.urlFrame,
+  validate: validators.urlFrame,
+  write: writers.urlFrame,
+  version: [2]
+}
+
+export const WXX = {
+  parse: parsers.wxxxFrame,
+  validate: validators.wxxxFrame,
+  write: writers.wxxxFrame,
+  version: [2]
+}
+
+export const IPL = {
+  parse: parsers.iplsFrame,
+  validate: validators.textFrame,
+  write: writers.iplsFrame,
+  version: [2]
+}
+
+export const MCI = {
+  parse: parsers.mcdiFrame,
+  validate: validators.mcdiFrame,
+  write: writers.mcdiFrame,
+  version: [2]
+}
+
+export const ETC = {
+  parse: parsers.etcoFrame,
+  validate: validators.etcoFrame,
+  write: writers.etcoFrame,
+  version: [2]
+}
+
+export const STC = {
+  parse: parsers.sytcFrame,
+  validate: validators.sytcFrame,
+  write: writers.sytcFrame,
+  version: [2]
+}
+
+export const ULT = {
+  parse: parsers.langDescFrame,
+  validate: validators.langDescFrame,
+  write: writers.langDescFrame,
+  version: [2]
+}
+
+export const SLT = {
+  parse: parsers.syltFrame,
+  validate: validators.syltFrame,
+  write: writers.syltFrame,
+  version: [2]
+}
+
+export const COM = {
+  parse: parsers.langDescFrame,
+  validate: validators.langDescFrame,
+  write: writers.langDescFrame,
+  version: [2]
+}
+
+export const RVA = {
+  parse: parsers.rvadFrame,
+  validate: validators.rvadFrame,
+  write: writers.rvadFrame,
+  version: [2]
+}
+
+export const PIC = {
+  parse: parsers.apicFrame,
+  validate: validators.apicFrame,
+  write: writers.apicFrame,
+  version: [2]
+}
+
+export const GEO = {
+  parse: parsers.geobFrame,
+  validate: validators.geobFrame,
+  write: writers.geobFrame,
+  version: [2]
+}
+
+export const CNT = {
+  parse: parsers.pcntFrame,
+  validate: validators.pcntFrame,
+  write: writers.pcntFrame,
+  version: [2]
+}
+
+export const POP = {
+  parse: parsers.popmFrame,
+  validate: validators.popmFrame,
+  write: writers.popmFrame,
+  version: [2]
+}
