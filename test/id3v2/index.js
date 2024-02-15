@@ -4,14 +4,64 @@
 const assert = require('assert')
 
 const MP3Tag = require('../../dist/mp3tag.js')
-const { bytes, bytesUnsupported } = require('../globals.js')
+const { bytes, bytesUnsupported, bytesv2 } = require('../globals.js')
 
 describe('ID3v2', function () {
+  describe('ID3v2.2', function () {
+    beforeEach(function () {
+      this.mp3tag = new MP3Tag(bytesv2.buffer)
+      this.mp3tag.read({ id3v1: false })
+      if (this.mp3tag.error) throw new Error(this.mp3tag.error)
+    })
+
+    it('Read data', function () {
+      assert.deepStrictEqual(this.mp3tag.tags.v2.TT2, 'title')
+      assert.deepStrictEqual(this.mp3tag.tags.v2.TP1, 'artist')
+      assert.deepStrictEqual(this.mp3tag.tags.title, 'title')
+    })
+
+    it('Validate data', function () {
+      this.mp3tag.tags.v2.TT2 = 'NEWLINE\r\n'
+      this.mp3tag.save({
+        strict: true,
+        id3v1: { include: false }
+      })
+
+      assert.throws(() => {
+        const error = this.mp3tag.error
+        if (error !== '') throw new Error(error)
+      }, {
+        name: 'Error',
+        message: this.mp3tag.error
+      })
+    })
+
+    it('Write data', function () {
+      this.mp3tag.tags.v2.TT2 = 'NEW TITLE'
+      this.mp3tag.tags.artist = 'NEW ARTIST'
+      this.mp3tag.save({ strict: true, id3v2: { padding: 0 } })
+      if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+      this.mp3tag.read()
+      if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+      assert.deepStrictEqual(this.mp3tag.tags.v2Details.version, [2, 0])
+      assert.deepStrictEqual(this.mp3tag.tags.v2.TT2, 'NEW TITLE')
+      assert.deepStrictEqual(this.mp3tag.tags.title, 'NEW TITLE')
+      assert.deepStrictEqual(this.mp3tag.tags.artist, 'NEW ARTIST')
+      assert.deepStrictEqual(this.mp3tag.tags.album, '')
+      assert.deepStrictEqual(this.mp3tag.tags.year, '')
+      assert.deepStrictEqual(this.mp3tag.tags.comment, '')
+      assert.deepStrictEqual(this.mp3tag.tags.track, '')
+      assert.deepStrictEqual(this.mp3tag.tags.genre, '')
+    })
+  })
+
   describe('MP3 with supported frames', function () {
     beforeEach(function () {
       this.mp3tag = new MP3Tag(bytes.buffer)
       this.mp3tag.read({ id3v1: false })
-      if (this.mp3tag.error) throw this.mp3tag.error
+      if (this.mp3tag.error) throw new Error(this.mp3tag.error)
     })
 
     it('Read data', function () {
@@ -193,7 +243,7 @@ describe('ID3v2', function () {
     beforeEach(function () {
       this.mp3tag = new MP3Tag(bytesUnsupported.buffer)
       this.mp3tag.read({ id3v1: false })
-      if (this.mp3tag.error) throw this.mp3tag.error
+      if (this.mp3tag.error) throw new Error(this.mp3tag.error)
     })
 
     it('Throws error with unsupported frames', function () {
@@ -227,7 +277,7 @@ describe('ID3v2', function () {
       })
 
       this.mp3tag.read({ id3v1: false })
-      if (this.mp3tag.error) throw this.mp3tag.error
+      if (this.mp3tag.error) throw new Error(this.mp3tag.error)
 
       assert.strictEqual(this.mp3tag.tags.v2.TDRC, '2024')
       assert.strictEqual(this.mp3tag.tags.v2.TYER, undefined)
