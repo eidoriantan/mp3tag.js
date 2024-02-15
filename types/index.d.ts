@@ -3,7 +3,7 @@ import type { MP3TagTags } from './tags';
 
 export type MP3Buffer = Buffer | ArrayBuffer;
 
-export type MP3TagV2Versions = 3 | 4;
+export type MP3TagV2Versions = 2 | 3 | 4;
 
 export interface MP3TagDefaultReadOptions {
   id3v1: boolean;
