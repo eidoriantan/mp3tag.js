@@ -591,8 +591,24 @@ export const TSO2 = {
   version: [3, 4]
 }
 
-/* ID3v2.2 Tags */
+/**
+ *  ID3v2.2 Tags
+ */
+export const TT1 = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
 export const TT2 = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TT3 = {
   parse: parsers.textFrame,
   validate: validators.textFrame,
   write: writers.textFrame,
@@ -603,5 +619,215 @@ export const TP1 = {
   parse: parsers.textFrame,
   validate: validators.textFrame,
   write: writers.textFrame,
+  version: [2]
+}
+
+export const TP2 = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TP3 = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TP4 = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TCM = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TXT = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TLA = {
+  parse: parsers.textFrame,
+  validate: validators.tlanFrame,
+  write: writers.win1251Frame,
+  version: [2]
+}
+
+export const TCO = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TAL = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TPA = {
+  parse: parsers.setFrame,
+  validate: validators.setFrame,
+  write: writers.setFrame,
+  version: [2]
+}
+
+export const TRK = {
+  parse: parsers.setFrame,
+  validate: validators.setFrame,
+  write: writers.setFrame,
+  version: [2]
+}
+
+export const TRC = {
+  parse: parsers.textFrame,
+  validate: validators.tsrcFrame,
+  write: writers.win1251Frame,
+  version: [2]
+}
+
+export const TYE = {
+  parse: parsers.textFrame,
+  validate: validators.timeFrame,
+  write: writers.win1251Frame,
+  version: [2]
+}
+
+export const TDA = {
+  parse: parsers.textFrame,
+  validate: validators.timeFrame,
+  write: writers.win1251Frame,
+  version: [2]
+}
+
+export const TIM = {
+  parse: parsers.textFrame,
+  validate: validators.timeFrame,
+  write: writers.win1251Frame,
+  version: [2]
+}
+
+export const TRD = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.win1251Frame,
+  version: [2]
+}
+
+export const TMT = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TFT = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TBP = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.win1251Frame,
+  version: [2]
+}
+
+export const TCR = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TPB = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TEN = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TSS = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TOF = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TLE = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.win1251Frame,
+  version: [2]
+}
+
+export const TSI = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.win1251Frame,
+  version: [2]
+}
+
+export const TDY = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.win1251Frame,
+  version: [2]
+}
+
+export const TKE = {
+  parse: parsers.textFrame,
+  validate: validators.tkeyFrame,
+  write: writers.win1251Frame,
+  version: [2]
+}
+
+export const TOT = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TOA = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TOR = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.win1251Frame,
   version: [2]
 }
