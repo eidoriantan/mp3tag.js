@@ -25,7 +25,7 @@ export function textFrame (value, version, strict) {
 }
 
 export function setFrame (value, version, strict) {
-  if (version === 3) value = [value]
+  if (version === 2 || version === 3) value = [value]
   else if (version === 4) value = value.split('\\\\')
 
   value.forEach(set => {
@@ -51,7 +51,7 @@ export function setFrame (value, version, strict) {
 }
 
 export function timeFrame (value, version, strict) {
-  if (version === 3) value = [value]
+  if (version === 2 || version === 3) value = [value]
   else if (version === 4) value = value.split('\\\\')
 
   value.forEach(time => {
@@ -70,7 +70,7 @@ export function timeFrame (value, version, strict) {
 }
 
 export function tkeyFrame (value, version, strict) {
-  if (version === 3) value = [value]
+  if (version === 2 || version === 3) value = [value]
   else if (version === 4) value = value.split('\\\\')
 
   value.forEach(tkey => {
@@ -85,7 +85,7 @@ export function tkeyFrame (value, version, strict) {
 }
 
 export function tlanFrame (value, version, strict) {
-  if (version === 3) value = [value]
+  if (version === 2 || version === 3) value = [value]
   else if (version === 4) value = value.split('\\\\')
 
   value.forEach(tlan => {
@@ -100,7 +100,7 @@ export function tlanFrame (value, version, strict) {
 }
 
 export function tsrcFrame (value, version, strict) {
-  if (version === 3) value = [value]
+  if (version === 2 || version === 3) value = [value]
   else if (version === 4) value = value.split('\\\\')
 
   value.forEach(tsrc => {
