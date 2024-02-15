@@ -53,40 +53,53 @@ export default class MP3Tag {
     Object.defineProperties(tags, {
       title: {
         get: function () {
-          return (this.v2 && this.v2.TIT2) || (this.v1 && this.v1.title) || ''
+          return (this.v2 && (this.v2.TIT2 || this.v2.TT2)) ||
+            (this.v1 && this.v1.title) || ''
         },
         set: function (value) {
-          if (this.v2) this.v2.TIT2 = value
+          if (this.v2) {
+            const version = this.v2Details.version[0]
+            this.v2[version === 2 ? 'TT2' : 'TIT2'] = value
+          }
           if (this.v1) this.v1.title = value
         }
       },
       artist: {
         get: function () {
-          return (this.v2 && this.v2.TPE1) || (this.v1 && this.v1.artist) || ''
+          return (this.v2 && (this.v2.TPE1 || this.v2.TP1)) ||
+            (this.v1 && this.v1.artist) || ''
         },
         set: function (value) {
-          if (this.v2) this.v2.TPE1 = value
+          if (this.v2) {
+            const version = this.v2Details.version[0]
+            this.v2[version === 2 ? 'TP1' : 'TPE1'] = value
+          }
           if (this.v1) this.v1.artist = value
         }
       },
       album: {
         get: function () {
-          return (this.v2 && this.v2.TALB) || (this.v1 && this.v1.album) || ''
+          return (this.v2 && (this.v2.TALB || this.v2.TAL)) ||
+            (this.v1 && this.v1.album) || ''
         },
         set: function (value) {
-          if (this.v2) this.v2.TALB = value
+          if (this.v2) {
+            const version = this.v2Details.version[0]
+            this.v2[version === 2 ? 'TAL' : 'TALB'] = value
+          }
           if (this.v1) this.v1.album = value
         }
       },
       year: {
         get: function () {
-          return (this.v2 && (this.v2.TYER || this.v2.TDRC)) ||
+          return (this.v2 && (this.v2.TYER || this.v2.TDRC || this.v2.TYE)) ||
             (this.v1 && this.v1.year) || ''
         },
         set: function (value) {
           if (this.v2) {
             const version = this.v2Details.version[0]
-            if (version === 3) this.v2.TYER = value
+            if (version === 2) this.v2.TYE = value
+            else if (version === 3) this.v2.TYER = value
             else if (version === 4) this.v2.TDRC = value
           }
           if (this.v1) this.v1.year = value
@@ -95,15 +108,16 @@ export default class MP3Tag {
       comment: {
         get: function () {
           let text = ''
-          if (this.v2 && this.v2.COMM) {
-            const comm = this.v2.COMM
+          if (this.v2 && (this.v2.COMM || this.v2.COM)) {
+            const comm = this.v2.COMM || this.v2.COM
             if (Array.isArray(comm) && comm.length > 0) text = comm[0].text
           } else if (this.v1 && this.v1.comment) text = this.v1.comment
           return text
         },
         set: function (value) {
           if (this.v2) {
-            this.v2.COMM = [{
+            const version = this.v2Details.version[0]
+            this.v2[version === 2 ? 'COM' : 'COMM'] = [{
               language: 'eng',
               descriptor: '',
               text: value
@@ -114,20 +128,29 @@ export default class MP3Tag {
       },
       track: {
         get: function () {
-          return (this.v2 && this.v2.TRCK && this.v2.TRCK.split('/')[0]) ||
-            (this.v1 && this.v1.track) || ''
+          return (this.v2 && (
+            (this.v2.TRCK && this.v2.TRCK.split('/')[0]) ||
+            (this.v2.TRK && this.v2.TRK.split('/')[0])
+          )) || (this.v1 && this.v1.track) || ''
         },
         set: function (value) {
-          if (this.v2 && value !== '') this.v2.TRCK = value
+          if (this.v2 && value !== '') {
+            const version = this.v2Details.version[0]
+            this.v2[version === 2 ? 'TRK' : 'TRCK'] = value
+          }
           if (this.v1) this.v1.track = value
         }
       },
       genre: {
         get: function () {
-          return (this.v2 && this.v2.TCON) || (this.v1 && this.v1.genre) || ''
+          return (this.v2 && (this.v2.TCON || this.v2.TCO)) ||
+            (this.v1 && this.v1.genre) || ''
         },
         set: function (value) {
-          if (this.v2) this.v2.TCON = value
+          if (this.v2) {
+            const version = this.v2Details.version[0]
+            this.v2[version === 2 ? 'TCO' : 'TCON'] = value
+          }
           if (this.v1) this.v1.genre = value
         }
       }

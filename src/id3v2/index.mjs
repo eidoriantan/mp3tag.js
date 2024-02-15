@@ -22,10 +22,11 @@ export function decode (buffer, tagOffset = 0) {
   const details = { version, flags, size }
   const tags = {}
 
-  if (version[0] !== 3 && version[0] !== 4) {
+  if (version[0] !== 2 && version[0] !== 3 && version[0] !== 4) {
     throw new Error('Unknown ID3v2 major version')
   }
 
+  const frameHeaderSize = version[0] === 2 ? 6 : 10
   let offset = 10
   let limit = size
 
@@ -57,8 +58,8 @@ export function decode (buffer, tagOffset = 0) {
     const frame = decodeFrame(frameBytes, { version, flags })
     if (!frame) break
 
-    offset += frame.size + 10
-    limit -= frame.size + 10
+    offset += frame.size + frameHeaderSize
+    limit -= frame.size + frameHeaderSize
 
     if (frame.id === 'SEEK') {
       const seekedTags = decode(buffer, offset + frame.value)
@@ -75,14 +76,14 @@ function decodeFrame (bytes, options) {
 
   const frame = {}
   const { version, flags } = options
-  const sizeByte = view.getUint32(4)
+  const sizeByte = version[0] === 2 ? view.getUint24(3) : view.getUint32(4)
 
-  frame.id = view.getUint8String(0, 4)
-  frame.flags = getFrameFlags(view.getUint8(8, 2), version[0])
+  frame.id = view.getUint8String(0, version[0] === 2 ? 3 : 4)
+  frame.flags = version[0] === 2 ? {} : getFrameFlags(view.getUint8(8, 2), version[0])
   frame.size = version[0] === 4 ? decodeSynch(sizeByte) : sizeByte
 
   const frameSpec = frames[frame.id]
-  let offset = 10
+  let offset = version[0] === 2 ? 6 : 10
   let actualSize = frame.size
   let dataLength = frame.size
   let contents
@@ -116,7 +117,7 @@ function decodeFrame (bytes, options) {
 
 export function validate (tags, strict, options) {
   const { version, skipUnsupported } = options
-  if (version !== 3 && version !== 4) {
+  if (version !== 2 && version !== 3 && version !== 4) {
     throw new Error('Unknown provided version')
   }
 

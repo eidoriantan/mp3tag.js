@@ -13,20 +13,28 @@ import { encodeString, ENCODINGS } from '../utils/strings.mjs'
 
 function getHeaderBytes (id, size, version, flags) {
   const idBytes = encodeString(id)
-  const sizeView = new BufferView(4)
+  const sizeView = new BufferView(version === 2 ? 3 : 4)
 
-  sizeView.setUint32(0, version === 3 ? size : encodeSynch(size))
+  if (version === 2) sizeView.setUint24(0, size)
+  else sizeView.setUint32(0, version === 3 ? size : encodeSynch(size))
 
-  const flagsBytes = [0, 0]
-  if (version === 4 && flags.unsynchronisation) {
-    flagsBytes[1] = setBit(flagsBytes[1], 1)
+  const flagsBytes = []
+  if (version === 3 || version === 4) {
+    flagsBytes.push(0, 0)
+    if (version === 4 && flags.unsynchronisation) {
+      flagsBytes[1] = setBit(flagsBytes[1], 1)
+    }
+
+    if (version === 4 && flags.dataLengthIndicator) {
+      flagsBytes[1] = setBit(flagsBytes[1], 0)
+    }
   }
 
-  if (version === 4 && flags.dataLengthIndicator) {
-    flagsBytes[1] = setBit(flagsBytes[1], 0)
-  }
-
-  return mergeBytes(idBytes, sizeView.getUint8(0, 4), flagsBytes)
+  return mergeBytes(
+    idBytes,
+    sizeView.getUint8(0, version === 2 ? 3 : 4),
+    flagsBytes
+  )
 }
 
 function unsynchData (data, version) {
@@ -49,6 +57,7 @@ export function textFrame (value, options) {
   let strBytes = []
 
   switch (version) {
+    case 2:
     case 3:
       encoding = 1
       strBytes = encodeString(value.replace(/\\\\/g, '/') + '\0', 'utf-16')

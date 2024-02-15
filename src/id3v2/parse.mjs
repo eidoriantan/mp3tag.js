@@ -8,7 +8,7 @@ export function textFrame (buffer, version) {
   const encoding = ENCODINGS[view.getUint8(0)]
   const len = view.byteLength - 1
 
-  return version === 3
+  return version === 3 || version === 2
     ? view.getCString(1, encoding).string.replace(/\//g, '\\\\')
     : view.getString(1, len, encoding).string.replace(/\0/g, '\\\\')
 }
