@@ -4364,6 +4364,36 @@
         }
         return bytes.length === 1 ? bytes[0] : bytes;
       }
+    }, {
+      key: "getUint24",
+      value: function getUint24(offset) {
+        var length = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 3;
+        var le = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+        while (length % 3 !== 0) length -= 1;
+        var limit = offset + length;
+        var bytes = [];
+        if (this.byteLength - limit < 0 || length <= 0) return false;
+        for (var i = offset; i < limit; i += 3) {
+          var a = DataView.prototype.getUint16.call(this, i, le);
+          var b = DataView.prototype.getUint8.call(this, i + 2);
+          var _byte3 = le ? (b << 16) + a : (a << 8) + b;
+          bytes.push(_byte3);
+        }
+        return bytes.length === 1 ? bytes[0] : bytes;
+      }
+    }, {
+      key: "setUint24",
+      value: function setUint24(offset, value) {
+        var le = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+        if (value > 16777215) return false;
+        if (le) {
+          DataView.prototype.setUint16.call(this, offset + 1, value >> 8, le);
+          DataView.prototype.setUint8.call(this, offset, value & 0xFF);
+        } else {
+          DataView.prototype.setUint16.call(this, offset, value >> 8, le);
+          DataView.prototype.setUint8.call(this, offset + 2, value & 0xFF);
+        }
+      }
     }], [{
       key: "isViewable",
       value: function isViewable(param) {
@@ -5127,7 +5157,7 @@
     return bytes;
   }
 
-  var GENRES = ['Blues', 'Classic Rock', 'Country', 'Dance', 'Disco', 'Funk', 'Grunge', 'Hip-Hop', 'Jazz', 'Metal', 'New Age', 'Oldies', 'Other', 'Pop', 'R&B', 'Reggae', 'Rock', 'Techno', 'Industrial', 'Alternative', 'Ska', 'Death Metal', 'Pranks', 'Soundtrack', 'Euro-Techno', 'Ambient', 'Trip-Hop', 'Vocal', 'Jazz+Funk', 'Fusion', 'Trance', 'Classical', 'Instrumental', 'Acid', 'House', 'Game', 'Sound Clip', 'Gospel', 'Noise', 'Alt. Rock', 'Bass', 'Soul', 'Punk', 'Space', 'Meditative', 'Instrumental Pop', 'Instrumental Rock', 'Ethnic', 'Gothic', 'Darkwave', 'Techno-Industrial', 'Electronic', 'Pop-Folk', 'Eurodance', 'Dream', 'Southern Rock', 'Comedy', 'Cult', 'Gangsta Rap', 'Top 40', 'Christian Rap', 'Pop/Funk', 'Jungle', 'Native American', 'Cabaret', 'New Wave', 'Psychedelic', 'Rave', 'Showtunes', 'Trailer', 'Lo-Fi', 'Tribal', 'Acid Punk', 'Acid Jazz', 'Polka', 'Retro', 'Musical', 'Rock & Roll', 'Hard Rock', 'Folk', 'Folk-Rock', 'National Folk', 'Swing', 'Fast-Fusion', 'Bebop', 'Latin', 'Revival', 'Celtic', 'Bluegrass', 'Avantgarde', 'Gothic Rock', 'Progressive Rock', 'Psychedelic Rock', 'Symphonic Rock', 'Slow Rock', 'Big Band', 'Chorus', 'Easy Listening', 'Acoustic', 'Humour', 'Speech', 'Chanson', 'Opera', 'Chamber Music', 'Sonata', 'Symphony', 'Booty Bass', 'Primus', 'Porn Groove', 'Satire', 'Slow Jam', 'Club', 'Tango', 'Samba', 'Folklore', 'Ballad', 'Power Ballad', 'Rhythmic Soul', 'Freestyle', 'Duet', 'Punk Rock', 'Drum Solo', 'A Cappella', 'Euro-House', 'Dance Hall', 'Goa', 'Drum & Bass', 'Club-House', 'Hardcore', 'Terror', 'Indie', 'BritPop', 'Afro-Punk', 'Polsk Punk', 'Beat', 'Christian Gangsta Rap', 'Heavy Metal', 'Black Metal', 'Crossover', 'Contemporary Christian', 'Christian Rock', 'Merengue', 'Salsa', 'Thrash Metal', 'Anime', 'JPop', 'Synthpop', 'Abstract', 'Art Rock', 'Baroque', 'Bhangra', 'Big Beat', 'Breakbeat', 'Chillout', 'Downtempo', 'Dub', 'EBM', 'Eclectic', 'Electro', 'Electroclash', 'Emo', 'Experimental', 'Garage', 'Global', 'IDM', 'Illbient', 'Industro-Goth', 'Jam Band', 'Krautrock', 'Leftfield', 'Lounge', 'Math Rock', 'New Romantic', 'Nu-Breakz', 'Post-Punk', 'Post-Rock', 'Psytrance', 'Shoegaze', 'Space Rock', 'Trop Rock', 'World Music', 'Neoclassical', 'Audiobook', 'Audio Theatre', 'Neue Deutsche Welle', 'Podcast', 'Indie Rock', 'G-Funk', 'Dubstep', 'Garage Rock', 'Psybient'];
+  var GENRES = ['Blues', 'Classic Rock', 'Country', 'Dance', 'Disco', 'Funk', 'Grunge', 'Hip-Hop', 'Jazz', 'Metal', 'New Age', 'Oldies', 'Other', 'Pop', 'R&B', 'Rap', 'Reggae', 'Rock', 'Techno', 'Industrial', 'Alternative', 'Ska', 'Death Metal', 'Pranks', 'Soundtrack', 'Euro-Techno', 'Ambient', 'Trip-Hop', 'Vocal', 'Jazz+Funk', 'Fusion', 'Trance', 'Classical', 'Instrumental', 'Acid', 'House', 'Game', 'Sound Clip', 'Gospel', 'Noise', 'Alt. Rock', 'Bass', 'Soul', 'Punk', 'Space', 'Meditative', 'Instrumental Pop', 'Instrumental Rock', 'Ethnic', 'Gothic', 'Darkwave', 'Techno-Industrial', 'Electronic', 'Pop-Folk', 'Eurodance', 'Dream', 'Southern Rock', 'Comedy', 'Cult', 'Gangsta Rap', 'Top 40', 'Christian Rap', 'Pop/Funk', 'Jungle', 'Native American', 'Cabaret', 'New Wave', 'Psychedelic', 'Rave', 'Showtunes', 'Trailer', 'Lo-Fi', 'Tribal', 'Acid Punk', 'Acid Jazz', 'Polka', 'Retro', 'Musical', 'Rock & Roll', 'Hard Rock', 'Folk', 'Folk-Rock', 'National Folk', 'Swing', 'Fast-Fusion', 'Bebop', 'Latin', 'Revival', 'Celtic', 'Bluegrass', 'Avantgarde', 'Gothic Rock', 'Progressive Rock', 'Psychedelic Rock', 'Symphonic Rock', 'Slow Rock', 'Big Band', 'Chorus', 'Easy Listening', 'Acoustic', 'Humour', 'Speech', 'Chanson', 'Opera', 'Chamber Music', 'Sonata', 'Symphony', 'Booty Bass', 'Primus', 'Porn Groove', 'Satire', 'Slow Jam', 'Club', 'Tango', 'Samba', 'Folklore', 'Ballad', 'Power Ballad', 'Rhythmic Soul', 'Freestyle', 'Duet', 'Punk Rock', 'Drum Solo', 'A Cappella', 'Euro-House', 'Dance Hall', 'Goa', 'Drum & Bass', 'Club-House', 'Hardcore', 'Terror', 'Indie', 'BritPop', 'Afro-Punk', 'Polsk Punk', 'Beat', 'Christian Gangsta Rap', 'Heavy Metal', 'Black Metal', 'Crossover', 'Contemporary Christian', 'Christian Rock', 'Merengue', 'Salsa', 'Thrash Metal', 'Anime', 'JPop', 'Synthpop', 'Abstract', 'Art Rock', 'Baroque', 'Bhangra', 'Big Beat', 'Breakbeat', 'Chillout', 'Downtempo', 'Dub', 'EBM', 'Eclectic', 'Electro', 'Electroclash', 'Emo', 'Experimental', 'Garage', 'Global', 'IDM', 'Illbient', 'Industro-Goth', 'Jam Band', 'Krautrock', 'Leftfield', 'Lounge', 'Math Rock', 'New Romantic', 'Nu-Breakz', 'Post-Punk', 'Post-Rock', 'Psytrance', 'Shoegaze', 'Space Rock', 'Trop Rock', 'World Music', 'Neoclassical', 'Audiobook', 'Audio Theatre', 'Neue Deutsche Welle', 'Podcast', 'Indie Rock', 'G-Funk', 'Dubstep', 'Garage Rock', 'Psybient'];
   function hasID3v1(buffer) {
     var offset = buffer.byteLength - 128;
     if (offset > -1) {
@@ -5331,15 +5361,18 @@
   });
 
   function getHeaderFlags(_byte, version) {
-    var flags = {};
+    var flags = {
+      unsynchronisation: isBitSet(_byte, 7)
+    };
     switch (version) {
+      case 2:
+        flags.compression = isBitSet(_byte, 6);
+        break;
       case 3:
-        flags.unsynchronisation = isBitSet(_byte, 7);
         flags.extendedHeader = isBitSet(_byte, 6);
         flags.experimentalIndicator = isBitSet(_byte, 5);
         break;
       case 4:
-        flags.unsynchronisation = isBitSet(_byte, 7);
         flags.extendedHeader = isBitSet(_byte, 6);
         flags.experimentalIndicator = isBitSet(_byte, 5);
         flags.footerPresent = isBitSet(_byte, 4);
@@ -5376,13 +5409,13 @@
     var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
     var len = view.byteLength - 1;
-    return version === 3 ? view.getCString(1, encoding).string.replace(/\//g, '\\\\') : view.getString(1, len, encoding).string.replace(/\0/g, '\\\\');
+    return version === 3 || version === 2 ? view.getCString(1, encoding).string.replace(/\//g, '\\\\') : view.getString(1, len, encoding).string.replace(/\0/g, '\\\\');
   }
   function setFrame$2(buffer, version) {
     var view = new BufferView(buffer);
     var encoding = ENCODINGS[view.getUint8(0)];
     var len = view.byteLength - 1;
-    return version === 3 ? view.getCString(1, encoding).string : view.getString(1, len, encoding).string.replace(/\0/g, '\\\\');
+    return version === 3 || version === 2 ? view.getCString(1, encoding).string : view.getString(1, len, encoding).string.replace(/\0/g, '\\\\');
   }
   function iplsFrame$1(buffer, version) {
     var view = new BufferView(buffer);
@@ -6684,7 +6717,7 @@
     return true;
   }
   function setFrame$1(value, version, strict) {
-    if (version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
+    if (version === 2 || version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
     value.forEach(function (set) {
       textFrame$1(set, version, strict);
       if (typeof set !== 'string' && typeof set !== 'number') {
@@ -6703,7 +6736,7 @@
     return true;
   }
   function timeFrame(value, version, strict) {
-    if (version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
+    if (version === 2 || version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
     value.forEach(function (time) {
       textFrame$1(time, version, strict);
       if (version === 3 && strict && !time.match(/^(\d{4})$/)) {
@@ -6716,7 +6749,7 @@
     return true;
   }
   function tkeyFrame(value, version, strict) {
-    if (version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
+    if (version === 2 || version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
     value.forEach(function (tkey) {
       textFrame$1(tkey, version, strict);
       if (strict && !tkey.match(/^([A-Gb#mo]{1,3})$/)) {
@@ -6726,7 +6759,7 @@
     return true;
   }
   function tlanFrame(value, version, strict) {
-    if (version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
+    if (version === 2 || version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
     value.forEach(function (tlan) {
       textFrame$1(tlan, version, strict);
       if (strict && !tlan.match(langRegex)) {
@@ -6736,7 +6769,7 @@
     return true;
   }
   function tsrcFrame(value, version, strict) {
-    if (version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
+    if (version === 2 || version === 3) value = [value];else if (version === 4) value = value.split('\\\\');
     value.forEach(function (tsrc) {
       textFrame$1(tsrc, version, strict);
       if (strict && !tsrc.match(/^([A-Z0-9]{12})$/)) {
@@ -7248,16 +7281,19 @@
 
   function getHeaderBytes(id, size, version, flags) {
     var idBytes = encodeString(id);
-    var sizeView = new BufferView(4);
-    sizeView.setUint32(0, version === 3 ? size : encodeSynch(size));
-    var flagsBytes = [0, 0];
-    if (version === 4 && flags.unsynchronisation) {
-      flagsBytes[1] = setBit(flagsBytes[1], 1);
+    var sizeView = new BufferView(version === 2 ? 3 : 4);
+    if (version === 2) sizeView.setUint24(0, size);else sizeView.setUint32(0, version === 3 ? size : encodeSynch(size));
+    var flagsBytes = [];
+    if (version === 3 || version === 4) {
+      flagsBytes.push(0, 0);
+      if (version === 4 && flags.unsynchronisation) {
+        flagsBytes[1] = setBit(flagsBytes[1], 1);
+      }
+      if (version === 4 && flags.dataLengthIndicator) {
+        flagsBytes[1] = setBit(flagsBytes[1], 0);
+      }
     }
-    if (version === 4 && flags.dataLengthIndicator) {
-      flagsBytes[1] = setBit(flagsBytes[1], 0);
-    }
-    return mergeBytes(idBytes, sizeView.getUint8(0, 4), flagsBytes);
+    return mergeBytes(idBytes, sizeView.getUint8(0, version === 2 ? 3 : 4), flagsBytes);
   }
   function unsynchData(data, version) {
     var sizeView = new BufferView(4);
@@ -7279,6 +7315,7 @@
     var encoding = 0;
     var strBytes = [];
     switch (version) {
+      case 2:
       case 3:
         encoding = 1;
         strBytes = encodeString(value.replace(/\\\\/g, '/') + '\0', 'utf-16');
@@ -7302,6 +7339,7 @@
       unsynch = options.unsynch;
     var strBytes = [];
     switch (version) {
+      case 2:
       case 3:
         strBytes = encodeString(value.replace(/\\\\/g, '/') + '\0');
         break;
@@ -7319,7 +7357,7 @@
   }
   function setFrame(value, options) {
     var version = options.version;
-    if (version === 3) value = value.toString().split('\\\\')[0];else if (version === 4) value = value.toString().replace(/\\\\/g, '\0');
+    if (version === 2 || version === 3) value = value.toString().split('\\\\')[0];else if (version === 4) value = value.toString().replace(/\\\\/g, '\0');
     return win1251Frame(value, options);
   }
   function urlFrame(value, options) {
@@ -7343,6 +7381,7 @@
       var encoding = 0;
       var descBytes, strBytes;
       switch (version) {
+        case 2:
         case 3:
           encoding = 1;
           descBytes = encodeString(txxx.description + '\0', 'utf-16');
@@ -7376,6 +7415,7 @@
       var encoding = 0;
       var descBytes, strBytes;
       switch (version) {
+        case 2:
         case 3:
           encoding = 1;
           descBytes = encodeString(wxxx.description + '\0', 'utf-16');
@@ -7414,6 +7454,7 @@
       var langBytes = encodeString(langDesc.language);
       var descBytes, textBytes;
       switch (version) {
+        case 2:
         case 3:
           encoding = 1;
           descBytes = encodeString(langDesc.descriptor + '\0', 'utf-16');
@@ -7449,6 +7490,7 @@
       var imageBytes = new Uint8Array(apic.data);
       var strBytes = [];
       switch (version) {
+        case 2:
         case 3:
           encoding = 1;
           strBytes = encodeString(apic.description + '\0', 'utf-16');
@@ -7481,6 +7523,7 @@
       var object = new Uint8Array(geob.object);
       var encoding, filename, description;
       switch (version) {
+        case 2:
         case 3:
           encoding = 1;
           filename = encodeString(geob.filename + '\0', 'utf-16');
@@ -7535,6 +7578,7 @@
     var langBytes = encodeString(value.language);
     var textBytes;
     switch (version) {
+      case 2:
       case 3:
         encoding = 1;
         textBytes = encodeString(value.text + '\0', 'utf-16');
@@ -7566,6 +7610,7 @@
     var dateBytes = encodeString(value.date);
     var sellerBytes;
     switch (version) {
+      case 2:
       case 3:
         encoding = 1;
         sellerBytes = encodeString(value.seller, 'utf-16');
@@ -7757,7 +7802,7 @@
       version = options.version,
       unsynch = options.unsynch;
     var bytes = [];
-    var encoding = version === 3 ? 1 : version === 4 ? 3 : 0;
+    var encoding = version === 3 || version === 2 ? 1 : version === 4 ? 3 : 0;
     var encodingString = ENCODINGS[encoding];
     values.forEach(function (sylt) {
       var langBytes = encodeString(sylt.language);
@@ -8374,6 +8419,334 @@
     version: [3, 4]
   };
 
+  /**
+   *  ID3v2.2 Tags
+   */
+  var TT1 = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TT2 = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TT3 = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TP1 = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TP2 = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TP3 = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TP4 = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TCM = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TXT = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TLA = {
+    parse: textFrame$2,
+    validate: tlanFrame,
+    write: win1251Frame,
+    version: [2]
+  };
+  var TCO = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TAL = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TPA = {
+    parse: setFrame$2,
+    validate: setFrame$1,
+    write: setFrame,
+    version: [2]
+  };
+  var TRK = {
+    parse: setFrame$2,
+    validate: setFrame$1,
+    write: setFrame,
+    version: [2]
+  };
+  var TRC = {
+    parse: textFrame$2,
+    validate: tsrcFrame,
+    write: win1251Frame,
+    version: [2]
+  };
+  var TYE = {
+    parse: textFrame$2,
+    validate: timeFrame,
+    write: win1251Frame,
+    version: [2]
+  };
+  var TDA = {
+    parse: textFrame$2,
+    validate: timeFrame,
+    write: win1251Frame,
+    version: [2]
+  };
+  var TIM = {
+    parse: textFrame$2,
+    validate: timeFrame,
+    write: win1251Frame,
+    version: [2]
+  };
+  var TRD = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: win1251Frame,
+    version: [2]
+  };
+  var TMT = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TFT = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TBP = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: win1251Frame,
+    version: [2]
+  };
+  var TCR = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TPB = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TEN = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TSS = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TOF = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TLE = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: win1251Frame,
+    version: [2]
+  };
+  var TSI = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: win1251Frame,
+    version: [2]
+  };
+  var TDY = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: win1251Frame,
+    version: [2]
+  };
+  var TKE = {
+    parse: textFrame$2,
+    validate: tkeyFrame,
+    write: win1251Frame,
+    version: [2]
+  };
+  var TOT = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TOA = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
+  var TOR = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: win1251Frame,
+    version: [2]
+  };
+  var TXX = {
+    parse: txxxFrame$2,
+    validate: txxxFrame$1,
+    write: txxxFrame,
+    version: [2]
+  };
+  var WAF = {
+    parse: urlFrame$2,
+    validate: urlFrame$1,
+    write: urlFrame,
+    version: [2]
+  };
+  var WAR = {
+    parse: urlFrame$2,
+    validate: urlFrame$1,
+    write: urlFrame,
+    version: [2]
+  };
+  var WAS = {
+    parse: urlFrame$2,
+    validate: urlFrame$1,
+    write: urlFrame,
+    version: [2]
+  };
+  var WCM = {
+    parse: urlFrame$2,
+    validate: urlFrame$1,
+    write: urlFrame,
+    version: [2]
+  };
+  var WCP = {
+    parse: urlFrame$2,
+    validate: urlFrame$1,
+    write: urlFrame,
+    version: [2]
+  };
+  var WPB = {
+    parse: urlFrame$2,
+    validate: urlFrame$1,
+    write: urlFrame,
+    version: [2]
+  };
+  var WXX = {
+    parse: wxxxFrame$2,
+    validate: wxxxFrame$1,
+    write: wxxxFrame,
+    version: [2]
+  };
+  var IPL = {
+    parse: iplsFrame$1,
+    validate: textFrame$1,
+    write: iplsFrame,
+    version: [2]
+  };
+  var MCI = {
+    parse: mcdiFrame$2,
+    validate: mcdiFrame$1,
+    write: mcdiFrame,
+    version: [2]
+  };
+  var ETC = {
+    parse: etcoFrame$2,
+    validate: etcoFrame$1,
+    write: etcoFrame,
+    version: [2]
+  };
+  var STC = {
+    parse: sytcFrame$2,
+    validate: sytcFrame$1,
+    write: sytcFrame,
+    version: [2]
+  };
+  var ULT = {
+    parse: langDescFrame$2,
+    validate: langDescFrame$1,
+    write: langDescFrame,
+    version: [2]
+  };
+  var SLT = {
+    parse: syltFrame$2,
+    validate: syltFrame$1,
+    write: syltFrame,
+    version: [2]
+  };
+  var COM = {
+    parse: langDescFrame$2,
+    validate: langDescFrame$1,
+    write: langDescFrame,
+    version: [2]
+  };
+  var RVA = {
+    parse: rvadFrame$2,
+    validate: rvadFrame$1,
+    write: rvadFrame,
+    version: [2]
+  };
+  var PIC = {
+    parse: apicFrame$2,
+    validate: apicFrame$1,
+    write: apicFrame,
+    version: [2]
+  };
+  var GEO = {
+    parse: geobFrame$2,
+    validate: geobFrame$1,
+    write: geobFrame,
+    version: [2]
+  };
+  var CNT = {
+    parse: pcntFrame$2,
+    validate: pcntFrame$1,
+    write: pcntFrame,
+    version: [2]
+  };
+  var POP = {
+    parse: popmFrame$2,
+    validate: popmFrame$1,
+    write: popmFrame,
+    version: [2]
+  };
+
   var frames = /*#__PURE__*/Object.freeze({
     __proto__: null,
     APIC: APIC,
@@ -8459,7 +8832,61 @@
     WXXX: WXXX,
     WFED: WFED,
     TGID: TGID,
-    TSO2: TSO2
+    TSO2: TSO2,
+    TT1: TT1,
+    TT2: TT2,
+    TT3: TT3,
+    TP1: TP1,
+    TP2: TP2,
+    TP3: TP3,
+    TP4: TP4,
+    TCM: TCM,
+    TXT: TXT,
+    TLA: TLA,
+    TCO: TCO,
+    TAL: TAL,
+    TPA: TPA,
+    TRK: TRK,
+    TRC: TRC,
+    TYE: TYE,
+    TDA: TDA,
+    TIM: TIM,
+    TRD: TRD,
+    TMT: TMT,
+    TFT: TFT,
+    TBP: TBP,
+    TCR: TCR,
+    TPB: TPB,
+    TEN: TEN,
+    TSS: TSS,
+    TOF: TOF,
+    TLE: TLE,
+    TSI: TSI,
+    TDY: TDY,
+    TKE: TKE,
+    TOT: TOT,
+    TOA: TOA,
+    TOR: TOR,
+    TXX: TXX,
+    WAF: WAF,
+    WAR: WAR,
+    WAS: WAS,
+    WCM: WCM,
+    WCP: WCP,
+    WPB: WPB,
+    WXX: WXX,
+    IPL: IPL,
+    MCI: MCI,
+    ETC: ETC,
+    STC: STC,
+    ULT: ULT,
+    SLT: SLT,
+    COM: COM,
+    RVA: RVA,
+    PIC: PIC,
+    GEO: GEO,
+    CNT: CNT,
+    POP: POP
   });
 
   function hasID3v2(buffer) {
@@ -8478,9 +8905,10 @@
       size: size
     };
     var tags = {};
-    if (version[0] !== 3 && version[0] !== 4) {
+    if (version[0] !== 2 && version[0] !== 3 && version[0] !== 4) {
       throw new Error('Unknown ID3v2 major version');
     }
+    var frameHeaderSize = version[0] === 2 ? 6 : 10;
     var offset = 10;
     var limit = size;
     var pushTag = function pushTag(tag) {
@@ -8509,8 +8937,8 @@
         flags: flags
       });
       if (!frame) break;
-      offset += frame.size + 10;
-      limit -= frame.size + 10;
+      offset += frame.size + frameHeaderSize;
+      limit -= frame.size + frameHeaderSize;
       if (frame.id === 'SEEK') {
         var seekedTags = decode(buffer, offset + frame.value);
         for (var id in seekedTags) pushTag({
@@ -8533,12 +8961,12 @@
     var frame = {};
     var version = options.version,
       flags = options.flags;
-    var sizeByte = view.getUint32(4);
-    frame.id = view.getUint8String(0, 4);
-    frame.flags = getFrameFlags(view.getUint8(8, 2), version[0]);
+    var sizeByte = version[0] === 2 ? view.getUint24(3) : view.getUint32(4);
+    frame.id = view.getUint8String(0, version[0] === 2 ? 3 : 4);
+    frame.flags = version[0] === 2 ? {} : getFrameFlags(view.getUint8(8, 2), version[0]);
     frame.size = version[0] === 4 ? decodeSynch(sizeByte) : sizeByte;
     var frameSpec = frames[frame.id];
-    var offset = 10;
+    var offset = version[0] === 2 ? 6 : 10;
     var actualSize = frame.size;
     var dataLength = frame.size;
     var contents;
@@ -8567,7 +8995,7 @@
   function validate(tags, strict, options) {
     var version = options.version,
       skipUnsupported = options.skipUnsupported;
-    if (version !== 3 && version !== 4) {
+    if (version !== 2 && version !== 3 && version !== 4) {
       throw new Error('Unknown provided version');
     }
     for (var id in tags) {
@@ -8623,7 +9051,7 @@
         throw new TypeError('buffer is not ArrayBuffer/Buffer');
       }
       this.name = 'MP3Tag';
-      this.version = '3.8.0';
+      this.version = '3.9.1';
       this.verbose = verbose;
       this.buffer = buffer;
       this.tags = {};
@@ -8703,39 +9131,48 @@
         Object.defineProperties(tags, {
           title: {
             get: function get() {
-              return this.v2 && this.v2.TIT2 || this.v1 && this.v1.title || '';
+              return this.v2 && (this.v2.TIT2 || this.v2.TT2) || this.v1 && this.v1.title || '';
             },
             set: function set(value) {
-              if (this.v2) this.v2.TIT2 = value;
+              if (this.v2) {
+                var version = this.v2Details.version[0];
+                this.v2[version === 2 ? 'TT2' : 'TIT2'] = value;
+              }
               if (this.v1) this.v1.title = value;
             }
           },
           artist: {
             get: function get() {
-              return this.v2 && this.v2.TPE1 || this.v1 && this.v1.artist || '';
+              return this.v2 && (this.v2.TPE1 || this.v2.TP1) || this.v1 && this.v1.artist || '';
             },
             set: function set(value) {
-              if (this.v2) this.v2.TPE1 = value;
+              if (this.v2) {
+                var version = this.v2Details.version[0];
+                this.v2[version === 2 ? 'TP1' : 'TPE1'] = value;
+              }
               if (this.v1) this.v1.artist = value;
             }
           },
           album: {
             get: function get() {
-              return this.v2 && this.v2.TALB || this.v1 && this.v1.album || '';
+              return this.v2 && (this.v2.TALB || this.v2.TAL) || this.v1 && this.v1.album || '';
             },
             set: function set(value) {
-              if (this.v2) this.v2.TALB = value;
+              if (this.v2) {
+                var version = this.v2Details.version[0];
+                this.v2[version === 2 ? 'TAL' : 'TALB'] = value;
+              }
               if (this.v1) this.v1.album = value;
             }
           },
           year: {
             get: function get() {
-              return this.v2 && (this.v2.TYER || this.v2.TDRC) || this.v1 && this.v1.year || '';
+              return this.v2 && (this.v2.TYER || this.v2.TDRC || this.v2.TYE) || this.v1 && this.v1.year || '';
             },
             set: function set(value) {
               if (this.v2) {
                 var version = this.v2Details.version[0];
-                if (version === 3) this.v2.TYER = value;else if (version === 4) this.v2.TDRC = value;
+                if (version === 2) this.v2.TYE = value;else if (version === 3) this.v2.TYER = value;else if (version === 4) this.v2.TDRC = value;
               }
               if (this.v1) this.v1.year = value;
             }
@@ -8743,15 +9180,16 @@
           comment: {
             get: function get() {
               var text = '';
-              if (this.v2 && this.v2.COMM) {
-                var comm = this.v2.COMM;
+              if (this.v2 && (this.v2.COMM || this.v2.COM)) {
+                var comm = this.v2.COMM || this.v2.COM;
                 if (Array.isArray(comm) && comm.length > 0) text = comm[0].text;
               } else if (this.v1 && this.v1.comment) text = this.v1.comment;
               return text;
             },
             set: function set(value) {
               if (this.v2) {
-                this.v2.COMM = [{
+                var version = this.v2Details.version[0];
+                this.v2[version === 2 ? 'COM' : 'COMM'] = [{
                   language: 'eng',
                   descriptor: '',
                   text: value
@@ -8762,19 +9200,25 @@
           },
           track: {
             get: function get() {
-              return this.v2 && this.v2.TRCK && this.v2.TRCK.split('/')[0] || this.v1 && this.v1.track || '';
+              return this.v2 && (this.v2.TRCK && this.v2.TRCK.split('/')[0] || this.v2.TRK && this.v2.TRK.split('/')[0]) || this.v1 && this.v1.track || '';
             },
             set: function set(value) {
-              if (this.v2) this.v2.TRCK = value;
+              if (this.v2 && value !== '') {
+                var version = this.v2Details.version[0];
+                this.v2[version === 2 ? 'TRK' : 'TRCK'] = value;
+              }
               if (this.v1) this.v1.track = value;
             }
           },
           genre: {
             get: function get() {
-              return this.v2 && this.v2.TCON || this.v1 && this.v1.genre || '';
+              return this.v2 && (this.v2.TCON || this.v2.TCO) || this.v1 && this.v1.genre || '';
             },
             set: function set(value) {
-              if (this.v2) this.v2.TCON = value;
+              if (this.v2) {
+                var version = this.v2Details.version[0];
+                this.v2[version === 2 ? 'TCO' : 'TCON'] = value;
+              }
               if (this.v1) this.v1.genre = value;
             }
           }
