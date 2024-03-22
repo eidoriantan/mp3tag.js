@@ -19,7 +19,8 @@ The website is also open sourced and can be viewed at the
 ### Features
 * Read, write, and remove ID3 tags (Supports ID3v1, ID3v2.2, ID3v2.3, and ID3v2.4)
 * Supports unsynchronisation
-* Standards compliant. See [id3.org](http://id3.org)
+* Standards compliant. See ~~[id3.org](http://id3.org)~~
+[mutagen-specs.readthedocs.io](https://mutagen-specs.readthedocs.io/en/latest/id3/index.html)
 
 ## Installation
 You can download the ready-to-use script at
