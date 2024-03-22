@@ -5,6 +5,10 @@ export type MP3Buffer = Buffer | ArrayBuffer;
 
 export type MP3TagV2Versions = 2 | 3 | 4;
 
+export type MP3TagEncodings =
+  'utf8' | 'utf-8' | 'utf16' | 'utf16be' | 'utf-16' | 'utf-16be' |
+  'windows1251' | '';
+
 export interface MP3TagDefaultReadOptions {
   id3v1: boolean;
   id3v2: boolean;
@@ -14,6 +18,7 @@ export interface MP3TagDefaultWriteOptions {
   strict: boolean;
   id3v1: {
     include: boolean;
+    encoding: MP3TagEncodings;
   };
   id3v2: {
     include: boolean;

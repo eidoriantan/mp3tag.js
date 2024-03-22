@@ -178,7 +178,10 @@ export default class MP3Tag {
 
     options = overwriteDefault(options, {
       strict: false,
-      id3v1: { include: false },
+      id3v1: {
+        include: false,
+        encoding: 'utf-8'
+      },
       id3v2: {
         include: true,
         unsynch: false,
@@ -193,7 +196,7 @@ export default class MP3Tag {
       ID3v1.validate(tags.v1, options.strict)
 
       if (verbose) console.log('Writing ID3v1...')
-      const encoded = ID3v1.encode(tags.v1)
+      const encoded = ID3v1.encode(tags.v1, options.encoding)
       const tagBytes = new Uint8Array(encoded)
       audio = mergeBytes(audio, tagBytes)
     }

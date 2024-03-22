@@ -119,14 +119,14 @@ export function validate (tags, strict) {
   return true
 }
 
-export function encode (tags) {
+export function encode (tags, encoding = 'utf-8') {
   let { title, artist, album, year, comment, track, genre } = tags
 
-  title = encodeString(title, 'utf-8')
-  artist = encodeString(artist, 'utf-8')
-  album = encodeString(album, 'utf-8')
-  year = encodeString(year, 'utf-8')
-  comment = encodeString(comment, 'utf-8')
+  title = encodeString(title, encoding)
+  artist = encodeString(artist, encoding)
+  album = encodeString(album, encoding)
+  year = encodeString(year, encoding)
+  comment = encodeString(comment, encoding)
   genre = GENRES.indexOf(genre)
 
   while (title.length < 30) title.push(0)
