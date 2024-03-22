@@ -62,10 +62,13 @@ export function encodeUTF8 (string) {
 export function encodeString (string, format = 'windows1251') {
   let bytes = []
   switch (format) {
+    case 'utf8':
     case 'utf-8':
       bytes = encodeUTF8(string)
       break
 
+    case 'utf16':
+    case 'utf16be':
     case 'utf-16':
     case 'utf-16be': {
       const buffer = new ArrayBuffer(string.length * 2)
