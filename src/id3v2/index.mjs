@@ -129,8 +129,12 @@ export function validate (tags, strict, options) {
     const frameSpec = frames[id]
     const isSupported = frameSpec && frameSpec.version.includes(version)
 
+    if (strict && !isSupported && includeUnsupported) {
+      throw new Error(`${id} is not supported in ID3v2.${version}`)
+    }
+
     try {
-      if (isSupported) frameSpec.validate(tags[id], version, strict)
+      if (isSupported || frameSpec) frameSpec.validate(tags[id], version, strict)
       else if (includeUnsupported) frames.unsupported.validate(tags[id], version, strict)
     } catch (error) {
       throw new Error(`${error.message} at ${id}`)
