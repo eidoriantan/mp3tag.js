@@ -306,6 +306,29 @@ describe('ID3v2', function () {
       ])
     })
 
+    it('Write unsupported frames', function () {
+      this.mp3tag.read({
+        id3v1: false,
+        unsupported: true
+      })
+      if (this.mp3tag.error) throw new Error(this.mp3tag.error)
+
+      this.mp3tag.save({
+        id3v2: { unsupported: true }
+      })
+      if (this.mp3tag.error) throw new Error(this.mp3tag.error)
+
+      this.mp3tag.read({
+        id3v1: false,
+        unsupported: true
+      })
+      if (this.mp3tag.error) throw new Error(this.mp3tag.error)
+
+      assert.deepStrictEqual(this.mp3tag.tags.v2.UNSU, [
+        [1, 2, 3, 4, 5]
+      ])
+    })
+
     it('Skip unsupported frames', function () {
       this.mp3tag.read({ id3v1: false })
       if (this.mp3tag.error) throw new Error(this.mp3tag.error)
