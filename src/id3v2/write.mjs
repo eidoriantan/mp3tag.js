@@ -702,3 +702,20 @@ export function popmFrame (values, options) {
 
   return bytes
 }
+
+export function unsupportedFrame (values, options) {
+  const { id, version, unsynch } = options
+  const bytes = []
+
+  values.forEach(value => {
+    const header = getHeaderBytes(id, value.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+
+    const merged = mergeBytes(header, value)
+    merged.forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}

@@ -971,3 +971,8 @@ export const POP = {
   write: writers.popmFrame,
   version: [2]
 }
+
+export const unsupported = {
+  validate: validators.unsupportedFrame,
+  write: writers.unsupportedFrame
+}

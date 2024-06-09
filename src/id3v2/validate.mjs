@@ -593,3 +593,13 @@ export function popmFrame (values, version, strict) {
 
   return true
 }
+
+export function unsupportedFrame (values, version, strict) {
+  values.forEach(value => {
+    if (!Array.isArray(value)) {
+      throw new Error('Unsupported frame is not an array')
+    }
+  })
+
+  return true
+}

@@ -13,9 +13,8 @@ export function hasID3v2 (buffer) {
   return view.getString(0, 3).string === 'ID3'
 }
 
-export function decode (buffer, tagOffset = 0) {
+export function decode (buffer, tagOffset, parseUnsupported) {
   const view = new BufferView(buffer, tagOffset)
-
   const version = view.getUint8(3, 2)
   const size = decodeSynch(view.getUint32(6))
   const flags = getHeaderFlags(view.getUint8(5), version[0])
@@ -55,14 +54,14 @@ export function decode (buffer, tagOffset = 0) {
 
   while (offset < size) {
     const frameBytes = view.getUint8(offset, limit)
-    const frame = decodeFrame(frameBytes, { version, flags })
+    const frame = decodeFrame(frameBytes, { version, flags, parseUnsupported })
     if (!frame) break
 
     offset += frame.size + frameHeaderSize
     limit -= frame.size + frameHeaderSize
 
     if (frame.id === 'SEEK') {
-      const seekedTags = decode(buffer, offset + frame.value)
+      const seekedTags = decode(buffer, offset + frame.value, parseUnsupported)
       for (const id in seekedTags) pushTag({ id, value: seekedTags[id] })
     } else pushTag({ id: frame.id, value: frame.value })
   }
@@ -75,7 +74,7 @@ function decodeFrame (bytes, options) {
   if (view.getUint8(0) === 0x00) return false
 
   const frame = {}
-  const { version, flags } = options
+  const { version, flags, parseUnsupported } = options
   const sizeByte = version[0] === 2 ? view.getUint24(3) : view.getUint32(4)
 
   frame.id = view.getUint8String(0, version[0] === 2 ? 3 : 4)
@@ -83,15 +82,12 @@ function decodeFrame (bytes, options) {
   frame.size = version[0] === 4 ? decodeSynch(sizeByte) : sizeByte
 
   const frameSpec = frames[frame.id]
+  if (!frameSpec && !parseUnsupported) return
+
   let offset = version[0] === 2 ? 6 : 10
   let actualSize = frame.size
   let dataLength = frame.size
   let contents
-
-  if (!frameSpec) {
-    console.warn(`Skipping unsupported frame: ${frame.id}`)
-    return frame
-  }
 
   if (frame.flags.dataLengthIndicator) {
     actualSize = decodeSynch(view.getUint32(offset))
@@ -111,30 +107,31 @@ function decodeFrame (bytes, options) {
     contents = new Uint8Array(Array.isArray(uint8) ? uint8 : [uint8])
   }
 
+  if (!frameSpec && parseUnsupported) {
+    frame.value = Array.from(contents)
+    return frame
+  }
+
   frame.value = frameSpec.parse(contents.buffer, version[0])
   return frame
 }
 
 export function validate (tags, strict, options) {
-  const { version, skipUnsupported } = options
+  // TODO: `skipUnsupported` is deprecated.
+  const { version, skipUnsupported, unsupported } = options
+  const includeUnsupported = unsupported || !skipUnsupported
+
   if (version !== 2 && version !== 3 && version !== 4) {
     throw new Error('Unknown provided version')
   }
 
   for (const id in tags) {
-    if (!Object.keys(frames).includes(id)) continue
-
     const frameSpec = frames[id]
-    const isSupported = frameSpec.version.includes(version)
-
-    if (strict && !isSupported && !skipUnsupported) {
-      throw new Error(`${id} is not supported in ID3v2.${version}`)
-    }
+    const isSupported = frameSpec && frameSpec.version.includes(version)
 
     try {
-      if (isSupported || !skipUnsupported) {
-        frameSpec.validate(tags[id], version, strict)
-      }
+      if (isSupported) frameSpec.validate(tags[id], version, strict)
+      else if (includeUnsupported) frames.unsupported.validate(tags[id], version, strict)
     } catch (error) {
       throw new Error(`${error.message} at ${id}`)
     }
@@ -144,7 +141,9 @@ export function validate (tags, strict, options) {
 }
 
 export function encode (tags, options) {
-  const { version, padding, unsynch, skipUnsupported } = options
+  // TODO: `skipUnsupported` is deprecated.
+  const { version, padding, unsynch, skipUnsupported, unsupported } = options
+  const includeUnsupported = unsupported || !skipUnsupported
 
   const headerBytes = [0x49, 0x44, 0x33, version, 0]
   let flagsByte = 0
@@ -154,10 +153,14 @@ export function encode (tags, options) {
 
   for (const id in tags) {
     const frameSpec = frames[id]
-    const isSupported = frameSpec.version.includes(version)
-    if (!isSupported && skipUnsupported) continue
+    const isSupported = frameSpec && frameSpec.version.includes(version)
 
-    const bytes = frameSpec.write(tags[id], { id, version, unsynch })
+    if (!isSupported && !includeUnsupported) continue
+
+    const bytes = !isSupported && includeUnsupported
+      ? frames.unsupported.write(tags[id], { id, version, unsynch })
+      : frameSpec.write(tags[id], { id, version, unsynch })
+
     bytes.forEach(byte => framesBytes.push(byte))
   }
 

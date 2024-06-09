@@ -31,7 +31,8 @@ export default class MP3Tag {
     const tags = {}
     options = overwriteDefault(options, {
       id3v1: true,
-      id3v2: true
+      id3v2: true,
+      unsupported: false
     })
 
     if (options.id3v1 && ID3v1.hasID3v1(buffer)) {
@@ -44,7 +45,8 @@ export default class MP3Tag {
 
     if (options.id3v2 && ID3v2.hasID3v2(buffer)) {
       if (verbose) console.log('ID3v2 found, reading...')
-      const { tags: v2Tags, details } = ID3v2.decode(buffer)
+      const { unsupported } = options
+      const { tags: v2Tags, details } = ID3v2.decode(buffer, 0, unsupported)
       if (verbose) console.log('ID3v2 reading finished')
       tags.v2 = { ...v2Tags }
       tags.v2Details = details
@@ -187,7 +189,8 @@ export default class MP3Tag {
         unsynch: false,
         version: defaultVersion,
         padding: 2048,
-        skipUnsupported: true
+        skipUnsupported: true, // TODO: `skipUnsupported` is deprecated.
+        unsupported: false
       }
     })
 
