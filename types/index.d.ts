@@ -12,6 +12,7 @@ export type MP3TagEncodings =
 export interface MP3TagDefaultReadOptions {
   id3v1: boolean;
   id3v2: boolean;
+  unsupported: boolean;
 }
 
 export interface MP3TagDefaultWriteOptions {
@@ -25,7 +26,11 @@ export interface MP3TagDefaultWriteOptions {
     unsynch: boolean;
     version: MP3TagV2Versions;
     padding: number;
+    /**
+     * @deprecated use `unsupported` instead
+     */
     skipUnsupported: boolean;
+    unsupported: boolean;
   };
 }
 
