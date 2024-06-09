@@ -9,15 +9,18 @@ import { overwriteDefault } from './utils/objects.mjs'
 import { isBuffer } from './utils/types.mjs'
 
 export default class MP3Tag {
+  get name () { return 'MP3Tag' }
+  set name (value) { throw new Error('Unable to set this property') }
+
+  get version () { return '3.10.0' }
+  set version (value) { throw new Error('Unable to set this property') }
+
   constructor (buffer, verbose = false) {
     if (!isBuffer(buffer)) {
       throw new TypeError('buffer is not ArrayBuffer/Buffer')
     }
 
-    this.name = 'MP3Tag'
-    this.version = '3.9.1'
     this.verbose = verbose
-
     this.buffer = buffer
     this.tags = {}
     this.error = ''
