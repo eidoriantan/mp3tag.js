@@ -3,7 +3,7 @@
 const assert = require('assert')
 
 const MP3Tag = require('../../dist/mp3tag.js')
-const { bytes, bytesUnsupported, bytesv2 } = require('../globals.cjs')
+const { bytes, bytesInvalid, bytesUnsupported, bytesv2 } = require('../globals.cjs')
 
 describe('ID3v2', function () {
   describe('ID3v2.2', function () {
@@ -238,21 +238,23 @@ describe('ID3v2', function () {
     })
   })
 
-  describe('MP3 with unsupported frames', function () {
+  describe('MP3 with invalid frames', function () {
     beforeEach(function () {
-      this.mp3tag = new MP3Tag(bytesUnsupported.buffer)
+      this.mp3tag = new MP3Tag(bytesInvalid.buffer)
       this.mp3tag.read({ id3v1: false })
       if (this.mp3tag.error) throw new Error(this.mp3tag.error)
     })
 
-    it('Throws error with unsupported frames', function () {
+    it('Throws error with invalid frames', function () {
       this.mp3tag.save({
         strict: true,
         id3v1: { include: false },
         id3v2: {
           include: true,
           version: 4,
-          skipUnsupported: false
+          // TODO: `skipUnsupported` is deprecated
+          skipUnsupported: false,
+          unsupported: true
         }
       })
 
@@ -265,13 +267,14 @@ describe('ID3v2', function () {
       })
     })
 
-    it('Skips unsupported frames', function () {
+    it('Skips invalid frames', function () {
       this.mp3tag.save({
         strict: true,
         id3v1: { include: false },
         id3v2: {
           include: true,
-          version: 4
+          version: 4,
+          unsupported: false
         }
       })
 
@@ -280,6 +283,34 @@ describe('ID3v2', function () {
 
       assert.strictEqual(this.mp3tag.tags.v2.TDRC, '2024')
       assert.strictEqual(this.mp3tag.tags.v2.TYER, undefined)
+    })
+  })
+
+  describe('MP3 with unsupported frames', function () {
+    beforeEach(function () {
+      this.mp3tag = new MP3Tag(bytesUnsupported.buffer)
+    })
+
+    it('Read unsupported frames as an array', function () {
+      this.mp3tag.read({
+        id3v1: false,
+        unsupported: true
+      })
+
+      if (this.mp3tag.error) throw new Error(this.mp3tag.error)
+
+      assert.deepStrictEqual(this.mp3tag.tags.v2Details.version, [3, 0])
+      assert.deepStrictEqual(this.mp3tag.tags.v2.TIT2, 'title')
+      assert.deepStrictEqual(this.mp3tag.tags.v2.UNSU, [
+        [1, 2, 3, 4, 5]
+      ])
+    })
+
+    it('Skip unsupported frames', function () {
+      this.mp3tag.read({ id3v1: false })
+      if (this.mp3tag.error) throw new Error(this.mp3tag.error)
+
+      assert.deepStrictEqual(this.mp3tag.tags.v2.UNSU, undefined)
     })
   })
 })
