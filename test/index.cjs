@@ -1,11 +1,10 @@
-
 /* eslint-env mocha */
 
 const path = require('path')
 const assert = require('assert')
 
 const MP3Tag = require('../dist/mp3tag.js')
-const { bytes } = require('./globals.js')
+const { bytes } = require('./globals.cjs')
 
 describe('MP3Tag', function () {
   it('Get audio', function () {
@@ -35,7 +34,7 @@ describe('MP3Tag', function () {
   })
 
   after(function () {
-    const extendTests = ['id3v1/index.js', 'id3v2/index.js', 'id3/index.js']
+    const extendTests = ['id3v1/index.cjs', 'id3v2/index.cjs', 'id3/index.cjs']
     const tests = this.test.parent.tests
     let failed = false
 

@@ -1,10 +1,9 @@
-
 /* eslint-env mocha */
 
 const assert = require('assert')
 
 const MP3Tag = require('../../dist/mp3tag.js')
-const { bytes, bytesUnsupported, bytesv2 } = require('../globals.js')
+const { bytes, bytesUnsupported, bytesv2 } = require('../globals.cjs')
 
 describe('ID3v2', function () {
   describe('ID3v2.2', function () {
