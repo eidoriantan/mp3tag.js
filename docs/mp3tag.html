@@ -5,7 +5,7 @@ description: >-
   JavaScript library documentations page. mp3tag.js exported class documentation
 keywords: mp3, id3, audio, tag, edit, write, documentations, docs, mp3tag
 active: mp3tag
-last_modified_at: 2024-06-09T16:25+08:00
+last_modified_at: 2024-06-09T16:29+08:00
 ---
 <div id="properties" class="Subhead bg-white position-sticky top-0">
   <div class="Subhead-heading">Properties</div>
@@ -113,7 +113,14 @@ last_modified_at: 2024-06-09T16:25+08:00
   // Default Options
   {
     strict: false, // Use strict mode when validating
-    id3v1: { include: false }, // Add ID3v1 tags to buffer
+    id3v1: {
+      include: false, // Add ID3v1 tags to buffer
+      /**
+       * Encoding to use when writing ID3v1 tags. Valid options are:
+       * 'utf-8', 'utf8', 'utf16', 'utf-16', 'utf16be', 'utf-16be', 'windows1251', ''
+       */
+      encoding: 'utf-8'
+    },
     id3v2: {
       include: true, // Add ID3v2 tags to buffer
       unsynch: false, // Use unsynchronisation scheme
