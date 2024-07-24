@@ -117,9 +117,7 @@ function decodeFrame (bytes, options) {
 }
 
 export function validate (tags, strict, options) {
-  // TODO: `skipUnsupported` is deprecated.
-  const { version, skipUnsupported, unsupported } = options
-  const includeUnsupported = unsupported || !skipUnsupported
+  const { version, unsupported } = options
 
   if (version !== 2 && version !== 3 && version !== 4) {
     throw new Error('Unknown provided version')
@@ -129,13 +127,13 @@ export function validate (tags, strict, options) {
     const frameSpec = frames[id]
     const isSupported = frameSpec && frameSpec.version.includes(version)
 
-    if (strict && !isSupported && includeUnsupported) {
+    if (strict && !isSupported && unsupported) {
       throw new Error(`${id} is not supported in ID3v2.${version}`)
     }
 
     try {
       if (isSupported || frameSpec) frameSpec.validate(tags[id], version, strict)
-      else if (includeUnsupported) frames.unsupported.validate(tags[id], version, strict)
+      else if (unsupported) frames.unsupported.validate(tags[id], version, strict)
     } catch (error) {
       throw new Error(`${error.message} at ${id}`)
     }
@@ -145,10 +143,7 @@ export function validate (tags, strict, options) {
 }
 
 export function encode (tags, options) {
-  // TODO: `skipUnsupported` is deprecated.
-  const { version, padding, unsynch, skipUnsupported, unsupported } = options
-  const includeUnsupported = unsupported || !skipUnsupported
-
+  const { version, padding, unsynch, unsupported } = options
   const headerBytes = [0x49, 0x44, 0x33, version, 0]
   let flagsByte = 0
   const sizeView = new BufferView(4)
@@ -159,9 +154,9 @@ export function encode (tags, options) {
     const frameSpec = frames[id]
     const isSupported = frameSpec && frameSpec.version.includes(version)
 
-    if (!isSupported && !includeUnsupported) continue
+    if (!isSupported && !unsupported) continue
 
-    const bytes = !isSupported && includeUnsupported
+    const bytes = !isSupported && unsupported
       ? frames.unsupported.write(tags[id], { id, version, unsynch })
       : frameSpec.write(tags[id], { id, version, unsynch })
 

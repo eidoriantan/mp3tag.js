@@ -192,7 +192,6 @@ export default class MP3Tag {
         unsynch: false,
         version: defaultVersion,
         padding: 2048,
-        skipUnsupported: true, // TODO: `skipUnsupported` is deprecated.
         unsupported: false
       }
     })

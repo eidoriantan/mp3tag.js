@@ -26,10 +26,6 @@ export interface MP3TagDefaultWriteOptions {
     unsynch: boolean;
     version: MP3TagV2Versions;
     padding: number;
-    /**
-     * @deprecated use `unsupported` instead
-     */
-    skipUnsupported: boolean;
     unsupported: boolean;
   };
 }

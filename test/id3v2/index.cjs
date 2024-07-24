@@ -252,8 +252,6 @@ describe('ID3v2', function () {
         id3v2: {
           include: true,
           version: 4,
-          // TODO: `skipUnsupported` is deprecated
-          skipUnsupported: false,
           unsupported: true
         }
       })
