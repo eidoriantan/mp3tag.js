@@ -972,6 +972,16 @@ export const POP = {
   version: [2]
 }
 
+/**
+ *  Non-standard ID3v2.2 frames
+ */
+export const GP1 = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
 export const unsupported = {
   validate: validators.unsupportedFrame,
   write: writers.unsupportedFrame

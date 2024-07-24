@@ -57,6 +57,7 @@ export interface MP3TagTagsV2Defined {
     GEO?: Array<frames.MP3TagGEOBFrame>;
     CNT?: frames.MP3TagTextFrame;
     POP?: Array<frames.MP3TagPOPMFrame>;
+    GP1?: frames.MP3TagTextFrame;
     APIC?: Array<frames.MP3TagAPICFrame>;
     COMM?: Array<frames.MP3TagLangDescFrame>;
     ETCO?: frames.MP3TagETCOFrame;
