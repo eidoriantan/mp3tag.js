@@ -74,8 +74,8 @@ describe('ID3v2', function () {
       const titleBytes = bytes.subarray(16, 39)
       const expectedTitle = new Uint8Array([
         1, 255, 254, 78, 0, 69, 0, 87,
-        0,  32,   0, 84, 0, 73, 0, 84,
-        0,  76,   0, 69, 0,  0, 0
+        0, 32, 0, 84, 0, 73, 0, 84,
+        0, 76, 0, 69, 0, 0, 0
       ])
 
       assert.deepStrictEqual(titleBytes, expectedTitle)
