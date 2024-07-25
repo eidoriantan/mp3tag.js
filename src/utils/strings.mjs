@@ -85,6 +85,7 @@ export function encodeString (string, format = 'windows1251') {
     }
 
     case 'windows1251':
+    case 'windows-1251':
     default:
       for (let i = 0; i < string.length; i++) {
         bytes.push(string.charCodeAt(i))
@@ -92,4 +93,35 @@ export function encodeString (string, format = 'windows1251') {
   }
 
   return bytes
+}
+
+export function encoding2Index (encoding) {
+  let index = -1
+
+  switch (encoding) {
+    case 'windows1251':
+    case 'windows-1251':
+      index = 0
+      break
+
+    case 'utf16':
+    case 'utf-16':
+      index = 1
+      break
+
+    case 'utf16be':
+    case 'utf-16be':
+      index = 2
+      break
+
+    case 'utf8':
+    case 'utf-8':
+      index = 3
+      break
+
+    default:
+      index = -1
+  }
+
+  return index
 }

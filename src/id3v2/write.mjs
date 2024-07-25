@@ -9,7 +9,7 @@ import {
   dataBlock,
   longToBytes
 } from '../utils/bytes.mjs'
-import { encodeString, ENCODINGS } from '../utils/strings.mjs'
+import { encodeString } from '../utils/strings.mjs'
 
 function getHeaderBytes (id, size, version, flags) {
   const idBytes = encodeString(id)
@@ -52,24 +52,21 @@ function unsynchData (data, version) {
 }
 
 export function textFrame (value, options) {
-  const { id, version, unsynch } = options
-  let encoding = 0
+  const { id, version, unsynch, encoding, encodingIndex } = options
   let strBytes = []
 
   switch (version) {
     case 2:
     case 3:
-      encoding = 1
-      strBytes = encodeString(value.replace(/\\\\/g, '/') + '\0', 'utf-16')
+      strBytes = encodeString(value.replace(/\\\\/g, '/') + '\0', encoding)
       break
 
     case 4:
-      encoding = 3
-      strBytes = encodeString(value.replace(/\\\\/g, '\0') + '\0', 'utf-8')
+      strBytes = encodeString(value.replace(/\\\\/g, '\0') + '\0', encoding)
       break
   }
 
-  let data = mergeBytes(encoding, strBytes)
+  let data = mergeBytes(encodingIndex, strBytes)
   if (unsynch) data = unsynchData(data, version)
 
   const header = getHeaderBytes(id, data.length, version, {
@@ -128,29 +125,14 @@ export function urlFrame (value, options) {
 }
 
 export function txxxFrame (values, options) {
-  const { id, version, unsynch } = options
+  const { id, version, unsynch, encoding, encodingIndex } = options
   const bytes = []
 
   values.forEach(txxx => {
-    let encoding = 0
-    let descBytes, strBytes
+    const descBytes = encodeString(txxx.description + '\0', encoding)
+    const strBytes = encodeString(txxx.text + '\0', encoding)
 
-    switch (version) {
-      case 2:
-      case 3:
-        encoding = 1
-        descBytes = encodeString(txxx.description + '\0', 'utf-16')
-        strBytes = encodeString(txxx.text + '\0', 'utf-16')
-        break
-
-      case 4:
-        encoding = 3
-        descBytes = encodeString(txxx.description + '\0', 'utf-8')
-        strBytes = encodeString(txxx.text + '\0', 'utf-8')
-        break
-    }
-
-    let data = mergeBytes(encoding, descBytes, strBytes)
+    let data = mergeBytes(encodingIndex, descBytes, strBytes)
     if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
@@ -166,29 +148,14 @@ export function txxxFrame (values, options) {
 }
 
 export function wxxxFrame (values, options) {
-  const { id, version, unsynch } = options
+  const { id, version, unsynch, encoding, encodingIndex } = options
   const bytes = []
 
   values.forEach(wxxx => {
-    let encoding = 0
-    let descBytes, strBytes
+    const descBytes = encodeString(wxxx.description + '\0', encoding)
+    const strBytes = encodeString(wxxx.url + '\0')
 
-    switch (version) {
-      case 2:
-      case 3:
-        encoding = 1
-        descBytes = encodeString(wxxx.description + '\0', 'utf-16')
-        strBytes = encodeString(wxxx.url + '\0')
-        break
-
-      case 4:
-        encoding = 3
-        descBytes = encodeString(wxxx.description + '\0', 'utf-8')
-        strBytes = encodeString(wxxx.url + '\0')
-        break
-    }
-
-    let data = mergeBytes(encoding, descBytes, strBytes)
+    let data = mergeBytes(encodingIndex, descBytes, strBytes)
     if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
@@ -209,30 +176,15 @@ export function iplsFrame (value, options) {
 }
 
 export function langDescFrame (values, options) {
-  const { id, version, unsynch } = options
+  const { id, version, unsynch, encoding, encodingIndex } = options
   const bytes = []
 
   values.forEach(langDesc => {
-    let encoding = 0
     const langBytes = encodeString(langDesc.language)
-    let descBytes, textBytes
+    const descBytes = encodeString(langDesc.descriptor + '\0', encoding)
+    const textBytes = encodeString(langDesc.text + '\0', encoding)
 
-    switch (version) {
-      case 2:
-      case 3:
-        encoding = 1
-        descBytes = encodeString(langDesc.descriptor + '\0', 'utf-16')
-        textBytes = encodeString(langDesc.text + '\0', 'utf-16')
-        break
-
-      case 4:
-        encoding = 3
-        descBytes = encodeString(langDesc.descriptor + '\0', 'utf-8')
-        textBytes = encodeString(langDesc.text + '\0', 'utf-8')
-        break
-    }
-
-    let data = mergeBytes(encoding, langBytes, descBytes, textBytes)
+    let data = mergeBytes(encodingIndex, langBytes, descBytes, textBytes)
     if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
@@ -248,29 +200,15 @@ export function langDescFrame (values, options) {
 }
 
 export function apicFrame (values, options) {
-  const { id, version, unsynch } = options
+  const { id, version, unsynch, encoding, encodingIndex } = options
   const bytes = []
 
   values.forEach(apic => {
-    let encoding = 0
     const mimeBytes = encodeString(apic.format + '\0')
     const imageBytes = new Uint8Array(apic.data)
-    let strBytes = []
+    const strBytes = encodeString(apic.description + '\0', encoding)
 
-    switch (version) {
-      case 2:
-      case 3:
-        encoding = 1
-        strBytes = encodeString(apic.description + '\0', 'utf-16')
-        break
-
-      case 4:
-        encoding = 3
-        strBytes = encodeString(apic.description + '\0', 'utf-8')
-        break
-    }
-
-    let data = mergeBytes(encoding, mimeBytes, apic.type, strBytes, imageBytes)
+    let data = mergeBytes(encodingIndex, mimeBytes, apic.type, strBytes, imageBytes)
     if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
@@ -286,30 +224,16 @@ export function apicFrame (values, options) {
 }
 
 export function geobFrame (values, options) {
-  const { id, version, unsynch } = options
+  const { id, version, unsynch, encoding, encodingIndex } = options
   const bytes = []
 
   values.forEach(geob => {
     const mime = encodeString(geob.format + '\0')
     const object = new Uint8Array(geob.object)
-    let encoding, filename, description
+    const filename = encodeString(geob.filename + '\0', encoding)
+    const description = encodeString(geob.description + '\0', encoding)
 
-    switch (version) {
-      case 2:
-      case 3:
-        encoding = 1
-        filename = encodeString(geob.filename + '\0', 'utf-16')
-        description = encodeString(geob.description + '\0', 'utf-16')
-        break
-
-      case 4:
-        encoding = 3
-        filename = encodeString(geob.filename + '\0', 'utf-8')
-        description = encodeString(geob.description + '\0', 'utf-8')
-        break
-    }
-
-    let data = mergeBytes(encoding, mime, filename, description, object)
+    let data = mergeBytes(encodingIndex, mime, filename, description, object)
     if (unsynch) data = unsynchData(data, version)
 
     const header = getHeaderBytes(id, data.length, version, {
@@ -348,27 +272,13 @@ export function ufidFrame (values, options) {
 }
 
 export function userFrame (value, options) {
-  const { id, version, unsynch } = options
+  const { id, version, unsynch, encoding, encodingIndex } = options
   const bytes = []
 
-  let encoding = 0
   const langBytes = encodeString(value.language)
-  let textBytes
+  const textBytes = encodeString(value.text + '\0', encoding)
 
-  switch (version) {
-    case 2:
-    case 3:
-      encoding = 1
-      textBytes = encodeString(value.text + '\0', 'utf-16')
-      break
-
-    case 4:
-      encoding = 3
-      textBytes = encodeString(value.text + '\0', 'utf-8')
-      break
-  }
-
-  let data = mergeBytes(encoding, langBytes, textBytes)
+  let data = mergeBytes(encodingIndex, langBytes, textBytes)
   if (unsynch) data = unsynchData(data, version)
 
   const header = getHeaderBytes(id, data.length, version, {
@@ -383,27 +293,13 @@ export function userFrame (value, options) {
 }
 
 export function owneFrame (value, options) {
-  const { id, version, unsynch } = options
-  let encoding = 0
+  const { id, version, unsynch, encoding, encodingIndex } = options
   const codeBytes = encodeString(value.currencyCode)
   const priceBytes = encodeString(value.currencyPrice + '\0')
   const dateBytes = encodeString(value.date)
-  let sellerBytes
+  const sellerBytes = encodeString(value.seller, encoding)
 
-  switch (version) {
-    case 2:
-    case 3:
-      encoding = 1
-      sellerBytes = encodeString(value.seller, 'utf-16')
-      break
-
-    case 4:
-      encoding = 3
-      sellerBytes = encodeString(value.seller, 'utf-8')
-      break
-  }
-
-  let data = mergeBytes(encoding, codeBytes, priceBytes, dateBytes, sellerBytes)
+  let data = mergeBytes(encodingIndex, codeBytes, priceBytes, dateBytes, sellerBytes)
   if (unsynch) data = unsynchData(data, version)
 
   const header = getHeaderBytes(id, data.length, version, {
@@ -585,26 +481,24 @@ function parseLyrics (lyrics, encodingString) {
 }
 
 export function syltFrame (values, options) {
-  const { id, version, unsynch } = options
+  const { id, version, unsynch, encoding, encodingIndex } = options
   const bytes = []
-  const encoding = version === 3 || version === 2 ? 1 : version === 4 ? 3 : 0
-  const encodingString = ENCODINGS[encoding]
 
   values.forEach(sylt => {
     const langBytes = encodeString(sylt.language)
-    const descBytes = encodeString(sylt.descriptor + '\0', encodingString)
+    const descBytes = encodeString(sylt.descriptor + '\0', encoding)
 
     let dataBytes = []
     if (sylt.data) {
       sylt.data.forEach(({ time, line }) => {
-        const string = encodeString(line + '\0', encodingString)
+        const string = encodeString(line + '\0', encoding)
         dataBytes = mergeBytes(dataBytes, string, timeBytes(time))
       })
     } else if (sylt.lyrics) {
-      dataBytes = parseLyrics(sylt.lyrics, encodingString)
+      dataBytes = parseLyrics(sylt.lyrics, encoding)
     }
 
-    let data = mergeBytes(encoding, langBytes, sylt.format, sylt.type,
+    let data = mergeBytes(encodingIndex, langBytes, sylt.format, sylt.type,
       descBytes, dataBytes)
     if (unsynch) data = unsynchData(data, version)
 

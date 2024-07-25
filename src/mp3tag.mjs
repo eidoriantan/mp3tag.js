@@ -7,6 +7,7 @@ import * as ID3v2 from './id3v2/index.mjs'
 import { mergeBytes } from './utils/bytes.mjs'
 import { overwriteDefault } from './utils/objects.mjs'
 import { isBuffer } from './utils/types.mjs'
+import { encoding2Index } from './utils/strings.mjs'
 
 export default class MP3Tag {
   get name () { return 'MP3Tag' }
@@ -179,20 +180,23 @@ export default class MP3Tag {
 
   static writeBuffer (buffer, tags, options = {}, verbose = false) {
     const defaultVersion = tags.v2Details ? tags.v2Details.version[0] : 3
+    const defaultEncoding = 'utf-8'
     let audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer))
 
     options = overwriteDefault(options, {
       strict: false,
+      encoding: defaultEncoding,
       id3v1: {
         include: false,
-        encoding: 'utf-8'
+        encoding: typeof options.id3v1 !== 'undefined' ? options.id3v1.encoding : defaultEncoding
       },
       id3v2: {
         include: true,
         unsynch: false,
         version: defaultVersion,
         padding: 2048,
-        unsupported: false
+        unsupported: false,
+        encoding: typeof options.id3v2 !== 'undefined' ? options.id3v2.encoding : defaultEncoding
       }
     })
 
@@ -201,13 +205,16 @@ export default class MP3Tag {
       ID3v1.validate(tags.v1, options.strict)
 
       if (verbose) console.log('Writing ID3v1...')
-      const encoded = ID3v1.encode(tags.v1, options.encoding)
+      const encoding = options.id3v1.encoding || options.encoding
+      const encoded = ID3v1.encode(tags.v1, encoding)
       const tagBytes = new Uint8Array(encoded)
       audio = mergeBytes(audio, tagBytes)
     }
 
     if (options.id3v2.include) {
       if (verbose) console.log('Validating ID3v2...')
+      options.id3v2.encoding = options.id3v2.encoding || options.encoding
+      options.id3v2.encodingIndex = encoding2Index(options.id3v2.encoding)
       ID3v2.validate(tags.v2, options.strict, options.id3v2)
 
       if (verbose) console.log('Writing ID3v2...')

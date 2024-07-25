@@ -117,10 +117,14 @@ function decodeFrame (bytes, options) {
 }
 
 export function validate (tags, strict, options) {
-  const { version, unsupported } = options
+  const { version, unsupported, encoding, encodingIndex } = options
 
   if (version !== 2 && version !== 3 && version !== 4) {
     throw new Error('Unknown provided version')
+  }
+
+  if (encodingIndex < 0) {
+    throw new Error(`Unknown provided encoding: ${encoding}`)
   }
 
   for (const id in tags) {
@@ -143,7 +147,7 @@ export function validate (tags, strict, options) {
 }
 
 export function encode (tags, options) {
-  const { version, padding, unsynch, unsupported } = options
+  const { version, padding, unsynch, unsupported, encoding, encodingIndex } = options
   const headerBytes = [0x49, 0x44, 0x33, version, 0]
   let flagsByte = 0
   const sizeView = new BufferView(4)
@@ -156,9 +160,10 @@ export function encode (tags, options) {
 
     if (!isSupported && !unsupported) continue
 
+    const writeOptions = { id, version, unsynch, encoding, encodingIndex }
     const bytes = !isSupported && unsupported
-      ? frames.unsupported.write(tags[id], { id, version, unsynch })
-      : frameSpec.write(tags[id], { id, version, unsynch })
+      ? frames.unsupported.write(tags[id], writeOptions)
+      : frameSpec.write(tags[id], writeOptions)
 
     bytes.forEach(byte => framesBytes.push(byte))
   }
