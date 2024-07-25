@@ -54,6 +54,32 @@ describe('ID3v2', function () {
       assert.deepStrictEqual(this.mp3tag.tags.track, '')
       assert.deepStrictEqual(this.mp3tag.tags.genre, '')
     })
+
+    it('Write data with different encodings', function () {
+      this.mp3tag.tags.v2.TT2 = 'NEW TITLE'
+      this.mp3tag.tags.artist = 'NEW ARTIST'
+      this.mp3tag.save({
+        strict: true,
+        encoding: 'utf-16',
+        id3v2: {
+          padding: 0
+        }
+      })
+      if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+      this.mp3tag.read()
+      if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+      const bytes = new Uint8Array(this.mp3tag.buffer)
+      const titleBytes = bytes.subarray(16, 39)
+      const expectedTitle = new Uint8Array([
+        1, 255, 254, 78, 0, 69, 0, 87,
+        0,  32,   0, 84, 0, 73, 0, 84,
+        0,  76,   0, 69, 0,  0, 0
+      ])
+
+      assert.deepStrictEqual(titleBytes, expectedTitle)
+    })
   })
 
   describe('MP3 with supported frames', function () {
