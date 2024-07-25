@@ -4199,12 +4199,37 @@
           break;
         }
       case 'windows1251':
+      case 'windows-1251':
       default:
         for (var _i = 0; _i < string.length; _i++) {
           bytes.push(string.charCodeAt(_i));
         }
     }
     return bytes;
+  }
+  function encoding2Index(encoding) {
+    var index = -1;
+    switch (encoding) {
+      case 'windows1251':
+      case 'windows-1251':
+        index = 0;
+        break;
+      case 'utf16':
+      case 'utf-16':
+        index = 1;
+        break;
+      case 'utf16be':
+      case 'utf-16be':
+        index = 2;
+        break;
+      case 'utf8':
+      case 'utf-8':
+        index = 3;
+        break;
+      default:
+        index = -1;
+    }
+    return index;
   }
 
   function isBuffer(param) {
@@ -7406,21 +7431,20 @@
   function textFrame(value, options) {
     var id = options.id,
       version = options.version,
-      unsynch = options.unsynch;
-    var encoding = 0;
+      unsynch = options.unsynch,
+      encoding = options.encoding,
+      encodingIndex = options.encodingIndex;
     var strBytes = [];
     switch (version) {
       case 2:
       case 3:
-        encoding = 1;
-        strBytes = encodeString(value.replace(/\\\\/g, '/') + '\0', 'utf-16');
+        strBytes = encodeString(value.replace(/\\\\/g, '/') + '\0', encoding);
         break;
       case 4:
-        encoding = 3;
-        strBytes = encodeString(value.replace(/\\\\/g, '\0') + '\0', 'utf-8');
+        strBytes = encodeString(value.replace(/\\\\/g, '\0') + '\0', encoding);
         break;
     }
-    var data = mergeBytes(encoding, strBytes);
+    var data = mergeBytes(encodingIndex, strBytes);
     if (unsynch) data = unsynchData(data, version);
     var header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -7470,25 +7494,14 @@
   function txxxFrame(values, options) {
     var id = options.id,
       version = options.version,
-      unsynch = options.unsynch;
+      unsynch = options.unsynch,
+      encoding = options.encoding,
+      encodingIndex = options.encodingIndex;
     var bytes = [];
     values.forEach(function (txxx) {
-      var encoding = 0;
-      var descBytes, strBytes;
-      switch (version) {
-        case 2:
-        case 3:
-          encoding = 1;
-          descBytes = encodeString(txxx.description + '\0', 'utf-16');
-          strBytes = encodeString(txxx.text + '\0', 'utf-16');
-          break;
-        case 4:
-          encoding = 3;
-          descBytes = encodeString(txxx.description + '\0', 'utf-8');
-          strBytes = encodeString(txxx.text + '\0', 'utf-8');
-          break;
-      }
-      var data = mergeBytes(encoding, descBytes, strBytes);
+      var descBytes = encodeString(txxx.description + '\0', encoding);
+      var strBytes = encodeString(txxx.text + '\0', encoding);
+      var data = mergeBytes(encodingIndex, descBytes, strBytes);
       if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
@@ -7504,25 +7517,14 @@
   function wxxxFrame(values, options) {
     var id = options.id,
       version = options.version,
-      unsynch = options.unsynch;
+      unsynch = options.unsynch,
+      encoding = options.encoding,
+      encodingIndex = options.encodingIndex;
     var bytes = [];
     values.forEach(function (wxxx) {
-      var encoding = 0;
-      var descBytes, strBytes;
-      switch (version) {
-        case 2:
-        case 3:
-          encoding = 1;
-          descBytes = encodeString(wxxx.description + '\0', 'utf-16');
-          strBytes = encodeString(wxxx.url + '\0');
-          break;
-        case 4:
-          encoding = 3;
-          descBytes = encodeString(wxxx.description + '\0', 'utf-8');
-          strBytes = encodeString(wxxx.url + '\0');
-          break;
-      }
-      var data = mergeBytes(encoding, descBytes, strBytes);
+      var descBytes = encodeString(wxxx.description + '\0', encoding);
+      var strBytes = encodeString(wxxx.url + '\0');
+      var data = mergeBytes(encodingIndex, descBytes, strBytes);
       if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
@@ -7542,26 +7544,15 @@
   function langDescFrame(values, options) {
     var id = options.id,
       version = options.version,
-      unsynch = options.unsynch;
+      unsynch = options.unsynch,
+      encoding = options.encoding,
+      encodingIndex = options.encodingIndex;
     var bytes = [];
     values.forEach(function (langDesc) {
-      var encoding = 0;
       var langBytes = encodeString(langDesc.language);
-      var descBytes, textBytes;
-      switch (version) {
-        case 2:
-        case 3:
-          encoding = 1;
-          descBytes = encodeString(langDesc.descriptor + '\0', 'utf-16');
-          textBytes = encodeString(langDesc.text + '\0', 'utf-16');
-          break;
-        case 4:
-          encoding = 3;
-          descBytes = encodeString(langDesc.descriptor + '\0', 'utf-8');
-          textBytes = encodeString(langDesc.text + '\0', 'utf-8');
-          break;
-      }
-      var data = mergeBytes(encoding, langBytes, descBytes, textBytes);
+      var descBytes = encodeString(langDesc.descriptor + '\0', encoding);
+      var textBytes = encodeString(langDesc.text + '\0', encoding);
+      var data = mergeBytes(encodingIndex, langBytes, descBytes, textBytes);
       if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
@@ -7577,25 +7568,15 @@
   function apicFrame(values, options) {
     var id = options.id,
       version = options.version,
-      unsynch = options.unsynch;
+      unsynch = options.unsynch,
+      encoding = options.encoding,
+      encodingIndex = options.encodingIndex;
     var bytes = [];
     values.forEach(function (apic) {
-      var encoding = 0;
       var mimeBytes = encodeString(apic.format + '\0');
       var imageBytes = new Uint8Array(apic.data);
-      var strBytes = [];
-      switch (version) {
-        case 2:
-        case 3:
-          encoding = 1;
-          strBytes = encodeString(apic.description + '\0', 'utf-16');
-          break;
-        case 4:
-          encoding = 3;
-          strBytes = encodeString(apic.description + '\0', 'utf-8');
-          break;
-      }
-      var data = mergeBytes(encoding, mimeBytes, apic.type, strBytes, imageBytes);
+      var strBytes = encodeString(apic.description + '\0', encoding);
+      var data = mergeBytes(encodingIndex, mimeBytes, apic.type, strBytes, imageBytes);
       if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
@@ -7611,26 +7592,16 @@
   function geobFrame(values, options) {
     var id = options.id,
       version = options.version,
-      unsynch = options.unsynch;
+      unsynch = options.unsynch,
+      encoding = options.encoding,
+      encodingIndex = options.encodingIndex;
     var bytes = [];
     values.forEach(function (geob) {
       var mime = encodeString(geob.format + '\0');
       var object = new Uint8Array(geob.object);
-      var encoding, filename, description;
-      switch (version) {
-        case 2:
-        case 3:
-          encoding = 1;
-          filename = encodeString(geob.filename + '\0', 'utf-16');
-          description = encodeString(geob.description + '\0', 'utf-16');
-          break;
-        case 4:
-          encoding = 3;
-          filename = encodeString(geob.filename + '\0', 'utf-8');
-          description = encodeString(geob.description + '\0', 'utf-8');
-          break;
-      }
-      var data = mergeBytes(encoding, mime, filename, description, object);
+      var filename = encodeString(geob.filename + '\0', encoding);
+      var description = encodeString(geob.description + '\0', encoding);
+      var data = mergeBytes(encodingIndex, mime, filename, description, object);
       if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
@@ -7667,23 +7638,13 @@
   function userFrame(value, options) {
     var id = options.id,
       version = options.version,
-      unsynch = options.unsynch;
+      unsynch = options.unsynch,
+      encoding = options.encoding,
+      encodingIndex = options.encodingIndex;
     var bytes = [];
-    var encoding = 0;
     var langBytes = encodeString(value.language);
-    var textBytes;
-    switch (version) {
-      case 2:
-      case 3:
-        encoding = 1;
-        textBytes = encodeString(value.text + '\0', 'utf-16');
-        break;
-      case 4:
-        encoding = 3;
-        textBytes = encodeString(value.text + '\0', 'utf-8');
-        break;
-    }
-    var data = mergeBytes(encoding, langBytes, textBytes);
+    var textBytes = encodeString(value.text + '\0', encoding);
+    var data = mergeBytes(encodingIndex, langBytes, textBytes);
     if (unsynch) data = unsynchData(data, version);
     var header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -7698,24 +7659,14 @@
   function owneFrame(value, options) {
     var id = options.id,
       version = options.version,
-      unsynch = options.unsynch;
-    var encoding = 0;
+      unsynch = options.unsynch,
+      encoding = options.encoding,
+      encodingIndex = options.encodingIndex;
     var codeBytes = encodeString(value.currencyCode);
     var priceBytes = encodeString(value.currencyPrice + '\0');
     var dateBytes = encodeString(value.date);
-    var sellerBytes;
-    switch (version) {
-      case 2:
-      case 3:
-        encoding = 1;
-        sellerBytes = encodeString(value.seller, 'utf-16');
-        break;
-      case 4:
-        encoding = 3;
-        sellerBytes = encodeString(value.seller, 'utf-8');
-        break;
-    }
-    var data = mergeBytes(encoding, codeBytes, priceBytes, dateBytes, sellerBytes);
+    var sellerBytes = encodeString(value.seller, encoding);
+    var data = mergeBytes(encodingIndex, codeBytes, priceBytes, dateBytes, sellerBytes);
     if (unsynch) data = unsynchData(data, version);
     var header = getHeaderBytes(id, data.length, version, {
       unsynchronisation: unsynch,
@@ -7895,25 +7846,25 @@
   function syltFrame(values, options) {
     var id = options.id,
       version = options.version,
-      unsynch = options.unsynch;
+      unsynch = options.unsynch,
+      encoding = options.encoding,
+      encodingIndex = options.encodingIndex;
     var bytes = [];
-    var encoding = version === 3 || version === 2 ? 1 : version === 4 ? 3 : 0;
-    var encodingString = ENCODINGS[encoding];
     values.forEach(function (sylt) {
       var langBytes = encodeString(sylt.language);
-      var descBytes = encodeString(sylt.descriptor + '\0', encodingString);
+      var descBytes = encodeString(sylt.descriptor + '\0', encoding);
       var dataBytes = [];
       if (sylt.data) {
         sylt.data.forEach(function (_ref) {
           var time = _ref.time,
             line = _ref.line;
-          var string = encodeString(line + '\0', encodingString);
+          var string = encodeString(line + '\0', encoding);
           dataBytes = mergeBytes(dataBytes, string, timeBytes(time));
         });
       } else if (sylt.lyrics) {
-        dataBytes = parseLyrics(sylt.lyrics, encodingString);
+        dataBytes = parseLyrics(sylt.lyrics, encoding);
       }
-      var data = mergeBytes(encoding, langBytes, sylt.format, sylt.type, descBytes, dataBytes);
+      var data = mergeBytes(encodingIndex, langBytes, sylt.format, sylt.type, descBytes, dataBytes);
       if (unsynch) data = unsynchData(data, version);
       var header = getHeaderBytes(id, data.length, version, {
         unsynchronisation: unsynch,
@@ -8858,6 +8809,16 @@
     write: popmFrame,
     version: [2]
   };
+
+  /**
+   *  Non-standard ID3v2.2 frames
+   */
+  var GP1 = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
   var unsupported = {
     validate: unsupportedFrame$1,
     write: unsupportedFrame
@@ -9003,6 +8964,7 @@
     GEO: GEO,
     CNT: CNT,
     POP: POP,
+    GP1: GP1,
     unsupported: unsupported
   });
 
@@ -9112,22 +9074,24 @@
     return frame;
   }
   function validate(tags, strict, options) {
-    // TODO: `skipUnsupported` is deprecated.
     var version = options.version,
-      skipUnsupported = options.skipUnsupported,
-      unsupported$1 = options.unsupported;
-    var includeUnsupported = unsupported$1 || !skipUnsupported;
+      unsupported$1 = options.unsupported,
+      encoding = options.encoding,
+      encodingIndex = options.encodingIndex;
     if (version !== 2 && version !== 3 && version !== 4) {
       throw new Error('Unknown provided version');
+    }
+    if (encodingIndex < 0) {
+      throw new Error("Unknown provided encoding: ".concat(encoding));
     }
     for (var id in tags) {
       var frameSpec = frames[id];
       var isSupported = frameSpec && frameSpec.version.includes(version);
-      if (strict && !isSupported && includeUnsupported) {
+      if (strict && !isSupported && unsupported$1) {
         throw new Error("".concat(id, " is not supported in ID3v2.").concat(version));
       }
       try {
-        if (isSupported || frameSpec) frameSpec.validate(tags[id], version, strict);else if (includeUnsupported) unsupported.validate(tags[id], version, strict);
+        if (isSupported || frameSpec) frameSpec.validate(tags[id], version, strict);else if (unsupported$1) unsupported.validate(tags[id], version, strict);
       } catch (error) {
         throw new Error("".concat(error.message, " at ").concat(id));
       }
@@ -9135,13 +9099,12 @@
     return true;
   }
   function encode(tags, options) {
-    // TODO: `skipUnsupported` is deprecated.
     var version = options.version,
       padding = options.padding,
       unsynch = options.unsynch,
-      skipUnsupported = options.skipUnsupported,
-      unsupported$1 = options.unsupported;
-    var includeUnsupported = unsupported$1 || !skipUnsupported;
+      unsupported$1 = options.unsupported,
+      encoding = options.encoding,
+      encodingIndex = options.encodingIndex;
     var headerBytes = [0x49, 0x44, 0x33, version, 0];
     var flagsByte = 0;
     var sizeView = new BufferView(4);
@@ -9150,16 +9113,15 @@
     for (var id in tags) {
       var frameSpec = frames[id];
       var isSupported = frameSpec && frameSpec.version.includes(version);
-      if (!isSupported && !includeUnsupported) continue;
-      var bytes = !isSupported && includeUnsupported ? unsupported.write(tags[id], {
+      if (!isSupported && !unsupported$1) continue;
+      var writeOptions = {
         id: id,
         version: version,
-        unsynch: unsynch
-      }) : frameSpec.write(tags[id], {
-        id: id,
-        version: version,
-        unsynch: unsynch
-      });
+        unsynch: unsynch,
+        encoding: encoding,
+        encodingIndex: encodingIndex
+      };
+      var bytes = !isSupported && unsupported$1 ? unsupported.write(tags[id], writeOptions) : frameSpec.write(tags[id], writeOptions);
       bytes.forEach(function (_byte) {
         return framesBytes.push(_byte);
       });
@@ -9192,7 +9154,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '3.10.0';
+        return '3.11.0';
       },
       set: function set(value) {
         throw new Error('Unable to set this property');
@@ -9374,33 +9336,37 @@
         var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
         var verbose = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
         var defaultVersion = tags.v2Details ? tags.v2Details.version[0] : 3;
+        var defaultEncoding = 'utf-8';
         var audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer));
         options = overwriteDefault(options, {
           strict: false,
+          encoding: defaultEncoding,
           id3v1: {
             include: false,
-            encoding: 'utf-8'
+            encoding: typeof options.id3v1 !== 'undefined' ? options.id3v1.encoding : defaultEncoding
           },
           id3v2: {
             include: true,
             unsynch: false,
             version: defaultVersion,
             padding: 2048,
-            skipUnsupported: true,
-            // TODO: `skipUnsupported` is deprecated.
-            unsupported: false
+            unsupported: false,
+            encoding: typeof options.id3v2 !== 'undefined' ? options.id3v2.encoding : defaultEncoding
           }
         });
         if (options.id3v1.include) {
           if (verbose) console.log('Validating ID3v1...');
           validate$1(tags.v1, options.strict);
           if (verbose) console.log('Writing ID3v1...');
-          var encoded = encode$1(tags.v1, options.encoding);
+          var encoding = options.id3v1.encoding || options.encoding;
+          var encoded = encode$1(tags.v1, encoding);
           var tagBytes = new Uint8Array(encoded);
           audio = mergeBytes(audio, tagBytes);
         }
         if (options.id3v2.include) {
           if (verbose) console.log('Validating ID3v2...');
+          options.id3v2.encoding = options.id3v2.encoding || options.encoding;
+          options.id3v2.encodingIndex = encoding2Index(options.id3v2.encoding);
           validate(tags.v2, options.strict, options.id3v2);
           if (verbose) console.log('Writing ID3v2...');
           var _encoded = encode(tags.v2, options.id3v2);
