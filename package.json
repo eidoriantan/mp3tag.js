@@ -43,7 +43,6 @@
     "test": "mocha test/index.cjs",
     "clean": "rm -rf dist"
   },
-  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
@@ -52,11 +51,11 @@
     "@rollup/plugin-babel": "6.0.4",
     "@rollup/plugin-commonjs": "^25.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-terser": "^0.4.4",
     "core-js": "^3.7.0",
     "mocha": "^10.1.0",
     "regenerator-runtime": "0.13.11",
     "rollup": "^2.33.1",
-    "rollup-plugin-terser": "^7.0.2",
     "should": "^13.2.3",
     "standard": "^17.0.0"
   }
