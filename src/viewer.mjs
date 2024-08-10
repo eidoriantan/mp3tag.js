@@ -134,7 +134,7 @@ export default class BufferView extends DataView {
   }
 
   getUint16 (offset, length = 2, le = false) {
-    if (length % 2 !== 0) length -= 1
+    while (length % 2 !== 0) length -= 1
     const limit = offset + length
     const bytes = []
 
