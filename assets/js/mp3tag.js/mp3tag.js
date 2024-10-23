@@ -4357,7 +4357,7 @@
       value: function getUint16(offset) {
         var length = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
         var le = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-        if (length % 2 !== 0) length -= 1;
+        while (length % 2 !== 0) length -= 1;
         var limit = offset + length;
         var bytes = [];
         if (this.byteLength - limit < 0) return false;
@@ -9154,7 +9154,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '3.11.0';
+        return '3.11.1';
       },
       set: function set(value) {
         throw new Error('Unable to set this property');
