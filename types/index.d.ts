@@ -1,5 +1,11 @@
-
 import type { MP3TagTags } from './tags';
+
+type RecursivePartial<T> = {
+  [P in keyof T]?:
+    T[P] extends (infer U)[] ? RecursivePartial<U>[] :
+    T[P] extends object | undefined ? RecursivePartial<T[P]> :
+    T[P];
+};
 
 export type MP3Buffer = Buffer | ArrayBuffer;
 
@@ -32,8 +38,8 @@ export interface MP3TagDefaultWriteOptions {
   };
 }
 
-export type MP3TagReadOptions = Partial<MP3TagDefaultReadOptions>;
-export type MP3TagWriteOptions = Partial<MP3TagDefaultWriteOptions>;
+export type MP3TagReadOptions = RecursivePartial<MP3TagDefaultReadOptions>;
+export type MP3TagWriteOptions = RecursivePartial<MP3TagDefaultWriteOptions>;
 
 export class MP3Tag {
   readonly name = 'MP3Tag';
