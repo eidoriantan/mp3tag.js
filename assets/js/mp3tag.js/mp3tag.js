@@ -8990,7 +8990,7 @@
     var offset = 10;
     var limit = size;
     var pushTag = function pushTag(tag) {
-      var singleFrame = ['USER', 'OWNE', 'MCDI', 'RVAD', 'SYTC', 'ETCO', 'PCNT'];
+      var singleFrame = ['OWNE', 'MCDI', 'RVAD', 'SYTC', 'ETCO', 'PCNT'];
       switch (_typeof(tag.value)) {
         case 'number':
         case 'string':
@@ -9154,7 +9154,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '3.11.1';
+        return '3.11.2';
       },
       set: function set(value) {
         throw new Error('Unable to set this property');
