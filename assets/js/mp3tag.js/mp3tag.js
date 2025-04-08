@@ -9154,7 +9154,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '3.11.2';
+        return '3.11.3';
       },
       set: function set(value) {
         throw new Error('Unable to set this property');
