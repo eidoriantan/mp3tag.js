@@ -43,7 +43,7 @@ export type MP3TagWriteOptions = RecursivePartial<MP3TagDefaultWriteOptions>;
 
 export class MP3Tag {
   readonly name = 'MP3Tag';
-  readonly version = '3.11.3';
+  readonly version = '3.11.4';
 
   verbose: boolean;
   buffer: MP3Buffer;
