@@ -9154,7 +9154,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '3.11.3';
+        return '3.11.4';
       },
       set: function set(value) {
         throw new Error('Unable to set this property');
@@ -9354,7 +9354,7 @@
             encoding: typeof options.id3v2 !== 'undefined' ? options.id3v2.encoding : defaultEncoding
           }
         });
-        if (options.id3v1.include) {
+        if (options.id3v1.include && typeof tags.v1 !== 'undefined') {
           if (verbose) console.log('Validating ID3v1...');
           validate$1(tags.v1, options.strict);
           if (verbose) console.log('Writing ID3v1...');
@@ -9363,7 +9363,7 @@
           var tagBytes = new Uint8Array(encoded);
           audio = mergeBytes(audio, tagBytes);
         }
-        if (options.id3v2.include) {
+        if (options.id3v2.include && typeof tags.v2 !== 'undefined') {
           if (verbose) console.log('Validating ID3v2...');
           options.id3v2.encoding = options.id3v2.encoding || options.encoding;
           options.id3v2.encodingIndex = encoding2Index(options.id3v2.encoding);
