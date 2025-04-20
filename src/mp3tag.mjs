@@ -200,7 +200,7 @@ export default class MP3Tag {
       }
     })
 
-    if (options.id3v1.include) {
+    if (options.id3v1.include && typeof tags.v1 !== 'undefined') {
       if (verbose) console.log('Validating ID3v1...')
       ID3v1.validate(tags.v1, options.strict)
 
@@ -211,7 +211,7 @@ export default class MP3Tag {
       audio = mergeBytes(audio, tagBytes)
     }
 
-    if (options.id3v2.include) {
+    if (options.id3v2.include && typeof tags.v2 !== 'undefined') {
       if (verbose) console.log('Validating ID3v2...')
       options.id3v2.encoding = options.id3v2.encoding || options.encoding
       options.id3v2.encodingIndex = encoding2Index(options.id3v2.encoding)
