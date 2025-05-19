@@ -577,6 +577,13 @@ export const WFED = {
   version: [3, 4]
 }
 
+export const TCMP = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [3, 4]
+}
+
 export const TGID = {
   parse: parsers.win1251Frame,
   validate: validators.urlFrame,
@@ -976,6 +983,13 @@ export const POP = {
  *  Non-standard ID3v2.2 frames
  */
 export const GP1 = {
+  parse: parsers.textFrame,
+  validate: validators.textFrame,
+  write: writers.textFrame,
+  version: [2]
+}
+
+export const TCP = {
   parse: parsers.textFrame,
   validate: validators.textFrame,
   write: writers.textFrame,
