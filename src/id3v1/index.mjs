@@ -127,7 +127,7 @@ export function encode (tags, encoding = 'utf-8') {
   album = encodeString(album, encoding)
   year = encodeString(year, encoding)
   comment = encodeString(comment, encoding)
-  genre = GENRES.indexOf(genre)
+  genre = genre !== '' ? GENRES.indexOf(genre) : 255
 
   while (title.length < 30) title.push(0)
   while (artist.length < 30) artist.push(0)
