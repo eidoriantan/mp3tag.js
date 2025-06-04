@@ -13,7 +13,7 @@ export default class MP3Tag {
   get name () { return 'MP3Tag' }
   set name (value) { throw new Error('Unable to set this property') }
 
-  get version () { return '3.12.0' }
+  get version () { return '3.13.0' }
   set version (value) { throw new Error('Unable to set this property') }
 
   constructor (buffer, verbose = false) {
