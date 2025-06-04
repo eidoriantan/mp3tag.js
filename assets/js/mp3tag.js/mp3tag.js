@@ -4198,8 +4198,12 @@
           });
           break;
         }
+      case 'latin1':
+      case 'iso-8859-1':
       case 'windows1251':
       case 'windows-1251':
+      case 'windows1252':
+      case 'windows-1252':
       default:
         for (var _i = 0; _i < string.length; _i++) {
           bytes.push(string.charCodeAt(_i));
@@ -4210,8 +4214,12 @@
   function encoding2Index(encoding) {
     var index = -1;
     switch (encoding) {
+      case 'latin1':
+      case 'iso-8859-1':
       case 'windows1251':
       case 'windows-1251':
+      case 'windows1252':
+      case 'windows-1252':
         index = 0;
         break;
       case 'utf16':
@@ -5169,13 +5177,14 @@
     } else return false;
   }
   function decode$1(buffer) {
+    var encoding = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'utf-8';
     var view = new BufferView(buffer, buffer.byteLength - 128);
-    var title = view.getString(3, 30, 'utf-8').string.replace(/\0/g, '');
-    var artist = view.getString(33, 30, 'utf-8').string.replace(/\0/g, '');
-    var album = view.getString(63, 30, 'utf-8').string.replace(/\0/g, '');
-    var year = view.getString(93, 4, 'utf-8').string.replace(/\0/g, '');
+    var title = view.getString(3, 30, encoding).string.replace(/\0/g, '');
+    var artist = view.getString(33, 30, encoding).string.replace(/\0/g, '');
+    var album = view.getString(63, 30, encoding).string.replace(/\0/g, '');
+    var year = view.getString(93, 4, encoding).string.replace(/\0/g, '');
     var track = view.getUint8(126).toString() || '';
-    var comment = view.getString(97, track !== null ? 28 : 30, 'utf-8').string.replace(/\0/g, '');
+    var comment = view.getString(97, track !== null ? 28 : 30, encoding).string.replace(/\0/g, '');
     var genre = GENRES[view.getUint8(127)] || '';
     var tags = {
       title: title,
@@ -5196,6 +5205,7 @@
     };
   }
   function validate$1(tags, strict) {
+    var encoding = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'utf-8';
     var title = tags.title,
       artist = tags.artist,
       album = tags.album,
@@ -5205,22 +5215,22 @@
       genre = tags.genre;
     if (typeof title !== 'string') {
       throw new Error('Title is not a string');
-    } else if (encodeString(title, 'utf-8').length > 30) {
+    } else if (encodeString(title, encoding).length > 30) {
       throw new Error('Title length exceeds 30 characters');
     }
     if (typeof artist !== 'string') {
       throw new Error('Artist is not a string');
-    } else if (encodeString(artist, 'utf-8').length > 30) {
+    } else if (encodeString(artist, encoding).length > 30) {
       throw new Error('Artist length exceeds 30 characters');
     }
     if (typeof album !== 'string') {
       throw new Error('Album is not a string');
-    } else if (encodeString(album, 'utf-8').length > 30) {
+    } else if (encodeString(album, encoding).length > 30) {
       throw new Error('Album length exceeds 30 characters');
     }
     if (typeof year !== 'string') {
       throw new Error('Year is not a string');
-    } else if (encodeString(year, 'utf-8').length > 4) {
+    } else if (encodeString(year, encoding).length > 4) {
       throw new Error('Year length exceeds 4 characters');
     }
     if (typeof comment !== 'string') {
@@ -5232,10 +5242,10 @@
       throw new Error('Track should be in range 255 - 0');
     }
     if (track !== '') {
-      if (encodeString(comment, 'utf-8').length > 28) {
+      if (encodeString(comment, encoding).length > 28) {
         throw new Error('Comment length exceeds 28 characters');
       }
-    } else if (encodeString(comment, 'utf-8').length > 30) {
+    } else if (encodeString(comment, encoding).length > 30) {
       throw new Error('Comment length exceeds 30 characters');
     }
     if (typeof genre !== 'string') {
@@ -5259,7 +5269,7 @@
     album = encodeString(album, encoding);
     year = encodeString(year, encoding);
     comment = encodeString(comment, encoding);
-    genre = GENRES.indexOf(genre);
+    genre = genre !== '' ? GENRES.indexOf(genre) : 255;
     while (title.length < 30) title.push(0);
     while (artist.length < 30) artist.push(0);
     while (album.length < 30) album.push(0);
@@ -8469,6 +8479,12 @@
     write: win1251Frame,
     version: [3, 4]
   };
+  var TCMP = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [3, 4]
+  };
   var TGID = {
     parse: win1251Frame$1,
     validate: urlFrame$1,
@@ -8819,6 +8835,12 @@
     write: textFrame,
     version: [2]
   };
+  var TCP = {
+    parse: textFrame$2,
+    validate: textFrame$1,
+    write: textFrame,
+    version: [2]
+  };
   var unsupported = {
     validate: unsupportedFrame$1,
     write: unsupportedFrame
@@ -8908,6 +8930,7 @@
     WPUB: WPUB,
     WXXX: WXXX,
     WFED: WFED,
+    TCMP: TCMP,
     TGID: TGID,
     TSO2: TSO2,
     TT1: TT1,
@@ -8965,6 +8988,7 @@
     CNT: CNT,
     POP: POP,
     GP1: GP1,
+    TCP: TCP,
     unsupported: unsupported
   });
 
@@ -9154,7 +9178,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '3.11.4';
+        return '3.13.0';
       },
       set: function set(value) {
         throw new Error('Unable to set this property');
@@ -9211,11 +9235,12 @@
         options = overwriteDefault(options, {
           id3v1: true,
           id3v2: true,
-          unsupported: false
+          unsupported: false,
+          encoding: 'utf-8'
         });
         if (options.id3v1 && hasID3v1(buffer)) {
           if (verbose) console.log('ID3v1 found, reading...');
-          var _ID3v1$decode = decode$1(buffer),
+          var _ID3v1$decode = decode$1(buffer, options.encoding),
             v1Tags = _ID3v1$decode.tags,
             details = _ID3v1$decode.details;
           if (verbose) console.log('ID3v1 reading finished');
@@ -9356,9 +9381,9 @@
         });
         if (options.id3v1.include && typeof tags.v1 !== 'undefined') {
           if (verbose) console.log('Validating ID3v1...');
-          validate$1(tags.v1, options.strict);
-          if (verbose) console.log('Writing ID3v1...');
           var encoding = options.id3v1.encoding || options.encoding;
+          validate$1(tags.v1, options.strict, encoding);
+          if (verbose) console.log('Writing ID3v1...');
           var encoded = encode$1(tags.v1, encoding);
           var tagBytes = new Uint8Array(encoded);
           audio = mergeBytes(audio, tagBytes);
