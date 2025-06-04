@@ -84,8 +84,12 @@ export function encodeString (string, format = 'windows1251') {
       break
     }
 
+    case 'latin1':
+    case 'iso-8859-1':
     case 'windows1251':
     case 'windows-1251':
+    case 'windows1252':
+    case 'windows-1252':
     default:
       for (let i = 0; i < string.length; i++) {
         bytes.push(string.charCodeAt(i))
@@ -99,8 +103,12 @@ export function encoding2Index (encoding) {
   let index = -1
 
   switch (encoding) {
+    case 'latin1':
+    case 'iso-8859-1':
     case 'windows1251':
     case 'windows-1251':
+    case 'windows1252':
+    case 'windows-1252':
       index = 0
       break
 

@@ -12,13 +12,17 @@ export type MP3Buffer = Buffer | ArrayBuffer;
 export type MP3TagV2Versions = 2 | 3 | 4;
 
 export type MP3TagEncodings =
-  'utf8' | 'utf-8' | 'utf16' | 'utf16be' | 'utf-16' | 'utf-16be' |
-  'windows1251' | 'windows-1251' | '';
+  | 'utf8' | 'utf-8'
+  | 'utf16' | 'utf16be'
+  | 'utf-16' | 'utf-16be'
+  | 'windows1251' | 'windows-1251' | 'windows1252' | 'windows-1252'
+  | 'latin1' | 'iso-8859-1' | 'iso88591';
 
 export interface MP3TagDefaultReadOptions {
   id3v1: boolean;
   id3v2: boolean;
   unsupported: boolean;
+  encoding: MP3TagEncodings;
 }
 
 export interface MP3TagDefaultWriteOptions {

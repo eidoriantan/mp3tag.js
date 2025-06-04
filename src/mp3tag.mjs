@@ -36,12 +36,13 @@ export default class MP3Tag {
     options = overwriteDefault(options, {
       id3v1: true,
       id3v2: true,
-      unsupported: false
+      unsupported: false,
+      encoding: 'utf-8'
     })
 
     if (options.id3v1 && ID3v1.hasID3v1(buffer)) {
       if (verbose) console.log('ID3v1 found, reading...')
-      const { tags: v1Tags, details } = ID3v1.decode(buffer)
+      const { tags: v1Tags, details } = ID3v1.decode(buffer, options.encoding)
       if (verbose) console.log('ID3v1 reading finished')
       tags.v1 = { ...v1Tags }
       tags.v1Details = details
@@ -202,10 +203,10 @@ export default class MP3Tag {
 
     if (options.id3v1.include && typeof tags.v1 !== 'undefined') {
       if (verbose) console.log('Validating ID3v1...')
-      ID3v1.validate(tags.v1, options.strict)
+      const encoding = options.id3v1.encoding || options.encoding
+      ID3v1.validate(tags.v1, options.strict, encoding)
 
       if (verbose) console.log('Writing ID3v1...')
-      const encoding = options.id3v1.encoding || options.encoding
       const encoded = ID3v1.encode(tags.v1, encoding)
       const tagBytes = new Uint8Array(encoded)
       audio = mergeBytes(audio, tagBytes)

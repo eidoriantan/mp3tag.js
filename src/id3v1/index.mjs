@@ -47,15 +47,15 @@ export function hasID3v1 (buffer) {
   } else return false
 }
 
-export function decode (buffer) {
+export function decode (buffer, encoding = 'utf-8') {
   const view = new BufferView(buffer, buffer.byteLength - 128)
 
-  const title = view.getString(3, 30, 'utf-8').string.replace(/\0/g, '')
-  const artist = view.getString(33, 30, 'utf-8').string.replace(/\0/g, '')
-  const album = view.getString(63, 30, 'utf-8').string.replace(/\0/g, '')
-  const year = view.getString(93, 4, 'utf-8').string.replace(/\0/g, '')
+  const title = view.getString(3, 30, encoding).string.replace(/\0/g, '')
+  const artist = view.getString(33, 30, encoding).string.replace(/\0/g, '')
+  const album = view.getString(63, 30, encoding).string.replace(/\0/g, '')
+  const year = view.getString(93, 4, encoding).string.replace(/\0/g, '')
   const track = view.getUint8(126).toString() || ''
-  const comment = view.getString(97, track !== null ? 28 : 30, 'utf-8').string
+  const comment = view.getString(97, track !== null ? 28 : 30, encoding).string
     .replace(/\0/g, '')
   const genre = GENRES[view.getUint8(127)] || ''
 
@@ -65,30 +65,30 @@ export function decode (buffer) {
   return { tags, details }
 }
 
-export function validate (tags, strict) {
+export function validate (tags, strict, encoding = 'utf-8') {
   const { title, artist, album, year, comment, track, genre } = tags
 
   if (typeof title !== 'string') {
     throw new Error('Title is not a string')
-  } else if (encodeString(title, 'utf-8').length > 30) {
+  } else if (encodeString(title, encoding).length > 30) {
     throw new Error('Title length exceeds 30 characters')
   }
 
   if (typeof artist !== 'string') {
     throw new Error('Artist is not a string')
-  } else if (encodeString(artist, 'utf-8').length > 30) {
+  } else if (encodeString(artist, encoding).length > 30) {
     throw new Error('Artist length exceeds 30 characters')
   }
 
   if (typeof album !== 'string') {
     throw new Error('Album is not a string')
-  } else if (encodeString(album, 'utf-8').length > 30) {
+  } else if (encodeString(album, encoding).length > 30) {
     throw new Error('Album length exceeds 30 characters')
   }
 
   if (typeof year !== 'string') {
     throw new Error('Year is not a string')
-  } else if (encodeString(year, 'utf-8').length > 4) {
+  } else if (encodeString(year, encoding).length > 4) {
     throw new Error('Year length exceeds 4 characters')
   }
 
@@ -103,10 +103,10 @@ export function validate (tags, strict) {
   }
 
   if (track !== '') {
-    if (encodeString(comment, 'utf-8').length > 28) {
+    if (encodeString(comment, encoding).length > 28) {
       throw new Error('Comment length exceeds 28 characters')
     }
-  } else if (encodeString(comment, 'utf-8').length > 30) {
+  } else if (encodeString(comment, encoding).length > 30) {
     throw new Error('Comment length exceeds 30 characters')
   }
 
