@@ -5,7 +5,7 @@ description: >-
   JavaScript library documentations page. mp3tag.js exported class documentation
 keywords: mp3, id3, audio, tag, edit, write, documentations, docs, mp3tag
 active: mp3tag
-last_modified_at: 2024-07-25T19:18+08:00
+last_modified_at: 2025-06-04T11:52+08:00
 ---
 <div id="properties" class="Subhead bg-white position-sticky top-0">
   <div class="Subhead-heading">Properties</div>
@@ -76,7 +76,8 @@ last_modified_at: 2024-07-25T19:18+08:00
   {
     id3v1: true, // include ID3v1
     id3v2: true, // include ID3v2
-    unsupported: false // if true, parses unsupported frames as an array of bytes. Otherwise, skip
+    unsupported: false, // if true, parses unsupported frames as an array of bytes. Otherwise, skip
+    encoding: 'utf-8' // encoding to use when parsing ID3v1 tags
   }
   ```
   {% endcapture %}
