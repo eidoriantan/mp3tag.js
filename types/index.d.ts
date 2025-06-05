@@ -28,6 +28,7 @@ export interface MP3TagDefaultReadOptions {
 export interface MP3TagDefaultWriteOptions {
   strict: boolean;
   encoding: MP3TagEncodings;
+  emptyAudioNone: boolean;
   id3v1: {
     include: boolean;
     encoding: MP3TagEncodings;
@@ -56,13 +57,13 @@ export class MP3Tag {
 
   static readBuffer (buffer: MP3Buffer, options?: MP3TagReadOptions, verbose?: boolean): MP3TagTags;
   static writeBuffer (buffer: MP3Buffer, tags: MP3TagTags, options?: MP3TagWriteOptions, verbose?: boolean): MP3Buffer;
-  static getAudioBuffer (buffer: MP3Buffer): MP3Buffer;
+  static getAudioBuffer (buffer: MP3Buffer, emptyNone?: boolean): MP3Buffer;
 
   constructor (buffer: MP3Buffer, verbose?: boolean);
   read (options?: MP3TagReadOptions): MP3TagTags;
   save (options?: MP3TagWriteOptions): MP3Buffer;
   remove (): boolean;
-  getAudio (): MP3Buffer;
+  getAudio (emptyNone?: boolean): MP3Buffer;
 }
 
 export default MP3Tag;
