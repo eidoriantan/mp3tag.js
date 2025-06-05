@@ -3826,20 +3826,6 @@
   });
 
   var $$l = _export;
-  var ArrayBufferViewCore = arrayBufferViewCore;
-  var NATIVE_ARRAY_BUFFER_VIEWS = ArrayBufferViewCore.NATIVE_ARRAY_BUFFER_VIEWS;
-
-  // `ArrayBuffer.isView` method
-  // https://tc39.es/ecma262/#sec-arraybuffer.isview
-  $$l({
-    target: 'ArrayBuffer',
-    stat: true,
-    forced: !NATIVE_ARRAY_BUFFER_VIEWS
-  }, {
-    isView: ArrayBufferViewCore.isView
-  });
-
-  var $$k = _export;
   var global$c = global$w;
   var arrayBufferModule = arrayBuffer;
   var setSpecies$1 = setSpecies$3;
@@ -3849,7 +3835,7 @@
 
   // `ArrayBuffer` constructor
   // https://tc39.es/ecma262/#sec-arraybuffer-constructor
-  $$k({
+  $$l({
     global: true,
     constructor: true,
     forced: NativeArrayBuffer !== ArrayBuffer$1
@@ -3857,6 +3843,20 @@
     ArrayBuffer: ArrayBuffer$1
   });
   setSpecies$1(ARRAY_BUFFER);
+
+  var $$k = _export;
+  var ArrayBufferViewCore = arrayBufferViewCore;
+  var NATIVE_ARRAY_BUFFER_VIEWS = ArrayBufferViewCore.NATIVE_ARRAY_BUFFER_VIEWS;
+
+  // `ArrayBuffer.isView` method
+  // https://tc39.es/ecma262/#sec-arraybuffer.isview
+  $$k({
+    target: 'ArrayBuffer',
+    stat: true,
+    forced: !NATIVE_ARRAY_BUFFER_VIEWS
+  }, {
+    isView: ArrayBufferViewCore.isView
+  });
 
   var $TypeError$3 = TypeError;
   var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF; // 2 ** 53 - 1 == 9007199254740991
@@ -9178,7 +9178,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '3.13.0';
+        return '3.14.0';
       },
       set: function set(value) {
         throw new Error('Unable to set this property');
@@ -9221,7 +9221,8 @@
     }, {
       key: "getAudio",
       value: function getAudio() {
-        return MP3Tag.getAudioBuffer(this.buffer);
+        var emptyNone = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+        return MP3Tag.getAudioBuffer(this.buffer, emptyNone);
       }
     }], [{
       key: "readBuffer",
@@ -9362,10 +9363,10 @@
         var verbose = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
         var defaultVersion = tags.v2Details ? tags.v2Details.version[0] : 3;
         var defaultEncoding = 'utf-8';
-        var audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer));
         options = overwriteDefault(options, {
           strict: false,
           encoding: defaultEncoding,
+          emptyAudioNone: false,
           id3v1: {
             include: false,
             encoding: typeof options.id3v1 !== 'undefined' ? options.id3v1.encoding : defaultEncoding
@@ -9379,6 +9380,7 @@
             encoding: typeof options.id3v2 !== 'undefined' ? options.id3v2.encoding : defaultEncoding
           }
         });
+        var audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer, options.emptyAudioNone));
         if (options.id3v1.include && typeof tags.v1 !== 'undefined') {
           if (verbose) console.log('Validating ID3v1...');
           var encoding = options.id3v1.encoding || options.encoding;
@@ -9403,6 +9405,7 @@
     }, {
       key: "getAudioBuffer",
       value: function getAudioBuffer(buffer) {
+        var emptyNone = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
         if (!isBuffer(buffer)) {
           throw new TypeError('buffer is not ArrayBuffer/Buffer');
         }
@@ -9423,6 +9426,9 @@
             start = i;
             break;
           } else i++;
+        }
+        if (emptyNone && start === 0) {
+          return typeof Buffer !== 'undefined' ? Buffer.alloc(0) : new ArrayBuffer(0);
         }
         var sliced = buffer.slice(start);
         return typeof Buffer !== 'undefined' ? Buffer.from(sliced) : sliced;
