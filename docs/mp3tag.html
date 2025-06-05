@@ -5,7 +5,7 @@ description: >-
   JavaScript library documentations page. mp3tag.js exported class documentation
 keywords: mp3, id3, audio, tag, edit, write, documentations, docs, mp3tag
 active: mp3tag
-last_modified_at: 2025-06-04T11:52+08:00
+last_modified_at: 2025-06-05T19:31+08:00
 ---
 <div id="properties" class="Subhead bg-white position-sticky top-0">
   <div class="Subhead-heading">Properties</div>
@@ -119,6 +119,11 @@ last_modified_at: 2025-06-04T11:52+08:00
      * 'utf-8', 'utf8', 'utf16', 'utf-16', 'utf16be', 'utf-16be', 'windows1251', ''
      */
     encoding: 'utf-8',
+    /**
+     * If true, returns an empty buffer instead as an audio if no audio was detected.
+     * Otherwise, returns the entire buffer.
+     */
+    emptyAudioNone: false,
     id3v1: {
       include: false,          // Add ID3v1 tags to buffer
       encoding: 'utf-8'
@@ -162,17 +167,17 @@ last_modified_at: 2025-06-04T11:52+08:00
 
 <div id="mp3tag-getaudio" class="Box Box--blue Box--condensed my-3">
   <header class="Box-header Box-header--blue">
-    <span>Method: </span><strong class="Box-title">getAudio()</strong>
+    <span>Method: </span><strong class="Box-title">getAudio(emptyNone = false)</strong>
   </header>
   <div class="Box-body">
     <small class="text-gray mb-2">Return type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></small>
-    <p>Gets the audio buffer from the buffer.</p>
+    <p>Gets the audio buffer from the buffer. If <code>emptyNone</code> is false, this returns the entire buffer if no audio was detected. Otherwise, it returns an empty buffer.</p>
   </div>
 </div>
 
 <div id="mp3tag-getaudiobuffer" class="Box Box--blue Box--condensed my-3">
   <header class="Box-header Box-header--blue">
-    <span>Static Method: </span><strong class="Box-title">getAudioBuffer(buffer)</strong>
+    <span>Static Method: </span><strong class="Box-title">getAudioBuffer(buffer, emptyNone = false)</strong>
   </header>
   <div class="Box-body">
     <small class="text-gray mb-2">Return type: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a></small>
