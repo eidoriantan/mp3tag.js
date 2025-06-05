@@ -182,11 +182,11 @@ export default class MP3Tag {
   static writeBuffer (buffer, tags, options = {}, verbose = false) {
     const defaultVersion = tags.v2Details ? tags.v2Details.version[0] : 3
     const defaultEncoding = 'utf-8'
-    let audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer))
 
     options = overwriteDefault(options, {
       strict: false,
       encoding: defaultEncoding,
+      emptyAudioNone: false,
       id3v1: {
         include: false,
         encoding: typeof options.id3v1 !== 'undefined' ? options.id3v1.encoding : defaultEncoding
@@ -200,6 +200,8 @@ export default class MP3Tag {
         encoding: typeof options.id3v2 !== 'undefined' ? options.id3v2.encoding : defaultEncoding
       }
     })
+
+    let audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer, options.emptyAudioNone))
 
     if (options.id3v1.include && typeof tags.v1 !== 'undefined') {
       if (verbose) console.log('Validating ID3v1...')
@@ -248,7 +250,7 @@ export default class MP3Tag {
     return true
   }
 
-  static getAudioBuffer (buffer) {
+  static getAudioBuffer (buffer, emptyNone = false) {
     if (!isBuffer(buffer)) {
       throw new TypeError('buffer is not ArrayBuffer/Buffer')
     }
@@ -274,9 +276,13 @@ export default class MP3Tag {
       } else i++
     }
 
+    if (emptyNone && start === 0) {
+      return typeof Buffer !== 'undefined' ? Buffer.alloc(0) : new ArrayBuffer(0)
+    }
+
     const sliced = buffer.slice(start)
     return typeof Buffer !== 'undefined' ? Buffer.from(sliced) : sliced
   }
 
-  getAudio () { return MP3Tag.getAudioBuffer(this.buffer) }
+  getAudio (emptyNone = false) { return MP3Tag.getAudioBuffer(this.buffer, emptyNone) }
 }
