@@ -1,6 +1,6 @@
 {
   "name": "mp3tag.js",
-  "version": "3.14.0",
+  "version": "3.14.1",
   "description": "MP3 tagging library written in pure JavaScript",
   "keywords": [
     "node",
