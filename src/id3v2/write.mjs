@@ -353,8 +353,9 @@ export function rvadFrame (values, options) {
   bytes.push(incdec)
   bytes.push(bitsvolume)
 
-  const volumechange = values.volumechange || {}
-  const peakvolume = values.peakvolume || {}
+  const volumechange = typeof values.volumechange === 'object' ? values.volumechange : {}
+  const peakvolume = typeof values.peakvolume === 'object' ? values.peakvolume : {}
+
   const rightChangeBlock = dataBlock(volumechange.right, limit)
   const leftChangeBlock = dataBlock(volumechange.left, limit)
   const rightPeakBlock = dataBlock(peakvolume.right, limit)
@@ -365,10 +366,10 @@ export function rvadFrame (values, options) {
   leftPeakBlock.forEach(byte => bytes.push(byte))
 
   if (
-    volumechange.rightback || volumechange.leftback ||
-    peakvolume.rightback || peakvolume.leftback ||
-    volumechange.center || peakvolume.center ||
-    volumechange.bass || peakvolume.bass
+    (Array.isArray(volumechange.rightback) && volumechange.rightback.length > 0) ||
+    (Array.isArray(volumechange.leftback) && volumechange.leftback.length > 0) ||
+    (Array.isArray(peakvolume.rightback) && peakvolume.rightback.length > 0) ||
+    (Array.isArray(peakvolume.leftback) && peakvolume.leftback.length > 0)
   ) {
     const rightBackChangeBlock = dataBlock(volumechange.rightback, limit)
     const leftBackChangeBlock = dataBlock(volumechange.leftback, limit)
@@ -381,8 +382,8 @@ export function rvadFrame (values, options) {
   }
 
   if (
-    volumechange.center || peakvolume.center ||
-    volumechange.bass || peakvolume.bass
+    (Array.isArray(volumechange.center) && volumechange.center.length > 0) ||
+    (Array.isArray(peakvolume.center) && peakvolume.center.length > 0)
   ) {
     const centerChangeBlock = dataBlock(volumechange.center, limit)
     const centerPeakBlock = dataBlock(peakvolume.center, limit)
@@ -390,7 +391,10 @@ export function rvadFrame (values, options) {
     centerPeakBlock.forEach(byte => bytes.push(byte))
   }
 
-  if (volumechange.bass || peakvolume.bass) {
+  if (
+    (Array.isArray(volumechange.bass) && volumechange.bass.length > 0) ||
+    (Array.isArray(peakvolume.bass) && peakvolume.bass.length > 0)
+  ) {
     const bassChangeBlock = dataBlock(volumechange.bass, limit)
     const bassPeakBlock = dataBlock(peakvolume.bass, limit)
     bassChangeBlock.forEach(byte => bytes.push(byte))
