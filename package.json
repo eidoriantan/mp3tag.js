@@ -37,7 +37,7 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
-    "lint": "standard",
+    "lint": "standard \"src/**/*.mjs\" \"test/**/*.cjs\"",
     "postlint": "git log -1 --format=%B | commitlint",
     "pretest": "npm run lint && npm run build",
     "test": "mocha test/index.cjs",
