@@ -53,7 +53,26 @@ For browsers:
 <input type="file" id="input-file" accept="audio/mpeg">
 <script>
 const inputFile = document.getElementById('input-file')
-inputFile.onchange = function () {
+inputFile.addEventListener('change', function () {
+  [...this.files].forEach(async (file) => {
+    const buffer = await file.arrayBuffer()
+
+    // MP3Tag Usage
+    const mp3tag = new MP3Tag(buffer)
+    mp3tag.read()
+
+    // Handle error if there's any
+    if (mp3tag.error !== '') throw new Error(mp3tag.error)
+    else console.log(mp3tag.tags)
+  })
+})
+</script>
+```
+
+```html
+<input type="file" id="input-file" accept="audio/mpeg">
+<script>
+inputFile.addEventListener('change', function () {
   const reader = new FileReader()
   reader.onload = function () {
     const buffer = this.result
@@ -70,7 +89,7 @@ inputFile.onchange = function () {
   if (this.files.length > 0) {
     reader.readAsArrayBuffer(this.files[0])
   }
-}
+})
 </script>
 ```
 
@@ -87,6 +106,23 @@ mp3tag.read()
 // Handle error if there's any
 if (mp3tag.error !== '') throw new Error(mp3tag.error)
 else console.log(mp3tag.tags)
+```
+
+```javascript
+import { openAsBlob } from 'node:fs'
+import MP3Tag from 'mp3tag.js'
+
+async function main () {
+  const blob = await openAsBlob('/path/to/audio.mp3')
+  const arrayBuffer = await blob.arrayBuffer()
+  const mp3tag = new MP3Tag(arrayBuffer)
+  mp3tag.read()
+
+  if (mp3tag.error !== '') throw new Error(mp3tag.error)
+  else console.log(mp3tag.tags)
+}
+
+main()
 ```
 
 If you want a detailed documentations, please visit the documentations page at
