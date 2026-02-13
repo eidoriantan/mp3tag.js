@@ -17,7 +17,16 @@ export default class BufferView extends DataView {
     }
 
     if (ArrayBuffer.isView(params[0])) {
-      params[0] = params[0].buffer
+      const view = params[0]
+      // Preserve byteOffset and byteLength for Node.js Buffers which use shared buffer pool
+      const baseOffset = view.byteOffset
+      const baseLength = view.byteLength
+      params[0] = view.buffer
+
+      // Handle additional offset parameter (used by ID3v2.decode)
+      const additionalOffset = typeof params[1] === 'number' ? params[1] : 0
+      params[1] = baseOffset + additionalOffset
+      params[2] = baseLength - additionalOffset
     }
 
     super(...params)
