@@ -23,6 +23,7 @@ The website is also open-sourced and can be viewed at the
 * Read and write ID3v2 tags in MP4/M4A/M4V/MOV containers (via ID32 box)
 * Read and write ID3v2 tags in AIFF/AIFC files (via ID3 chunk)
 * Read and write ID3v2 tags in AAC/ADTS streams (prepended ID3v2)
+* Partial reading from Blob/File without loading entire file into memory
 * Supports unsynchronisation
 * Standards compliant. See ~~[id3.org](http://id3.org)~~
 [mutagen-specs.readthedocs.io](https://mutagen-specs.readthedocs.io/en/latest/id3/index.html)
@@ -128,6 +129,50 @@ async function main () {
 }
 
 main()
+```
+
+### Partial reading with `readBlob`
+
+For read-only scenarios, you can read the metadata without loading the entire
+file into memory. `MP3Tag.readBlob()` accepts a
+[Blob](https://developer.mozilla.org/en-US/docs/Web/API/Blob) (or `File`) and
+uses `blob.slice()` to read only the bytes it needs.
+
+In the browser:
+```html
+<input type="file" id="input-file" accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/aiff,audio/aac">
+<script>
+const inputFile = document.getElementById('input-file')
+inputFile.addEventListener('change', async function () {
+  for (const file of this.files) {
+    // Only reads headers + tag data, not the entire file
+    const tags = await MP3Tag.readBlob(file)
+    console.log(tags.title, tags.artist)
+  }
+})
+</script>
+```
+
+In Node.js (requires Node 19.8+):
+```javascript
+import { openAsBlob } from 'node:fs'
+import MP3Tag from 'mp3tag.js'
+
+const blob = await openAsBlob('/path/to/large-file.mp3')
+const tags = await MP3Tag.readBlob(blob)
+console.log(tags.title, tags.artist)
+```
+
+`readBlob` accepts the same options as `read`:
+```javascript
+const tags = await MP3Tag.readBlob(blob, {
+  id3v1: true,
+  id3v2: true,
+  mp4: true,
+  aiff: true,
+  aac: true,
+  unsupported: false
+})
 ```
 
 ### MP4/M4A Support

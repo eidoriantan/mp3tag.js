@@ -62,6 +62,7 @@ export class MP3Tag {
   error: string;
 
   static readBuffer (buffer: MP3Buffer, options?: MP3TagReadOptions, verbose?: boolean): MP3TagTags;
+  static readBlob (blob: Blob, options?: MP3TagReadOptions): Promise<MP3TagTags>;
   static writeBuffer (buffer: MP3Buffer, tags: MP3TagTags, options?: MP3TagWriteOptions, verbose?: boolean): MP3Buffer;
   static getAudioBuffer (buffer: MP3Buffer, emptyNone?: boolean): MP3Buffer;
 
