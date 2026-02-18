@@ -8,7 +8,8 @@
 **mp3tag.js** is an open-sourced JavaScript library used to edit the metadata of
 audio files. It supports ID3v1, ID3v2.2, ID3v2.3, and ID3v2.4 tags for MP3 files,
 as well as ID3v2 tags in MP4/M4A/M4V/MOV containers (ID32 box), AIFF/AIFC files
-(ID3 chunk), and AAC/ADTS streams (prepended ID3v2).
+(ID3 chunk), AAC/ADTS streams, FLAC, WAV, OGG, WavPack, and APE files
+(prepended ID3v2).
 
 Visit [https://mp3tag.js.org](https://mp3tag.js.org) to learn more about the
 library and view it in action through an [editor](https://mp3tag.js.org/editor).
@@ -23,6 +24,7 @@ The website is also open-sourced and can be viewed at the
 * Read and write ID3v2 tags in MP4/M4A/M4V/MOV containers (via ID32 box)
 * Read and write ID3v2 tags in AIFF/AIFC files (via ID3 chunk)
 * Read and write ID3v2 tags in AAC/ADTS streams (prepended ID3v2)
+* Read and write prepended ID3v2 tags in FLAC, WAV, OGG, WavPack, and APE files
 * Supports unsynchronisation
 * Standards compliant. See ~~[id3.org](http://id3.org)~~
 [mutagen-specs.readthedocs.io](https://mutagen-specs.readthedocs.io/en/latest/id3/index.html)
@@ -55,7 +57,7 @@ If you are using a browser, you can just install the library through a CDN:
 
 For browsers:
 ```html
-<input type="file" id="input-file" accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/aiff,audio/aac">
+<input type="file" id="input-file" accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/aiff,audio/aac,audio/flac,audio/wav,audio/ogg,audio/x-wavpack,audio/x-ape">
 <script>
 const inputFile = document.getElementById('input-file')
 inputFile.addEventListener('change', function () {
@@ -75,7 +77,7 @@ inputFile.addEventListener('change', function () {
 ```
 
 ```html
-<input type="file" id="input-file" accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/aiff,audio/aac">
+<input type="file" id="input-file" accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/aiff,audio/aac,audio/flac,audio/wav,audio/ogg,audio/x-wavpack,audio/x-ape">
 <script>
 inputFile.addEventListener('change', function () {
   const reader = new FileReader()
@@ -218,6 +220,165 @@ fs.writeFileSync('/path/to/audio.aac', Buffer.from(mp3tag.buffer))
 **Note:** AAC support is for raw ADTS streams (.aac files). For AAC audio in MP4
 containers (.m4a files), see the MP4/M4A Support section above.
 
+### FLAC Support
+
+mp3tag.js supports reading and writing ID3v2 tags prepended to FLAC audio files.
+The library detects the FLAC magic bytes (`fLaC`) and handles the prepended ID3v2
+tag transparently.
+
+```javascript
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+// Reading from FLAC
+const buffer = fs.readFileSync('/path/to/audio.flac')
+const mp3tag = new MP3Tag(buffer)
+mp3tag.read()
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+console.log(mp3tag.tags.title)  // Works the same as MP3
+
+// Writing to FLAC
+mp3tag.tags.v2.TIT2 = 'New Title'
+mp3tag.tags.v2.TPE1 = 'New Artist'
+mp3tag.save({ id3v2: { include: true, padding: 1024 } })
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+fs.writeFileSync('/path/to/audio.flac', Buffer.from(mp3tag.buffer))
+```
+
+**Note:** Prepending ID3v2 to FLAC is considered unusual. FLAC's native metadata
+system is [Vorbis Comments](https://xiph.org/flac/format.html#metadata_block_vorbis_comment),
+stored in FLAC metadata blocks. This library does not read or write Vorbis
+Comments — it only handles prepended ID3v2 tags.
+
+### WAV Support
+
+mp3tag.js supports reading and writing ID3v2 tags prepended to WAV audio files.
+The library detects the RIFF/WAVE header and handles the prepended ID3v2 tag
+transparently.
+
+```javascript
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+// Reading from WAV
+const buffer = fs.readFileSync('/path/to/audio.wav')
+const mp3tag = new MP3Tag(buffer)
+mp3tag.read()
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+console.log(mp3tag.tags.title)  // Works the same as MP3
+
+// Writing to WAV
+mp3tag.tags.v2.TIT2 = 'New Title'
+mp3tag.tags.v2.TPE1 = 'New Artist'
+mp3tag.save({ id3v2: { include: true, padding: 1024 } })
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+fs.writeFileSync('/path/to/audio.wav', Buffer.from(mp3tag.buffer))
+```
+
+**Note:** Prepending ID3v2 to WAV is considered unusual. WAV's native metadata
+system is [RIFF INFO](https://www.robotplanet.dk/audio/wav_meta_data/riff_info.html)
+chunks within the RIFF container. This library does not read or write RIFF INFO
+tags — it only handles prepended ID3v2 tags.
+
+### OGG Support
+
+mp3tag.js supports reading and writing ID3v2 tags prepended to OGG audio files.
+The library detects the OGG page header (`OggS`) and handles the prepended ID3v2
+tag transparently.
+
+```javascript
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+// Reading from OGG
+const buffer = fs.readFileSync('/path/to/audio.ogg')
+const mp3tag = new MP3Tag(buffer)
+mp3tag.read()
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+console.log(mp3tag.tags.title)  // Works the same as MP3
+
+// Writing to OGG
+mp3tag.tags.v2.TIT2 = 'New Title'
+mp3tag.tags.v2.TPE1 = 'New Artist'
+mp3tag.save({ id3v2: { include: true, padding: 1024 } })
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+fs.writeFileSync('/path/to/audio.ogg', Buffer.from(mp3tag.buffer))
+```
+
+**Note:** Prepending ID3v2 to OGG is considered unusual. OGG's native metadata
+system is [Vorbis Comments](https://xiph.org/vorbis/doc/v-comment.html), stored
+in OGG stream headers. This library does not read or write Vorbis Comments — it
+only handles prepended ID3v2 tags.
+
+### WavPack Support
+
+mp3tag.js supports reading and writing ID3v2 tags prepended to WavPack audio
+files. The library detects the WavPack block header (`wvpk`) and handles the
+prepended ID3v2 tag transparently.
+
+```javascript
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+// Reading from WavPack
+const buffer = fs.readFileSync('/path/to/audio.wv')
+const mp3tag = new MP3Tag(buffer)
+mp3tag.read()
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+console.log(mp3tag.tags.title)  // Works the same as MP3
+
+// Writing to WavPack
+mp3tag.tags.v2.TIT2 = 'New Title'
+mp3tag.tags.v2.TPE1 = 'New Artist'
+mp3tag.save({ id3v2: { include: true, padding: 1024 } })
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+fs.writeFileSync('/path/to/audio.wv', Buffer.from(mp3tag.buffer))
+```
+
+**Note:** Prepending ID3v2 to WavPack is considered unusual. WavPack's native
+metadata system is [APEv2 tags](https://www.wavpack.com/file_format.txt). This
+library does not read or write APEv2 tags — it only handles prepended ID3v2 tags.
+
+### APE Support
+
+mp3tag.js supports reading and writing ID3v2 tags prepended to Monkey's Audio
+(APE) files. The library detects the APE header (`MAC `) and handles the
+prepended ID3v2 tag transparently.
+
+```javascript
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+// Reading from APE
+const buffer = fs.readFileSync('/path/to/audio.ape')
+const mp3tag = new MP3Tag(buffer)
+mp3tag.read()
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+console.log(mp3tag.tags.title)  // Works the same as MP3
+
+// Writing to APE
+mp3tag.tags.v2.TIT2 = 'New Title'
+mp3tag.tags.v2.TPE1 = 'New Artist'
+mp3tag.save({ id3v2: { include: true, padding: 1024 } })
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+fs.writeFileSync('/path/to/audio.ape', Buffer.from(mp3tag.buffer))
+```
+
+**Note:** Prepending ID3v2 to APE is considered unusual. APE's native metadata
+system is [APEv2 tags](http://wiki.hydrogenaud.io/index.php?title=APEv2_specification).
+This library does not read or write APEv2 tags — it only handles prepended ID3v2
+tags.
+
 ### Read Options
 
 ```javascript
@@ -227,6 +388,11 @@ mp3tag.read({
   mp4: true,         // Detect and read from MP4 containers (default: true)
   aiff: true,        // Detect and read from AIFF containers (default: true)
   aac: true,         // Detect and read from AAC/ADTS streams (default: true)
+  flac: true,        // Detect and read from FLAC files (default: true)
+  wav: true,         // Detect and read from WAV files (default: true)
+  ogg: true,         // Detect and read from OGG files (default: true)
+  wavpack: true,     // Detect and read from WavPack files (default: true)
+  ape: true,         // Detect and read from APE files (default: true)
   unsupported: false // Parse unsupported frames as raw bytes (default: false)
 })
 ```

@@ -34,7 +34,7 @@ describe('MP3Tag', function () {
   })
 
   after(function () {
-    const extendTests = ['id3v1/index.cjs', 'id3v2/index.cjs', 'id3/index.cjs', 'mp4/index.cjs', 'aiff/index.cjs', 'aac/index.cjs']
+    const extendTests = ['id3v1/index.cjs', 'id3v2/index.cjs', 'id3/index.cjs', 'mp4/index.cjs', 'aiff/index.cjs', 'aac/index.cjs', 'flac/index.cjs', 'wav/index.cjs', 'ogg/index.cjs', 'wavpack/index.cjs', 'ape/index.cjs']
     const tests = this.test.parent.tests
     let failed = false
 

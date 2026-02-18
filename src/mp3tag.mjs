@@ -6,11 +6,128 @@ import * as ID3v2 from './id3v2/index.mjs'
 import * as MP4 from './mp4/index.mjs'
 import * as AIFF from './aiff/index.mjs'
 import * as AAC from './aac/index.mjs'
+import * as FLAC from './flac/index.mjs'
+import * as WAV from './wav/index.mjs'
+import * as OGG from './ogg/index.mjs'
+import * as WavPack from './wavpack/index.mjs'
+import * as APE from './ape/index.mjs'
 
 import { mergeBytes } from './utils/bytes.mjs'
 import { overwriteDefault } from './utils/objects.mjs'
 import { isBuffer } from './utils/types.mjs'
 import { encoding2Index } from './utils/strings.mjs'
+
+function defineV2Props (tags) {
+  Object.defineProperties(tags, {
+    title: {
+      get: function () {
+        return (this.v2 && (this.v2.TIT2 || this.v2.TT2)) || ''
+      },
+      set: function (value) {
+        if (this.v2) {
+          const version = this.v2Details.version[0]
+          this.v2[version === 2 ? 'TT2' : 'TIT2'] = value
+        }
+      }
+    },
+    artist: {
+      get: function () {
+        return (this.v2 && (this.v2.TPE1 || this.v2.TP1)) || ''
+      },
+      set: function (value) {
+        if (this.v2) {
+          const version = this.v2Details.version[0]
+          this.v2[version === 2 ? 'TP1' : 'TPE1'] = value
+        }
+      }
+    },
+    album: {
+      get: function () {
+        return (this.v2 && (this.v2.TALB || this.v2.TAL)) || ''
+      },
+      set: function (value) {
+        if (this.v2) {
+          const version = this.v2Details.version[0]
+          this.v2[version === 2 ? 'TAL' : 'TALB'] = value
+        }
+      }
+    },
+    year: {
+      get: function () {
+        return (this.v2 && (this.v2.TYER || this.v2.TDRC || this.v2.TYE)) || ''
+      },
+      set: function (value) {
+        if (this.v2) {
+          const version = this.v2Details.version[0]
+          if (version === 2) this.v2.TYE = value
+          else if (version === 3) this.v2.TYER = value
+          else if (version === 4) this.v2.TDRC = value
+        }
+      }
+    },
+    comment: {
+      get: function () {
+        let text = ''
+        if (this.v2 && (this.v2.COMM || this.v2.COM)) {
+          const comm = this.v2.COMM || this.v2.COM
+          if (Array.isArray(comm) && comm.length > 0) text = comm[0].text
+        }
+        return text
+      },
+      set: function (value) {
+        if (this.v2) {
+          const version = this.v2Details.version[0]
+          this.v2[version === 2 ? 'COM' : 'COMM'] = [{
+            language: 'eng',
+            descriptor: '',
+            text: value
+          }]
+        }
+      }
+    },
+    track: {
+      get: function () {
+        return (this.v2 && (
+          (this.v2.TRCK && this.v2.TRCK.split('/')[0]) ||
+          (this.v2.TRK && this.v2.TRK.split('/')[0])
+        )) || ''
+      },
+      set: function (value) {
+        if (this.v2 && value !== '') {
+          const version = this.v2Details.version[0]
+          this.v2[version === 2 ? 'TRK' : 'TRCK'] = value
+        }
+      }
+    },
+    genre: {
+      get: function () {
+        return (this.v2 && (this.v2.TCON || this.v2.TCO)) || ''
+      },
+      set: function (value) {
+        if (this.v2) {
+          const version = this.v2Details.version[0]
+          this.v2[version === 2 ? 'TCO' : 'TCON'] = value
+        }
+      }
+    }
+  })
+}
+
+function readPrependedFormat (buffer, tags, options, verbose, format) {
+  if (format.hasID3(buffer)) {
+    if (verbose) console.log('ID3v2 found in ' + format.label + ', reading...')
+    const { unsupported } = options
+    const result = format.decode(buffer, { unsupported })
+    if (result) {
+      if (verbose) console.log('ID3v2 reading finished')
+      tags.v2 = { ...result.tags }
+      tags.v2Details = result.details
+    }
+  }
+
+  defineV2Props(tags)
+  return tags
+}
 
 export default class MP3Tag {
   get name () { return 'MP3Tag' }
@@ -42,6 +159,11 @@ export default class MP3Tag {
       mp4: true,
       aiff: true,
       aac: true,
+      flac: true,
+      wav: true,
+      ogg: true,
+      wavpack: true,
+      ape: true,
       unsupported: false,
       encoding: 'utf-8'
     })
@@ -379,6 +501,46 @@ export default class MP3Tag {
       return tags
     }
 
+    // Check for FLAC with prepended ID3v2
+    if (options.flac && FLAC.hasFLAC(buffer)) {
+      if (verbose) console.log('FLAC detected')
+      return readPrependedFormat(buffer, tags, options, verbose, {
+        label: 'FLAC', hasID3: FLAC.hasID3, decode: FLAC.decode
+      })
+    }
+
+    // Check for WAV with prepended ID3v2
+    if (options.wav && WAV.hasWAV(buffer)) {
+      if (verbose) console.log('WAV detected')
+      return readPrependedFormat(buffer, tags, options, verbose, {
+        label: 'WAV', hasID3: WAV.hasID3, decode: WAV.decode
+      })
+    }
+
+    // Check for OGG with prepended ID3v2
+    if (options.ogg && OGG.hasOGG(buffer)) {
+      if (verbose) console.log('OGG detected')
+      return readPrependedFormat(buffer, tags, options, verbose, {
+        label: 'OGG', hasID3: OGG.hasID3, decode: OGG.decode
+      })
+    }
+
+    // Check for WavPack with prepended ID3v2
+    if (options.wavpack && WavPack.hasWavPack(buffer)) {
+      if (verbose) console.log('WavPack detected')
+      return readPrependedFormat(buffer, tags, options, verbose, {
+        label: 'WavPack', hasID3: WavPack.hasID3, decode: WavPack.decode
+      })
+    }
+
+    // Check for APE with prepended ID3v2
+    if (options.ape && APE.hasAPE(buffer)) {
+      if (verbose) console.log('APE detected')
+      return readPrependedFormat(buffer, tags, options, verbose, {
+        label: 'APE', hasID3: APE.hasID3, decode: APE.decode
+      })
+    }
+
     if (options.id3v1 && ID3v1.hasID3v1(buffer)) {
       if (verbose) console.log('ID3v1 found, reading...')
       const { tags: v1Tags, details } = ID3v1.decode(buffer, options.encoding)
@@ -592,6 +754,32 @@ export default class MP3Tag {
       return typeof Buffer !== 'undefined' ? Buffer.from(result) : result
     }
 
+    // Handle prepended ID3v2 formats
+    const prependFormats = [
+      { has: FLAC.hasFLAC, encode: FLAC.encode, name: 'FLAC' },
+      { has: WAV.hasWAV, encode: WAV.encode, name: 'WAV' },
+      { has: OGG.hasOGG, encode: OGG.encode, name: 'OGG' },
+      { has: WavPack.hasWavPack, encode: WavPack.encode, name: 'WavPack' },
+      { has: APE.hasAPE, encode: APE.encode, name: 'APE' }
+    ]
+
+    for (const fmt of prependFormats) {
+      if (fmt.has(buffer)) {
+        if (typeof tags.v2 === 'undefined') {
+          throw new Error('No ID3v2 tags to write to ' + fmt.name)
+        }
+
+        if (verbose) console.log('Writing ID3v2 to ' + fmt.name + '...')
+        options.id3v2.encoding = options.id3v2.encoding || options.encoding
+        const result = fmt.encode(buffer, tags, {
+          strict: options.strict,
+          id3v2: options.id3v2
+        })
+
+        return typeof Buffer !== 'undefined' ? Buffer.from(result) : result
+      }
+    }
+
     let audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer, options.emptyAudioNone))
 
     if (options.id3v1.include && typeof tags.v1 !== 'undefined') {
@@ -660,6 +848,13 @@ export default class MP3Tag {
     if (AAC.hasAAC(buffer)) {
       return AAC.getAudioBuffer(buffer)
     }
+
+    // Handle prepended ID3v2 formats
+    if (FLAC.hasFLAC(buffer)) return FLAC.getAudioBuffer(buffer)
+    if (WAV.hasWAV(buffer)) return WAV.getAudioBuffer(buffer)
+    if (OGG.hasOGG(buffer)) return OGG.getAudioBuffer(buffer)
+    if (WavPack.hasWavPack(buffer)) return WavPack.getAudioBuffer(buffer)
+    if (APE.hasAPE(buffer)) return APE.getAudioBuffer(buffer)
 
     if (ID3v1.hasID3v1(buffer)) {
       buffer = buffer.slice(0, buffer.byteLength - 128)

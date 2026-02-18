@@ -21,6 +21,14 @@ export type MP3TagEncodings =
 export interface MP3TagDefaultReadOptions {
   id3v1: boolean;
   id3v2: boolean;
+  mp4: boolean;
+  aiff: boolean;
+  aac: boolean;
+  flac: boolean;
+  wav: boolean;
+  ogg: boolean;
+  wavpack: boolean;
+  ape: boolean;
   unsupported: boolean;
   encoding: MP3TagEncodings;
 }
