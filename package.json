@@ -13,7 +13,11 @@
     "id3v2",
     "id3v2.2",
     "id3v2.3",
-    "id3v2.4"
+    "id3v2.4",
+    "aiff",
+    "aif",
+    "aac",
+    "mp4"
   ],
   "homepage": "https://mp3tag.js.org",
   "bugs": "https://github.com/eidoriantan/mp3tag.js/issues",
