@@ -21,6 +21,9 @@ export type MP3TagEncodings =
 export interface MP3TagDefaultReadOptions {
   id3v1: boolean;
   id3v2: boolean;
+  mp4: boolean;
+  aiff: boolean;
+  aac: boolean;
   unsupported: boolean;
   encoding: MP3TagEncodings;
 }
@@ -40,6 +43,9 @@ export interface MP3TagDefaultWriteOptions {
     padding: number;
     unsupported: boolean;
     encoding: MP3TagEncodings;
+  };
+  mp4: {
+    language: 'und'
   };
 }
 
