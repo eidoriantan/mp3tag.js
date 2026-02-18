@@ -27,7 +27,9 @@
     "email": "eidoriantan@gmail.com",
     "url": "https://eidoriantan.me"
   },
-  "contributors": [],
+  "contributors": [
+    "Kolja Koischwitz"
+  ],
   "main": "dist/mp3tag.js",
   "types": "types/index.d.ts",
   "directories": {
