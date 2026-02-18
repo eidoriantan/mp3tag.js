@@ -75,6 +75,110 @@ mp3tag.save({
 {% endcapture %}
 {{ advanced | markdownify }}
 
+<h5 class="f3-light my-2">MP4/M4A Usage</h5>
+<p>
+  mp3tag.js automatically detects MP4/M4A containers and reads ID3v2 tags from
+  the ID32 box. The same <code>read()</code> and <code>save()</code> API works
+  transparently.
+</p>
+{% capture mp4 %}
+```javascript
+
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+const buffer = fs.readFileSync('/path/to/audio.m4a')
+const mp3tag = new MP3Tag(buffer)
+
+mp3tag.read()
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+console.log(mp3tag.tags.title)
+
+// Writing to MP4/M4A
+mp3tag.tags.v2.TIT2 = 'New Title'
+mp3tag.save({
+  id3v2: { padding: 0 },
+  mp4: { language: 'eng' } // Optional: ISO-639-2/T language code (default: 'und')
+})
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+fs.writeFileSync('/path/to/audio.m4a', Buffer.from(mp3tag.buffer))
+
+```
+{% endcapture %}
+{{ mp4 | markdownify }}
+
+<div class="flash flash-warn my-2">
+  <strong>Note:</strong> MP4 support focuses on ID32 boxes containing ID3v2
+  data. Native iTunes metadata (ilst atoms) is not supported.
+</div>
+
+<h5 class="f3-light my-2">AIFF/AIFC Usage</h5>
+<p>
+  mp3tag.js automatically detects AIFF and AIFC files and reads ID3v2 tags from
+  the "ID3 " chunk within the AIFF container.
+</p>
+{% capture aiff %}
+```javascript
+
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+const buffer = fs.readFileSync('/path/to/audio.aiff')
+const mp3tag = new MP3Tag(buffer)
+
+mp3tag.read()
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+console.log(mp3tag.tags.title)
+
+// Writing to AIFF
+mp3tag.tags.v2.TIT2 = 'New Title'
+mp3tag.save({ id3v2: { padding: 0 } })
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+fs.writeFileSync('/path/to/audio.aiff', Buffer.from(mp3tag.buffer))
+
+```
+{% endcapture %}
+{{ aiff | markdownify }}
+
+<h5 class="f3-light my-2">AAC/ADTS Usage</h5>
+<p>
+  mp3tag.js supports raw AAC/ADTS streams (.aac files) with ID3v2 tags
+  prepended to the audio data, similar to MP3.
+</p>
+{% capture aac %}
+```javascript
+
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+const buffer = fs.readFileSync('/path/to/audio.aac')
+const mp3tag = new MP3Tag(buffer)
+
+mp3tag.read()
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+console.log(mp3tag.tags.title)
+
+// Writing to AAC
+mp3tag.tags.v2.TIT2 = 'New Title'
+mp3tag.save({ id3v2: { padding: 1024, unsynch: true } })
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+fs.writeFileSync('/path/to/audio.aac', Buffer.from(mp3tag.buffer))
+
+```
+{% endcapture %}
+{{ aac | markdownify }}
+
+<div class="flash flash-warn my-2">
+  <strong>Note:</strong> AAC support is for raw ADTS streams (.aac files). For
+  AAC audio in MP4 containers (.m4a files), see the MP4/M4A section above.
+</div>
+
 <div class="flash my-2">
   You can browse more examples at the
   <a href="{{ site.github.repository_url }}/tree/master/examples">GitHub Repository</a>
