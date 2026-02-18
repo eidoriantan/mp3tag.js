@@ -76,6 +76,9 @@ last_modified_at: 2025-06-05T19:31+08:00
   {
     id3v1: true, // include ID3v1
     id3v2: true, // include ID3v2
+    mp4: true, // detect and read from MP4/M4A containers (ID32 box)
+    aiff: true, // detect and read from AIFF/AIFC containers (ID3 chunk)
+    aac: true, // detect and read from AAC/ADTS streams (prepended ID3v2)
     unsupported: false, // if true, parses unsupported frames as an array of bytes. Otherwise, skip
     encoding: 'utf-8' // encoding to use when parsing ID3v1 tags
   }
@@ -135,6 +138,9 @@ last_modified_at: 2025-06-05T19:31+08:00
       padding: 2048,           // Number of null bytes added after ID3v2 tag
       unsupported: false,      // Whether to write unsupported frames to buffer. Otherwise, skips
       encoding: 'utf-8'
+    },
+    mp4: {
+      language: 'und'          // ISO-639-2/T language code for ID32 box
     }
   }
   ```
