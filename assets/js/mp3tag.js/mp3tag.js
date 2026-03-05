@@ -25,6 +25,307 @@
     }
     return e;
   }
+  function _regeneratorRuntime() {
+    _regeneratorRuntime = function () {
+      return e;
+    };
+    var t,
+      e = {},
+      r = Object.prototype,
+      n = r.hasOwnProperty,
+      o = Object.defineProperty || function (t, e, r) {
+        t[e] = r.value;
+      },
+      i = "function" == typeof Symbol ? Symbol : {},
+      a = i.iterator || "@@iterator",
+      c = i.asyncIterator || "@@asyncIterator",
+      u = i.toStringTag || "@@toStringTag";
+    function define(t, e, r) {
+      return Object.defineProperty(t, e, {
+        value: r,
+        enumerable: !0,
+        configurable: !0,
+        writable: !0
+      }), t[e];
+    }
+    try {
+      define({}, "");
+    } catch (t) {
+      define = function (t, e, r) {
+        return t[e] = r;
+      };
+    }
+    function wrap(t, e, r, n) {
+      var i = e && e.prototype instanceof Generator ? e : Generator,
+        a = Object.create(i.prototype),
+        c = new Context(n || []);
+      return o(a, "_invoke", {
+        value: makeInvokeMethod(t, r, c)
+      }), a;
+    }
+    function tryCatch(t, e, r) {
+      try {
+        return {
+          type: "normal",
+          arg: t.call(e, r)
+        };
+      } catch (t) {
+        return {
+          type: "throw",
+          arg: t
+        };
+      }
+    }
+    e.wrap = wrap;
+    var h = "suspendedStart",
+      l = "suspendedYield",
+      f = "executing",
+      s = "completed",
+      y = {};
+    function Generator() {}
+    function GeneratorFunction() {}
+    function GeneratorFunctionPrototype() {}
+    var p = {};
+    define(p, a, function () {
+      return this;
+    });
+    var d = Object.getPrototypeOf,
+      v = d && d(d(values([])));
+    v && v !== r && n.call(v, a) && (p = v);
+    var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p);
+    function defineIteratorMethods(t) {
+      ["next", "throw", "return"].forEach(function (e) {
+        define(t, e, function (t) {
+          return this._invoke(e, t);
+        });
+      });
+    }
+    function AsyncIterator(t, e) {
+      function invoke(r, o, i, a) {
+        var c = tryCatch(t[r], t, o);
+        if ("throw" !== c.type) {
+          var u = c.arg,
+            h = u.value;
+          return h && "object" == typeof h && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) {
+            invoke("next", t, i, a);
+          }, function (t) {
+            invoke("throw", t, i, a);
+          }) : e.resolve(h).then(function (t) {
+            u.value = t, i(u);
+          }, function (t) {
+            return invoke("throw", t, i, a);
+          });
+        }
+        a(c.arg);
+      }
+      var r;
+      o(this, "_invoke", {
+        value: function (t, n) {
+          function callInvokeWithMethodAndArg() {
+            return new e(function (e, r) {
+              invoke(t, n, e, r);
+            });
+          }
+          return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+        }
+      });
+    }
+    function makeInvokeMethod(e, r, n) {
+      var o = h;
+      return function (i, a) {
+        if (o === f) throw new Error("Generator is already running");
+        if (o === s) {
+          if ("throw" === i) throw a;
+          return {
+            value: t,
+            done: !0
+          };
+        }
+        for (n.method = i, n.arg = a;;) {
+          var c = n.delegate;
+          if (c) {
+            var u = maybeInvokeDelegate(c, n);
+            if (u) {
+              if (u === y) continue;
+              return u;
+            }
+          }
+          if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) {
+            if (o === h) throw o = s, n.arg;
+            n.dispatchException(n.arg);
+          } else "return" === n.method && n.abrupt("return", n.arg);
+          o = f;
+          var p = tryCatch(e, r, n);
+          if ("normal" === p.type) {
+            if (o = n.done ? s : l, p.arg === y) continue;
+            return {
+              value: p.arg,
+              done: n.done
+            };
+          }
+          "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg);
+        }
+      };
+    }
+    function maybeInvokeDelegate(e, r) {
+      var n = r.method,
+        o = e.iterator[n];
+      if (o === t) return r.delegate = null, "throw" === n && e.iterator.return && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y;
+      var i = tryCatch(o, e.iterator, r.arg);
+      if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y;
+      var a = i.arg;
+      return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y);
+    }
+    function pushTryEntry(t) {
+      var e = {
+        tryLoc: t[0]
+      };
+      1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e);
+    }
+    function resetTryEntry(t) {
+      var e = t.completion || {};
+      e.type = "normal", delete e.arg, t.completion = e;
+    }
+    function Context(t) {
+      this.tryEntries = [{
+        tryLoc: "root"
+      }], t.forEach(pushTryEntry, this), this.reset(!0);
+    }
+    function values(e) {
+      if (e || "" === e) {
+        var r = e[a];
+        if (r) return r.call(e);
+        if ("function" == typeof e.next) return e;
+        if (!isNaN(e.length)) {
+          var o = -1,
+            i = function next() {
+              for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next;
+              return next.value = t, next.done = !0, next;
+            };
+          return i.next = i;
+        }
+      }
+      throw new TypeError(typeof e + " is not iterable");
+    }
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", {
+      value: GeneratorFunctionPrototype,
+      configurable: !0
+    }), o(GeneratorFunctionPrototype, "constructor", {
+      value: GeneratorFunction,
+      configurable: !0
+    }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) {
+      var e = "function" == typeof t && t.constructor;
+      return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name));
+    }, e.mark = function (t) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t;
+    }, e.awrap = function (t) {
+      return {
+        __await: t
+      };
+    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () {
+      return this;
+    }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) {
+      void 0 === i && (i = Promise);
+      var a = new AsyncIterator(wrap(t, r, n, o), i);
+      return e.isGeneratorFunction(r) ? a : a.next().then(function (t) {
+        return t.done ? t.value : a.next();
+      });
+    }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () {
+      return this;
+    }), define(g, "toString", function () {
+      return "[object Generator]";
+    }), e.keys = function (t) {
+      var e = Object(t),
+        r = [];
+      for (var n in e) r.push(n);
+      return r.reverse(), function next() {
+        for (; r.length;) {
+          var t = r.pop();
+          if (t in e) return next.value = t, next.done = !1, next;
+        }
+        return next.done = !0, next;
+      };
+    }, e.values = values, Context.prototype = {
+      constructor: Context,
+      reset: function (e) {
+        if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t);
+      },
+      stop: function () {
+        this.done = !0;
+        var t = this.tryEntries[0].completion;
+        if ("throw" === t.type) throw t.arg;
+        return this.rval;
+      },
+      dispatchException: function (e) {
+        if (this.done) throw e;
+        var r = this;
+        function handle(n, o) {
+          return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o;
+        }
+        for (var o = this.tryEntries.length - 1; o >= 0; --o) {
+          var i = this.tryEntries[o],
+            a = i.completion;
+          if ("root" === i.tryLoc) return handle("end");
+          if (i.tryLoc <= this.prev) {
+            var c = n.call(i, "catchLoc"),
+              u = n.call(i, "finallyLoc");
+            if (c && u) {
+              if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
+              if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
+            } else if (c) {
+              if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
+            } else {
+              if (!u) throw new Error("try statement without catch or finally");
+              if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
+            }
+          }
+        }
+      },
+      abrupt: function (t, e) {
+        for (var r = this.tryEntries.length - 1; r >= 0; --r) {
+          var o = this.tryEntries[r];
+          if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) {
+            var i = o;
+            break;
+          }
+        }
+        i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null);
+        var a = i ? i.completion : {};
+        return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a);
+      },
+      complete: function (t, e) {
+        if ("throw" === t.type) throw t.arg;
+        return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y;
+      },
+      finish: function (t) {
+        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
+          var r = this.tryEntries[e];
+          if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y;
+        }
+      },
+      catch: function (t) {
+        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
+          var r = this.tryEntries[e];
+          if (r.tryLoc === t) {
+            var n = r.completion;
+            if ("throw" === n.type) {
+              var o = n.arg;
+              resetTryEntry(r);
+            }
+            return o;
+          }
+        }
+        throw new Error("illegal catch attempt");
+      },
+      delegateYield: function (e, r, n) {
+        return this.delegate = {
+          iterator: values(e),
+          resultName: r,
+          nextLoc: n
+        }, "next" === this.method && (this.arg = t), y;
+      }
+    }, e;
+  }
   function _typeof(o) {
     "@babel/helpers - typeof";
 
@@ -33,6 +334,36 @@
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
     }, _typeof(o);
+  }
+  function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+      var info = gen[key](arg);
+      var value = info.value;
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    if (info.done) {
+      resolve(value);
+    } else {
+      Promise.resolve(value).then(_next, _throw);
+    }
+  }
+  function _asyncToGenerator(fn) {
+    return function () {
+      var self = this,
+        args = arguments;
+      return new Promise(function (resolve, reject) {
+        var gen = fn.apply(self, args);
+        function _next(value) {
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+        }
+        function _throw(err) {
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+        }
+        _next(undefined);
+      });
+    };
   }
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -1286,8 +1617,176 @@
     isArray: isArray$5
   });
 
+  var wellKnownSymbol$o = wellKnownSymbol$q;
+  var TO_STRING_TAG$3 = wellKnownSymbol$o('toStringTag');
+  var test = {};
+  test[TO_STRING_TAG$3] = 'z';
+  var toStringTagSupport = String(test) === '[object z]';
+
+  var TO_STRING_TAG_SUPPORT$2 = toStringTagSupport;
+  var isCallable$d = isCallable$o;
+  var classofRaw$1 = classofRaw$2;
+  var wellKnownSymbol$n = wellKnownSymbol$q;
+  var TO_STRING_TAG$2 = wellKnownSymbol$n('toStringTag');
+  var $Object$1 = Object;
+
+  // ES3 wrong here
+  var CORRECT_ARGUMENTS = classofRaw$1(function () {
+    return arguments;
+  }()) === 'Arguments';
+
+  // fallback for IE11 Script Access Denied error
+  var tryGet = function (it, key) {
+    try {
+      return it[key];
+    } catch (error) {/* empty */}
+  };
+
+  // getting tag from ES6+ `Object.prototype.toString`
+  var classof$d = TO_STRING_TAG_SUPPORT$2 ? classofRaw$1 : function (it) {
+    var O, tag, result;
+    return it === undefined ? 'Undefined' : it === null ? 'Null'
+    // @@toStringTag case
+    : typeof (tag = tryGet(O = $Object$1(it), TO_STRING_TAG$2)) == 'string' ? tag
+    // builtinTag case
+    : CORRECT_ARGUMENTS ? classofRaw$1(O)
+    // ES3 arguments fallback
+    : (result = classofRaw$1(O)) === 'Object' && isCallable$d(O.callee) ? 'Arguments' : result;
+  };
+
+  var uncurryThis$u = functionUncurryThis;
+  var fails$t = fails$C;
+  var isCallable$c = isCallable$o;
+  var classof$c = classof$d;
   var getBuiltIn$5 = getBuiltIn$8;
-  var html$1 = getBuiltIn$5('document', 'documentElement');
+  var inspectSource = inspectSource$2;
+  var noop = function () {/* empty */};
+  var empty = [];
+  var construct = getBuiltIn$5('Reflect', 'construct');
+  var constructorRegExp = /^\s*(?:class|function)\b/;
+  var exec$4 = uncurryThis$u(constructorRegExp.exec);
+  var INCORRECT_TO_STRING = !constructorRegExp.exec(noop);
+  var isConstructorModern = function isConstructor(argument) {
+    if (!isCallable$c(argument)) return false;
+    try {
+      construct(noop, empty, argument);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+  var isConstructorLegacy = function isConstructor(argument) {
+    if (!isCallable$c(argument)) return false;
+    switch (classof$c(argument)) {
+      case 'AsyncFunction':
+      case 'GeneratorFunction':
+      case 'AsyncGeneratorFunction':
+        return false;
+    }
+    try {
+      // we can't check .prototype since constructors produced by .bind haven't it
+      // `Function#toString` throws on some built-it function in some legacy engines
+      // (for example, `DOMQuad` and similar in FF41-)
+      return INCORRECT_TO_STRING || !!exec$4(constructorRegExp, inspectSource(argument));
+    } catch (error) {
+      return true;
+    }
+  };
+  isConstructorLegacy.sham = true;
+
+  // `IsConstructor` abstract operation
+  // https://tc39.es/ecma262/#sec-isconstructor
+  var isConstructor$4 = !construct || fails$t(function () {
+    var called;
+    return isConstructorModern(isConstructorModern.call) || !isConstructorModern(Object) || !isConstructorModern(function () {
+      called = true;
+    }) || called;
+  }) ? isConstructorLegacy : isConstructorModern;
+
+  var toPropertyKey$2 = toPropertyKey$5;
+  var definePropertyModule$2 = objectDefineProperty;
+  var createPropertyDescriptor$3 = createPropertyDescriptor$6;
+  var createProperty$4 = function (object, key, value) {
+    var propertyKey = toPropertyKey$2(key);
+    if (propertyKey in object) definePropertyModule$2.f(object, propertyKey, createPropertyDescriptor$3(0, value));else object[propertyKey] = value;
+  };
+
+  var fails$s = fails$C;
+  var wellKnownSymbol$m = wellKnownSymbol$q;
+  var V8_VERSION$1 = engineV8Version;
+  var SPECIES$5 = wellKnownSymbol$m('species');
+  var arrayMethodHasSpeciesSupport$2 = function (METHOD_NAME) {
+    // We can't use this feature detection in V8 since it causes
+    // deoptimization and serious performance degradation
+    // https://github.com/zloirock/core-js/issues/677
+    return V8_VERSION$1 >= 51 || !fails$s(function () {
+      var array = [];
+      var constructor = array.constructor = {};
+      constructor[SPECIES$5] = function () {
+        return {
+          foo: 1
+        };
+      };
+      return array[METHOD_NAME](Boolean).foo !== 1;
+    });
+  };
+
+  var uncurryThis$t = functionUncurryThis;
+  var arraySlice$6 = uncurryThis$t([].slice);
+
+  var $$p = _export;
+  var isArray$4 = isArray$6;
+  var isConstructor$3 = isConstructor$4;
+  var isObject$8 = isObject$e;
+  var toAbsoluteIndex$5 = toAbsoluteIndex$7;
+  var lengthOfArrayLike$d = lengthOfArrayLike$f;
+  var toIndexedObject$5 = toIndexedObject$a;
+  var createProperty$3 = createProperty$4;
+  var wellKnownSymbol$l = wellKnownSymbol$q;
+  var arrayMethodHasSpeciesSupport$1 = arrayMethodHasSpeciesSupport$2;
+  var nativeSlice = arraySlice$6;
+  var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport$1('slice');
+  var SPECIES$4 = wellKnownSymbol$l('species');
+  var $Array$4 = Array;
+  var max$2 = Math.max;
+
+  // `Array.prototype.slice` method
+  // https://tc39.es/ecma262/#sec-array.prototype.slice
+  // fallback for not array-like ES3 strings and DOM objects
+  $$p({
+    target: 'Array',
+    proto: true,
+    forced: !HAS_SPECIES_SUPPORT
+  }, {
+    slice: function slice(start, end) {
+      var O = toIndexedObject$5(this);
+      var length = lengthOfArrayLike$d(O);
+      var k = toAbsoluteIndex$5(start, length);
+      var fin = toAbsoluteIndex$5(end === undefined ? length : end, length);
+      // inline `ArraySpeciesCreate` for usage native `Array#slice` where it's possible
+      var Constructor, result, n;
+      if (isArray$4(O)) {
+        Constructor = O.constructor;
+        // cross-realm fallback
+        if (isConstructor$3(Constructor) && (Constructor === $Array$4 || isArray$4(Constructor.prototype))) {
+          Constructor = undefined;
+        } else if (isObject$8(Constructor)) {
+          Constructor = Constructor[SPECIES$4];
+          if (Constructor === null) Constructor = undefined;
+        }
+        if (Constructor === $Array$4 || Constructor === undefined) {
+          return nativeSlice(O, k, fin);
+        }
+      }
+      result = new (Constructor === undefined ? $Array$4 : Constructor)(max$2(fin - k, 0));
+      for (n = 0; k < fin; k++, n++) if (k in O) createProperty$3(result, n, O[k]);
+      result.length = n;
+      return result;
+    }
+  });
+
+  var getBuiltIn$4 = getBuiltIn$8;
+  var html$1 = getBuiltIn$4('document', 'documentElement');
 
   /* global ActiveXObject -- old IE, WSH */
   var anObject$d = anObject$h;
@@ -1366,10 +1865,10 @@
     return Properties === undefined ? result : definePropertiesModule$1.f(result, Properties);
   };
 
-  var wellKnownSymbol$o = wellKnownSymbol$q;
+  var wellKnownSymbol$k = wellKnownSymbol$q;
   var create$3 = objectCreate;
   var defineProperty$5 = objectDefineProperty.f;
-  var UNSCOPABLES = wellKnownSymbol$o('unscopables');
+  var UNSCOPABLES = wellKnownSymbol$k('unscopables');
   var ArrayPrototype$1 = Array.prototype;
 
   // Array.prototype[@@unscopables]
@@ -1388,8 +1887,8 @@
 
   var iterators = {};
 
-  var fails$t = fails$C;
-  var correctPrototypeGetter = !fails$t(function () {
+  var fails$r = fails$C;
+  var correctPrototypeGetter = !fails$r(function () {
     function F() {/* empty */}
     F.prototype.constructor = null;
     // eslint-disable-next-line es/no-object-getprototypeof -- required for testing
@@ -1397,34 +1896,34 @@
   });
 
   var hasOwn$a = hasOwnProperty_1;
-  var isCallable$d = isCallable$o;
+  var isCallable$b = isCallable$o;
   var toObject$a = toObject$c;
   var sharedKey$1 = sharedKey$4;
   var CORRECT_PROTOTYPE_GETTER = correctPrototypeGetter;
   var IE_PROTO = sharedKey$1('IE_PROTO');
-  var $Object$1 = Object;
-  var ObjectPrototype$3 = $Object$1.prototype;
+  var $Object = Object;
+  var ObjectPrototype$3 = $Object.prototype;
 
   // `Object.getPrototypeOf` method
   // https://tc39.es/ecma262/#sec-object.getprototypeof
   // eslint-disable-next-line es/no-object-getprototypeof -- safe
-  var objectGetPrototypeOf = CORRECT_PROTOTYPE_GETTER ? $Object$1.getPrototypeOf : function (O) {
+  var objectGetPrototypeOf = CORRECT_PROTOTYPE_GETTER ? $Object.getPrototypeOf : function (O) {
     var object = toObject$a(O);
     if (hasOwn$a(object, IE_PROTO)) return object[IE_PROTO];
     var constructor = object.constructor;
-    if (isCallable$d(constructor) && object instanceof constructor) {
+    if (isCallable$b(constructor) && object instanceof constructor) {
       return constructor.prototype;
     }
-    return object instanceof $Object$1 ? ObjectPrototype$3 : null;
+    return object instanceof $Object ? ObjectPrototype$3 : null;
   };
 
-  var fails$s = fails$C;
-  var isCallable$c = isCallable$o;
-  var isObject$8 = isObject$e;
+  var fails$q = fails$C;
+  var isCallable$a = isCallable$o;
+  var isObject$7 = isObject$e;
   var getPrototypeOf$3 = objectGetPrototypeOf;
   var defineBuiltIn$a = defineBuiltIn$c;
-  var wellKnownSymbol$n = wellKnownSymbol$q;
-  var ITERATOR$7 = wellKnownSymbol$n('iterator');
+  var wellKnownSymbol$j = wellKnownSymbol$q;
+  var ITERATOR$7 = wellKnownSymbol$j('iterator');
   var BUGGY_SAFARI_ITERATORS$1 = false;
 
   // `%IteratorPrototype%` object
@@ -1440,7 +1939,7 @@
       if (PrototypeOfArrayIteratorPrototype !== Object.prototype) IteratorPrototype$2 = PrototypeOfArrayIteratorPrototype;
     }
   }
-  var NEW_ITERATOR_PROTOTYPE = !isObject$8(IteratorPrototype$2) || fails$s(function () {
+  var NEW_ITERATOR_PROTOTYPE = !isObject$7(IteratorPrototype$2) || fails$q(function () {
     var test = {};
     // FF44- legacy iterators case
     return IteratorPrototype$2[ITERATOR$7].call(test) !== test;
@@ -1449,7 +1948,7 @@
 
   // `%IteratorPrototype%[@@iterator]()` method
   // https://tc39.es/ecma262/#sec-%iteratorprototype%-@@iterator
-  if (!isCallable$c(IteratorPrototype$2[ITERATOR$7])) {
+  if (!isCallable$a(IteratorPrototype$2[ITERATOR$7])) {
     defineBuiltIn$a(IteratorPrototype$2, ITERATOR$7, function () {
       return this;
     });
@@ -1461,12 +1960,12 @@
 
   var defineProperty$4 = objectDefineProperty.f;
   var hasOwn$9 = hasOwnProperty_1;
-  var wellKnownSymbol$m = wellKnownSymbol$q;
-  var TO_STRING_TAG$3 = wellKnownSymbol$m('toStringTag');
+  var wellKnownSymbol$i = wellKnownSymbol$q;
+  var TO_STRING_TAG$1 = wellKnownSymbol$i('toStringTag');
   var setToStringTag$4 = function (target, TAG, STATIC) {
     if (target && !STATIC) target = target.prototype;
-    if (target && !hasOwn$9(target, TO_STRING_TAG$3)) {
-      defineProperty$4(target, TO_STRING_TAG$3, {
+    if (target && !hasOwn$9(target, TO_STRING_TAG$1)) {
+      defineProperty$4(target, TO_STRING_TAG$1, {
         configurable: true,
         value: TAG
       });
@@ -1475,7 +1974,7 @@
 
   var IteratorPrototype$1 = iteratorsCore.IteratorPrototype;
   var create$2 = objectCreate;
-  var createPropertyDescriptor$3 = createPropertyDescriptor$6;
+  var createPropertyDescriptor$2 = createPropertyDescriptor$6;
   var setToStringTag$3 = setToStringTag$4;
   var Iterators$4 = iterators;
   var returnThis$1 = function () {
@@ -1484,27 +1983,27 @@
   var iteratorCreateConstructor = function (IteratorConstructor, NAME, next, ENUMERABLE_NEXT) {
     var TO_STRING_TAG = NAME + ' Iterator';
     IteratorConstructor.prototype = create$2(IteratorPrototype$1, {
-      next: createPropertyDescriptor$3(+!ENUMERABLE_NEXT, next)
+      next: createPropertyDescriptor$2(+!ENUMERABLE_NEXT, next)
     });
     setToStringTag$3(IteratorConstructor, TO_STRING_TAG, false);
     Iterators$4[TO_STRING_TAG] = returnThis$1;
     return IteratorConstructor;
   };
 
-  var uncurryThis$u = functionUncurryThis;
+  var uncurryThis$s = functionUncurryThis;
   var aCallable$5 = aCallable$7;
   var functionUncurryThisAccessor = function (object, key, method) {
     try {
       // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
-      return uncurryThis$u(aCallable$5(Object.getOwnPropertyDescriptor(object, key)[method]));
+      return uncurryThis$s(aCallable$5(Object.getOwnPropertyDescriptor(object, key)[method]));
     } catch (error) {/* empty */}
   };
 
-  var isCallable$b = isCallable$o;
+  var isCallable$9 = isCallable$o;
   var $String$2 = String;
   var $TypeError$a = TypeError;
   var aPossiblePrototype$1 = function (argument) {
-    if (typeof argument == 'object' || isCallable$b(argument)) return argument;
+    if (typeof argument == 'object' || isCallable$9(argument)) return argument;
     throw $TypeError$a("Can't set " + $String$2(argument) + ' as a prototype');
   };
 
@@ -1534,24 +2033,24 @@
     };
   }() : undefined);
 
-  var $$p = _export;
+  var $$o = _export;
   var call$h = functionCall;
   var FunctionName$1 = functionName;
-  var isCallable$a = isCallable$o;
+  var isCallable$8 = isCallable$o;
   var createIteratorConstructor = iteratorCreateConstructor;
   var getPrototypeOf$2 = objectGetPrototypeOf;
   var setPrototypeOf$4 = objectSetPrototypeOf;
   var setToStringTag$2 = setToStringTag$4;
   var createNonEnumerableProperty$6 = createNonEnumerableProperty$9;
   var defineBuiltIn$9 = defineBuiltIn$c;
-  var wellKnownSymbol$l = wellKnownSymbol$q;
+  var wellKnownSymbol$h = wellKnownSymbol$q;
   var Iterators$3 = iterators;
   var IteratorsCore = iteratorsCore;
   var PROPER_FUNCTION_NAME$2 = FunctionName$1.PROPER;
   var CONFIGURABLE_FUNCTION_NAME$1 = FunctionName$1.CONFIGURABLE;
   var IteratorPrototype = IteratorsCore.IteratorPrototype;
   var BUGGY_SAFARI_ITERATORS = IteratorsCore.BUGGY_SAFARI_ITERATORS;
-  var ITERATOR$6 = wellKnownSymbol$l('iterator');
+  var ITERATOR$6 = wellKnownSymbol$h('iterator');
   var KEYS = 'keys';
   var VALUES = 'values';
   var ENTRIES = 'entries';
@@ -1596,7 +2095,7 @@
         if (getPrototypeOf$2(CurrentIteratorPrototype) !== IteratorPrototype) {
           if (setPrototypeOf$4) {
             setPrototypeOf$4(CurrentIteratorPrototype, IteratorPrototype);
-          } else if (!isCallable$a(CurrentIteratorPrototype[ITERATOR$6])) {
+          } else if (!isCallable$8(CurrentIteratorPrototype[ITERATOR$6])) {
             defineBuiltIn$9(CurrentIteratorPrototype, ITERATOR$6, returnThis);
           }
         }
@@ -1628,7 +2127,7 @@
         if (BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME || !(KEY in IterablePrototype)) {
           defineBuiltIn$9(IterablePrototype, KEY, methods[KEY]);
         }
-      } else $$p({
+      } else $$o({
         target: NAME,
         proto: true,
         forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME
@@ -1654,7 +2153,7 @@
     };
   };
 
-  var toIndexedObject$5 = toIndexedObject$a;
+  var toIndexedObject$4 = toIndexedObject$a;
   var addToUnscopables$2 = addToUnscopables$3;
   var Iterators$2 = iterators;
   var InternalStateModule$5 = internalState;
@@ -1679,7 +2178,7 @@
   var es_array_iterator = defineIterator$1(Array, 'Array', function (iterated, kind) {
     setInternalState$4(this, {
       type: ARRAY_ITERATOR,
-      target: toIndexedObject$5(iterated),
+      target: toIndexedObject$4(iterated),
       // target
       index: 0,
       // next index
@@ -1722,13 +2221,13 @@
     });
   } catch (error) {/* empty */}
 
-  var classofRaw$1 = classofRaw$2;
-  var uncurryThis$t = functionUncurryThis;
+  var classofRaw = classofRaw$2;
+  var uncurryThis$r = functionUncurryThis;
   var functionUncurryThisClause = function (fn) {
     // Nashorn bug:
     //   https://github.com/zloirock/core-js/issues/1128
     //   https://github.com/zloirock/core-js/issues/1130
-    if (classofRaw$1(fn) === 'Function') return uncurryThis$t(fn);
+    if (classofRaw(fn) === 'Function') return uncurryThis$r(fn);
   };
 
   // eslint-disable-next-line es/no-typed-arrays -- safe
@@ -1785,7 +2284,7 @@
   // IEEE754 conversions based on https://github.com/feross/ieee754
   var sign = mathSign;
   var trunc = mathTrunc;
-  var $Array$4 = Array;
+  var $Array$3 = Array;
   var abs = Math.abs;
   var pow = Math.pow;
   var floor$4 = Math.floor;
@@ -1800,7 +2299,7 @@
     return truncated;
   };
   var pack = function (number, mantissaLength, bytes) {
-    var buffer = $Array$4(bytes);
+    var buffer = $Array$3(bytes);
     var exponentLength = bytes * 8 - mantissaLength - 1;
     var eMax = (1 << exponentLength) - 1;
     var eBias = eMax >> 1;
@@ -1894,55 +2393,47 @@
   };
 
   var toObject$9 = toObject$c;
-  var toAbsoluteIndex$5 = toAbsoluteIndex$7;
-  var lengthOfArrayLike$d = lengthOfArrayLike$f;
+  var toAbsoluteIndex$4 = toAbsoluteIndex$7;
+  var lengthOfArrayLike$c = lengthOfArrayLike$f;
 
   // `Array.prototype.fill` method implementation
   // https://tc39.es/ecma262/#sec-array.prototype.fill
   var arrayFill$1 = function fill(value /* , start = 0, end = @length */) {
     var O = toObject$9(this);
-    var length = lengthOfArrayLike$d(O);
+    var length = lengthOfArrayLike$c(O);
     var argumentsLength = arguments.length;
-    var index = toAbsoluteIndex$5(argumentsLength > 1 ? arguments[1] : undefined, length);
+    var index = toAbsoluteIndex$4(argumentsLength > 1 ? arguments[1] : undefined, length);
     var end = argumentsLength > 2 ? arguments[2] : undefined;
-    var endPos = end === undefined ? length : toAbsoluteIndex$5(end, length);
+    var endPos = end === undefined ? length : toAbsoluteIndex$4(end, length);
     while (endPos > index) O[index++] = value;
     return O;
   };
 
-  var toPropertyKey$2 = toPropertyKey$5;
-  var definePropertyModule$2 = objectDefineProperty;
-  var createPropertyDescriptor$2 = createPropertyDescriptor$6;
-  var createProperty$4 = function (object, key, value) {
-    var propertyKey = toPropertyKey$2(key);
-    if (propertyKey in object) definePropertyModule$2.f(object, propertyKey, createPropertyDescriptor$2(0, value));else object[propertyKey] = value;
-  };
-
-  var toAbsoluteIndex$4 = toAbsoluteIndex$7;
-  var lengthOfArrayLike$c = lengthOfArrayLike$f;
-  var createProperty$3 = createProperty$4;
-  var $Array$3 = Array;
-  var max$2 = Math.max;
+  var toAbsoluteIndex$3 = toAbsoluteIndex$7;
+  var lengthOfArrayLike$b = lengthOfArrayLike$f;
+  var createProperty$2 = createProperty$4;
+  var $Array$2 = Array;
+  var max$1 = Math.max;
   var arraySliceSimple = function (O, start, end) {
-    var length = lengthOfArrayLike$c(O);
-    var k = toAbsoluteIndex$4(start, length);
-    var fin = toAbsoluteIndex$4(end === undefined ? length : end, length);
-    var result = $Array$3(max$2(fin - k, 0));
+    var length = lengthOfArrayLike$b(O);
+    var k = toAbsoluteIndex$3(start, length);
+    var fin = toAbsoluteIndex$3(end === undefined ? length : end, length);
+    var result = $Array$2(max$1(fin - k, 0));
     var n = 0;
-    for (; k < fin; k++, n++) createProperty$3(result, n, O[k]);
+    for (; k < fin; k++, n++) createProperty$2(result, n, O[k]);
     result.length = n;
     return result;
   };
 
   var global$l = global$w;
-  var uncurryThis$s = functionUncurryThis;
+  var uncurryThis$q = functionUncurryThis;
   var DESCRIPTORS$8 = descriptors;
   var NATIVE_ARRAY_BUFFER$2 = arrayBufferBasicDetection;
   var FunctionName = functionName;
   var createNonEnumerableProperty$5 = createNonEnumerableProperty$9;
   var defineBuiltInAccessor$7 = defineBuiltInAccessor$8;
   var defineBuiltIns = defineBuiltIns$1;
-  var fails$r = fails$C;
+  var fails$p = fails$C;
   var anInstance$1 = anInstance$2;
   var toIntegerOrInfinity$4 = toIntegerOrInfinity$8;
   var toLength$6 = toLength$9;
@@ -1952,7 +2443,7 @@
   var setPrototypeOf$3 = objectSetPrototypeOf;
   var getOwnPropertyNames$2 = objectGetOwnPropertyNames.f;
   var arrayFill = arrayFill$1;
-  var arraySlice$6 = arraySliceSimple;
+  var arraySlice$5 = arraySliceSimple;
   var setToStringTag$1 = setToStringTag$4;
   var InternalStateModule$4 = internalState;
   var PROPER_FUNCTION_NAME$1 = FunctionName.PROPER;
@@ -1973,8 +2464,8 @@
   var ObjectPrototype$2 = Object.prototype;
   var Array$1 = global$l.Array;
   var RangeError$3 = global$l.RangeError;
-  var fill = uncurryThis$s(arrayFill);
-  var reverse = uncurryThis$s([].reverse);
+  var fill = uncurryThis$q(arrayFill);
+  var reverse = uncurryThis$q([].reverse);
   var packIEEE754 = IEEE754.pack;
   var unpackIEEE754 = IEEE754.unpack;
   var packInt8 = function (number) {
@@ -2010,7 +2501,7 @@
     if (intIndex + count > store.byteLength) throw RangeError$3(WRONG_INDEX);
     var bytes = store.bytes;
     var start = intIndex + store.byteOffset;
-    var pack = arraySlice$6(bytes, start, start + count);
+    var pack = arraySlice$5(bytes, start, start + count);
     return boolIsLittleEndian ? pack : reverse(pack);
   };
   var set = function (view, count, index, conversion, value, isLittleEndian) {
@@ -2122,11 +2613,11 @@
   } else {
     var INCORRECT_ARRAY_BUFFER_NAME = PROPER_FUNCTION_NAME$1 && NativeArrayBuffer$1.name !== ARRAY_BUFFER$1;
     /* eslint-disable no-new -- required for testing */
-    if (!fails$r(function () {
+    if (!fails$p(function () {
       NativeArrayBuffer$1(1);
-    }) || !fails$r(function () {
+    }) || !fails$p(function () {
       new NativeArrayBuffer$1(-1);
-    }) || fails$r(function () {
+    }) || fails$p(function () {
       new NativeArrayBuffer$1();
       new NativeArrayBuffer$1(1.5);
       new NativeArrayBuffer$1(NaN);
@@ -2155,7 +2646,7 @@
 
     // iOS Safari 7.x bug
     var testView = new $DataView(new $ArrayBuffer(2));
-    var $setInt8 = uncurryThis$s(DataViewPrototype$1.setInt8);
+    var $setInt8 = uncurryThis$q(DataViewPrototype$1.setInt8);
     testView.setInt8(0, 2147483648);
     testView.setInt8(1, 2147483649);
     if (testView.getInt8(0) || !testView.getInt8(1)) defineBuiltIns(DataViewPrototype$1, {
@@ -2176,137 +2667,51 @@
     DataView: $DataView
   };
 
-  var wellKnownSymbol$k = wellKnownSymbol$q;
-  var TO_STRING_TAG$2 = wellKnownSymbol$k('toStringTag');
-  var test = {};
-  test[TO_STRING_TAG$2] = 'z';
-  var toStringTagSupport = String(test) === '[object z]';
-
-  var TO_STRING_TAG_SUPPORT$2 = toStringTagSupport;
-  var isCallable$9 = isCallable$o;
-  var classofRaw = classofRaw$2;
-  var wellKnownSymbol$j = wellKnownSymbol$q;
-  var TO_STRING_TAG$1 = wellKnownSymbol$j('toStringTag');
-  var $Object = Object;
-
-  // ES3 wrong here
-  var CORRECT_ARGUMENTS = classofRaw(function () {
-    return arguments;
-  }()) === 'Arguments';
-
-  // fallback for IE11 Script Access Denied error
-  var tryGet = function (it, key) {
-    try {
-      return it[key];
-    } catch (error) {/* empty */}
-  };
-
-  // getting tag from ES6+ `Object.prototype.toString`
-  var classof$d = TO_STRING_TAG_SUPPORT$2 ? classofRaw : function (it) {
-    var O, tag, result;
-    return it === undefined ? 'Undefined' : it === null ? 'Null'
-    // @@toStringTag case
-    : typeof (tag = tryGet(O = $Object(it), TO_STRING_TAG$1)) == 'string' ? tag
-    // builtinTag case
-    : CORRECT_ARGUMENTS ? classofRaw(O)
-    // ES3 arguments fallback
-    : (result = classofRaw(O)) === 'Object' && isCallable$9(O.callee) ? 'Arguments' : result;
-  };
-
-  var uncurryThis$r = functionUncurryThis;
-  var fails$q = fails$C;
-  var isCallable$8 = isCallable$o;
-  var classof$c = classof$d;
-  var getBuiltIn$4 = getBuiltIn$8;
-  var inspectSource = inspectSource$2;
-  var noop = function () {/* empty */};
-  var empty = [];
-  var construct = getBuiltIn$4('Reflect', 'construct');
-  var constructorRegExp = /^\s*(?:class|function)\b/;
-  var exec$4 = uncurryThis$r(constructorRegExp.exec);
-  var INCORRECT_TO_STRING = !constructorRegExp.exec(noop);
-  var isConstructorModern = function isConstructor(argument) {
-    if (!isCallable$8(argument)) return false;
-    try {
-      construct(noop, empty, argument);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  };
-  var isConstructorLegacy = function isConstructor(argument) {
-    if (!isCallable$8(argument)) return false;
-    switch (classof$c(argument)) {
-      case 'AsyncFunction':
-      case 'GeneratorFunction':
-      case 'AsyncGeneratorFunction':
-        return false;
-    }
-    try {
-      // we can't check .prototype since constructors produced by .bind haven't it
-      // `Function#toString` throws on some built-it function in some legacy engines
-      // (for example, `DOMQuad` and similar in FF41-)
-      return INCORRECT_TO_STRING || !!exec$4(constructorRegExp, inspectSource(argument));
-    } catch (error) {
-      return true;
-    }
-  };
-  isConstructorLegacy.sham = true;
-
-  // `IsConstructor` abstract operation
-  // https://tc39.es/ecma262/#sec-isconstructor
-  var isConstructor$4 = !construct || fails$q(function () {
-    var called;
-    return isConstructorModern(isConstructorModern.call) || !isConstructorModern(Object) || !isConstructorModern(function () {
-      called = true;
-    }) || called;
-  }) ? isConstructorLegacy : isConstructorModern;
-
-  var isConstructor$3 = isConstructor$4;
+  var isConstructor$2 = isConstructor$4;
   var tryToString$4 = tryToString$6;
   var $TypeError$8 = TypeError;
 
   // `Assert: IsConstructor(argument) is true`
   var aConstructor$2 = function (argument) {
-    if (isConstructor$3(argument)) return argument;
+    if (isConstructor$2(argument)) return argument;
     throw $TypeError$8(tryToString$4(argument) + ' is not a constructor');
   };
 
   var anObject$b = anObject$h;
   var aConstructor$1 = aConstructor$2;
   var isNullOrUndefined$3 = isNullOrUndefined$6;
-  var wellKnownSymbol$i = wellKnownSymbol$q;
-  var SPECIES$5 = wellKnownSymbol$i('species');
+  var wellKnownSymbol$g = wellKnownSymbol$q;
+  var SPECIES$3 = wellKnownSymbol$g('species');
 
   // `SpeciesConstructor` abstract operation
   // https://tc39.es/ecma262/#sec-speciesconstructor
   var speciesConstructor$2 = function (O, defaultConstructor) {
     var C = anObject$b(O).constructor;
     var S;
-    return C === undefined || isNullOrUndefined$3(S = anObject$b(C)[SPECIES$5]) ? defaultConstructor : aConstructor$1(S);
+    return C === undefined || isNullOrUndefined$3(S = anObject$b(C)[SPECIES$3]) ? defaultConstructor : aConstructor$1(S);
   };
 
-  var $$o = _export;
-  var uncurryThis$q = functionUncurryThisClause;
-  var fails$p = fails$C;
+  var $$n = _export;
+  var uncurryThis$p = functionUncurryThisClause;
+  var fails$o = fails$C;
   var ArrayBufferModule$2 = arrayBuffer;
   var anObject$a = anObject$h;
-  var toAbsoluteIndex$3 = toAbsoluteIndex$7;
+  var toAbsoluteIndex$2 = toAbsoluteIndex$7;
   var toLength$5 = toLength$9;
   var speciesConstructor$1 = speciesConstructor$2;
   var ArrayBuffer$4 = ArrayBufferModule$2.ArrayBuffer;
   var DataView$2 = ArrayBufferModule$2.DataView;
   var DataViewPrototype = DataView$2.prototype;
-  var nativeArrayBufferSlice = uncurryThis$q(ArrayBuffer$4.prototype.slice);
-  var getUint8 = uncurryThis$q(DataViewPrototype.getUint8);
-  var setUint8 = uncurryThis$q(DataViewPrototype.setUint8);
-  var INCORRECT_SLICE = fails$p(function () {
+  var nativeArrayBufferSlice = uncurryThis$p(ArrayBuffer$4.prototype.slice);
+  var getUint8 = uncurryThis$p(DataViewPrototype.getUint8);
+  var setUint8 = uncurryThis$p(DataViewPrototype.setUint8);
+  var INCORRECT_SLICE = fails$o(function () {
     return !new ArrayBuffer$4(2).slice(1, undefined).byteLength;
   });
 
   // `ArrayBuffer.prototype.slice` method
   // https://tc39.es/ecma262/#sec-arraybuffer.prototype.slice
-  $$o({
+  $$n({
     target: 'ArrayBuffer',
     proto: true,
     unsafe: true,
@@ -2318,8 +2723,8 @@
       }
 
       var length = anObject$a(this).byteLength;
-      var first = toAbsoluteIndex$3(start, length);
-      var fin = toAbsoluteIndex$3(end === undefined ? length : end, length);
+      var first = toAbsoluteIndex$2(start, length);
+      var fin = toAbsoluteIndex$2(end === undefined ? length : end, length);
       var result = new (speciesConstructor$1(this, ArrayBuffer$4))(toLength$5(fin - first));
       var viewSource = new DataView$2(this);
       var viewTarget = new DataView$2(result);
@@ -2354,8 +2759,8 @@
 
   var typedArrayConstructor = {exports: {}};
 
-  var wellKnownSymbol$h = wellKnownSymbol$q;
-  var ITERATOR$5 = wellKnownSymbol$h('iterator');
+  var wellKnownSymbol$f = wellKnownSymbol$q;
+  var ITERATOR$5 = wellKnownSymbol$f('iterator');
   var SAFE_CLOSING = false;
   try {
     var called = 0;
@@ -2404,7 +2809,7 @@
   var DESCRIPTORS$7 = descriptors;
   var global$k = global$w;
   var isCallable$7 = isCallable$o;
-  var isObject$7 = isObject$e;
+  var isObject$6 = isObject$e;
   var hasOwn$8 = hasOwnProperty_1;
   var classof$a = classof$d;
   var tryToString$3 = tryToString$6;
@@ -2414,7 +2819,7 @@
   var isPrototypeOf$5 = objectIsPrototypeOf;
   var getPrototypeOf = objectGetPrototypeOf;
   var setPrototypeOf$2 = objectSetPrototypeOf;
-  var wellKnownSymbol$g = wellKnownSymbol$q;
+  var wellKnownSymbol$e = wellKnownSymbol$q;
   var uid$1 = uid$4;
   var InternalStateModule$3 = internalState;
   var enforceInternalState$2 = InternalStateModule$3.enforce;
@@ -2427,7 +2832,7 @@
   var TypedArrayPrototype$2 = Int8ArrayPrototype$1 && getPrototypeOf(Int8ArrayPrototype$1);
   var ObjectPrototype$1 = Object.prototype;
   var TypeError$2 = global$k.TypeError;
-  var TO_STRING_TAG = wellKnownSymbol$g('toStringTag');
+  var TO_STRING_TAG = wellKnownSymbol$e('toStringTag');
   var TYPED_ARRAY_TAG$1 = uid$1('TYPED_ARRAY_TAG');
   var TYPED_ARRAY_CONSTRUCTOR = 'TypedArrayConstructor';
   // Fixing native typed arrays in Opera Presto crashes the browser, see #595
@@ -2450,18 +2855,18 @@
     BigUint64Array: 8
   };
   var isView = function isView(it) {
-    if (!isObject$7(it)) return false;
+    if (!isObject$6(it)) return false;
     var klass = classof$a(it);
     return klass === 'DataView' || hasOwn$8(TypedArrayConstructorsList, klass) || hasOwn$8(BigIntArrayConstructorsList, klass);
   };
   var getTypedArrayConstructor$1 = function (it) {
     var proto = getPrototypeOf(it);
-    if (!isObject$7(proto)) return;
+    if (!isObject$6(proto)) return;
     var state = getInternalState$5(proto);
     return state && hasOwn$8(state, TYPED_ARRAY_CONSTRUCTOR) ? state[TYPED_ARRAY_CONSTRUCTOR] : getTypedArrayConstructor$1(proto);
   };
   var isTypedArray$1 = function (it) {
-    if (!isObject$7(it)) return false;
+    if (!isObject$6(it)) return false;
     var klass = classof$a(it);
     return hasOwn$8(TypedArrayConstructorsList, klass) || hasOwn$8(BigIntArrayConstructorsList, klass);
   };
@@ -2551,7 +2956,7 @@
     defineBuiltInAccessor$6(TypedArrayPrototype$2, TO_STRING_TAG, {
       configurable: true,
       get: function () {
-        return isObject$7(this) ? this[TYPED_ARRAY_TAG$1] : undefined;
+        return isObject$6(this) ? this[TYPED_ARRAY_TAG$1] : undefined;
       }
     });
     for (NAME in TypedArrayConstructorsList) if (global$k[NAME]) {
@@ -2574,33 +2979,33 @@
 
   /* eslint-disable no-new -- required for testing */
   var global$j = global$w;
-  var fails$o = fails$C;
+  var fails$n = fails$C;
   var checkCorrectnessOfIteration$1 = checkCorrectnessOfIteration$2;
   var NATIVE_ARRAY_BUFFER_VIEWS$2 = arrayBufferViewCore.NATIVE_ARRAY_BUFFER_VIEWS;
   var ArrayBuffer$3 = global$j.ArrayBuffer;
   var Int8Array$3 = global$j.Int8Array;
-  var typedArrayConstructorsRequireWrappers = !NATIVE_ARRAY_BUFFER_VIEWS$2 || !fails$o(function () {
+  var typedArrayConstructorsRequireWrappers = !NATIVE_ARRAY_BUFFER_VIEWS$2 || !fails$n(function () {
     Int8Array$3(1);
-  }) || !fails$o(function () {
+  }) || !fails$n(function () {
     new Int8Array$3(-1);
   }) || !checkCorrectnessOfIteration$1(function (iterable) {
     new Int8Array$3();
     new Int8Array$3(null);
     new Int8Array$3(1.5);
     new Int8Array$3(iterable);
-  }, true) || fails$o(function () {
+  }, true) || fails$n(function () {
     // Safari (11+) bug - a reason why even Safari 13 should load a typed array polyfill
     return new Int8Array$3(new ArrayBuffer$3(2), 1, undefined).length !== 1;
   });
 
-  var isObject$6 = isObject$e;
+  var isObject$5 = isObject$e;
   var floor$3 = Math.floor;
 
   // `IsIntegralNumber` abstract operation
   // https://tc39.es/ecma262/#sec-isintegralnumber
   // eslint-disable-next-line es/no-number-isinteger -- safe
   var isIntegralNumber$1 = Number.isInteger || function isInteger(it) {
-    return !isObject$6(it) && isFinite(it) && floor$3(it) === it;
+    return !isObject$5(it) && isFinite(it) && floor$3(it) === it;
   };
 
   var toIntegerOrInfinity$3 = toIntegerOrInfinity$8;
@@ -2625,10 +3030,10 @@
     return value < 0 ? 0 : value > 0xFF ? 0xFF : value & 0xFF;
   };
 
-  var uncurryThis$p = functionUncurryThisClause;
+  var uncurryThis$o = functionUncurryThisClause;
   var aCallable$4 = aCallable$7;
   var NATIVE_BIND$1 = functionBindNative;
-  var bind$4 = uncurryThis$p(uncurryThis$p.bind);
+  var bind$4 = uncurryThis$o(uncurryThis$o.bind);
 
   // optional / simple context binding
   var functionBindContext = function (fn, that) {
@@ -2643,8 +3048,8 @@
   var getMethod$3 = getMethod$5;
   var isNullOrUndefined$2 = isNullOrUndefined$6;
   var Iterators$1 = iterators;
-  var wellKnownSymbol$f = wellKnownSymbol$q;
-  var ITERATOR$4 = wellKnownSymbol$f('iterator');
+  var wellKnownSymbol$d = wellKnownSymbol$q;
+  var ITERATOR$4 = wellKnownSymbol$d('iterator');
   var getIteratorMethod$3 = function (it) {
     if (!isNullOrUndefined$2(it)) return getMethod$3(it, ITERATOR$4) || getMethod$3(it, '@@iterator') || Iterators$1[classof$9(it)];
   };
@@ -2661,9 +3066,9 @@
     throw $TypeError$7(tryToString$2(argument) + ' is not iterable');
   };
 
-  var wellKnownSymbol$e = wellKnownSymbol$q;
+  var wellKnownSymbol$c = wellKnownSymbol$q;
   var Iterators = iterators;
-  var ITERATOR$3 = wellKnownSymbol$e('iterator');
+  var ITERATOR$3 = wellKnownSymbol$c('iterator');
   var ArrayPrototype = Array.prototype;
 
   // check on default Array iterator
@@ -2693,7 +3098,7 @@
   var call$f = functionCall;
   var aConstructor = aConstructor$2;
   var toObject$8 = toObject$c;
-  var lengthOfArrayLike$b = lengthOfArrayLike$f;
+  var lengthOfArrayLike$a = lengthOfArrayLike$f;
   var getIterator$1 = getIterator$2;
   var getIteratorMethod$1 = getIteratorMethod$3;
   var isArrayIteratorMethod$1 = isArrayIteratorMethod$2;
@@ -2719,7 +3124,7 @@
     if (mapping && argumentsLength > 2) {
       mapfn = bind$3(mapfn, arguments[2]);
     }
-    length = lengthOfArrayLike$b(O);
+    length = lengthOfArrayLike$a(O);
     result = new (aTypedArrayConstructor$2(C))(length);
     thisIsBigIntArray = isBigIntArray(result);
     for (i = 0; length > i; i++) {
@@ -2730,26 +3135,26 @@
     return result;
   };
 
-  var isArray$4 = isArray$6;
-  var isConstructor$2 = isConstructor$4;
-  var isObject$5 = isObject$e;
-  var wellKnownSymbol$d = wellKnownSymbol$q;
-  var SPECIES$4 = wellKnownSymbol$d('species');
-  var $Array$2 = Array;
+  var isArray$3 = isArray$6;
+  var isConstructor$1 = isConstructor$4;
+  var isObject$4 = isObject$e;
+  var wellKnownSymbol$b = wellKnownSymbol$q;
+  var SPECIES$2 = wellKnownSymbol$b('species');
+  var $Array$1 = Array;
 
   // a part of `ArraySpeciesCreate` abstract operation
   // https://tc39.es/ecma262/#sec-arrayspeciescreate
   var arraySpeciesConstructor$1 = function (originalArray) {
     var C;
-    if (isArray$4(originalArray)) {
+    if (isArray$3(originalArray)) {
       C = originalArray.constructor;
       // cross-realm fallback
-      if (isConstructor$2(C) && (C === $Array$2 || isArray$4(C.prototype))) C = undefined;else if (isObject$5(C)) {
-        C = C[SPECIES$4];
+      if (isConstructor$1(C) && (C === $Array$1 || isArray$3(C.prototype))) C = undefined;else if (isObject$4(C)) {
+        C = C[SPECIES$2];
         if (C === null) C = undefined;
       }
     }
-    return C === undefined ? $Array$2 : C;
+    return C === undefined ? $Array$1 : C;
   };
 
   var arraySpeciesConstructor = arraySpeciesConstructor$1;
@@ -2761,12 +3166,12 @@
   };
 
   var bind$2 = functionBindContext;
-  var uncurryThis$o = functionUncurryThis;
+  var uncurryThis$n = functionUncurryThis;
   var IndexedObject$1 = indexedObject;
   var toObject$7 = toObject$c;
-  var lengthOfArrayLike$a = lengthOfArrayLike$f;
+  var lengthOfArrayLike$9 = lengthOfArrayLike$f;
   var arraySpeciesCreate$2 = arraySpeciesCreate$3;
-  var push$3 = uncurryThis$o([].push);
+  var push$3 = uncurryThis$n([].push);
 
   // `Array.prototype.{ forEach, map, filter, some, every, find, findIndex, filterReject }` methods implementation
   var createMethod$3 = function (TYPE) {
@@ -2781,7 +3186,7 @@
       var O = toObject$7($this);
       var self = IndexedObject$1(O);
       var boundFunction = bind$2(callbackfn, that);
-      var length = lengthOfArrayLike$a(self);
+      var length = lengthOfArrayLike$9(self);
       var index = 0;
       var create = specificCreate || arraySpeciesCreate$2;
       var target = IS_MAP ? create($this, length) : IS_FILTER || IS_FILTER_REJECT ? create($this, 0) : undefined;
@@ -2847,13 +3252,13 @@
 
   var getBuiltIn$3 = getBuiltIn$8;
   var defineBuiltInAccessor$5 = defineBuiltInAccessor$8;
-  var wellKnownSymbol$c = wellKnownSymbol$q;
+  var wellKnownSymbol$a = wellKnownSymbol$q;
   var DESCRIPTORS$6 = descriptors;
-  var SPECIES$3 = wellKnownSymbol$c('species');
+  var SPECIES$1 = wellKnownSymbol$a('species');
   var setSpecies$3 = function (CONSTRUCTOR_NAME) {
     var Constructor = getBuiltIn$3(CONSTRUCTOR_NAME);
-    if (DESCRIPTORS$6 && Constructor && !Constructor[SPECIES$3]) {
-      defineBuiltInAccessor$5(Constructor, SPECIES$3, {
+    if (DESCRIPTORS$6 && Constructor && !Constructor[SPECIES$1]) {
+      defineBuiltInAccessor$5(Constructor, SPECIES$1, {
         configurable: true,
         get: function () {
           return this;
@@ -2863,7 +3268,7 @@
   };
 
   var isCallable$6 = isCallable$o;
-  var isObject$4 = isObject$e;
+  var isObject$3 = isObject$e;
   var setPrototypeOf$1 = objectSetPrototypeOf;
 
   // makes subclassing work correct for wrapped built-ins
@@ -2873,11 +3278,11 @@
     // it can work only with native `setPrototypeOf`
     setPrototypeOf$1 &&
     // we haven't completely correct pre-ES6 way for getting `new.target`, so use this
-    isCallable$6(NewTarget = dummy.constructor) && NewTarget !== Wrapper && isObject$4(NewTargetPrototype = NewTarget.prototype) && NewTargetPrototype !== Wrapper.prototype) setPrototypeOf$1($this, NewTargetPrototype);
+    isCallable$6(NewTarget = dummy.constructor) && NewTarget !== Wrapper && isObject$3(NewTargetPrototype = NewTarget.prototype) && NewTargetPrototype !== Wrapper.prototype) setPrototypeOf$1($this, NewTargetPrototype);
     return $this;
   };
 
-  var $$n = _export;
+  var $$m = _export;
   var global$i = global$w;
   var call$e = functionCall;
   var DESCRIPTORS$5 = descriptors;
@@ -2895,7 +3300,7 @@
   var toPropertyKey$1 = toPropertyKey$5;
   var hasOwn$7 = hasOwnProperty_1;
   var classof$7 = classof$d;
-  var isObject$3 = isObject$e;
+  var isObject$2 = isObject$e;
   var isSymbol$2 = isSymbol$5;
   var create$1 = objectCreate;
   var isPrototypeOf$4 = objectIsPrototypeOf;
@@ -2955,7 +3360,7 @@
   };
   var wrappedDefineProperty = function defineProperty(target, key, descriptor) {
     key = toPropertyKey$1(key);
-    if (isTypedArrayIndex(target, key) && isObject$3(descriptor) && hasOwn$7(descriptor, 'value') && !hasOwn$7(descriptor, 'get') && !hasOwn$7(descriptor, 'set')
+    if (isTypedArrayIndex(target, key) && isObject$2(descriptor) && hasOwn$7(descriptor, 'value') && !hasOwn$7(descriptor, 'get') && !hasOwn$7(descriptor, 'set')
     // TODO: add validation descriptor w/o calling accessors
     && !descriptor.configurable && (!hasOwn$7(descriptor, 'writable') || descriptor.writable) && (!hasOwn$7(descriptor, 'enumerable') || descriptor.enumerable)) {
       target[key] = descriptor.value;
@@ -2972,7 +3377,7 @@
       addGetter(TypedArrayPrototype$1, 'byteLength');
       addGetter(TypedArrayPrototype$1, 'length');
     }
-    $$n({
+    $$m({
       target: 'Object',
       stat: true,
       forced: !NATIVE_ARRAY_BUFFER_VIEWS$1
@@ -3014,7 +3419,7 @@
           var index = 0;
           var byteOffset = 0;
           var buffer, byteLength, length;
-          if (!isObject$3(data)) {
+          if (!isObject$2(data)) {
             length = toIndex(data);
             byteLength = length * BYTES;
             buffer = new ArrayBuffer$2(byteLength);
@@ -3051,7 +3456,7 @@
         TypedArrayConstructor = wrapper(function (dummy, data, typedArrayOffset, $length) {
           anInstance(dummy, TypedArrayConstructorPrototype);
           return inheritIfRequired$1(function () {
-            if (!isObject$3(data)) return new NativeTypedArrayConstructor(toIndex(data));
+            if (!isObject$2(data)) return new NativeTypedArrayConstructor(toIndex(data));
             if (isArrayBuffer(data)) return $length !== undefined ? new NativeTypedArrayConstructor(data, toOffset$1(typedArrayOffset, BYTES), $length) : typedArrayOffset !== undefined ? new NativeTypedArrayConstructor(data, toOffset$1(typedArrayOffset, BYTES)) : new NativeTypedArrayConstructor(data);
             if (isTypedArray(data)) return fromList(TypedArrayConstructor, data);
             return call$e(typedArrayFrom, TypedArrayConstructor, data);
@@ -3074,7 +3479,7 @@
       }
       var FORCED = TypedArrayConstructor !== NativeTypedArrayConstructor;
       exported[CONSTRUCTOR_NAME] = TypedArrayConstructor;
-      $$n({
+      $$m({
         global: true,
         constructor: true,
         forced: FORCED,
@@ -3108,8 +3513,8 @@
   };
 
   var toObject$6 = toObject$c;
-  var toAbsoluteIndex$2 = toAbsoluteIndex$7;
-  var lengthOfArrayLike$9 = lengthOfArrayLike$f;
+  var toAbsoluteIndex$1 = toAbsoluteIndex$7;
+  var lengthOfArrayLike$8 = lengthOfArrayLike$f;
   var deletePropertyOrThrow = deletePropertyOrThrow$1;
   var min$3 = Math.min;
 
@@ -3118,11 +3523,11 @@
   // eslint-disable-next-line es/no-array-prototype-copywithin -- safe
   var arrayCopyWithin = [].copyWithin || function copyWithin(target /* = 0 */, start /* = 0, end = @length */) {
     var O = toObject$6(this);
-    var len = lengthOfArrayLike$9(O);
-    var to = toAbsoluteIndex$2(target, len);
-    var from = toAbsoluteIndex$2(start, len);
+    var len = lengthOfArrayLike$8(O);
+    var to = toAbsoluteIndex$1(target, len);
+    var from = toAbsoluteIndex$1(start, len);
     var end = arguments.length > 2 ? arguments[2] : undefined;
-    var count = min$3((end === undefined ? len : toAbsoluteIndex$2(end, len)) - from, len - to);
+    var count = min$3((end === undefined ? len : toAbsoluteIndex$1(end, len)) - from, len - to);
     var inc = 1;
     if (from < to && to < from + count) {
       inc = -1;
@@ -3137,10 +3542,10 @@
     return O;
   };
 
-  var uncurryThis$n = functionUncurryThis;
+  var uncurryThis$m = functionUncurryThis;
   var ArrayBufferViewCore$n = arrayBufferViewCore;
   var $ArrayCopyWithin = arrayCopyWithin;
-  var u$ArrayCopyWithin = uncurryThis$n($ArrayCopyWithin);
+  var u$ArrayCopyWithin = uncurryThis$m($ArrayCopyWithin);
   var aTypedArray$l = ArrayBufferViewCore$n.aTypedArray;
   var exportTypedArrayMethod$m = ArrayBufferViewCore$n.exportTypedArrayMethod;
 
@@ -3166,14 +3571,14 @@
   var toBigInt = toBigInt$2;
   var classof$6 = classof$d;
   var call$d = functionCall;
-  var uncurryThis$m = functionUncurryThis;
-  var fails$n = fails$C;
+  var uncurryThis$l = functionUncurryThis;
+  var fails$m = fails$C;
   var aTypedArray$j = ArrayBufferViewCore$l.aTypedArray;
   var exportTypedArrayMethod$k = ArrayBufferViewCore$l.exportTypedArrayMethod;
-  var slice$1 = uncurryThis$m(''.slice);
+  var slice$1 = uncurryThis$l(''.slice);
 
   // V8 ~ Chrome < 59, Safari < 14.1, FF < 55, Edge <=18
-  var CONVERSION_BUG = fails$n(function () {
+  var CONVERSION_BUG = fails$m(function () {
     var count = 0;
     // eslint-disable-next-line es/no-typed-arrays -- safe
     new Int8Array(2).fill({
@@ -3193,10 +3598,10 @@
     return call$d($fill, this, actualValue, length > 1 ? arguments[1] : undefined, length > 2 ? arguments[2] : undefined);
   }, CONVERSION_BUG);
 
-  var lengthOfArrayLike$8 = lengthOfArrayLike$f;
+  var lengthOfArrayLike$7 = lengthOfArrayLike$f;
   var arrayFromConstructorAndList$1 = function (Constructor, list) {
     var index = 0;
-    var length = lengthOfArrayLike$8(list);
+    var length = lengthOfArrayLike$7(list);
     var result = new Constructor(length);
     while (length > index) result[index] = list[index++];
     return result;
@@ -3288,20 +3693,20 @@
   });
 
   var global$h = global$w;
-  var fails$m = fails$C;
-  var uncurryThis$l = functionUncurryThis;
+  var fails$l = fails$C;
+  var uncurryThis$k = functionUncurryThis;
   var ArrayBufferViewCore$d = arrayBufferViewCore;
   var ArrayIterators = es_array_iterator;
-  var wellKnownSymbol$b = wellKnownSymbol$q;
-  var ITERATOR$2 = wellKnownSymbol$b('iterator');
+  var wellKnownSymbol$9 = wellKnownSymbol$q;
+  var ITERATOR$2 = wellKnownSymbol$9('iterator');
   var Uint8Array$2 = global$h.Uint8Array;
-  var arrayValues = uncurryThis$l(ArrayIterators.values);
-  var arrayKeys = uncurryThis$l(ArrayIterators.keys);
-  var arrayEntries = uncurryThis$l(ArrayIterators.entries);
+  var arrayValues = uncurryThis$k(ArrayIterators.values);
+  var arrayKeys = uncurryThis$k(ArrayIterators.keys);
+  var arrayEntries = uncurryThis$k(ArrayIterators.entries);
   var aTypedArray$c = ArrayBufferViewCore$d.aTypedArray;
   var exportTypedArrayMethod$d = ArrayBufferViewCore$d.exportTypedArrayMethod;
   var TypedArrayPrototype = Uint8Array$2 && Uint8Array$2.prototype;
-  var GENERIC = !fails$m(function () {
+  var GENERIC = !fails$l(function () {
     TypedArrayPrototype[ITERATOR$2].call([1]);
   });
   var ITERATOR_IS_VALUES = !!TypedArrayPrototype && TypedArrayPrototype.values && TypedArrayPrototype[ITERATOR$2] === TypedArrayPrototype.values && TypedArrayPrototype.values.name === 'values';
@@ -3331,10 +3736,10 @@
   });
 
   var ArrayBufferViewCore$c = arrayBufferViewCore;
-  var uncurryThis$k = functionUncurryThis;
+  var uncurryThis$j = functionUncurryThis;
   var aTypedArray$b = ArrayBufferViewCore$c.aTypedArray;
   var exportTypedArrayMethod$c = ArrayBufferViewCore$c.exportTypedArrayMethod;
-  var $join = uncurryThis$k([].join);
+  var $join = uncurryThis$j([].join);
 
   // `%TypedArray%.prototype.join` method
   // https://tc39.es/ecma262/#sec-%typedarray%.prototype.join
@@ -3352,10 +3757,10 @@
     return call$c.apply(apply$5, arguments);
   });
 
-  var fails$l = fails$C;
+  var fails$k = fails$C;
   var arrayMethodIsStrict$4 = function (METHOD_NAME, argument) {
     var method = [][METHOD_NAME];
-    return !!method && fails$l(function () {
+    return !!method && fails$k(function () {
       // eslint-disable-next-line no-useless-call -- required for testing
       method.call(null, argument || function () {
         return 1;
@@ -3365,9 +3770,9 @@
 
   /* eslint-disable es/no-array-prototype-lastindexof -- safe */
   var apply$4 = functionApply;
-  var toIndexedObject$4 = toIndexedObject$a;
+  var toIndexedObject$3 = toIndexedObject$a;
   var toIntegerOrInfinity$2 = toIntegerOrInfinity$8;
-  var lengthOfArrayLike$7 = lengthOfArrayLike$f;
+  var lengthOfArrayLike$6 = lengthOfArrayLike$f;
   var arrayMethodIsStrict$3 = arrayMethodIsStrict$4;
   var min$2 = Math.min;
   var $lastIndexOf$1 = [].lastIndexOf;
@@ -3380,8 +3785,8 @@
   var arrayLastIndexOf = FORCED$8 ? function lastIndexOf(searchElement /* , fromIndex = @[*-1] */) {
     // convert -0 to +0
     if (NEGATIVE_ZERO$1) return apply$4($lastIndexOf$1, this, arguments) || 0;
-    var O = toIndexedObject$4(this);
-    var length = lengthOfArrayLike$7(O);
+    var O = toIndexedObject$3(this);
+    var length = lengthOfArrayLike$6(O);
     var index = length - 1;
     if (arguments.length > 1) index = min$2(index, toIntegerOrInfinity$2(arguments[1]));
     if (index < 0) index = length + index;
@@ -3419,7 +3824,7 @@
   var aCallable$2 = aCallable$7;
   var toObject$5 = toObject$c;
   var IndexedObject = indexedObject;
-  var lengthOfArrayLike$6 = lengthOfArrayLike$f;
+  var lengthOfArrayLike$5 = lengthOfArrayLike$f;
   var $TypeError$4 = TypeError;
 
   // `Array.prototype.{ reduce, reduceRight }` methods implementation
@@ -3428,7 +3833,7 @@
       aCallable$2(callbackfn);
       var O = toObject$5(that);
       var self = IndexedObject(O);
-      var length = lengthOfArrayLike$6(O);
+      var length = lengthOfArrayLike$5(O);
       var index = IS_RIGHT ? length - 1 : 0;
       var i = IS_RIGHT ? -1 : 1;
       if (argumentsLength < 2) while (true) {
@@ -3505,17 +3910,17 @@
   var global$g = global$w;
   var call$b = functionCall;
   var ArrayBufferViewCore$6 = arrayBufferViewCore;
-  var lengthOfArrayLike$5 = lengthOfArrayLike$f;
+  var lengthOfArrayLike$4 = lengthOfArrayLike$f;
   var toOffset = toOffset$2;
-  var toIndexedObject$3 = toObject$c;
-  var fails$k = fails$C;
+  var toIndexedObject$2 = toObject$c;
+  var fails$j = fails$C;
   var RangeError$1 = global$g.RangeError;
   var Int8Array$2 = global$g.Int8Array;
   var Int8ArrayPrototype = Int8Array$2 && Int8Array$2.prototype;
   var $set = Int8ArrayPrototype && Int8ArrayPrototype.set;
   var aTypedArray$5 = ArrayBufferViewCore$6.aTypedArray;
   var exportTypedArrayMethod$6 = ArrayBufferViewCore$6.exportTypedArrayMethod;
-  var WORKS_WITH_OBJECTS_AND_GENERIC_ON_TYPED_ARRAYS = !fails$k(function () {
+  var WORKS_WITH_OBJECTS_AND_GENERIC_ON_TYPED_ARRAYS = !fails$j(function () {
     // eslint-disable-next-line es/no-typed-arrays -- required for testing
     var array = new Uint8ClampedArray(2);
     call$b($set, array, {
@@ -3526,7 +3931,7 @@
   });
 
   // https://bugs.chromium.org/p/v8/issues/detail?id=11294 and other
-  var TO_OBJECT_BUG = WORKS_WITH_OBJECTS_AND_GENERIC_ON_TYPED_ARRAYS && ArrayBufferViewCore$6.NATIVE_ARRAY_BUFFER_VIEWS && fails$k(function () {
+  var TO_OBJECT_BUG = WORKS_WITH_OBJECTS_AND_GENERIC_ON_TYPED_ARRAYS && ArrayBufferViewCore$6.NATIVE_ARRAY_BUFFER_VIEWS && fails$j(function () {
     var array = new Int8Array$2(2);
     array.set(1);
     array.set('2', 1);
@@ -3538,25 +3943,22 @@
   exportTypedArrayMethod$6('set', function set(arrayLike /* , offset */) {
     aTypedArray$5(this);
     var offset = toOffset(arguments.length > 1 ? arguments[1] : undefined, 1);
-    var src = toIndexedObject$3(arrayLike);
+    var src = toIndexedObject$2(arrayLike);
     if (WORKS_WITH_OBJECTS_AND_GENERIC_ON_TYPED_ARRAYS) return call$b($set, this, src, offset);
     var length = this.length;
-    var len = lengthOfArrayLike$5(src);
+    var len = lengthOfArrayLike$4(src);
     var index = 0;
     if (len + offset > length) throw RangeError$1('Wrong length');
     while (index < len) this[offset + index] = src[index++];
   }, !WORKS_WITH_OBJECTS_AND_GENERIC_ON_TYPED_ARRAYS || TO_OBJECT_BUG);
 
-  var uncurryThis$j = functionUncurryThis;
-  var arraySlice$5 = uncurryThis$j([].slice);
-
   var ArrayBufferViewCore$5 = arrayBufferViewCore;
   var typedArraySpeciesConstructor$1 = typedArraySpeciesConstructor$4;
-  var fails$j = fails$C;
-  var arraySlice$4 = arraySlice$5;
+  var fails$i = fails$C;
+  var arraySlice$4 = arraySlice$6;
   var aTypedArray$4 = ArrayBufferViewCore$5.aTypedArray;
   var exportTypedArrayMethod$5 = ArrayBufferViewCore$5.exportTypedArrayMethod;
-  var FORCED$7 = fails$j(function () {
+  var FORCED$7 = fails$i(function () {
     // eslint-disable-next-line es/no-typed-arrays -- required for testing
     new Int8Array(1).slice();
   });
@@ -3630,7 +4032,7 @@
 
   var global$f = global$w;
   var uncurryThis$i = functionUncurryThisClause;
-  var fails$i = fails$C;
+  var fails$h = fails$C;
   var aCallable$1 = aCallable$7;
   var internalSort = arraySort;
   var ArrayBufferViewCore$3 = arrayBufferViewCore;
@@ -3644,12 +4046,12 @@
   var nativeSort = Uint16Array$1 && uncurryThis$i(Uint16Array$1.prototype.sort);
 
   // WebKit
-  var ACCEPT_INCORRECT_ARGUMENTS = !!nativeSort && !(fails$i(function () {
+  var ACCEPT_INCORRECT_ARGUMENTS = !!nativeSort && !(fails$h(function () {
     nativeSort(new Uint16Array$1(2), null);
-  }) && fails$i(function () {
+  }) && fails$h(function () {
     nativeSort(new Uint16Array$1(2), {});
   }));
-  var STABLE_SORT = !!nativeSort && !fails$i(function () {
+  var STABLE_SORT = !!nativeSort && !fails$h(function () {
     // feature detection can be too slow, so check engines versions
     if (V8) return V8 < 74;
     if (FF) return FF < 67;
@@ -3692,7 +4094,7 @@
 
   var ArrayBufferViewCore$2 = arrayBufferViewCore;
   var toLength$3 = toLength$9;
-  var toAbsoluteIndex$1 = toAbsoluteIndex$7;
+  var toAbsoluteIndex = toAbsoluteIndex$7;
   var typedArraySpeciesConstructor = typedArraySpeciesConstructor$4;
   var aTypedArray$1 = ArrayBufferViewCore$2.aTypedArray;
   var exportTypedArrayMethod$2 = ArrayBufferViewCore$2.exportTypedArrayMethod;
@@ -3702,28 +4104,28 @@
   exportTypedArrayMethod$2('subarray', function subarray(begin, end) {
     var O = aTypedArray$1(this);
     var length = O.length;
-    var beginIndex = toAbsoluteIndex$1(begin, length);
+    var beginIndex = toAbsoluteIndex(begin, length);
     var C = typedArraySpeciesConstructor(O);
-    return new C(O.buffer, O.byteOffset + beginIndex * O.BYTES_PER_ELEMENT, toLength$3((end === undefined ? length : toAbsoluteIndex$1(end, length)) - beginIndex));
+    return new C(O.buffer, O.byteOffset + beginIndex * O.BYTES_PER_ELEMENT, toLength$3((end === undefined ? length : toAbsoluteIndex(end, length)) - beginIndex));
   });
 
   var global$e = global$w;
   var apply$2 = functionApply;
   var ArrayBufferViewCore$1 = arrayBufferViewCore;
-  var fails$h = fails$C;
-  var arraySlice$2 = arraySlice$5;
+  var fails$g = fails$C;
+  var arraySlice$2 = arraySlice$6;
   var Int8Array$1 = global$e.Int8Array;
   var aTypedArray = ArrayBufferViewCore$1.aTypedArray;
   var exportTypedArrayMethod$1 = ArrayBufferViewCore$1.exportTypedArrayMethod;
   var $toLocaleString = [].toLocaleString;
 
   // iOS Safari 6.x fails here
-  var TO_LOCALE_STRING_BUG = !!Int8Array$1 && fails$h(function () {
+  var TO_LOCALE_STRING_BUG = !!Int8Array$1 && fails$g(function () {
     $toLocaleString.call(new Int8Array$1(1));
   });
-  var FORCED$6 = fails$h(function () {
+  var FORCED$6 = fails$g(function () {
     return [1, 2].toLocaleString() !== new Int8Array$1([1, 2]).toLocaleString();
-  }) || !fails$h(function () {
+  }) || !fails$g(function () {
     Int8Array$1.prototype.toLocaleString.call([1, 2]);
   });
 
@@ -3734,14 +4136,14 @@
   }, FORCED$6);
 
   var exportTypedArrayMethod = arrayBufferViewCore.exportTypedArrayMethod;
-  var fails$g = fails$C;
+  var fails$f = fails$C;
   var global$d = global$w;
   var uncurryThis$h = functionUncurryThis;
   var Uint8Array$1 = global$d.Uint8Array;
   var Uint8ArrayPrototype = Uint8Array$1 && Uint8Array$1.prototype || {};
   var arrayToString = [].toString;
   var join = uncurryThis$h([].join);
-  if (fails$g(function () {
+  if (fails$f(function () {
     arrayToString.call({});
   })) {
     arrayToString = function toString() {
@@ -3753,77 +4155,6 @@
   // `%TypedArray%.prototype.toString` method
   // https://tc39.es/ecma262/#sec-%typedarray%.prototype.tostring
   exportTypedArrayMethod('toString', arrayToString, IS_NOT_ARRAY_METHOD);
-
-  var fails$f = fails$C;
-  var wellKnownSymbol$a = wellKnownSymbol$q;
-  var V8_VERSION$1 = engineV8Version;
-  var SPECIES$2 = wellKnownSymbol$a('species');
-  var arrayMethodHasSpeciesSupport$2 = function (METHOD_NAME) {
-    // We can't use this feature detection in V8 since it causes
-    // deoptimization and serious performance degradation
-    // https://github.com/zloirock/core-js/issues/677
-    return V8_VERSION$1 >= 51 || !fails$f(function () {
-      var array = [];
-      var constructor = array.constructor = {};
-      constructor[SPECIES$2] = function () {
-        return {
-          foo: 1
-        };
-      };
-      return array[METHOD_NAME](Boolean).foo !== 1;
-    });
-  };
-
-  var $$m = _export;
-  var isArray$3 = isArray$6;
-  var isConstructor$1 = isConstructor$4;
-  var isObject$2 = isObject$e;
-  var toAbsoluteIndex = toAbsoluteIndex$7;
-  var lengthOfArrayLike$4 = lengthOfArrayLike$f;
-  var toIndexedObject$2 = toIndexedObject$a;
-  var createProperty$2 = createProperty$4;
-  var wellKnownSymbol$9 = wellKnownSymbol$q;
-  var arrayMethodHasSpeciesSupport$1 = arrayMethodHasSpeciesSupport$2;
-  var nativeSlice = arraySlice$5;
-  var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport$1('slice');
-  var SPECIES$1 = wellKnownSymbol$9('species');
-  var $Array$1 = Array;
-  var max$1 = Math.max;
-
-  // `Array.prototype.slice` method
-  // https://tc39.es/ecma262/#sec-array.prototype.slice
-  // fallback for not array-like ES3 strings and DOM objects
-  $$m({
-    target: 'Array',
-    proto: true,
-    forced: !HAS_SPECIES_SUPPORT
-  }, {
-    slice: function slice(start, end) {
-      var O = toIndexedObject$2(this);
-      var length = lengthOfArrayLike$4(O);
-      var k = toAbsoluteIndex(start, length);
-      var fin = toAbsoluteIndex(end === undefined ? length : end, length);
-      // inline `ArraySpeciesCreate` for usage native `Array#slice` where it's possible
-      var Constructor, result, n;
-      if (isArray$3(O)) {
-        Constructor = O.constructor;
-        // cross-realm fallback
-        if (isConstructor$1(Constructor) && (Constructor === $Array$1 || isArray$3(Constructor.prototype))) {
-          Constructor = undefined;
-        } else if (isObject$2(Constructor)) {
-          Constructor = Constructor[SPECIES$1];
-          if (Constructor === null) Constructor = undefined;
-        }
-        if (Constructor === $Array$1 || Constructor === undefined) {
-          return nativeSlice(O, k, fin);
-        }
-      }
-      result = new (Constructor === undefined ? $Array$1 : Constructor)(max$1(fin - k, 0));
-      for (n = 0; k < fin; k++, n++) if (k in O) createProperty$2(result, n, O[k]);
-      result.length = n;
-      return result;
-    }
-  });
 
   var $$l = _export;
   var global$c = global$w;
@@ -4256,7 +4587,16 @@
         params[0] = new Uint8Array(params[0]);
       }
       if (ArrayBuffer.isView(params[0])) {
-        params[0] = params[0].buffer;
+        var view = params[0];
+        // Preserve byteOffset and byteLength for Node.js Buffers which use shared buffer pool
+        var baseOffset = view.byteOffset;
+        var baseLength = view.byteLength;
+        params[0] = view.buffer;
+
+        // Handle additional offset parameter (used by ID3v2.decode)
+        var additionalOffset = typeof params[1] === 'number' ? params[1] : 0;
+        params[1] = baseOffset + additionalOffset;
+        params[2] = baseLength - additionalOffset;
       }
       return _super.call.apply(_super, [this].concat(params));
     }
@@ -5176,7 +5516,7 @@
       return view.getString(0, 3).string === 'TAG';
     } else return false;
   }
-  function decode$1(buffer) {
+  function decode$4(buffer) {
     var encoding = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'utf-8';
     var view = new BufferView(buffer, buffer.byteLength - 128);
     var title = view.getString(3, 30, encoding).string.replace(/\0/g, '');
@@ -5255,7 +5595,7 @@
     }
     return true;
   }
-  function encode$1(tags) {
+  function encode$4(tags) {
     var encoding = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'utf-8';
     var title = tags.title,
       artist = tags.artist,
@@ -6316,7 +6656,7 @@
   var fails$3 = fails$C;
   var isCallable$2 = isCallable$o;
   var isSymbol = isSymbol$5;
-  var arraySlice = arraySlice$5;
+  var arraySlice = arraySlice$6;
   var getReplacerFunction = getJsonReplacerFunction;
   var NATIVE_SYMBOL$2 = symbolConstructorDetection;
   var $String = String;
@@ -7723,8 +8063,8 @@
     }
     bytes.push(incdec);
     bytes.push(bitsvolume);
-    var volumechange = values.volumechange || {};
-    var peakvolume = values.peakvolume || {};
+    var volumechange = _typeof(values.volumechange) === 'object' ? values.volumechange : {};
+    var peakvolume = _typeof(values.peakvolume) === 'object' ? values.peakvolume : {};
     var rightChangeBlock = dataBlock(volumechange.right, limit);
     var leftChangeBlock = dataBlock(volumechange.left, limit);
     var rightPeakBlock = dataBlock(peakvolume.right, limit);
@@ -7741,7 +8081,7 @@
     leftPeakBlock.forEach(function (_byte13) {
       return bytes.push(_byte13);
     });
-    if (volumechange.rightback || volumechange.leftback || peakvolume.rightback || peakvolume.leftback || volumechange.center || peakvolume.center || volumechange.bass || peakvolume.bass) {
+    if (Array.isArray(volumechange.rightback) && volumechange.rightback.length > 0 || Array.isArray(volumechange.leftback) && volumechange.leftback.length > 0 || Array.isArray(peakvolume.rightback) && peakvolume.rightback.length > 0 || Array.isArray(peakvolume.leftback) && peakvolume.leftback.length > 0) {
       var rightBackChangeBlock = dataBlock(volumechange.rightback, limit);
       var leftBackChangeBlock = dataBlock(volumechange.leftback, limit);
       var rightBackPeakBlock = dataBlock(peakvolume.rightback, limit);
@@ -7759,7 +8099,7 @@
         return bytes.push(_byte17);
       });
     }
-    if (volumechange.center || peakvolume.center || volumechange.bass || peakvolume.bass) {
+    if (Array.isArray(volumechange.center) && volumechange.center.length > 0 || Array.isArray(peakvolume.center) && peakvolume.center.length > 0) {
       var centerChangeBlock = dataBlock(volumechange.center, limit);
       var centerPeakBlock = dataBlock(peakvolume.center, limit);
       centerChangeBlock.forEach(function (_byte18) {
@@ -7769,7 +8109,7 @@
         return bytes.push(_byte19);
       });
     }
-    if (volumechange.bass || peakvolume.bass) {
+    if (Array.isArray(volumechange.bass) && volumechange.bass.length > 0 || Array.isArray(peakvolume.bass) && peakvolume.bass.length > 0) {
       var bassChangeBlock = dataBlock(volumechange.bass, limit);
       var bassPeakBlock = dataBlock(peakvolume.bass, limit);
       bassChangeBlock.forEach(function (_byte20) {
@@ -8996,7 +9336,7 @@
     var view = new BufferView(buffer);
     return view.getString(0, 3).string === 'ID3';
   }
-  function decode(buffer, tagOffset, parseUnsupported) {
+  function decode$3(buffer, tagOffset, parseUnsupported) {
     var view = new BufferView(buffer, tagOffset);
     var version = view.getUint8(3, 2);
     var size = decodeSynch(view.getUint32(6));
@@ -9043,7 +9383,7 @@
       offset += frame.size + frameHeaderSize;
       limit -= frame.size + frameHeaderSize;
       if (frame.id === 'SEEK') {
-        var seekedTags = decode(buffer, offset + frame.value, parseUnsupported);
+        var seekedTags = decode$3(buffer, offset + frame.value, parseUnsupported);
         for (var id in seekedTags) pushTag({
           id: id,
           value: seekedTags[id]
@@ -9122,7 +9462,7 @@
     }
     return true;
   }
-  function encode(tags, options) {
+  function encode$3(tags, options) {
     var version = options.version,
       padding = options.padding,
       unsynch = options.unsynch,
@@ -9155,6 +9495,976 @@
     return mergeBytes(headerBytes, flagsByte, sizeView.getUint8(0, 4), framesBytes, paddingBytes).buffer;
   }
 
+  /**
+   * Parse an MP4 box header at the given offset
+   * @param {BufferView} view
+   * @param {number} offset
+   * @returns {{ size: number, type: string, headerSize: number, dataStart: number, end: number } | null}
+   */
+  function parseBoxHeader(view, offset) {
+    if (offset + 8 > view.byteLength) return null;
+    var size = view.getUint32(offset);
+    var type = view.getUint8String(offset + 4, 4);
+    var headerSize = 8;
+
+    // Extended size (64-bit)
+    if (size === 1) {
+      if (offset + 16 > view.byteLength) return null;
+      // Read 64-bit size (we only support up to 32-bit for practical purposes)
+      var highBits = view.getUint32(offset + 8);
+      var lowBits = view.getUint32(offset + 12);
+      if (highBits > 0) {
+        // File too large to handle
+        return null;
+      }
+      size = lowBits;
+      headerSize = 16;
+    } else if (size === 0) {
+      // Box extends to end of file
+      size = view.byteLength - offset;
+    }
+    return {
+      size: size,
+      type: type,
+      headerSize: headerSize,
+      dataStart: offset + headerSize,
+      end: offset + size
+    };
+  }
+
+  /**
+   * Find a box of the given type within a range
+   * @param {BufferView} view
+   * @param {number} start - Start offset
+   * @param {number} end - End offset
+   * @param {string} type - Box type to find (e.g., 'moov', 'mdat')
+   * @returns {{ size: number, type: string, headerSize: number, dataStart: number, end: number, offset: number } | null}
+   */
+  function findBox(view, start, end, type) {
+    var offset = start;
+    while (offset < end) {
+      var box = parseBoxHeader(view, offset);
+      if (!box) return null;
+      if (box.type === type) {
+        return _objectSpread2(_objectSpread2({}, box), {}, {
+          offset: offset
+        });
+      }
+      offset = box.end;
+    }
+    return null;
+  }
+
+  /**
+   * Navigate moov > udta > meta > ID32 box hierarchy
+   * @param {ArrayBuffer|Buffer} buffer
+   * @returns {{ offset: number, size: number, dataStart: number, end: number, language: string, id3Offset: number, id3Size: number } | null}
+   */
+  function findID32Box(buffer) {
+    var view = new BufferView(buffer);
+    var moov = findBox(view, 0, view.byteLength, 'moov');
+    if (!moov) return null;
+    var udta = findBox(view, moov.dataStart, moov.end, 'udta');
+    if (!udta) return null;
+    var meta = findBox(view, udta.dataStart, udta.end, 'meta');
+    if (!meta) return null;
+
+    // meta box has 4-byte version/flags after header
+    var id32 = findBox(view, meta.dataStart + 4, meta.end, 'ID32');
+    if (!id32) return null;
+
+    // ID32 box structure:
+    // [4 bytes] size
+    // [4 bytes] 'ID32'
+    // [1 byte]  version (0)
+    // [3 bytes] flags (0)
+    // [3 bytes] language (packed 5-bit chars)
+    // [N bytes] ID3v2 data
+    var languageBytes = view.getUint8(id32.dataStart + 4, 2);
+    var langValue = languageBytes[0] << 8 | languageBytes[1];
+    var language = decodeLanguage(langValue);
+    var id3Offset = id32.dataStart + 4 + 2; // version/flags + language
+    var id3Size = id32.end - id3Offset;
+    return {
+      offset: id32.offset,
+      size: id32.size,
+      dataStart: id32.dataStart,
+      end: id32.end,
+      language: language,
+      id3Offset: id3Offset,
+      id3Size: id3Size
+    };
+  }
+
+  /**
+   * Build an ID32 box from ID3v2 data
+   * @param {ArrayBuffer|Uint8Array} id3Data - Raw ID3v2 bytes
+   * @param {string} language - ISO-639-2/T language code (default: 'und')
+   * @returns {Uint8Array}
+   */
+  function buildID32Box(id3Data) {
+    var language = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'und';
+    var id3Bytes = id3Data instanceof Uint8Array ? id3Data : new Uint8Array(id3Data);
+    var langEncoded = encodeLanguage(language);
+
+    // Box size: 8 (header) + 4 (version/flags) + 2 (language) + ID3 data
+    var boxSize = 8 + 4 + 2 + id3Bytes.length;
+    var header = new BufferView(8);
+    header.setUint32(0, boxSize);
+    header.setUint8(4, 'I'.charCodeAt(0));
+    header.setUint8(5, 'D'.charCodeAt(0));
+    header.setUint8(6, '3'.charCodeAt(0));
+    header.setUint8(7, '2'.charCodeAt(0));
+    var versionFlags = new Uint8Array(4); // All zeros for version 0, flags 0
+
+    var langBytes = new Uint8Array(2);
+    langBytes[0] = langEncoded >> 8 & 0xFF;
+    langBytes[1] = langEncoded & 0xFF;
+    return mergeBytes(new Uint8Array(header.buffer), versionFlags, langBytes, id3Bytes);
+  }
+
+  /**
+   * Encode a 3-character ISO-639-2/T language code to packed 5-bit format
+   * @param {string} lang - 3-character language code (e.g., 'und', 'eng')
+   * @returns {number} - 16-bit packed value
+   */
+  function encodeLanguage(lang) {
+    if (!lang || lang.length !== 3) lang = 'und';
+    lang = lang.toLowerCase();
+    var c1 = lang.charCodeAt(0) - 0x60;
+    var c2 = lang.charCodeAt(1) - 0x60;
+    var c3 = lang.charCodeAt(2) - 0x60;
+    return (c1 & 0x1F) << 10 | (c2 & 0x1F) << 5 | c3 & 0x1F;
+  }
+
+  /**
+   * Decode packed 5-bit language code to 3-character string
+   * @param {number} packed - 16-bit packed value
+   * @returns {string} - 3-character language code
+   */
+  function decodeLanguage(packed) {
+    var c1 = (packed >> 10 & 0x1F) + 0x60;
+    var c2 = (packed >> 5 & 0x1F) + 0x60;
+    var c3 = (packed & 0x1F) + 0x60;
+    return String.fromCharCode(c1, c2, c3);
+  }
+
+  /**
+   * Build a minimal moov/udta/meta structure with ID32 box
+   * @param {Uint8Array} id32Box - The ID32 box data
+   * @returns {Uint8Array}
+   */
+  function buildMetaStructure(id32Box) {
+    // hdlr box for meta (required by spec)
+    var hdlrData = new BufferView(25);
+    hdlrData.setUint32(0, 33); // size
+    hdlrData.setUint8(4, 'h'.charCodeAt(0));
+    hdlrData.setUint8(5, 'd'.charCodeAt(0));
+    hdlrData.setUint8(6, 'l'.charCodeAt(0));
+    hdlrData.setUint8(7, 'r'.charCodeAt(0));
+    // version/flags: 0
+    // pre_defined: 0
+    hdlrData.setUint8(16, 'm'.charCodeAt(0));
+    hdlrData.setUint8(17, 'd'.charCodeAt(0));
+    hdlrData.setUint8(18, 'i'.charCodeAt(0));
+    hdlrData.setUint8(19, 'r'.charCodeAt(0));
+    // reserved: 0, 0, 0
+    // name: null-terminated empty string (implicit with remaining zeros)
+
+    var hdlrBox = new Uint8Array(33);
+    new DataView(hdlrBox.buffer).setUint32(0, 33);
+    hdlrBox[4] = 'h'.charCodeAt(0);
+    hdlrBox[5] = 'd'.charCodeAt(0);
+    hdlrBox[6] = 'l'.charCodeAt(0);
+    hdlrBox[7] = 'r'.charCodeAt(0);
+    // version/flags at 8-11: 0
+    // pre_defined at 12-15: 0
+    hdlrBox[16] = 'm'.charCodeAt(0);
+    hdlrBox[17] = 'd'.charCodeAt(0);
+    hdlrBox[18] = 'i'.charCodeAt(0);
+    hdlrBox[19] = 'r'.charCodeAt(0);
+    // reserved 20-31: 0
+    hdlrBox[32] = 0; // name: null terminator
+
+    // meta box: header (8) + version/flags (4) + hdlr + ID32
+    var metaSize = 8 + 4 + hdlrBox.length + id32Box.length;
+    var metaHeader = new Uint8Array(12);
+    new DataView(metaHeader.buffer).setUint32(0, metaSize);
+    metaHeader[4] = 'm'.charCodeAt(0);
+    metaHeader[5] = 'e'.charCodeAt(0);
+    metaHeader[6] = 't'.charCodeAt(0);
+    metaHeader[7] = 'a'.charCodeAt(0);
+    // version/flags at 8-11: 0
+
+    var metaBox = mergeBytes(metaHeader, hdlrBox, id32Box);
+
+    // udta box: header (8) + meta
+    var udtaSize = 8 + metaBox.length;
+    var udtaHeader = new Uint8Array(8);
+    new DataView(udtaHeader.buffer).setUint32(0, udtaSize);
+    udtaHeader[4] = 'u'.charCodeAt(0);
+    udtaHeader[5] = 'd'.charCodeAt(0);
+    udtaHeader[6] = 't'.charCodeAt(0);
+    udtaHeader[7] = 'a'.charCodeAt(0);
+    return mergeBytes(udtaHeader, metaBox);
+  }
+
+  /**
+   * Rebuild MP4 buffer with new or updated ID32 box
+   * @param {ArrayBuffer|Buffer} buffer - Original MP4 buffer
+   * @param {Uint8Array} id32Box - New ID32 box
+   * @returns {ArrayBuffer}
+   */
+  function rebuildMP4WithID32(buffer, id32Box) {
+    var view = new BufferView(buffer);
+    var originalBytes = new Uint8Array(buffer);
+
+    // Find existing structure
+    var moov = findBox(view, 0, view.byteLength, 'moov');
+    if (!moov) {
+      throw new Error('No moov box found in MP4 file');
+    }
+
+    // Check for existing path
+    var udta = findBox(view, moov.dataStart, moov.end, 'udta');
+    var meta = udta ? findBox(view, udta.dataStart, udta.end, 'meta') : null;
+    var existingID32 = meta ? findBox(view, meta.dataStart + 4, meta.end, 'ID32') : null;
+    if (existingID32) {
+      // Replace existing ID32 box
+      return replaceID32Box(originalBytes, view, existingID32, id32Box);
+    } else if (meta) {
+      // Insert ID32 into existing meta box
+      return insertID32IntoMeta(originalBytes, view, moov, udta, meta, id32Box);
+    } else if (udta) {
+      // Create meta with ID32 and insert into udta
+      return insertMetaIntoUdta(originalBytes, view, moov, udta, id32Box);
+    } else {
+      // Create udta/meta/ID32 structure and insert into moov
+      return insertUdtaIntoMoov(originalBytes, view, moov, id32Box);
+    }
+  }
+
+  /**
+   * Replace an existing ID32 box
+   */
+  function replaceID32Box(originalBytes, view, existingID32, newID32Box) {
+    var sizeDiff = newID32Box.length - existingID32.size;
+
+    // Build new buffer
+    var beforeID32 = originalBytes.slice(0, existingID32.offset);
+    var afterID32 = originalBytes.slice(existingID32.end);
+    var result = mergeBytes(beforeID32, newID32Box, afterID32);
+
+    // Update parent box sizes
+    result = updateParentSizes(result, existingID32.offset, sizeDiff);
+
+    // Update chunk offsets (stco/co64) that point to data after the change
+    result = updateChunkOffsets(result, existingID32.offset, sizeDiff);
+    return result.buffer;
+  }
+
+  /**
+   * Insert ID32 box into existing meta box
+   */
+  function insertID32IntoMeta(originalBytes, view, moov, udta, meta, id32Box) {
+    // Insert at end of meta box (before meta.end)
+    var insertPoint = meta.end;
+    var sizeDiff = id32Box.length;
+    var before = originalBytes.slice(0, insertPoint);
+    var after = originalBytes.slice(insertPoint);
+    var result = mergeBytes(before, id32Box, after);
+
+    // Update meta, udta, moov sizes
+    result = updateBoxSize(result, meta.offset, meta.size + sizeDiff);
+    result = updateBoxSize(result, udta.offset, udta.size + sizeDiff);
+    result = updateBoxSize(result, moov.offset, moov.size + sizeDiff);
+
+    // Update chunk offsets (stco/co64) that point to data after the insertion
+    result = updateChunkOffsets(result, insertPoint, sizeDiff);
+    return result.buffer;
+  }
+
+  /**
+   * Insert meta box (with ID32) into existing udta box
+   */
+  function insertMetaIntoUdta(originalBytes, view, moov, udta, id32Box) {
+    var metaStructure = buildMetaWithID32(id32Box);
+    var insertPoint = udta.end;
+    var sizeDiff = metaStructure.length;
+    var before = originalBytes.slice(0, insertPoint);
+    var after = originalBytes.slice(insertPoint);
+    var result = mergeBytes(before, metaStructure, after);
+
+    // Update udta, moov sizes
+    result = updateBoxSize(result, udta.offset, udta.size + sizeDiff);
+    result = updateBoxSize(result, moov.offset, moov.size + sizeDiff);
+
+    // Update chunk offsets (stco/co64) that point to data after the insertion
+    result = updateChunkOffsets(result, insertPoint, sizeDiff);
+    return result.buffer;
+  }
+
+  /**
+   * Insert udta box (with meta/ID32) into moov box
+   */
+  function insertUdtaIntoMoov(originalBytes, view, moov, id32Box) {
+    var udtaStructure = buildMetaStructure(id32Box);
+    var insertPoint = moov.end;
+    var sizeDiff = udtaStructure.length;
+    var before = originalBytes.slice(0, insertPoint);
+    var after = originalBytes.slice(insertPoint);
+    var result = mergeBytes(before, udtaStructure, after);
+
+    // Update moov size
+    result = updateBoxSize(result, moov.offset, moov.size + sizeDiff);
+
+    // Update chunk offsets (stco/co64) that point to data after the insertion
+    result = updateChunkOffsets(result, insertPoint, sizeDiff);
+    return result.buffer;
+  }
+
+  /**
+   * Build a meta box containing only hdlr and ID32
+   */
+  function buildMetaWithID32(id32Box) {
+    // hdlr box for meta
+    var hdlrBox = new Uint8Array(33);
+    new DataView(hdlrBox.buffer).setUint32(0, 33);
+    hdlrBox[4] = 'h'.charCodeAt(0);
+    hdlrBox[5] = 'd'.charCodeAt(0);
+    hdlrBox[6] = 'l'.charCodeAt(0);
+    hdlrBox[7] = 'r'.charCodeAt(0);
+    hdlrBox[16] = 'm'.charCodeAt(0);
+    hdlrBox[17] = 'd'.charCodeAt(0);
+    hdlrBox[18] = 'i'.charCodeAt(0);
+    hdlrBox[19] = 'r'.charCodeAt(0);
+    hdlrBox[32] = 0;
+
+    // meta box: header (8) + version/flags (4) + hdlr + ID32
+    var metaSize = 8 + 4 + hdlrBox.length + id32Box.length;
+    var metaHeader = new Uint8Array(12);
+    new DataView(metaHeader.buffer).setUint32(0, metaSize);
+    metaHeader[4] = 'm'.charCodeAt(0);
+    metaHeader[5] = 'e'.charCodeAt(0);
+    metaHeader[6] = 't'.charCodeAt(0);
+    metaHeader[7] = 'a'.charCodeAt(0);
+    return mergeBytes(metaHeader, hdlrBox, id32Box);
+  }
+
+  /**
+   * Update a box's size field
+   */
+  function updateBoxSize(bytes, offset, newSize) {
+    var result = new Uint8Array(bytes);
+    new DataView(result.buffer).setUint32(offset, newSize);
+    return result;
+  }
+
+  /**
+   * Update parent box sizes after a size change
+   */
+  function updateParentSizes(bytes, changedOffset, sizeDiff) {
+    if (sizeDiff === 0) return bytes;
+    var view = new BufferView(bytes);
+    var result = new Uint8Array(bytes);
+    var resultView = new DataView(result.buffer);
+
+    // Find and update moov
+    var moov = findBox(view, 0, view.byteLength, 'moov');
+    if (moov && changedOffset >= moov.offset && changedOffset < moov.end) {
+      resultView.setUint32(moov.offset, moov.size + sizeDiff);
+
+      // Find and update udta
+      var udta = findBox(view, moov.dataStart, moov.end, 'udta');
+      if (udta && changedOffset >= udta.offset && changedOffset < udta.end) {
+        resultView.setUint32(udta.offset, udta.size + sizeDiff);
+
+        // Find and update meta
+        var meta = findBox(view, udta.dataStart, udta.end, 'meta');
+        if (meta && changedOffset >= meta.offset && changedOffset < meta.end) {
+          resultView.setUint32(meta.offset, meta.size + sizeDiff);
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Find mdat box (contains audio data)
+   * @param {ArrayBuffer|Buffer} buffer
+   * @returns {{ offset: number, dataStart: number, size: number, end: number } | null}
+   */
+  function findMdatBox(buffer) {
+    var view = new BufferView(buffer);
+    return findBox(view, 0, view.byteLength, 'mdat');
+  }
+
+  /**
+   * Find all stco (Sample Table Chunk Offset) boxes in a buffer
+   * stco contains 32-bit absolute file offsets to media chunks
+   * @param {BufferView} view
+   * @returns {Array<{ offset: number, entryCount: number, entriesOffset: number }>}
+   */
+  function findStcoBoxes(view) {
+    var boxes = [];
+    findStcoBoxesRecursive(view, 0, view.byteLength, boxes);
+    return boxes;
+  }
+
+  /**
+   * Recursively search for stco boxes
+   */
+  function findStcoBoxesRecursive(view, start, end, boxes) {
+    var offset = start;
+    while (offset < end) {
+      var box = parseBoxHeader(view, offset);
+      if (!box) break;
+      if (box.type === 'stco') {
+        // stco structure: header (8) + version/flags (4) + entry_count (4) + entries (4 bytes each)
+        var entryCount = view.getUint32(box.dataStart + 4);
+        boxes.push({
+          offset: box.offset,
+          size: box.size,
+          entryCount: entryCount,
+          entriesOffset: box.dataStart + 8 // After version/flags and entry_count
+        });
+      } else if (box.type === 'co64') {
+        // co64 structure: header (8) + version/flags (4) + entry_count (4) + entries (8 bytes each)
+        var _entryCount = view.getUint32(box.dataStart + 4);
+        boxes.push({
+          offset: box.offset,
+          size: box.size,
+          entryCount: _entryCount,
+          entriesOffset: box.dataStart + 8,
+          is64bit: true
+        });
+      } else if (isContainerBox(box.type)) {
+        // Recurse into container boxes
+        var childStart = box.dataStart;
+        // meta box has 4 extra bytes for version/flags
+        if (box.type === 'meta') {
+          childStart += 4;
+        }
+        findStcoBoxesRecursive(view, childStart, box.end, boxes);
+      }
+      offset = box.end;
+    }
+  }
+
+  /**
+   * Check if a box type is a container that can have children
+   */
+  function isContainerBox(type) {
+    var containers = ['moov', 'trak', 'mdia', 'minf', 'stbl', 'udta', 'meta', 'edts', 'dinf'];
+    return containers.includes(type);
+  }
+
+  /**
+   * Update all chunk offsets (stco/co64) by a delta value
+   * This must be called after inserting/removing data that shifts the mdat position
+   * @param {Uint8Array} bytes - The buffer to modify
+   * @param {number} insertionPoint - The offset where data was inserted
+   * @param {number} delta - The size change (positive for insertion, negative for removal)
+   * @returns {Uint8Array}
+   */
+  function updateChunkOffsets(bytes, insertionPoint, delta) {
+    if (delta === 0) return bytes;
+    var view = new BufferView(bytes);
+    var result = new Uint8Array(bytes);
+    var resultView = new DataView(result.buffer);
+    var stcoBoxes = findStcoBoxes(view);
+    var _iterator = _createForOfIteratorHelper(stcoBoxes),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var stco = _step.value;
+        for (var i = 0; i < stco.entryCount; i++) {
+          if (stco.is64bit) {
+            // 64-bit offsets
+            var offsetPos = stco.entriesOffset + i * 8;
+            var highBits = view.getUint32(offsetPos);
+            var lowBits = view.getUint32(offsetPos + 4);
+            // For simplicity, only handle offsets that fit in 32 bits
+            if (highBits === 0) {
+              var chunkOffset = lowBits;
+              // Only update offsets that are after the insertion point
+              if (chunkOffset >= insertionPoint) {
+                var newOffset = chunkOffset + delta;
+                resultView.setUint32(offsetPos, 0);
+                resultView.setUint32(offsetPos + 4, newOffset);
+              }
+            }
+          } else {
+            // 32-bit offsets
+            var _offsetPos = stco.entriesOffset + i * 4;
+            var _chunkOffset = view.getUint32(_offsetPos);
+            // Only update offsets that are after the insertion point
+            if (_chunkOffset >= insertionPoint) {
+              resultView.setUint32(_offsetPos, _chunkOffset + delta);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+    return result;
+  }
+
+  /**
+   * Detect if buffer is an MP4 container by checking for 'ftyp' box
+   * @param {ArrayBuffer|Buffer} buffer
+   * @returns {boolean}
+   */
+  function hasMP4(buffer) {
+    var view = new BufferView(buffer);
+    if (view.byteLength < 8) return false;
+    return view.getUint8String(4, 4) === 'ftyp';
+  }
+
+  /**
+   * Check if MP4 buffer contains an ID32 box
+   * @param {ArrayBuffer|Buffer} buffer
+   * @returns {boolean}
+   */
+  function hasID32(buffer) {
+    return findID32Box(buffer) !== null;
+  }
+
+  /**
+   * Decode ID3v2 tags from MP4 ID32 box
+   * @param {ArrayBuffer|Buffer} buffer
+   * @param {object} options
+   * @param {boolean} [options.unsupported=false] - Parse unsupported frames
+   * @returns {{ tags: object, details: object } | null}
+   */
+  function decode$2(buffer) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var _options$unsupported = options.unsupported,
+      unsupported = _options$unsupported === void 0 ? false : _options$unsupported;
+    var id32Info = findID32Box(buffer);
+    if (!id32Info) return null;
+    var view = new BufferView(buffer);
+
+    // Extract raw ID3v2 data from ID32 box
+    var id3Bytes = view.getUint8(id32Info.id3Offset, id32Info.id3Size);
+    var id3Data = new Uint8Array(Array.isArray(id3Bytes) ? id3Bytes : [id3Bytes]).buffer;
+
+    // Verify ID3v2 header exists
+    if (!hasID3v2(id3Data)) {
+      return null;
+    }
+
+    // Decode using existing ID3v2 decoder
+    var _ID3v2$decode = decode$3(id3Data, 0, unsupported),
+      tags = _ID3v2$decode.tags,
+      details = _ID3v2$decode.details;
+
+    // Add MP4-specific details
+    details.mp4 = {
+      language: id32Info.language,
+      id32Offset: id32Info.offset,
+      id32Size: id32Info.size
+    };
+    return {
+      tags: tags,
+      details: details
+    };
+  }
+
+  /**
+   * Encode ID3v2 tags into MP4 buffer with ID32 box
+   * @param {ArrayBuffer|Buffer} buffer - Original MP4 buffer
+   * @param {object} tags - Tags object with v2 property
+   * @param {object} options
+   * @param {boolean} [options.strict=false] - Strict validation
+   * @param {string} [options.encoding='utf-8'] - Text encoding
+   * @param {object} [options.id3v2] - ID3v2 options
+   * @param {object} [options.mp4] - MP4-specific options
+   * @param {string} [options.mp4.language='und'] - ISO-639-2/T language code
+   * @returns {ArrayBuffer}
+   */
+  function encode$2(buffer, tags) {
+    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    var defaultVersion = tags.v2Details ? tags.v2Details.version[0] : 3;
+    var defaultEncoding = 'utf-8';
+    var id3v2Options = _objectSpread2({
+      version: defaultVersion,
+      padding: 0,
+      // No padding needed in ID32 box
+      unsynch: false,
+      unsupported: false,
+      encoding: defaultEncoding
+    }, options.id3v2);
+    id3v2Options.encodingIndex = encoding2Index(id3v2Options.encoding);
+    var mp4Options = _objectSpread2({
+      language: 'und'
+    }, options.mp4);
+
+    // Validate tags
+    if (options.strict !== false) {
+      validate(tags.v2, options.strict, id3v2Options);
+    }
+
+    // Encode ID3v2 data
+    var id3Data = encode$3(tags.v2, id3v2Options);
+
+    // Build ID32 box
+    var id32Box = buildID32Box(id3Data, mp4Options.language);
+
+    // Rebuild MP4 with new ID32 box
+    return rebuildMP4WithID32(buffer, id32Box);
+  }
+
+  /**
+   * Get audio buffer from MP4 (extract mdat contents)
+   * @param {ArrayBuffer|Buffer} buffer
+   * @returns {ArrayBuffer}
+   */
+  function getAudioBuffer$2(buffer) {
+    var mdat = findMdatBox(buffer);
+    if (!mdat) {
+      // Return the original buffer if no mdat found
+      return buffer;
+    }
+    var view = new BufferView(buffer);
+    var audioBytes = view.getUint8(mdat.dataStart, mdat.end - mdat.dataStart);
+    var audioData = new Uint8Array(Array.isArray(audioBytes) ? audioBytes : [audioBytes]);
+    return typeof Buffer !== 'undefined' ? Buffer.from(audioData.buffer) : audioData.buffer;
+  }
+
+  /**
+   * AIFF File Structure:
+   * - "FORM" (4 bytes)
+   * - Total size (4 bytes, big-endian) - size of file minus 8
+   * - "AIFF" or "AIFC" (4 bytes)
+   * - Chunks: each has 4-byte ID, 4-byte size (big-endian), data (padded to even)
+   * - ID3v2 tags are stored in "ID3 " chunk (note trailing space)
+   */
+
+  /**
+   * Detect if buffer is an AIFF file
+   * @param {ArrayBuffer|Buffer} buffer
+   * @returns {boolean}
+   */
+  function hasAIFF(buffer) {
+    var view = new BufferView(buffer);
+    if (view.byteLength < 12) return false;
+    var form = view.getUint8String(0, 4);
+    var type = view.getUint8String(8, 4);
+    return form === 'FORM' && (type === 'AIFF' || type === 'AIFC');
+  }
+
+  /**
+   * Check if AIFF buffer contains an ID3 chunk
+   * @param {ArrayBuffer|Buffer} buffer
+   * @returns {boolean}
+   */
+  function hasID3$1(buffer) {
+    return findID3Chunk(buffer) !== null;
+  }
+
+  /**
+   * Find the ID3 chunk in an AIFF file
+   * @param {ArrayBuffer|Buffer} buffer
+   * @returns {{ offset: number, size: number, dataOffset: number } | null}
+   */
+  function findID3Chunk(buffer) {
+    var view = new BufferView(buffer);
+    if (view.byteLength < 12) return null;
+
+    // Skip FORM header (4) + size (4) + AIFF/AIFC (4)
+    var offset = 12;
+    var fileEnd = view.byteLength;
+    while (offset + 8 <= fileEnd) {
+      var chunkId = view.getUint8String(offset, 4);
+      var chunkSize = view.getUint32(offset + 4);
+      if (chunkId === 'ID3 ') {
+        return {
+          offset: offset,
+          size: chunkSize,
+          dataOffset: offset + 8
+        };
+      }
+
+      // Move to next chunk (chunks are padded to even byte boundaries)
+      offset += 8 + chunkSize;
+      if (chunkSize % 2 !== 0) offset += 1;
+    }
+    return null;
+  }
+
+  /**
+   * Decode ID3v2 tags from AIFF ID3 chunk
+   * @param {ArrayBuffer|Buffer} buffer
+   * @param {object} options
+   * @param {boolean} [options.unsupported=false]
+   * @returns {{ tags: object, details: object } | null}
+   */
+  function decode$1(buffer) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var _options$unsupported = options.unsupported,
+      unsupported = _options$unsupported === void 0 ? false : _options$unsupported;
+    var id3Chunk = findID3Chunk(buffer);
+    if (!id3Chunk) return null;
+    var view = new BufferView(buffer);
+    var id3Bytes = view.getUint8(id3Chunk.dataOffset, id3Chunk.size);
+
+    // getUint8 returns false if out of bounds
+    if (id3Bytes === false) return null;
+
+    // Convert to array if single byte
+    var bytesArray = Array.isArray(id3Bytes) ? id3Bytes : [id3Bytes];
+    if (bytesArray.length === 0) return null;
+    var id3Data = new Uint8Array(bytesArray).buffer;
+    if (!hasID3v2(id3Data)) {
+      return null;
+    }
+    var _ID3v2$decode = decode$3(id3Data, 0, unsupported),
+      tags = _ID3v2$decode.tags,
+      details = _ID3v2$decode.details;
+    details.aiff = {
+      chunkOffset: id3Chunk.offset,
+      chunkSize: id3Chunk.size
+    };
+    return {
+      tags: tags,
+      details: details
+    };
+  }
+
+  /**
+   * Encode ID3v2 tags into AIFF buffer
+   * @param {ArrayBuffer|Buffer} buffer
+   * @param {object} tags
+   * @param {object} options
+   * @returns {ArrayBuffer}
+   */
+  function encode$1(buffer, tags) {
+    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    var defaultVersion = tags.v2Details ? tags.v2Details.version[0] : 3;
+    var defaultEncoding = 'utf-8';
+    var id3v2Options = _objectSpread2({
+      version: defaultVersion,
+      padding: 0,
+      unsynch: false,
+      unsupported: false,
+      encoding: defaultEncoding
+    }, options.id3v2);
+    id3v2Options.encodingIndex = encoding2Index(id3v2Options.encoding);
+    if (options.strict !== false) {
+      validate(tags.v2, options.strict, id3v2Options);
+    }
+    var id3Data = new Uint8Array(encode$3(tags.v2, id3v2Options));
+    var id3Chunk = buildID3Chunk(id3Data);
+    return rebuildAIFFWithID3(buffer, id3Chunk);
+  }
+
+  /**
+   * Build an ID3 chunk for AIFF
+   * @param {Uint8Array} id3Data
+   * @returns {Uint8Array}
+   */
+  function buildID3Chunk(id3Data) {
+    var chunkSize = id3Data.length;
+    var header = new BufferView(8);
+
+    // Chunk ID: "ID3 " (with trailing space)
+    header.setUint8(0, 'I'.charCodeAt(0));
+    header.setUint8(1, 'D'.charCodeAt(0));
+    header.setUint8(2, '3'.charCodeAt(0));
+    header.setUint8(3, ' '.charCodeAt(0));
+
+    // Chunk size (big-endian)
+    header.setUint32(4, chunkSize);
+
+    // Pad to even length if necessary
+    if (chunkSize % 2 !== 0) {
+      return mergeBytes(new Uint8Array(header.buffer), id3Data, [0]);
+    }
+    return mergeBytes(new Uint8Array(header.buffer), id3Data);
+  }
+
+  /**
+   * Rebuild AIFF buffer with new ID3 chunk
+   * @param {ArrayBuffer|Buffer} buffer
+   * @param {Uint8Array} id3Chunk
+   * @returns {ArrayBuffer}
+   */
+  function rebuildAIFFWithID3(buffer, id3Chunk) {
+    var originalBytes = new Uint8Array(buffer);
+    var existingID3 = findID3Chunk(buffer);
+    var newBytes;
+    if (existingID3) {
+      // Calculate existing chunk total size (including padding)
+      var existingChunkTotal = 8 + existingID3.size;
+      if (existingID3.size % 2 !== 0) existingChunkTotal += 1;
+
+      // Replace existing ID3 chunk
+      var before = originalBytes.slice(0, existingID3.offset);
+      var after = originalBytes.slice(existingID3.offset + existingChunkTotal);
+      newBytes = mergeBytes(before, id3Chunk, after);
+    } else {
+      // Append ID3 chunk at the end (before any padding)
+      newBytes = mergeBytes(originalBytes, id3Chunk);
+    }
+
+    // Update FORM size field
+    var newSize = newBytes.length - 8;
+    var result = new Uint8Array(newBytes);
+    new DataView(result.buffer).setUint32(4, newSize);
+    return typeof Buffer !== 'undefined' ? Buffer.from(result.buffer) : result.buffer;
+  }
+
+  /**
+   * Get audio data from AIFF (returns the entire file as AIFF is a container)
+   * @param {ArrayBuffer|Buffer} buffer
+   * @returns {ArrayBuffer}
+   */
+  function getAudioBuffer$1(buffer) {
+    // For AIFF, return the whole file as the audio is interleaved with metadata
+    return buffer;
+  }
+
+  /**
+   * AAC/ADTS File Structure:
+   * - Optional ID3v2 tag at beginning (like MP3)
+   * - ADTS frames, each starting with sync word 0xFFF (12 bits)
+   * - ADTS header is 7 bytes (no CRC) or 9 bytes (with CRC)
+   *
+   * ID3v2 tags are prepended to the file, same as MP3.
+   */
+
+  /**
+   * Detect if buffer is an AAC/ADTS file
+   * Checks for ADTS sync word (0xFFF) after skipping any ID3v2 header
+   * @param {ArrayBuffer|Buffer} buffer
+   * @returns {boolean}
+   */
+  function hasAAC(buffer) {
+    var view = new BufferView(buffer);
+    if (view.byteLength < 4) return false;
+    var offset = 0;
+
+    // Skip ID3v2 tag if present
+    if (hasID3v2(buffer)) {
+      var _ID3v2$decode = decode$3(buffer),
+        details = _ID3v2$decode.details;
+      offset = details.size + 10; // ID3v2 header (10) + tag size
+    }
+
+    // Check for ADTS sync word: 0xFFF (first 12 bits)
+    if (offset + 2 > view.byteLength) return false;
+    var syncWord = view.getUint8(offset) << 4 | view.getUint8(offset + 1) >> 4;
+    if (syncWord !== 0xFFF) return false;
+
+    // ADTS has layer bits = 00 (bits 1-2 of byte 1), while MP3 has layer 01/10/11
+    // This distinguishes ADTS from MP3 which also has 0xFFF sync
+    var layer = view.getUint8(offset + 1) >> 1 & 0x03;
+    return layer === 0;
+  }
+
+  /**
+   * Check if AAC buffer has ID3v2 tag
+   * @param {ArrayBuffer|Buffer} buffer
+   * @returns {boolean}
+   */
+  function hasID3(buffer) {
+    return hasID3v2(buffer);
+  }
+
+  /**
+   * Decode ID3v2 tags from AAC file
+   * @param {ArrayBuffer|Buffer} buffer
+   * @param {object} options
+   * @param {boolean} [options.unsupported=false]
+   * @returns {{ tags: object, details: object } | null}
+   */
+  function decode(buffer) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var _options$unsupported = options.unsupported,
+      unsupported = _options$unsupported === void 0 ? false : _options$unsupported;
+    if (!hasID3v2(buffer)) {
+      return null;
+    }
+    var _ID3v2$decode2 = decode$3(buffer, 0, unsupported),
+      tags = _ID3v2$decode2.tags,
+      details = _ID3v2$decode2.details;
+    details.aac = {
+      format: 'ADTS'
+    };
+    return {
+      tags: tags,
+      details: details
+    };
+  }
+
+  /**
+   * Encode ID3v2 tags into AAC buffer
+   * @param {ArrayBuffer|Buffer} buffer
+   * @param {object} tags
+   * @param {object} options
+   * @returns {ArrayBuffer}
+   */
+  function encode(buffer, tags) {
+    var _options$id3v2$paddin, _options$id3v;
+    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    var defaultVersion = tags.v2Details ? tags.v2Details.version[0] : 3;
+    var defaultEncoding = 'utf-8';
+    var id3v2Options = _objectSpread2({
+      version: defaultVersion,
+      padding: (_options$id3v2$paddin = (_options$id3v = options.id3v2) === null || _options$id3v === void 0 ? void 0 : _options$id3v.padding) !== null && _options$id3v2$paddin !== void 0 ? _options$id3v2$paddin : 1024,
+      unsynch: true,
+      // Unsynchronisation recommended for AAC
+      unsupported: false,
+      encoding: defaultEncoding
+    }, options.id3v2);
+    id3v2Options.encodingIndex = encoding2Index(id3v2Options.encoding);
+    if (options.strict !== false) {
+      validate(tags.v2, options.strict, id3v2Options);
+    }
+
+    // Get audio data without existing ID3 tags
+    var audioData = new Uint8Array(getAudioBuffer(buffer));
+
+    // Encode new ID3v2 tag
+    var id3Data = new Uint8Array(encode$3(tags.v2, id3v2Options));
+
+    // Prepend ID3v2 tag to audio
+    var result = mergeBytes(id3Data, audioData);
+    return typeof Buffer !== 'undefined' ? Buffer.from(result.buffer) : result.buffer;
+  }
+
+  /**
+   * Get audio buffer without ID3 tags
+   * @param {ArrayBuffer|Buffer} buffer
+   * @returns {ArrayBuffer}
+   */
+  function getAudioBuffer(buffer) {
+    var view = new BufferView(buffer);
+    var offset = 0;
+
+    // Skip ID3v2 tag if present
+    if (hasID3v2(buffer)) {
+      var _ID3v2$decode3 = decode$3(buffer),
+        details = _ID3v2$decode3.details;
+      offset = details.size + 10;
+    }
+
+    // Find first ADTS sync word
+    while (offset + 2 <= view.byteLength) {
+      var syncWord = view.getUint8(offset) << 4 | view.getUint8(offset + 1) >> 4;
+      if (syncWord === 0xFFF) {
+        break;
+      }
+      offset++;
+    }
+    var sliced = buffer.slice(offset);
+    return typeof Buffer !== 'undefined' ? Buffer.from(sliced) : sliced;
+  }
+
   var MP3Tag = /*#__PURE__*/function () {
     function MP3Tag(buffer) {
       var verbose = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -9178,7 +10488,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '3.14.0';
+        return '3.16.0';
       },
       set: function set(value) {
         throw new Error('Unable to set this property');
@@ -9236,12 +10546,336 @@
         options = overwriteDefault(options, {
           id3v1: true,
           id3v2: true,
+          mp4: true,
+          aiff: true,
+          aac: true,
           unsupported: false,
           encoding: 'utf-8'
         });
+
+        // Check for AIFF container first (before MP4 since it's more specific)
+        if (options.aiff && hasAIFF(buffer)) {
+          if (verbose) console.log('AIFF container detected');
+          if (hasID3$1(buffer)) {
+            if (verbose) console.log('ID3 chunk found, reading...');
+            var _options = options,
+              unsupported = _options.unsupported;
+            var result = decode$1(buffer, {
+              unsupported: unsupported
+            });
+            if (result) {
+              if (verbose) console.log('ID3 chunk reading finished');
+              tags.v2 = _objectSpread2({}, result.tags);
+              tags.v2Details = result.details;
+            }
+          }
+          Object.defineProperties(tags, {
+            title: {
+              get: function get() {
+                return this.v2 && (this.v2.TIT2 || this.v2.TT2) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TT2' : 'TIT2'] = value;
+                }
+              }
+            },
+            artist: {
+              get: function get() {
+                return this.v2 && (this.v2.TPE1 || this.v2.TP1) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TP1' : 'TPE1'] = value;
+                }
+              }
+            },
+            album: {
+              get: function get() {
+                return this.v2 && (this.v2.TALB || this.v2.TAL) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TAL' : 'TALB'] = value;
+                }
+              }
+            },
+            year: {
+              get: function get() {
+                return this.v2 && (this.v2.TYER || this.v2.TDRC || this.v2.TYE) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  if (version === 2) this.v2.TYE = value;else if (version === 3) this.v2.TYER = value;else if (version === 4) this.v2.TDRC = value;
+                }
+              }
+            },
+            comment: {
+              get: function get() {
+                var text = '';
+                if (this.v2 && (this.v2.COMM || this.v2.COM)) {
+                  var comm = this.v2.COMM || this.v2.COM;
+                  if (Array.isArray(comm) && comm.length > 0) text = comm[0].text;
+                }
+                return text;
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'COM' : 'COMM'] = [{
+                    language: 'eng',
+                    descriptor: '',
+                    text: value
+                  }];
+                }
+              }
+            },
+            track: {
+              get: function get() {
+                return this.v2 && (this.v2.TRCK && this.v2.TRCK.split('/')[0] || this.v2.TRK && this.v2.TRK.split('/')[0]) || '';
+              },
+              set: function set(value) {
+                if (this.v2 && value !== '') {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TRK' : 'TRCK'] = value;
+                }
+              }
+            },
+            genre: {
+              get: function get() {
+                return this.v2 && (this.v2.TCON || this.v2.TCO) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TCO' : 'TCON'] = value;
+                }
+              }
+            }
+          });
+          return tags;
+        }
+
+        // Check for MP4 container
+        if (options.mp4 && hasMP4(buffer)) {
+          if (verbose) console.log('MP4 container detected');
+          if (hasID32(buffer)) {
+            if (verbose) console.log('ID32 box found, reading...');
+            var _options2 = options,
+              _unsupported = _options2.unsupported;
+            var _result = decode$2(buffer, {
+              unsupported: _unsupported
+            });
+            if (_result) {
+              if (verbose) console.log('ID32 reading finished');
+              tags.v2 = _objectSpread2({}, _result.tags);
+              tags.v2Details = _result.details;
+            }
+          }
+          Object.defineProperties(tags, {
+            title: {
+              get: function get() {
+                return this.v2 && (this.v2.TIT2 || this.v2.TT2) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TT2' : 'TIT2'] = value;
+                }
+              }
+            },
+            artist: {
+              get: function get() {
+                return this.v2 && (this.v2.TPE1 || this.v2.TP1) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TP1' : 'TPE1'] = value;
+                }
+              }
+            },
+            album: {
+              get: function get() {
+                return this.v2 && (this.v2.TALB || this.v2.TAL) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TAL' : 'TALB'] = value;
+                }
+              }
+            },
+            year: {
+              get: function get() {
+                return this.v2 && (this.v2.TYER || this.v2.TDRC || this.v2.TYE) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  if (version === 2) this.v2.TYE = value;else if (version === 3) this.v2.TYER = value;else if (version === 4) this.v2.TDRC = value;
+                }
+              }
+            },
+            comment: {
+              get: function get() {
+                var text = '';
+                if (this.v2 && (this.v2.COMM || this.v2.COM)) {
+                  var comm = this.v2.COMM || this.v2.COM;
+                  if (Array.isArray(comm) && comm.length > 0) text = comm[0].text;
+                }
+                return text;
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'COM' : 'COMM'] = [{
+                    language: 'eng',
+                    descriptor: '',
+                    text: value
+                  }];
+                }
+              }
+            },
+            track: {
+              get: function get() {
+                return this.v2 && (this.v2.TRCK && this.v2.TRCK.split('/')[0] || this.v2.TRK && this.v2.TRK.split('/')[0]) || '';
+              },
+              set: function set(value) {
+                if (this.v2 && value !== '') {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TRK' : 'TRCK'] = value;
+                }
+              }
+            },
+            genre: {
+              get: function get() {
+                return this.v2 && (this.v2.TCON || this.v2.TCO) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TCO' : 'TCON'] = value;
+                }
+              }
+            }
+          });
+          return tags;
+        }
+
+        // Check for AAC/ADTS (has ID3v2 prepended like MP3, but audio uses 0xFFF sync)
+        if (options.aac && hasAAC(buffer)) {
+          if (verbose) console.log('AAC/ADTS detected');
+          if (hasID3(buffer)) {
+            if (verbose) console.log('ID3v2 found in AAC, reading...');
+            var _options3 = options,
+              _unsupported2 = _options3.unsupported;
+            var _result2 = decode(buffer, {
+              unsupported: _unsupported2
+            });
+            if (_result2) {
+              if (verbose) console.log('ID3v2 reading finished');
+              tags.v2 = _objectSpread2({}, _result2.tags);
+              tags.v2Details = _result2.details;
+            }
+          }
+          Object.defineProperties(tags, {
+            title: {
+              get: function get() {
+                return this.v2 && (this.v2.TIT2 || this.v2.TT2) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TT2' : 'TIT2'] = value;
+                }
+              }
+            },
+            artist: {
+              get: function get() {
+                return this.v2 && (this.v2.TPE1 || this.v2.TP1) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TP1' : 'TPE1'] = value;
+                }
+              }
+            },
+            album: {
+              get: function get() {
+                return this.v2 && (this.v2.TALB || this.v2.TAL) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TAL' : 'TALB'] = value;
+                }
+              }
+            },
+            year: {
+              get: function get() {
+                return this.v2 && (this.v2.TYER || this.v2.TDRC || this.v2.TYE) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  if (version === 2) this.v2.TYE = value;else if (version === 3) this.v2.TYER = value;else if (version === 4) this.v2.TDRC = value;
+                }
+              }
+            },
+            comment: {
+              get: function get() {
+                var text = '';
+                if (this.v2 && (this.v2.COMM || this.v2.COM)) {
+                  var comm = this.v2.COMM || this.v2.COM;
+                  if (Array.isArray(comm) && comm.length > 0) text = comm[0].text;
+                }
+                return text;
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'COM' : 'COMM'] = [{
+                    language: 'eng',
+                    descriptor: '',
+                    text: value
+                  }];
+                }
+              }
+            },
+            track: {
+              get: function get() {
+                return this.v2 && (this.v2.TRCK && this.v2.TRCK.split('/')[0] || this.v2.TRK && this.v2.TRK.split('/')[0]) || '';
+              },
+              set: function set(value) {
+                if (this.v2 && value !== '') {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TRK' : 'TRCK'] = value;
+                }
+              }
+            },
+            genre: {
+              get: function get() {
+                return this.v2 && (this.v2.TCON || this.v2.TCO) || '';
+              },
+              set: function set(value) {
+                if (this.v2) {
+                  var version = this.v2Details.version[0];
+                  this.v2[version === 2 ? 'TCO' : 'TCON'] = value;
+                }
+              }
+            }
+          });
+          return tags;
+        }
         if (options.id3v1 && hasID3v1(buffer)) {
           if (verbose) console.log('ID3v1 found, reading...');
-          var _ID3v1$decode = decode$1(buffer, options.encoding),
+          var _ID3v1$decode = decode$4(buffer, options.encoding),
             v1Tags = _ID3v1$decode.tags,
             details = _ID3v1$decode.details;
           if (verbose) console.log('ID3v1 reading finished');
@@ -9250,9 +10884,9 @@
         }
         if (options.id3v2 && hasID3v2(buffer)) {
           if (verbose) console.log('ID3v2 found, reading...');
-          var _options = options,
-            unsupported = _options.unsupported;
-          var _ID3v2$decode = decode(buffer, 0, unsupported),
+          var _options4 = options,
+            _unsupported3 = _options4.unsupported;
+          var _ID3v2$decode = decode$3(buffer, 0, _unsupported3),
             v2Tags = _ID3v2$decode.tags,
             _details = _ID3v2$decode.details;
           if (verbose) console.log('ID3v2 reading finished');
@@ -9357,6 +10991,509 @@
         return tags;
       }
     }, {
+      key: "readBlob",
+      value: function () {
+        var _readBlob = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(blob) {
+          var options,
+            size,
+            tags,
+            read,
+            _read,
+            containerProps,
+            mp3Props,
+            headerLen,
+            header,
+            hv,
+            formType,
+            chunkOffset,
+            id3ChunkOffset,
+            id3ChunkSize,
+            chunkHeader,
+            cv,
+            chunkId,
+            chunkSize,
+            id3Buffer,
+            _ID3v2$decode2,
+            v2Tags,
+            details,
+            boxOffset,
+            moovOffset,
+            moovSize,
+            boxHeader,
+            bv,
+            bSize,
+            bType,
+            moovBuffer,
+            mv,
+            udta,
+            meta,
+            id32,
+            languageBytes,
+            langValue,
+            language,
+            id3Start,
+            id3Size,
+            _id3Buffer,
+            _ID3v2$decode3,
+            _v2Tags,
+            _details2,
+            tagSize,
+            fullSize,
+            readLen,
+            tagBuffer,
+            _ID3v2$decode4,
+            _v2Tags2,
+            _details3,
+            isAAC,
+            tv,
+            b0,
+            b1,
+            syncWord,
+            layer,
+            tail,
+            _ID3v1$decode2,
+            v1Tags,
+            v1Details,
+            _tail,
+            _ID3v1$decode3,
+            _v1Tags,
+            _details4,
+            _args2 = arguments;
+          return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+            while (1) switch (_context2.prev = _context2.next) {
+              case 0:
+                _read = function _read3() {
+                  _read = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(offset, length) {
+                    return _regeneratorRuntime().wrap(function _callee$(_context) {
+                      while (1) switch (_context.prev = _context.next) {
+                        case 0:
+                          return _context.abrupt("return", blob.slice(offset, offset + length).arrayBuffer());
+                        case 1:
+                        case "end":
+                          return _context.stop();
+                      }
+                    }, _callee);
+                  }));
+                  return _read.apply(this, arguments);
+                };
+                read = function _read2(_x2, _x3) {
+                  return _read.apply(this, arguments);
+                };
+                options = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : {};
+                options = overwriteDefault(options, {
+                  id3v1: true,
+                  id3v2: true,
+                  mp4: true,
+                  aiff: true,
+                  aac: true,
+                  unsupported: false,
+                  encoding: 'utf-8'
+                });
+                size = blob.size;
+                tags = {};
+                containerProps = {
+                  title: {
+                    get: function get() {
+                      return this.v2 && (this.v2.TIT2 || this.v2.TT2) || '';
+                    },
+                    set: function set(value) {
+                      if (this.v2) {
+                        var version = this.v2Details.version[0];
+                        this.v2[version === 2 ? 'TT2' : 'TIT2'] = value;
+                      }
+                    }
+                  },
+                  artist: {
+                    get: function get() {
+                      return this.v2 && (this.v2.TPE1 || this.v2.TP1) || '';
+                    },
+                    set: function set(value) {
+                      if (this.v2) {
+                        var version = this.v2Details.version[0];
+                        this.v2[version === 2 ? 'TP1' : 'TPE1'] = value;
+                      }
+                    }
+                  },
+                  album: {
+                    get: function get() {
+                      return this.v2 && (this.v2.TALB || this.v2.TAL) || '';
+                    },
+                    set: function set(value) {
+                      if (this.v2) {
+                        var version = this.v2Details.version[0];
+                        this.v2[version === 2 ? 'TAL' : 'TALB'] = value;
+                      }
+                    }
+                  },
+                  year: {
+                    get: function get() {
+                      return this.v2 && (this.v2.TYER || this.v2.TDRC || this.v2.TYE) || '';
+                    },
+                    set: function set(value) {
+                      if (this.v2) {
+                        var version = this.v2Details.version[0];
+                        if (version === 2) this.v2.TYE = value;else if (version === 3) this.v2.TYER = value;else if (version === 4) this.v2.TDRC = value;
+                      }
+                    }
+                  },
+                  comment: {
+                    get: function get() {
+                      var text = '';
+                      if (this.v2 && (this.v2.COMM || this.v2.COM)) {
+                        var comm = this.v2.COMM || this.v2.COM;
+                        if (Array.isArray(comm) && comm.length > 0) text = comm[0].text;
+                      }
+                      return text;
+                    },
+                    set: function set(value) {
+                      if (this.v2) {
+                        var version = this.v2Details.version[0];
+                        this.v2[version === 2 ? 'COM' : 'COMM'] = [{
+                          language: 'eng',
+                          descriptor: '',
+                          text: value
+                        }];
+                      }
+                    }
+                  },
+                  track: {
+                    get: function get() {
+                      return this.v2 && (this.v2.TRCK && this.v2.TRCK.split('/')[0] || this.v2.TRK && this.v2.TRK.split('/')[0]) || '';
+                    },
+                    set: function set(value) {
+                      if (this.v2 && value !== '') {
+                        var version = this.v2Details.version[0];
+                        this.v2[version === 2 ? 'TRK' : 'TRCK'] = value;
+                      }
+                    }
+                  },
+                  genre: {
+                    get: function get() {
+                      return this.v2 && (this.v2.TCON || this.v2.TCO) || '';
+                    },
+                    set: function set(value) {
+                      if (this.v2) {
+                        var version = this.v2Details.version[0];
+                        this.v2[version === 2 ? 'TCO' : 'TCON'] = value;
+                      }
+                    }
+                  }
+                };
+                mp3Props = {
+                  title: {
+                    get: function get() {
+                      return this.v2 && (this.v2.TIT2 || this.v2.TT2) || this.v1 && this.v1.title || '';
+                    },
+                    set: function set(value) {
+                      if (this.v2) {
+                        var version = this.v2Details.version[0];
+                        this.v2[version === 2 ? 'TT2' : 'TIT2'] = value;
+                      }
+                      if (this.v1) this.v1.title = value;
+                    }
+                  },
+                  artist: {
+                    get: function get() {
+                      return this.v2 && (this.v2.TPE1 || this.v2.TP1) || this.v1 && this.v1.artist || '';
+                    },
+                    set: function set(value) {
+                      if (this.v2) {
+                        var version = this.v2Details.version[0];
+                        this.v2[version === 2 ? 'TP1' : 'TPE1'] = value;
+                      }
+                      if (this.v1) this.v1.artist = value;
+                    }
+                  },
+                  album: {
+                    get: function get() {
+                      return this.v2 && (this.v2.TALB || this.v2.TAL) || this.v1 && this.v1.album || '';
+                    },
+                    set: function set(value) {
+                      if (this.v2) {
+                        var version = this.v2Details.version[0];
+                        this.v2[version === 2 ? 'TAL' : 'TALB'] = value;
+                      }
+                      if (this.v1) this.v1.album = value;
+                    }
+                  },
+                  year: {
+                    get: function get() {
+                      return this.v2 && (this.v2.TYER || this.v2.TDRC || this.v2.TYE) || this.v1 && this.v1.year || '';
+                    },
+                    set: function set(value) {
+                      if (this.v2) {
+                        var version = this.v2Details.version[0];
+                        if (version === 2) this.v2.TYE = value;else if (version === 3) this.v2.TYER = value;else if (version === 4) this.v2.TDRC = value;
+                      }
+                      if (this.v1) this.v1.year = value;
+                    }
+                  },
+                  comment: {
+                    get: function get() {
+                      var text = '';
+                      if (this.v2 && (this.v2.COMM || this.v2.COM)) {
+                        var comm = this.v2.COMM || this.v2.COM;
+                        if (Array.isArray(comm) && comm.length > 0) text = comm[0].text;
+                      } else if (this.v1 && this.v1.comment) text = this.v1.comment;
+                      return text;
+                    },
+                    set: function set(value) {
+                      if (this.v2) {
+                        var version = this.v2Details.version[0];
+                        this.v2[version === 2 ? 'COM' : 'COMM'] = [{
+                          language: 'eng',
+                          descriptor: '',
+                          text: value
+                        }];
+                      }
+                      if (this.v1) this.v1.comment = value;
+                    }
+                  },
+                  track: {
+                    get: function get() {
+                      return this.v2 && (this.v2.TRCK && this.v2.TRCK.split('/')[0] || this.v2.TRK && this.v2.TRK.split('/')[0]) || this.v1 && this.v1.track || '';
+                    },
+                    set: function set(value) {
+                      if (this.v2 && value !== '') {
+                        var version = this.v2Details.version[0];
+                        this.v2[version === 2 ? 'TRK' : 'TRCK'] = value;
+                      }
+                      if (this.v1) this.v1.track = value;
+                    }
+                  },
+                  genre: {
+                    get: function get() {
+                      return this.v2 && (this.v2.TCON || this.v2.TCO) || this.v1 && this.v1.genre || '';
+                    },
+                    set: function set(value) {
+                      if (this.v2) {
+                        var version = this.v2Details.version[0];
+                        this.v2[version === 2 ? 'TCO' : 'TCON'] = value;
+                      }
+                      if (this.v1) this.v1.genre = value;
+                    }
+                  }
+                };
+                headerLen = Math.min(12, size);
+                if (!(headerLen < 4)) {
+                  _context2.next = 12;
+                  break;
+                }
+                Object.defineProperties(tags, mp3Props);
+                return _context2.abrupt("return", tags);
+              case 12:
+                _context2.next = 14;
+                return read(0, headerLen);
+              case 14:
+                header = _context2.sent;
+                hv = new BufferView(header); // AIFF
+                if (!(options.aiff && headerLen >= 12 && hv.getUint8String(0, 4) === 'FORM')) {
+                  _context2.next = 44;
+                  break;
+                }
+                formType = hv.getUint8String(8, 4);
+                if (!(formType === 'AIFF' || formType === 'AIFC')) {
+                  _context2.next = 44;
+                  break;
+                }
+                // Walk AIFF chunks to find ID3
+                chunkOffset = 12;
+                id3ChunkOffset = -1;
+                id3ChunkSize = 0;
+              case 22:
+                if (!(chunkOffset + 8 <= size)) {
+                  _context2.next = 37;
+                  break;
+                }
+                _context2.next = 25;
+                return read(chunkOffset, 8);
+              case 25:
+                chunkHeader = _context2.sent;
+                cv = new BufferView(chunkHeader);
+                chunkId = cv.getUint8String(0, 4);
+                chunkSize = cv.getUint32(4);
+                if (!(chunkId === 'ID3 ')) {
+                  _context2.next = 33;
+                  break;
+                }
+                id3ChunkOffset = chunkOffset;
+                id3ChunkSize = chunkSize;
+                return _context2.abrupt("break", 37);
+              case 33:
+                chunkOffset += 8 + chunkSize;
+                if (chunkSize % 2 !== 0) chunkOffset += 1;
+                _context2.next = 22;
+                break;
+              case 37:
+                if (!(id3ChunkOffset >= 0)) {
+                  _context2.next = 42;
+                  break;
+                }
+                _context2.next = 40;
+                return read(id3ChunkOffset + 8, id3ChunkSize);
+              case 40:
+                id3Buffer = _context2.sent;
+                if (hasID3v2(id3Buffer)) {
+                  _ID3v2$decode2 = decode$3(id3Buffer, 0, options.unsupported), v2Tags = _ID3v2$decode2.tags, details = _ID3v2$decode2.details;
+                  details.aiff = {
+                    chunkOffset: id3ChunkOffset,
+                    chunkSize: id3ChunkSize
+                  };
+                  tags.v2 = _objectSpread2({}, v2Tags);
+                  tags.v2Details = details;
+                }
+              case 42:
+                Object.defineProperties(tags, containerProps);
+                return _context2.abrupt("return", tags);
+              case 44:
+                if (!(options.mp4 && headerLen >= 8 && hv.getUint8String(4, 4) === 'ftyp')) {
+                  _context2.next = 76;
+                  break;
+                }
+                // Walk top-level boxes to find moov
+                boxOffset = 0;
+                moovOffset = -1;
+                moovSize = 0;
+              case 48:
+                if (!(boxOffset + 8 <= size)) {
+                  _context2.next = 65;
+                  break;
+                }
+                _context2.next = 51;
+                return read(boxOffset, 8);
+              case 51:
+                boxHeader = _context2.sent;
+                bv = new BufferView(boxHeader);
+                bSize = bv.getUint32(0);
+                bType = bv.getUint8String(4, 4);
+                if (bSize === 0) bSize = size - boxOffset;
+                if (!(bSize < 8)) {
+                  _context2.next = 58;
+                  break;
+                }
+                return _context2.abrupt("break", 65);
+              case 58:
+                if (!(bType === 'moov')) {
+                  _context2.next = 62;
+                  break;
+                }
+                moovOffset = boxOffset;
+                moovSize = bSize;
+                return _context2.abrupt("break", 65);
+              case 62:
+                boxOffset += bSize;
+                _context2.next = 48;
+                break;
+              case 65:
+                if (!(moovOffset >= 0)) {
+                  _context2.next = 74;
+                  break;
+                }
+                _context2.next = 68;
+                return read(moovOffset, moovSize);
+              case 68:
+                moovBuffer = _context2.sent;
+                mv = new BufferView(moovBuffer); // Navigate moov > udta > meta > ID32
+                udta = findBox(mv, 8, moovSize, 'udta');
+                meta = udta ? findBox(mv, udta.dataStart, udta.end, 'meta') : null;
+                id32 = meta ? findBox(mv, meta.dataStart + 4, meta.end, 'ID32') : null;
+                if (id32) {
+                  languageBytes = mv.getUint8(id32.dataStart + 4, 2);
+                  langValue = languageBytes[0] << 8 | languageBytes[1];
+                  language = decodeLanguage(langValue);
+                  id3Start = id32.dataStart + 4 + 2;
+                  id3Size = id32.end - id3Start;
+                  _id3Buffer = moovBuffer.slice(id3Start, id3Start + id3Size);
+                  if (hasID3v2(_id3Buffer)) {
+                    _ID3v2$decode3 = decode$3(_id3Buffer, 0, options.unsupported), _v2Tags = _ID3v2$decode3.tags, _details2 = _ID3v2$decode3.details;
+                    _details2.mp4 = {
+                      language: language,
+                      id32Offset: moovOffset + id32.offset,
+                      id32Size: id32.size
+                    };
+                    tags.v2 = _objectSpread2({}, _v2Tags);
+                    tags.v2Details = _details2;
+                  }
+                }
+              case 74:
+                Object.defineProperties(tags, containerProps);
+                return _context2.abrupt("return", tags);
+              case 76:
+                if (!(options.id3v2 && headerLen >= 10 && hv.getUint8String(0, 3) === 'ID3')) {
+                  _context2.next = 95;
+                  break;
+                }
+                tagSize = decodeSynch(hv.getUint32(6));
+                fullSize = 10 + tagSize;
+                readLen = Math.min(fullSize + 4, size);
+                _context2.next = 82;
+                return read(0, readLen);
+              case 82:
+                tagBuffer = _context2.sent;
+                _ID3v2$decode4 = decode$3(tagBuffer, 0, options.unsupported), _v2Tags2 = _ID3v2$decode4.tags, _details3 = _ID3v2$decode4.details;
+                tags.v2 = _objectSpread2({}, _v2Tags2);
+                tags.v2Details = _details3;
+                isAAC = false;
+                if (options.aac && readLen >= fullSize + 2) {
+                  tv = new BufferView(tagBuffer);
+                  b0 = tv.getUint8(fullSize);
+                  b1 = tv.getUint8(fullSize + 1);
+                  syncWord = b0 << 4 | b1 >> 4;
+                  if (syncWord === 0xFFF) {
+                    layer = b1 >> 1 & 0x03;
+                    if (layer === 0) {
+                      isAAC = true;
+                      _details3.aac = {
+                        format: 'ADTS'
+                      };
+                    }
+                  }
+                }
+                if (!(!isAAC && options.id3v1 && size >= 128)) {
+                  _context2.next = 93;
+                  break;
+                }
+                _context2.next = 91;
+                return read(size - 128, 128);
+              case 91:
+                tail = _context2.sent;
+                if (hasID3v1(tail)) {
+                  _ID3v1$decode2 = decode$4(tail, options.encoding), v1Tags = _ID3v1$decode2.tags, v1Details = _ID3v1$decode2.details;
+                  tags.v1 = _objectSpread2({}, v1Tags);
+                  tags.v1Details = v1Details;
+                }
+              case 93:
+                Object.defineProperties(tags, isAAC ? containerProps : mp3Props);
+                return _context2.abrupt("return", tags);
+              case 95:
+                if (!(options.id3v1 && size >= 128)) {
+                  _context2.next = 100;
+                  break;
+                }
+                _context2.next = 98;
+                return read(size - 128, 128);
+              case 98:
+                _tail = _context2.sent;
+                if (hasID3v1(_tail)) {
+                  _ID3v1$decode3 = decode$4(_tail, options.encoding), _v1Tags = _ID3v1$decode3.tags, _details4 = _ID3v1$decode3.details;
+                  tags.v1 = _objectSpread2({}, _v1Tags);
+                  tags.v1Details = _details4;
+                }
+              case 100:
+                Object.defineProperties(tags, mp3Props);
+                return _context2.abrupt("return", tags);
+              case 102:
+              case "end":
+                return _context2.stop();
+            }
+          }, _callee2);
+        }));
+        function readBlob(_x) {
+          return _readBlob.apply(this, arguments);
+        }
+        return readBlob;
+      }()
+    }, {
       key: "writeBuffer",
       value: function writeBuffer(buffer, tags) {
         var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
@@ -9378,15 +11515,61 @@
             padding: 2048,
             unsupported: false,
             encoding: typeof options.id3v2 !== 'undefined' ? options.id3v2.encoding : defaultEncoding
+          },
+          mp4: {
+            language: 'und'
           }
         });
+
+        // Handle AIFF containers separately
+        if (hasAIFF(buffer)) {
+          if (typeof tags.v2 === 'undefined') {
+            throw new Error('No ID3v2 tags to write to AIFF');
+          }
+          if (verbose) console.log('Writing ID3v2 to AIFF container...');
+          options.id3v2.encoding = options.id3v2.encoding || options.encoding;
+          var result = encode$1(buffer, tags, {
+            strict: options.strict,
+            id3v2: options.id3v2
+          });
+          return typeof Buffer !== 'undefined' ? Buffer.from(result) : result;
+        }
+
+        // Handle MP4 containers separately
+        if (hasMP4(buffer)) {
+          if (typeof tags.v2 === 'undefined') {
+            throw new Error('No ID3v2 tags to write to MP4');
+          }
+          if (verbose) console.log('Writing ID3v2 to MP4 container...');
+          options.id3v2.encoding = options.id3v2.encoding || options.encoding;
+          var _result3 = encode$2(buffer, tags, {
+            strict: options.strict,
+            id3v2: options.id3v2,
+            mp4: options.mp4
+          });
+          return typeof Buffer !== 'undefined' ? Buffer.from(_result3) : _result3;
+        }
+
+        // Handle AAC/ADTS files separately
+        if (hasAAC(buffer)) {
+          if (typeof tags.v2 === 'undefined') {
+            throw new Error('No ID3v2 tags to write to AAC');
+          }
+          if (verbose) console.log('Writing ID3v2 to AAC/ADTS...');
+          options.id3v2.encoding = options.id3v2.encoding || options.encoding;
+          var _result4 = encode(buffer, tags, {
+            strict: options.strict,
+            id3v2: options.id3v2
+          });
+          return typeof Buffer !== 'undefined' ? Buffer.from(_result4) : _result4;
+        }
         var audio = new Uint8Array(MP3Tag.getAudioBuffer(buffer, options.emptyAudioNone));
         if (options.id3v1.include && typeof tags.v1 !== 'undefined') {
           if (verbose) console.log('Validating ID3v1...');
           var encoding = options.id3v1.encoding || options.encoding;
           validate$1(tags.v1, options.strict, encoding);
           if (verbose) console.log('Writing ID3v1...');
-          var encoded = encode$1(tags.v1, encoding);
+          var encoded = encode$4(tags.v1, encoding);
           var tagBytes = new Uint8Array(encoded);
           audio = mergeBytes(audio, tagBytes);
         }
@@ -9396,7 +11579,7 @@
           options.id3v2.encodingIndex = encoding2Index(options.id3v2.encoding);
           validate(tags.v2, options.strict, options.id3v2);
           if (verbose) console.log('Writing ID3v2...');
-          var _encoded = encode(tags.v2, options.id3v2);
+          var _encoded = encode$3(tags.v2, options.id3v2);
           var _tagBytes = new Uint8Array(_encoded);
           audio = mergeBytes(_tagBytes, audio);
         }
@@ -9404,18 +11587,33 @@
       }
     }, {
       key: "getAudioBuffer",
-      value: function getAudioBuffer(buffer) {
+      value: function getAudioBuffer$3(buffer) {
         var emptyNone = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
         if (!isBuffer(buffer)) {
           throw new TypeError('buffer is not ArrayBuffer/Buffer');
+        }
+
+        // Handle AIFF containers - return whole file (audio interleaved with metadata)
+        if (hasAIFF(buffer)) {
+          return getAudioBuffer$1(buffer);
+        }
+
+        // Handle MP4 containers - extract mdat contents
+        if (hasMP4(buffer)) {
+          return getAudioBuffer$2(buffer);
+        }
+
+        // Handle AAC/ADTS - strip ID3v2 and find ADTS sync
+        if (hasAAC(buffer)) {
+          return getAudioBuffer(buffer);
         }
         if (hasID3v1(buffer)) {
           buffer = buffer.slice(0, buffer.byteLength - 128);
         }
         var i = 0;
         if (hasID3v2(buffer)) {
-          var _ID3v2$decode2 = decode(buffer),
-            details = _ID3v2$decode2.details;
+          var _ID3v2$decode5 = decode$3(buffer),
+            details = _ID3v2$decode5.details;
           var size = details.size;
           i = size;
         }
