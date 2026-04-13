@@ -178,6 +178,58 @@ describe('ID3v2', function () {
       })
     })
 
+    it('Write ETCO with extended events (0xFF prefix)', function () {
+      // Per ID3v2.4 §4.5, an event type may be a multi-byte sequence:
+      // one or more leading 0xFF escape bytes followed by a single
+      // terminating byte (0x00–0xFE). Verify round-trip for mixed
+      // single-byte and extended events.
+      this.mp3tag.tags.v2.ETCO = {
+        format: 2,
+        data: [
+          { event: 0x02, time: 100 },
+          { event: [0xff, 0x12], time: 5000 },
+          { event: [0xff, 0x20], time: 10000 },
+          { event: 0x10, time: 12000 },
+          { event: [0xff, 0xff, 0x07], time: 20000 }
+        ]
+      }
+      this.mp3tag.save({ strict: true })
+      if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+      this.mp3tag.read()
+      if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+      assert.deepStrictEqual(this.mp3tag.tags.v2.ETCO, {
+        format: 2,
+        data: [
+          { event: 0x02, time: 100 },
+          { event: [0xff, 0x12], time: 5000 },
+          { event: [0xff, 0x20], time: 10000 },
+          { event: 0x10, time: 12000 },
+          { event: [0xff, 0xff, 0x07], time: 20000 }
+        ]
+      })
+    })
+
+    it('Rejects malformed extended ETCO events (structural, non-strict too)', function () {
+      // Per ID3v2.4 §4.5 these byte layouts produce unparseable frames,
+      // so they are rejected unconditionally — not only under strict
+      // mode. A silent acceptance here would write a tag that no
+      // compliant reader (including this library's own parser) can
+      // decode correctly.
+      const cases = [
+        { event: 0xff, time: 100 }, // bare escape byte
+        { event: [0xff, 0xff], time: 100 }, // terminator is 0xFF
+        { event: [0x12, 0x34], time: 100 } // non-0xFF prefix
+      ]
+      for (const bad of cases) {
+        this.mp3tag.tags.v2.ETCO = { format: 2, data: [bad] }
+        this.mp3tag.save() // NOT strict
+        assert.notStrictEqual(this.mp3tag.error, '',
+          `expected error for event=${JSON.stringify(bad.event)}`)
+      }
+    })
+
     it('Write complex multi tag', function () {
       this.mp3tag.tags.v2.SYLT = [
         {

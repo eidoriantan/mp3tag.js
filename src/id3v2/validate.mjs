@@ -542,10 +542,41 @@ export function etcoFrame (value, version, strict) {
     throw new Error('Invalid timestamp format (should be 1 or 2)')
   }
   for (const { event, time } of value.data) {
-    if (typeof event !== 'number') {
-      throw new Error('Event is not a number')
-    } else if (event > 255 || event < 0) {
-      throw new Error('Event should be in range of 0 - 255')
+    // Per ID3v2.4 §4.5: events are either a single byte (0x00–0xFE)
+    // or, when 0xFF is used as escape prefix, a sequence of one or
+    // more 0xFF bytes followed by a single terminating byte. Accept
+    // either a number or an Array<number> of bytes.
+    // Structural checks (always on, including non-strict mode) — these
+    // rules are what make the byte stream parseable per §4.5. Emitting a
+    // bare 0xFF as a single-byte event, or an extended-event array whose
+    // prefix bytes aren't 0xFF, produces a malformed frame that no
+    // compliant reader can decode.
+    if (typeof event === 'number') {
+      if (event > 255 || event < 0) {
+        throw new Error('Event should be in range of 0 - 255')
+      }
+      if (event === 0xff) {
+        throw new Error('Event 0xFF is the escape byte (§4.5); use an array of bytes for extended events')
+      }
+    } else if (Array.isArray(event)) {
+      if (event.length === 0) {
+        throw new Error('Event array must not be empty')
+      }
+      for (const byte of event) {
+        if (typeof byte !== 'number' || byte > 255 || byte < 0) {
+          throw new Error('Event byte should be a number in range of 0 - 255')
+        }
+      }
+      for (let i = 0; i < event.length - 1; i++) {
+        if (event[i] !== 0xff) {
+          throw new Error('Extended event prefix bytes must all be 0xFF (§4.5)')
+        }
+      }
+      if (event[event.length - 1] === 0xff) {
+        throw new Error('Extended event terminator byte must not be 0xFF (§4.5)')
+      }
+    } else {
+      throw new Error('Event is not a number or an array of bytes')
     }
 
     if (typeof time !== 'number') {
