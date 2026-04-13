@@ -325,12 +325,28 @@ export function etcoFrame (buffer, version) {
   const view = new BufferView(buffer)
   const format = view.getUint8(0)
   const raw = view.getUint8(1, view.byteLength - 1)
-  const rview = new BufferView(Array.isArray(raw) ? raw : [raw])
+  const bytes = Array.isArray(raw) ? raw : [raw]
+  const rview = new BufferView(bytes)
   const data = []
-  for (let i = 0; i < raw.length; i += 5) {
-    const event = rview.getUint8(i)
-    const time = rview.getUint32(i + 1)
+  let i = 0
+  while (i + 5 <= bytes.length) {
+    // Per ID3v2.4 §4.5: $FF means "one more byte of events follows"
+    // and "all the following bytes with the value $FF have the same
+    // function". So an event type may span multiple bytes: any number
+    // of leading $FF bytes followed by a single terminating byte
+    // (0x00–0xFE), then a 4-byte timestamp.
+    let typeEnd = i
+    while (typeEnd < bytes.length && bytes[typeEnd] === 0xff) typeEnd++
+    if (typeEnd >= bytes.length || typeEnd + 4 >= bytes.length) break
+    let event
+    if (typeEnd === i) {
+      event = rview.getUint8(i)
+    } else {
+      event = bytes.slice(i, typeEnd + 1)
+    }
+    const time = rview.getUint32(typeEnd + 1)
     data.push({ event, time })
+    i = typeEnd + 5
   }
   return {
     format,

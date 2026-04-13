@@ -548,7 +548,13 @@ export function sytcFrame (value, options) {
 export function etcoFrame (value, options) {
   const { id, version, unsynch } = options
 
-  const array = value.data.flatMap(({ event, time }) => [event, ...timeBytes(time)])
+  // Per ID3v2.4 §4.5, event types may be multi-byte: any number of
+  // leading $FF bytes followed by a single terminating byte. Accept
+  // either a number (single byte) or an array of bytes.
+  const array = value.data.flatMap(({ event, time }) => {
+    const bytes = Array.isArray(event) ? event : [event]
+    return [...bytes, ...timeBytes(time)]
+  })
   let data = mergeBytes(value.format, array)
   if (unsynch) data = unsynchData(data, version)
 
