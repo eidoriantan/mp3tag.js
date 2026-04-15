@@ -17,7 +17,13 @@ export interface MP3TagAPICFrame {
 export interface MP3TagETCOFrame {
   format: number;
   data: Array<{
-    event: number;
+    /**
+     * Event type. A single byte (0x00–0xFE) for standard events, or an
+     * array of bytes for extended events as defined by ID3v2.4 §4.5:
+     * one or more leading 0xFF escape bytes followed by a single
+     * terminating byte (0x00–0xFE).
+     */
+    event: number | number[];
     time: number;
   }>;
 }
