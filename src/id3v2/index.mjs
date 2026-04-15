@@ -5,7 +5,7 @@ import { getHeaderFlags, getFrameFlags } from './flags.mjs'
 import * as frames from './frames.mjs'
 
 import {
-  setBit, decodeSynch, encodeSynch, synch, mergeBytes
+  setBit, decodeSynch, encodeSynch, synch, unsynch, mergeBytes
 } from '../utils/bytes.mjs'
 
 export function hasID3v2 (buffer) {
@@ -14,7 +14,7 @@ export function hasID3v2 (buffer) {
 }
 
 export function decode (buffer, tagOffset, parseUnsupported) {
-  const view = new BufferView(buffer, tagOffset)
+  let view = new BufferView(buffer, tagOffset)
   const version = view.getUint8(3, 2)
   const size = decodeSynch(view.getUint32(6))
   const flags = getHeaderFlags(view.getUint8(5), version[0])
@@ -25,9 +25,31 @@ export function decode (buffer, tagOffset, parseUnsupported) {
     throw new Error('Unknown ID3v2 major version')
   }
 
+  // ID3v2.2 §6.1 / ID3v2.3 §5: unsynchronisation is a TAG-level operation
+  // when the tag-level flag is set — the entire frame area after the
+  // 10-byte tag header is unsynchronised as one block. Un-unsynchronise
+  // it here before parsing any frames. For ID3v2.4 (§4.1.2) unsync moved
+  // to per-frame; the tag-level bit is only a hint and is honoured inside
+  // decodeFrame.
+  //
+  // After un-unsynchronisation the frame stream shrinks (each `$FF $00`
+  // pair collapses to `$FF`), so `frameLimit` tracks the real post-synch
+  // length rather than the unsynched `size` declared in the header.
+  let frameLimit = size
+  if ((version[0] === 2 || version[0] === 3) && flags.unsynchronisation) {
+    const raw = view.getUint8(10, size)
+    const synched = synch(Array.isArray(raw) ? raw : [raw])
+    const rebuilt = new Uint8Array(10 + synched.length)
+    const header = view.getUint8(0, 10)
+    rebuilt.set(Array.isArray(header) ? header : [header], 0)
+    rebuilt.set(synched, 10)
+    view = new BufferView(rebuilt)
+    frameLimit = synched.length
+  }
+
   const frameHeaderSize = version[0] === 2 ? 6 : 10
   let offset = 10
-  let limit = size
+  let limit = frameLimit
 
   const pushTag = (tag) => {
     const singleFrame = ['OWNE', 'MCDI', 'RVAD', 'SYTC', 'ETCO', 'PCNT']
@@ -52,9 +74,9 @@ export function decode (buffer, tagOffset, parseUnsupported) {
     }
   }
 
-  while (offset < size) {
+  while (offset - 10 < frameLimit) {
     const frameBytes = view.getUint8(offset, limit)
-    const frame = decodeFrame(frameBytes, { version, flags, parseUnsupported })
+    const frame = decodeFrame(frameBytes, { version, parseUnsupported })
     if (!frame) break
 
     offset += frame.size + frameHeaderSize
@@ -74,7 +96,7 @@ function decodeFrame (bytes, options) {
   if (view.getUint8(0) === 0x00) return false
 
   const frame = {}
-  const { version, flags, parseUnsupported } = options
+  const { version, parseUnsupported } = options
   const sizeByte = version[0] === 2 ? view.getUint24(3) : view.getUint32(4)
 
   frame.id = view.getUint8String(0, version[0] === 2 ? 3 : 4)
@@ -95,8 +117,15 @@ function decodeFrame (bytes, options) {
     dataLength -= 4
   }
 
-  let unsynchedData = flags.unsynchronisation
-  if (version === 4) unsynchedData = frame.flags.unsynchronisation
+  // Tag-level unsynchronisation for ID3v2.2 / ID3v2.3 has already been
+  // applied by `decode()` before frame parsing (v2.2 §6.1 / v2.3 §5), so
+  // at this point only the per-frame v2.4 unsync flag matters.
+  // Previously this compared `version === 4` where `version` is the
+  // `[major, revision]` array, making the check dead code — the fallback
+  // silently re-applied tag-level un-unsync per frame, which was
+  // accidentally correct only because the writer also unsynchronised
+  // frame bodies individually (non-compliant for v2.3).
+  const unsynchedData = version[0] === 4 && frame.flags.unsynchronisation
 
   if (unsynchedData) {
     const uint8 = view.getUint8(offset, dataLength)
@@ -147,12 +176,24 @@ export function validate (tags, strict, options) {
 }
 
 export function encode (tags, options) {
-  const { version, padding, unsynch, unsupported, encoding, encodingIndex } = options
+  const { version, padding, unsynch: unsyncRequested, unsupported, encoding, encodingIndex } = options
   const headerBytes = [0x49, 0x44, 0x33, version, 0]
   let flagsByte = 0
   const sizeView = new BufferView(4)
   const paddingBytes = new Uint8Array(padding)
-  const framesBytes = []
+  let framesBytes = []
+
+  // ID3v2.2 §6.1 / ID3v2.3 §5: unsynchronisation is a TAG-level operation;
+  // the entire concatenated frame stream (headers + bodies) is unsynched
+  // once, and the tag-level flag signals the reader to reverse it before
+  // frame parsing. Frame bodies must NOT be individually unsynchronised
+  // in v2.3 — doing so corrupts frame sizes and breaks any compliant
+  // reader that un-unsyncs at tag level.
+  //
+  // ID3v2.4 §4.1.2 moves unsync to per-frame, each with its own flag
+  // and a 4-byte DataLengthIndicator carrying the pre-unsync size.
+  const perFrameUnsync = unsyncRequested && version === 4
+  const tagLevelUnsync = unsyncRequested && version !== 4
 
   for (const id in tags) {
     const frameSpec = frames[id]
@@ -160,7 +201,7 @@ export function encode (tags, options) {
 
     if (!isSupported && !unsupported) continue
 
-    const writeOptions = { id, version, unsynch, encoding, encodingIndex }
+    const writeOptions = { id, version, unsynch: perFrameUnsync, encoding, encodingIndex }
     const bytes = !isSupported && unsupported
       ? frames.unsupported.write(tags[id], writeOptions)
       : frameSpec.write(tags[id], writeOptions)
@@ -168,7 +209,8 @@ export function encode (tags, options) {
     bytes.forEach(byte => framesBytes.push(byte))
   }
 
-  if (unsynch) flagsByte = setBit(flagsByte, 7)
+  if (tagLevelUnsync) framesBytes = unsynch(framesBytes)
+  if (unsyncRequested) flagsByte = setBit(flagsByte, 7)
   sizeView.setUint32(0, encodeSynch(framesBytes.length))
 
   return mergeBytes(
