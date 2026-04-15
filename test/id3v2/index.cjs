@@ -178,6 +178,61 @@ describe('ID3v2', function () {
       })
     })
 
+    it('Writes RVA2 volume adjustment in big-endian (§4.11)', function () {
+      // Regression test: previously the writer used `new Int16Array([v]).buffer`
+      // which is host-byte-order (little-endian on x86), producing corrupted
+      // output on every platform. Read path used `getInt16(offset, true)`,
+      // so round-trips self-matched but no other v2.4 reader could decode.
+      // This test asserts the actual bytes on disk are big-endian per spec.
+      this.mp3tag.tags.v2.RVA2 = [{
+        identification: 'test',
+        channels: [
+          { type: 1, volumeadjust: 0x1234, bitspeak: 0, peakvolume: [] },
+          { type: 2, volumeadjust: -1, bitspeak: 0, peakvolume: [] }
+        ]
+      }]
+      this.mp3tag.save({ id3v2: { version: 4 } })
+      if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+      // Inspect raw bytes after save. Find "RVA2" in the buffer and check
+      // the volume-adjust bytes for channel 1 (type=1) are 0x12 0x34 (BE).
+      const buf = new Uint8Array(this.mp3tag.buffer)
+      let offset = -1
+      for (let i = 0; i + 4 <= buf.length; i++) {
+        if (buf[i] === 0x52 && buf[i + 1] === 0x56 && buf[i + 2] === 0x41 && buf[i + 3] === 0x32) {
+          offset = i
+          break
+        }
+      }
+      if (offset < 0) throw new Error('RVA2 frame not found in saved buffer')
+      // RVA2 frame layout: 4-byte ID + 4-byte size + 2-byte flags
+      // + identification string "test" + '\0' + channel data.
+      // Channel data = type(1) + volumeadjust(2) + bitspeak(1) + peakvolume(0).
+      // Find the identification terminator.
+      const dataStart = offset + 10 + 'test'.length + 1
+      // Channel 1: positive value 0x1234 → bytes 0x12 0x34 (BE).
+      assert.strictEqual(buf[dataStart], 1, 'first channel type')
+      assert.strictEqual(buf[dataStart + 1], 0x12, 'channel 1 volume high byte (BE)')
+      assert.strictEqual(buf[dataStart + 2], 0x34, 'channel 1 volume low byte (BE)')
+      // Channel 2: negative value -1 → two's-complement 0xFFFF → 0xFF 0xFF.
+      // Crucial second assertion: a naive implementation that only swapped
+      // bytes for positive values would pass the 0x1234 check but fail
+      // here, because sign-extension and masking must also be correct.
+      assert.strictEqual(buf[dataStart + 4], 2, 'second channel type')
+      assert.strictEqual(buf[dataStart + 5], 0xff, 'channel 2 volume high byte (BE, -1)')
+      assert.strictEqual(buf[dataStart + 6], 0xff, 'channel 2 volume low byte (BE, -1)')
+
+      this.mp3tag.read()
+      if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+      assert.deepStrictEqual(this.mp3tag.tags.v2.RVA2, [{
+        identification: 'test',
+        channels: [
+          { type: 1, volumeadjust: 0x1234, bitspeak: 0, peakvolume: [] },
+          { type: 2, volumeadjust: -1, bitspeak: 0, peakvolume: [] }
+        ]
+      }])
+    })
+
     it('Write complex multi tag', function () {
       this.mp3tag.tags.v2.SYLT = [
         {
