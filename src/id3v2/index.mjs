@@ -95,8 +95,14 @@ function decodeFrame (bytes, options) {
     dataLength -= 4
   }
 
+  // ID3v2.3 §5 unsynchronisation is a tag-level flag (all frames share it).
+  // ID3v2.4 §4.1 makes it a per-frame flag (§4.1.2 bit %0000000a); the
+  // tag-level bit only hints "at least one frame is unsynchronised".
+  // Previously this compared `version === 4` where `version` is the
+  // `[major, revision]` array returned from the header — always false —
+  // so v2.4 frames with per-frame unsync could not be decoded.
   let unsynchedData = flags.unsynchronisation
-  if (version === 4) unsynchedData = frame.flags.unsynchronisation
+  if (version[0] === 4) unsynchedData = frame.flags.unsynchronisation
 
   if (unsynchedData) {
     const uint8 = view.getUint8(offset, dataLength)

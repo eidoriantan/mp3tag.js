@@ -178,6 +178,54 @@ describe('ID3v2', function () {
       })
     })
 
+    it('Honors the per-frame unsynchronisation flag in ID3v2.4 (§4.1.2)', function () {
+      // Regression test: previously the reader compared `version === 4`
+      // where `version` is the `[major, revision]` array, so the check
+      // was always false and v2.4 per-frame unsync flags were ignored.
+      // That accidentally worked when the tag-level unsync bit was also
+      // set (see v2.3 tag-level double-flag bug), but standards-compliant
+      // v2.4 tags set unsync only at frame level.
+      //
+      // We write a v2.4 tag with unsync enabled, then clear the tag-level
+      // unsync bit in the resulting buffer to simulate a standards-
+      // compliant writer. The reader must still decode the per-frame flag
+      // and un-unsynchronise the data.
+      // Use a GEOB frame whose object bytes include raw 0xFF sequences
+      // — the case where unsynchronisation actually modifies the bytes
+      // (the writer inserts 0x00 after every 0xFF followed by 0xE0-0xFF
+      // or 0x00 to prevent false MPEG sync patterns).
+      const object = [0xff, 0xfe, 0x01, 0x02, 0xff, 0x00, 0xff, 0xaa]
+      this.mp3tag.tags.v2.GEOB = [{
+        format: 'application/octet-stream',
+        filename: 'file.bin',
+        description: 'TEST',
+        object
+      }]
+      this.mp3tag.save({
+        strict: true,
+        id3v2: { version: 4, unsynch: true, padding: 0 }
+      })
+      if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+      // Clear the tag-level unsync flag (bit 7 of byte 5 in ID3 header)
+      // so the reader MUST consult the per-frame flag to decode correctly.
+      const buf = new Uint8Array(this.mp3tag.buffer)
+      assert.strictEqual(buf[5] & 0x80, 0x80, 'tag-level unsync bit set by writer')
+      buf[5] &= 0x7f
+
+      const mp3 = new MP3Tag(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength))
+      mp3.read({ id3v1: false })
+      if (mp3.error !== '') throw new Error(mp3.error)
+
+      assert.strictEqual(mp3.tags.v2Details.version[0], 4)
+      assert.deepStrictEqual(mp3.tags.v2.GEOB, [{
+        format: 'application/octet-stream',
+        filename: 'file.bin',
+        description: 'TEST',
+        object
+      }])
+    })
+
     it('Write complex multi tag', function () {
       this.mp3tag.tags.v2.SYLT = [
         {
