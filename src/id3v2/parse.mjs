@@ -1,6 +1,6 @@
 
 import BufferView from '../viewer.mjs'
-import { isBitSet, bytesToLong } from '../utils/bytes.mjs'
+import { isBitSet, bytesToLong, decodeSynch } from '../utils/bytes.mjs'
 import { ENCODINGS } from '../utils/strings.mjs'
 
 export function textFrame (buffer, version) {
@@ -361,4 +361,90 @@ export function popmFrame (buffer, version) {
   }
 
   return { email: email.string, rating, counter }
+}
+
+/**
+ * Decode the embedded sub-frames carried by CHAP/CTOC frames. Sub-frames use
+ * the same header layout as top-level v2.3/v2.4 frames (4-char id, 4-byte size,
+ * 2 flag bytes; v2.4 sizes are synchsafe). Returns an object keyed by frame id.
+ */
+function subFrames (view, start, length, version) {
+  const result = {}
+  let offset = start
+  const end = start + length
+
+  while (offset + 10 <= end) {
+    const id = view.getUint8String(offset, 4)
+    if (!/^[A-Z0-9]{4}$/.test(id)) break
+
+    const sizeBytes = view.getUint32(offset + 4)
+    const size = version === 4 ? decodeSynch(sizeBytes) : sizeBytes
+    const dataOffset = offset + 10
+    if (size <= 0 || dataOffset + size > end) break
+
+    const data = view.getUint8(dataOffset, size)
+    const buffer = new Uint8Array(Array.isArray(data) ? data : [data]).buffer
+    result[id] = parseSubFrame(id, buffer, version)
+    offset = dataOffset + size
+  }
+
+  return result
+}
+
+function parseSubFrame (id, buffer, version) {
+  if (id === 'APIC') return apicFrame(buffer, version)
+  if (id === 'TXXX') return txxxFrame(buffer, version)
+  if (id === 'WXXX') return wxxxFrame(buffer, version)
+  if (id.charAt(0) === 'T') return textFrame(buffer, version)
+  if (id.charAt(0) === 'W') return urlFrame(buffer, version)
+
+  const view = new BufferView(buffer)
+  const bytes = view.getUint8(0, view.byteLength)
+  return Array.isArray(bytes) ? bytes : [bytes]
+}
+
+export function chapFrame (buffer, version) {
+  const view = new BufferView(buffer)
+  const elementID = view.getCString(0)
+  let offset = elementID.length
+
+  const startTime = view.getUint32(offset)
+  const endTime = view.getUint32(offset + 4)
+  const startOffset = view.getUint32(offset + 8)
+  const endOffset = view.getUint32(offset + 12)
+  offset += 16
+
+  return {
+    id: elementID.string,
+    startTime,
+    endTime,
+    startOffset,
+    endOffset,
+    subFrames: subFrames(view, offset, view.byteLength - offset, version)
+  }
+}
+
+export function ctocFrame (buffer, version) {
+  const view = new BufferView(buffer)
+  const elementID = view.getCString(0)
+  let offset = elementID.length
+
+  const flags = view.getUint8(offset)
+  const entryCount = view.getUint8(offset + 1)
+  offset += 2
+
+  const childElementIds = []
+  for (let i = 0; i < entryCount; i++) {
+    const child = view.getCString(offset)
+    childElementIds.push(child.string)
+    offset += child.length
+  }
+
+  return {
+    id: elementID.string,
+    topLevel: isBitSet(flags, 1),
+    ordered: isBitSet(flags, 0),
+    childElementIds,
+    subFrames: subFrames(view, offset, view.byteLength - offset, version)
+  }
 }

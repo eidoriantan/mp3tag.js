@@ -603,3 +603,50 @@ export function unsupportedFrame (values, version, strict) {
 
   return true
 }
+
+function validateSubFrames (subFrames, version, strict) {
+  if (subFrames === undefined) return
+  if (typeof subFrames !== 'object' || Array.isArray(subFrames)) {
+    throw new Error('Sub-frames should be an object')
+  }
+  for (const id in subFrames) {
+    if (id.charAt(0) === 'T' && id !== 'TXXX') textFrame(subFrames[id], version, strict)
+  }
+}
+
+export function chapFrame (values, version, strict) {
+  const ids = []
+  values.forEach(value => {
+    if (typeof value.id !== 'string') {
+      throw new Error('Element ID should be a string')
+    }
+
+    if (typeof value.startTime !== 'number' || typeof value.endTime !== 'number') {
+      throw new Error('Start and end time should be numbers')
+    }
+
+    validateSubFrames(value.subFrames, version, strict)
+
+    if (strict && includes(ids, value.id)) {
+      throw new Error('Element ID should not duplicate')
+    } else ids.push(value.id)
+  })
+
+  return true
+}
+
+export function ctocFrame (values, version, strict) {
+  values.forEach(value => {
+    if (typeof value.id !== 'string') {
+      throw new Error('Element ID should be a string')
+    }
+
+    if (value.childElementIds !== undefined && !Array.isArray(value.childElementIds)) {
+      throw new Error('Child element IDs should be an array')
+    }
+
+    validateSubFrames(value.subFrames, version, strict)
+  })
+
+  return true
+}
