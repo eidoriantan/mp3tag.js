@@ -233,6 +233,69 @@ describe('ID3v2', function () {
       ])
     })
 
+    it('Write chapter frames (CHAP/CTOC)', function () {
+      this.mp3tag.tags.v2.CHAP = [
+        {
+          id: 'chp0',
+          startTime: 0,
+          endTime: 15000,
+          startOffset: 4294967295,
+          endOffset: 4294967295,
+          subFrames: { TIT2: 'Intro' }
+        },
+        {
+          id: 'chp1',
+          startTime: 15000,
+          endTime: 30000,
+          startOffset: 4294967295,
+          endOffset: 4294967295,
+          subFrames: { TIT2: 'Verse' }
+        }
+      ]
+      this.mp3tag.tags.v2.CTOC = [
+        {
+          id: 'toc0',
+          topLevel: true,
+          ordered: true,
+          childElementIds: ['chp0', 'chp1'],
+          subFrames: { TIT2: 'Table of Contents' }
+        }
+      ]
+      this.mp3tag.save({ strict: true })
+      if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+      this.mp3tag.read()
+      if (this.mp3tag.error !== '') throw new Error(this.mp3tag.error)
+
+      assert.deepStrictEqual(this.mp3tag.tags.v2.CHAP, [
+        {
+          id: 'chp0',
+          startTime: 0,
+          endTime: 15000,
+          startOffset: 4294967295,
+          endOffset: 4294967295,
+          subFrames: { TIT2: 'Intro' }
+        },
+        {
+          id: 'chp1',
+          startTime: 15000,
+          endTime: 30000,
+          startOffset: 4294967295,
+          endOffset: 4294967295,
+          subFrames: { TIT2: 'Verse' }
+        }
+      ])
+      assert.deepStrictEqual(this.mp3tag.tags.v2.CTOC, [
+        {
+          id: 'toc0',
+          topLevel: true,
+          ordered: true,
+          childElementIds: ['chp0', 'chp1'],
+          subFrames: { TIT2: 'Table of Contents' }
+        }
+      ])
+    })
+
     it('Write data (unsynched)', function () {
       const geob = {
         format: 'application/octet-stream',
