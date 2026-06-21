@@ -382,6 +382,75 @@ last_modified_at: 2024-02-12T03:39+08:00
   <div class="mb-n2">{{ apic | markdownify }}</div>
 </div>
 
+<div id="v2-chap" class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Chapter frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: CHAP</div>
+    <div class="text-gray">Type: object[]</div>
+  </div>
+  <div class="Box-row">
+    CHAP frame is parsed and must be saved as an array, one entry per chapter.
+    Each chapter has a unique element ID, a start/end time in milliseconds and an
+    optional start/end byte offset (<code>4294967295</code> /
+    <code>0xFFFFFFFF</code> means "not set"). Embedded sub-frames (commonly
+    <code>TIT2</code> for the chapter title) are stored in <code>subFrames</code>
+    keyed by frame ID. Available for ID3v2.3 and ID3v2.4.
+  </div>
+  {% capture chap %}
+  ```javascript
+  [
+    {
+      id: 'chp0',                  // Unique element ID
+      startTime: 0,                // Start time in milliseconds
+      endTime: 15000,              // End time in milliseconds
+      startOffset: 4294967295,     // Start byte offset (0xFFFFFFFF = not set)
+      endOffset: 4294967295,       // End byte offset (0xFFFFFFFF = not set)
+      subFrames: {                 // Embedded sub-frames keyed by frame ID
+        TIT2: 'Chapter title'
+      }
+    }
+  ]
+  ```
+  {% endcapture %}
+  <div class="mb-n2">{{ chap | markdownify }}</div>
+</div>
+
+<div id="v2-ctoc" class="Box Box--blue Box--condensed my-3">
+  <header class="Box-header Box-header--blue">
+    <h2 class="Box-title">Table of contents frame</h2>
+  </header>
+  <div class="Box-body">
+    <div>ID: CTOC</div>
+    <div class="text-gray">Type: object[]</div>
+  </div>
+  <div class="Box-row">
+    CTOC frame is parsed and must be saved as an array. It groups CHAP chapters
+    into a table of contents. <code>topLevel</code> marks the root entry and
+    <code>ordered</code> indicates whether the child elements are meant to be
+    played in order. <code>childElementIds</code> lists the element IDs of the
+    referenced CHAP (or nested CTOC) frames. Embedded sub-frames are stored in
+    <code>subFrames</code>. Available for ID3v2.3 and ID3v2.4.
+  </div>
+  {% capture ctoc %}
+  ```javascript
+  [
+    {
+      id: 'toc0',                        // Unique element ID
+      topLevel: true,                    // Is this the top-level TOC?
+      ordered: true,                     // Are the child elements ordered?
+      childElementIds: ['chp0', 'chp1'], // Referenced CHAP/CTOC element IDs
+      subFrames: {                       // Embedded sub-frames keyed by frame ID
+        TIT2: 'Table of contents'
+      }
+    }
+  ]
+  ```
+  {% endcapture %}
+  <div class="mb-n2">{{ ctoc | markdownify }}</div>
+</div>
+
 <div id="v2-ipls" class="Box Box--blue Box--condensed my-3">
   <header class="Box-header Box-header--blue">
     <h2 class="Box-title">Involved People List frame</h2>
