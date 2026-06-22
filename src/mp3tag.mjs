@@ -12,6 +12,16 @@ import { overwriteDefault } from './utils/objects.mjs'
 import { isBuffer } from './utils/types.mjs'
 import { encoding2Index } from './utils/strings.mjs'
 
+// Container/stream formats that embed an ID3v2 tag. Checked before the raw
+// MP3 ID3v1/ID3v2 path. AIFF is listed before MP4 because its `FORM` signature
+// is more specific. Each entry exposes a uniform interface over its module so
+// read/write/getAudio can share a single loop instead of one branch per format.
+const CONTAINERS = [
+  { name: 'aiff', label: 'AIFF', module: AIFF, detect: AIFF.hasAIFF, hasID3: AIFF.hasID3 },
+  { name: 'mp4', label: 'MP4', module: MP4, detect: MP4.hasMP4, hasID3: MP4.hasID32 },
+  { name: 'aac', label: 'AAC/ADTS', module: AAC, detect: AAC.hasAAC, hasID3: AAC.hasID3 }
+]
+
 export default class MP3Tag {
   get name () { return 'MP3Tag' }
   set name (value) { throw new Error('Unable to set this property') }
@@ -46,354 +56,46 @@ export default class MP3Tag {
       encoding: 'utf-8'
     })
 
-    // Check for AIFF container first (before MP4 since it's more specific)
-    if (options.aiff && AIFF.hasAIFF(buffer)) {
-      if (verbose) console.log('AIFF container detected')
-      if (AIFF.hasID3(buffer)) {
-        if (verbose) console.log('ID3 chunk found, reading...')
-        const { unsupported } = options
-        const result = AIFF.decode(buffer, { unsupported })
-        if (result) {
-          if (verbose) console.log('ID3 chunk reading finished')
-          tags.v2 = { ...result.tags }
-          tags.v2Details = result.details
-        }
+    // Container/stream formats embed their ID3v2 tag in a format-specific
+    // location. When one matches we read its ID3v2 data and skip the raw
+    // ID3v1/ID3v2 path below.
+    let container = null
+    for (const fmt of CONTAINERS) {
+      if (options[fmt.name] && fmt.detect(buffer)) {
+        container = fmt
+        break
       }
-
-      Object.defineProperties(tags, {
-        title: {
-          get: function () {
-            return (this.v2 && (this.v2.TIT2 || this.v2.TT2)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TT2' : 'TIT2'] = value
-            }
-          }
-        },
-        artist: {
-          get: function () {
-            return (this.v2 && (this.v2.TPE1 || this.v2.TP1)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TP1' : 'TPE1'] = value
-            }
-          }
-        },
-        album: {
-          get: function () {
-            return (this.v2 && (this.v2.TALB || this.v2.TAL)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TAL' : 'TALB'] = value
-            }
-          }
-        },
-        year: {
-          get: function () {
-            return (this.v2 && (this.v2.TYER || this.v2.TDRC || this.v2.TYE)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              if (version === 2) this.v2.TYE = value
-              else if (version === 3) this.v2.TYER = value
-              else if (version === 4) this.v2.TDRC = value
-            }
-          }
-        },
-        comment: {
-          get: function () {
-            let text = ''
-            if (this.v2 && (this.v2.COMM || this.v2.COM)) {
-              const comm = this.v2.COMM || this.v2.COM
-              if (Array.isArray(comm) && comm.length > 0) text = comm[0].text
-            }
-            return text
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'COM' : 'COMM'] = [{
-                language: 'eng',
-                descriptor: '',
-                text: value
-              }]
-            }
-          }
-        },
-        track: {
-          get: function () {
-            return (this.v2 && (
-              (this.v2.TRCK && this.v2.TRCK.split('/')[0]) ||
-              (this.v2.TRK && this.v2.TRK.split('/')[0])
-            )) || ''
-          },
-          set: function (value) {
-            if (this.v2 && value !== '') {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TRK' : 'TRCK'] = value
-            }
-          }
-        },
-        genre: {
-          get: function () {
-            return (this.v2 && (this.v2.TCON || this.v2.TCO)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TCO' : 'TCON'] = value
-            }
-          }
-        }
-      })
-
-      return tags
     }
 
-    // Check for MP4 container
-    if (options.mp4 && MP4.hasMP4(buffer)) {
-      if (verbose) console.log('MP4 container detected')
-      if (MP4.hasID32(buffer)) {
-        if (verbose) console.log('ID32 box found, reading...')
+    if (container) {
+      if (verbose) console.log(`${container.label} container detected`)
+      if (container.hasID3(buffer)) {
+        if (verbose) console.log('ID3v2 found, reading...')
         const { unsupported } = options
-        const result = MP4.decode(buffer, { unsupported })
-        if (result) {
-          if (verbose) console.log('ID32 reading finished')
-          tags.v2 = { ...result.tags }
-          tags.v2Details = result.details
-        }
-      }
-
-      Object.defineProperties(tags, {
-        title: {
-          get: function () {
-            return (this.v2 && (this.v2.TIT2 || this.v2.TT2)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TT2' : 'TIT2'] = value
-            }
-          }
-        },
-        artist: {
-          get: function () {
-            return (this.v2 && (this.v2.TPE1 || this.v2.TP1)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TP1' : 'TPE1'] = value
-            }
-          }
-        },
-        album: {
-          get: function () {
-            return (this.v2 && (this.v2.TALB || this.v2.TAL)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TAL' : 'TALB'] = value
-            }
-          }
-        },
-        year: {
-          get: function () {
-            return (this.v2 && (this.v2.TYER || this.v2.TDRC || this.v2.TYE)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              if (version === 2) this.v2.TYE = value
-              else if (version === 3) this.v2.TYER = value
-              else if (version === 4) this.v2.TDRC = value
-            }
-          }
-        },
-        comment: {
-          get: function () {
-            let text = ''
-            if (this.v2 && (this.v2.COMM || this.v2.COM)) {
-              const comm = this.v2.COMM || this.v2.COM
-              if (Array.isArray(comm) && comm.length > 0) text = comm[0].text
-            }
-            return text
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'COM' : 'COMM'] = [{
-                language: 'eng',
-                descriptor: '',
-                text: value
-              }]
-            }
-          }
-        },
-        track: {
-          get: function () {
-            return (this.v2 && (
-              (this.v2.TRCK && this.v2.TRCK.split('/')[0]) ||
-              (this.v2.TRK && this.v2.TRK.split('/')[0])
-            )) || ''
-          },
-          set: function (value) {
-            if (this.v2 && value !== '') {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TRK' : 'TRCK'] = value
-            }
-          }
-        },
-        genre: {
-          get: function () {
-            return (this.v2 && (this.v2.TCON || this.v2.TCO)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TCO' : 'TCON'] = value
-            }
-          }
-        }
-      })
-
-      return tags
-    }
-
-    // Check for AAC/ADTS (has ID3v2 prepended like MP3, but audio uses 0xFFF sync)
-    if (options.aac && AAC.hasAAC(buffer)) {
-      if (verbose) console.log('AAC/ADTS detected')
-      if (AAC.hasID3(buffer)) {
-        if (verbose) console.log('ID3v2 found in AAC, reading...')
-        const { unsupported } = options
-        const result = AAC.decode(buffer, { unsupported })
+        const result = container.module.decode(buffer, { unsupported })
         if (result) {
           if (verbose) console.log('ID3v2 reading finished')
           tags.v2 = { ...result.tags }
           tags.v2Details = result.details
         }
       }
+    } else {
+      if (options.id3v1 && ID3v1.hasID3v1(buffer)) {
+        if (verbose) console.log('ID3v1 found, reading...')
+        const { tags: v1Tags, details } = ID3v1.decode(buffer, options.encoding)
+        if (verbose) console.log('ID3v1 reading finished')
+        tags.v1 = { ...v1Tags }
+        tags.v1Details = details
+      }
 
-      Object.defineProperties(tags, {
-        title: {
-          get: function () {
-            return (this.v2 && (this.v2.TIT2 || this.v2.TT2)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TT2' : 'TIT2'] = value
-            }
-          }
-        },
-        artist: {
-          get: function () {
-            return (this.v2 && (this.v2.TPE1 || this.v2.TP1)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TP1' : 'TPE1'] = value
-            }
-          }
-        },
-        album: {
-          get: function () {
-            return (this.v2 && (this.v2.TALB || this.v2.TAL)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TAL' : 'TALB'] = value
-            }
-          }
-        },
-        year: {
-          get: function () {
-            return (this.v2 && (this.v2.TYER || this.v2.TDRC || this.v2.TYE)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              if (version === 2) this.v2.TYE = value
-              else if (version === 3) this.v2.TYER = value
-              else if (version === 4) this.v2.TDRC = value
-            }
-          }
-        },
-        comment: {
-          get: function () {
-            let text = ''
-            if (this.v2 && (this.v2.COMM || this.v2.COM)) {
-              const comm = this.v2.COMM || this.v2.COM
-              if (Array.isArray(comm) && comm.length > 0) text = comm[0].text
-            }
-            return text
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'COM' : 'COMM'] = [{
-                language: 'eng',
-                descriptor: '',
-                text: value
-              }]
-            }
-          }
-        },
-        track: {
-          get: function () {
-            return (this.v2 && (
-              (this.v2.TRCK && this.v2.TRCK.split('/')[0]) ||
-              (this.v2.TRK && this.v2.TRK.split('/')[0])
-            )) || ''
-          },
-          set: function (value) {
-            if (this.v2 && value !== '') {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TRK' : 'TRCK'] = value
-            }
-          }
-        },
-        genre: {
-          get: function () {
-            return (this.v2 && (this.v2.TCON || this.v2.TCO)) || ''
-          },
-          set: function (value) {
-            if (this.v2) {
-              const version = this.v2Details.version[0]
-              this.v2[version === 2 ? 'TCO' : 'TCON'] = value
-            }
-          }
-        }
-      })
-
-      return tags
-    }
-
-    if (options.id3v1 && ID3v1.hasID3v1(buffer)) {
-      if (verbose) console.log('ID3v1 found, reading...')
-      const { tags: v1Tags, details } = ID3v1.decode(buffer, options.encoding)
-      if (verbose) console.log('ID3v1 reading finished')
-      tags.v1 = { ...v1Tags }
-      tags.v1Details = details
-    }
-
-    if (options.id3v2 && ID3v2.hasID3v2(buffer)) {
-      if (verbose) console.log('ID3v2 found, reading...')
-      const { unsupported } = options
-      const { tags: v2Tags, details } = ID3v2.decode(buffer, 0, unsupported)
-      if (verbose) console.log('ID3v2 reading finished')
-      tags.v2 = { ...v2Tags }
-      tags.v2Details = details
+      if (options.id3v2 && ID3v2.hasID3v2(buffer)) {
+        if (verbose) console.log('ID3v2 found, reading...')
+        const { unsupported } = options
+        const { tags: v2Tags, details } = ID3v2.decode(buffer, 0, unsupported)
+        if (verbose) console.log('ID3v2 reading finished')
+        tags.v2 = { ...v2Tags }
+        tags.v2Details = details
+      }
     }
 
     Object.defineProperties(tags, {
@@ -543,50 +245,22 @@ export default class MP3Tag {
       }
     })
 
-    // Handle AIFF containers separately
-    if (AIFF.hasAIFF(buffer)) {
+    // Container/stream formats embed the ID3v2 tag in their own structure and
+    // are rewritten in place by the format module. The `mp4` option is ignored
+    // by encoders that don't use it.
+    for (const fmt of CONTAINERS) {
+      if (!fmt.detect(buffer)) continue
+
       if (typeof tags.v2 === 'undefined') {
-        throw new Error('No ID3v2 tags to write to AIFF')
+        throw new Error(`No ID3v2 tags to write to ${fmt.label}`)
       }
 
-      if (verbose) console.log('Writing ID3v2 to AIFF container...')
+      if (verbose) console.log(`Writing ID3v2 to ${fmt.label} container...`)
       options.id3v2.encoding = options.id3v2.encoding || options.encoding
-      const result = AIFF.encode(buffer, tags, {
-        strict: options.strict,
-        id3v2: options.id3v2
-      })
-
-      return typeof Buffer !== 'undefined' ? Buffer.from(result) : result
-    }
-
-    // Handle MP4 containers separately
-    if (MP4.hasMP4(buffer)) {
-      if (typeof tags.v2 === 'undefined') {
-        throw new Error('No ID3v2 tags to write to MP4')
-      }
-
-      if (verbose) console.log('Writing ID3v2 to MP4 container...')
-      options.id3v2.encoding = options.id3v2.encoding || options.encoding
-      const result = MP4.encode(buffer, tags, {
+      const result = fmt.module.encode(buffer, tags, {
         strict: options.strict,
         id3v2: options.id3v2,
         mp4: options.mp4
-      })
-
-      return typeof Buffer !== 'undefined' ? Buffer.from(result) : result
-    }
-
-    // Handle AAC/ADTS files separately
-    if (AAC.hasAAC(buffer)) {
-      if (typeof tags.v2 === 'undefined') {
-        throw new Error('No ID3v2 tags to write to AAC')
-      }
-
-      if (verbose) console.log('Writing ID3v2 to AAC/ADTS...')
-      options.id3v2.encoding = options.id3v2.encoding || options.encoding
-      const result = AAC.encode(buffer, tags, {
-        strict: options.strict,
-        id3v2: options.id3v2
       })
 
       return typeof Buffer !== 'undefined' ? Buffer.from(result) : result
@@ -646,19 +320,10 @@ export default class MP3Tag {
       throw new TypeError('buffer is not ArrayBuffer/Buffer')
     }
 
-    // Handle AIFF containers - return whole file (audio interleaved with metadata)
-    if (AIFF.hasAIFF(buffer)) {
-      return AIFF.getAudioBuffer(buffer)
-    }
-
-    // Handle MP4 containers - extract mdat contents
-    if (MP4.hasMP4(buffer)) {
-      return MP4.getAudioBuffer(buffer)
-    }
-
-    // Handle AAC/ADTS - strip ID3v2 and find ADTS sync
-    if (AAC.hasAAC(buffer)) {
-      return AAC.getAudioBuffer(buffer)
+    // Container/stream formats extract their audio data via the format module
+    // (e.g. AIFF returns the whole file, MP4 extracts mdat, AAC strips ID3v2).
+    for (const fmt of CONTAINERS) {
+      if (fmt.detect(buffer)) return fmt.module.getAudioBuffer(buffer)
     }
 
     if (ID3v1.hasID3v1(buffer)) {
