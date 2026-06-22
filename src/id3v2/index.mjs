@@ -96,7 +96,7 @@ function decodeFrame (bytes, options) {
   if (view.getUint8(0) === 0x00) return false
 
   const frame = {}
-  const { version, parseUnsupported } = options
+  const { version, flags, parseUnsupported } = options
   const sizeByte = version[0] === 2 ? view.getUint24(3) : view.getUint32(4)
 
   frame.id = view.getUint8String(0, version[0] === 2 ? 3 : 4)
