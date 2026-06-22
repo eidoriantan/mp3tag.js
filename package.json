@@ -31,7 +31,20 @@
     "Kolja Koischwitz"
   ],
   "main": "dist/mp3tag.js",
-  "types": "types/index.d.ts",
+  "module": "dist/mp3tag.mjs",
+  "types": "types/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./types/index.d.mts",
+        "default": "./dist/mp3tag.mjs"
+      },
+      "require": {
+        "types": "./types/index.d.cts",
+        "default": "./dist/mp3tag.js"
+      }
+    }
+  },
   "directories": {
     "example": "examples",
     "test": "test"
