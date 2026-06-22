@@ -10,10 +10,24 @@ export const APIC = {
   version: [3, 4]
 }
 
+export const CHAP = {
+  parse: parsers.chapFrame,
+  validate: validators.chapFrame,
+  write: writers.chapFrame,
+  version: [3, 4]
+}
+
 export const COMM = {
   parse: parsers.langDescFrame,
   validate: validators.langDescFrame,
   write: writers.langDescFrame,
+  version: [3, 4]
+}
+
+export const CTOC = {
+  parse: parsers.ctocFrame,
+  validate: validators.ctocFrame,
+  write: writers.ctocFrame,
   version: [3, 4]
 }
 

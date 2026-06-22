@@ -1,6 +1,6 @@
 
 import BufferView from '../viewer.mjs'
-import { isBitSet, bytesToLong } from '../utils/bytes.mjs'
+import { isBitSet, bytesToLong, decodeSynch } from '../utils/bytes.mjs'
 import { ENCODINGS } from '../utils/strings.mjs'
 
 export function textFrame (buffer, version) {
@@ -325,12 +325,28 @@ export function etcoFrame (buffer, version) {
   const view = new BufferView(buffer)
   const format = view.getUint8(0)
   const raw = view.getUint8(1, view.byteLength - 1)
-  const rview = new BufferView(Array.isArray(raw) ? raw : [raw])
+  const bytes = Array.isArray(raw) ? raw : [raw]
+  const rview = new BufferView(bytes)
   const data = []
-  for (let i = 0; i < raw.length; i += 5) {
-    const event = rview.getUint8(i)
-    const time = rview.getUint32(i + 1)
+  let i = 0
+  while (i + 5 <= bytes.length) {
+    // Per ID3v2.4 §4.5: $FF means "one more byte of events follows"
+    // and "all the following bytes with the value $FF have the same
+    // function". So an event type may span multiple bytes: any number
+    // of leading $FF bytes followed by a single terminating byte
+    // (0x00–0xFE), then a 4-byte timestamp.
+    let typeEnd = i
+    while (typeEnd < bytes.length && bytes[typeEnd] === 0xff) typeEnd++
+    if (typeEnd >= bytes.length || typeEnd + 4 >= bytes.length) break
+    let event
+    if (typeEnd === i) {
+      event = rview.getUint8(i)
+    } else {
+      event = bytes.slice(i, typeEnd + 1)
+    }
+    const time = rview.getUint32(typeEnd + 1)
     data.push({ event, time })
+    i = typeEnd + 5
   }
   return {
     format,
@@ -361,4 +377,90 @@ export function popmFrame (buffer, version) {
   }
 
   return { email: email.string, rating, counter }
+}
+
+/**
+ * Decode the embedded sub-frames carried by CHAP/CTOC frames. Sub-frames use
+ * the same header layout as top-level v2.3/v2.4 frames (4-char id, 4-byte size,
+ * 2 flag bytes; v2.4 sizes are synchsafe). Returns an object keyed by frame id.
+ */
+function subFrames (view, start, length, version) {
+  const result = {}
+  let offset = start
+  const end = start + length
+
+  while (offset + 10 <= end) {
+    const id = view.getUint8String(offset, 4)
+    if (!/^[A-Z0-9]{4}$/.test(id)) break
+
+    const sizeBytes = view.getUint32(offset + 4)
+    const size = version === 4 ? decodeSynch(sizeBytes) : sizeBytes
+    const dataOffset = offset + 10
+    if (size <= 0 || dataOffset + size > end) break
+
+    const data = view.getUint8(dataOffset, size)
+    const buffer = new Uint8Array(Array.isArray(data) ? data : [data]).buffer
+    result[id] = parseSubFrame(id, buffer, version)
+    offset = dataOffset + size
+  }
+
+  return result
+}
+
+function parseSubFrame (id, buffer, version) {
+  if (id === 'APIC') return apicFrame(buffer, version)
+  if (id === 'TXXX') return txxxFrame(buffer, version)
+  if (id === 'WXXX') return wxxxFrame(buffer, version)
+  if (id.charAt(0) === 'T') return textFrame(buffer, version)
+  if (id.charAt(0) === 'W') return urlFrame(buffer, version)
+
+  const view = new BufferView(buffer)
+  const bytes = view.getUint8(0, view.byteLength)
+  return Array.isArray(bytes) ? bytes : [bytes]
+}
+
+export function chapFrame (buffer, version) {
+  const view = new BufferView(buffer)
+  const elementID = view.getCString(0)
+  let offset = elementID.length
+
+  const startTime = view.getUint32(offset)
+  const endTime = view.getUint32(offset + 4)
+  const startOffset = view.getUint32(offset + 8)
+  const endOffset = view.getUint32(offset + 12)
+  offset += 16
+
+  return {
+    id: elementID.string,
+    startTime,
+    endTime,
+    startOffset,
+    endOffset,
+    subFrames: subFrames(view, offset, view.byteLength - offset, version)
+  }
+}
+
+export function ctocFrame (buffer, version) {
+  const view = new BufferView(buffer)
+  const elementID = view.getCString(0)
+  let offset = elementID.length
+
+  const flags = view.getUint8(offset)
+  const entryCount = view.getUint8(offset + 1)
+  offset += 2
+
+  const childElementIds = []
+  for (let i = 0; i < entryCount; i++) {
+    const child = view.getCString(offset)
+    childElementIds.push(child.string)
+    offset += child.length
+  }
+
+  return {
+    id: elementID.string,
+    topLevel: isBitSet(flags, 1),
+    ordered: isBitSet(flags, 0),
+    childElementIds,
+    subFrames: subFrames(view, offset, view.byteLength - offset, version)
+  }
 }
