@@ -123,7 +123,7 @@ function decodeFrame (bytes, options) {
   // Previously this compared `version === 4` where `version` is the
   // `[major, revision]` array returned from the header — always false —
   // so v2.4 frames with per-frame unsync could not be decoded.
-  let unsynchedData = flags.unsynchronisation
+  let unsynchedData = flags && flags.unsynchronisation
   if (version[0] === 4) unsynchedData = frame.flags.unsynchronisation
 
   if (unsynchedData) {
