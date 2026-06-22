@@ -214,7 +214,9 @@ export function rva2Frame (buffer, version) {
 
   while (read < view.byteLength) {
     const type = view.getUint8(read)
-    const volumeadjust = view.getInt16(read + 1, true)
+    // ID3v2.4 §4.11: volume adjustment is a 16-bit signed fixed-point,
+    // big-endian like every other integer in the spec (§3).
+    const volumeadjust = view.getInt16(read + 1)
     const bitspeak = view.getUint8(read + 3)
     const length = Math.ceil(bitspeak / 8)
     const peakvolume = view.getUint8(read + 4, length)

@@ -421,8 +421,13 @@ export function rva2Frame (values, options) {
     for (let i = 0; i < value.channels.length; i++) {
       const channel = value.channels[i]
       const type = channel.type
-      const volumeadjust = new Int16Array([channel.volumeadjust])
-      const volumeadjust8 = new Uint8Array(volumeadjust.buffer)
+      // ID3v2.4 §4.11: big-endian 16-bit signed fixed-point. Previously
+      // this used `new Int16Array([x]).buffer`, which is host byte order
+      // (little-endian on x86) — producing corrupted values on every
+      // platform and incompatible output with any standards-compliant
+      // v2.4 reader.
+      const adjust = channel.volumeadjust & 0xffff
+      const volumeadjust8 = [(adjust >> 8) & 0xff, adjust & 0xff]
       const bitspeak = channel.bitspeak
       const limit = Math.ceil(bitspeak / 8)
       const peakvolume = dataBlock(channel.peakvolume, limit)
