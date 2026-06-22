@@ -7,8 +7,7 @@ import {
   findID32Box,
   buildID32Box,
   rebuildMP4WithID32,
-  findMdatBox,
-  findBox
+  findMdatBox
 } from './boxes.mjs'
 
 /**
@@ -143,47 +142,4 @@ export function getAudioBuffer (buffer) {
   const audioData = new Uint8Array(Array.isArray(audioBytes) ? audioBytes : [audioBytes])
 
   return typeof Buffer !== 'undefined' ? Buffer.from(audioData.buffer) : audioData.buffer
-}
-
-/**
- * Get the full MP4 buffer without ID32 tags (for rewriting)
- * This removes the ID32 box but keeps the rest of the MP4 structure intact
- * @param {ArrayBuffer|Buffer} buffer
- * @returns {ArrayBuffer}
- */
-export function getMP4WithoutID32 (buffer) {
-  const id32Info = findID32Box(buffer)
-  if (!id32Info) {
-    // No ID32 to remove
-    return buffer
-  }
-
-  const originalBytes = new Uint8Array(buffer)
-  const view = new BufferView(buffer)
-
-  // Find parent boxes to update their sizes
-  const moov = findBox(view, 0, view.byteLength, 'moov')
-  const udta = moov ? findBox(view, moov.dataStart, moov.end, 'udta') : null
-  const meta = udta ? findBox(view, udta.dataStart, udta.end, 'meta') : null
-
-  if (!moov || !udta || !meta) {
-    return buffer
-  }
-
-  const sizeDiff = -id32Info.size
-
-  // Remove ID32 box
-  const before = originalBytes.slice(0, id32Info.offset)
-  const after = originalBytes.slice(id32Info.end)
-  const merged = new Uint8Array(before.length + after.length)
-  merged.set(before, 0)
-  merged.set(after, before.length)
-
-  // Update parent box sizes
-  const resultView = new DataView(merged.buffer)
-  resultView.setUint32(meta.offset, meta.size + sizeDiff)
-  resultView.setUint32(udta.offset, udta.size + sizeDiff)
-  resultView.setUint32(moov.offset, moov.size + sizeDiff)
-
-  return typeof Buffer !== 'undefined' ? Buffer.from(merged.buffer) : merged.buffer
 }

@@ -113,29 +113,6 @@ export function findID32Box (buffer) {
 }
 
 /**
- * Parse ID32 box and extract ID3v2 data
- * @param {BufferView} view
- * @param {number} offset - Start of ID32 box
- * @param {number} size - Size of ID32 box
- * @returns {{ language: string, id3Data: ArrayBuffer }}
- */
-export function parseID32Box (view, offset, size) {
-  // Skip header (8 bytes), version/flags (4 bytes)
-  const dataStart = offset + 8
-  const languageBytes = view.getUint8(dataStart + 4, 2)
-  const langValue = (languageBytes[0] << 8) | languageBytes[1]
-  const language = decodeLanguage(langValue)
-
-  const id3Offset = dataStart + 4 + 2
-  const id3Size = size - 8 - 4 - 2
-
-  const id3Bytes = view.getUint8(id3Offset, id3Size)
-  const id3Data = new Uint8Array(Array.isArray(id3Bytes) ? id3Bytes : [id3Bytes]).buffer
-
-  return { language, id3Data }
-}
-
-/**
  * Build an ID32 box from ID3v2 data
  * @param {ArrayBuffer|Uint8Array} id3Data - Raw ID3v2 bytes
  * @param {string} language - ISO-639-2/T language code (default: 'und')
@@ -204,48 +181,7 @@ export function decodeLanguage (packed) {
  * @returns {Uint8Array}
  */
 function buildMetaStructure (id32Box) {
-  // hdlr box for meta (required by spec)
-  const hdlrData = new BufferView(25)
-  hdlrData.setUint32(0, 33) // size
-  hdlrData.setUint8(4, 'h'.charCodeAt(0))
-  hdlrData.setUint8(5, 'd'.charCodeAt(0))
-  hdlrData.setUint8(6, 'l'.charCodeAt(0))
-  hdlrData.setUint8(7, 'r'.charCodeAt(0))
-  // version/flags: 0
-  // pre_defined: 0
-  hdlrData.setUint8(16, 'm'.charCodeAt(0))
-  hdlrData.setUint8(17, 'd'.charCodeAt(0))
-  hdlrData.setUint8(18, 'i'.charCodeAt(0))
-  hdlrData.setUint8(19, 'r'.charCodeAt(0))
-  // reserved: 0, 0, 0
-  // name: null-terminated empty string (implicit with remaining zeros)
-
-  const hdlrBox = new Uint8Array(33)
-  new DataView(hdlrBox.buffer).setUint32(0, 33)
-  hdlrBox[4] = 'h'.charCodeAt(0)
-  hdlrBox[5] = 'd'.charCodeAt(0)
-  hdlrBox[6] = 'l'.charCodeAt(0)
-  hdlrBox[7] = 'r'.charCodeAt(0)
-  // version/flags at 8-11: 0
-  // pre_defined at 12-15: 0
-  hdlrBox[16] = 'm'.charCodeAt(0)
-  hdlrBox[17] = 'd'.charCodeAt(0)
-  hdlrBox[18] = 'i'.charCodeAt(0)
-  hdlrBox[19] = 'r'.charCodeAt(0)
-  // reserved 20-31: 0
-  hdlrBox[32] = 0 // name: null terminator
-
-  // meta box: header (8) + version/flags (4) + hdlr + ID32
-  const metaSize = 8 + 4 + hdlrBox.length + id32Box.length
-  const metaHeader = new Uint8Array(12)
-  new DataView(metaHeader.buffer).setUint32(0, metaSize)
-  metaHeader[4] = 'm'.charCodeAt(0)
-  metaHeader[5] = 'e'.charCodeAt(0)
-  metaHeader[6] = 't'.charCodeAt(0)
-  metaHeader[7] = 'a'.charCodeAt(0)
-  // version/flags at 8-11: 0
-
-  const metaBox = mergeBytes(metaHeader, hdlrBox, id32Box)
+  const metaBox = buildMetaWithID32(id32Box)
 
   // udta box: header (8) + meta
   const udtaSize = 8 + metaBox.length
