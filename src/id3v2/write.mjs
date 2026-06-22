@@ -548,7 +548,13 @@ export function sytcFrame (value, options) {
 export function etcoFrame (value, options) {
   const { id, version, unsynch } = options
 
-  const array = value.data.flatMap(({ event, time }) => [event, ...timeBytes(time)])
+  // Per ID3v2.4 §4.5, event types may be multi-byte: any number of
+  // leading $FF bytes followed by a single terminating byte. Accept
+  // either a number (single byte) or an array of bytes.
+  const array = value.data.flatMap(({ event, time }) => {
+    const bytes = Array.isArray(event) ? event : [event]
+    return [...bytes, ...timeBytes(time)]
+  })
   let data = mergeBytes(value.format, array)
   if (unsynch) data = unsynchData(data, version)
 
@@ -613,6 +619,92 @@ export function unsupportedFrame (values, options) {
 
     const merged = mergeBytes(header, value)
     merged.forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}
+
+/**
+ * Encode the embedded sub-frames of a CHAP/CTOC frame. Each sub-frame is a
+ * complete v2.3/v2.4 frame (header + body) produced by the matching writer.
+ */
+function subFrameBytes (subFrames, options) {
+  const bytes = []
+  if (!subFrames) return bytes
+
+  for (const id in subFrames) {
+    const opts = { ...options, id, unsynch: false }
+    const value = subFrames[id]
+    let frameBytes = null
+
+    if (id === 'APIC') frameBytes = apicFrame([value], opts)
+    else if (id === 'TXXX') frameBytes = txxxFrame([value], opts)
+    else if (id === 'WXXX') frameBytes = wxxxFrame([value], opts)
+    else if (id.charAt(0) === 'T') frameBytes = textFrame(value, opts)
+    else if (id.charAt(0) === 'W') frameBytes = urlFrame(value, opts)
+
+    if (frameBytes) frameBytes.forEach(byte => bytes.push(byte))
+  }
+
+  return bytes
+}
+
+export function chapFrame (values, options) {
+  const { id, version, unsynch } = options
+  const bytes = []
+
+  values.forEach(value => {
+    const times = new BufferView(16)
+    times.setUint32(0, (value.startTime || 0) >>> 0)
+    times.setUint32(4, (value.endTime || 0) >>> 0)
+    times.setUint32(8, (value.startOffset === undefined ? 0xffffffff : value.startOffset) >>> 0)
+    times.setUint32(12, (value.endOffset === undefined ? 0xffffffff : value.endOffset) >>> 0)
+
+    let data = mergeBytes(
+      encodeString(value.id + '\0'),
+      times.getUint8(0, 16),
+      subFrameBytes(value.subFrames, options)
+    )
+    if (unsynch) data = unsynchData(data, version)
+
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+    mergeBytes(header, data).forEach(byte => bytes.push(byte))
+  })
+
+  return bytes
+}
+
+export function ctocFrame (values, options) {
+  const { id, version, unsynch } = options
+  const bytes = []
+
+  values.forEach(value => {
+    const childIds = value.childElementIds || []
+    let flags = 0
+    if (value.topLevel) flags = setBit(flags, 1)
+    if (value.ordered) flags = setBit(flags, 0)
+
+    const childBytes = []
+    childIds.forEach(child => {
+      encodeString(child + '\0').forEach(byte => childBytes.push(byte))
+    })
+
+    let data = mergeBytes(
+      encodeString(value.id + '\0'),
+      [flags, childIds.length & 0xff],
+      childBytes,
+      subFrameBytes(value.subFrames, options)
+    )
+    if (unsynch) data = unsynchData(data, version)
+
+    const header = getHeaderBytes(id, data.length, version, {
+      unsynchronisation: unsynch,
+      dataLengthIndicator: unsynch
+    })
+    mergeBytes(header, data).forEach(byte => bytes.push(byte))
   })
 
   return bytes

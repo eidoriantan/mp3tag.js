@@ -1,10 +1,10 @@
-import type { MP3TagTags } from './tags';
+import type { MP3TagTags } from './tags.d.ts';
 
 type RecursivePartial<T> = {
   [P in keyof T]?:
-    T[P] extends (infer U)[] ? RecursivePartial<U>[] :
-    T[P] extends object | undefined ? RecursivePartial<T[P]> :
-    T[P];
+  T[P] extends (infer U)[] ? RecursivePartial<U>[] :
+  T[P] extends object | undefined ? RecursivePartial<T[P]> :
+  T[P];
 };
 
 export type MP3Buffer = Buffer | ArrayBuffer;

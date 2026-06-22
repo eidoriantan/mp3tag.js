@@ -14,10 +14,42 @@ export interface MP3TagAPICFrame {
   data: Array<number>;
 }
 
+export type MP3TagSubFrames = {
+  [id: string]:
+    | MP3TagTextFrame
+    | MP3TagAPICFrame
+    | MP3TagTXXXFrame
+    | MP3TagWXXXFrame
+    | Array<number>;
+};
+
+export interface MP3TagCHAPFrame {
+  id: string;
+  startTime: number;
+  endTime: number;
+  startOffset: number;
+  endOffset: number;
+  subFrames: MP3TagSubFrames;
+}
+
+export interface MP3TagCTOCFrame {
+  id: string;
+  topLevel: boolean;
+  ordered: boolean;
+  childElementIds: Array<string>;
+  subFrames: MP3TagSubFrames;
+}
+
 export interface MP3TagETCOFrame {
   format: number;
   data: Array<{
-    event: number;
+    /**
+     * Event type. A single byte (0x00–0xFE) for standard events, or an
+     * array of bytes for extended events as defined by ID3v2.4 §4.5:
+     * one or more leading 0xFF escape bytes followed by a single
+     * terminating byte (0x00–0xFE).
+     */
+    event: number | number[];
     time: number;
   }>;
 }
