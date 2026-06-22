@@ -96,7 +96,7 @@ function decodeFrame (bytes, options) {
   if (view.getUint8(0) === 0x00) return false
 
   const frame = {}
-  const { version, parseUnsupported } = options
+  const { version, flags, parseUnsupported } = options
   const sizeByte = version[0] === 2 ? view.getUint24(3) : view.getUint32(4)
 
   frame.id = view.getUint8String(0, version[0] === 2 ? 3 : 4)
@@ -117,15 +117,14 @@ function decodeFrame (bytes, options) {
     dataLength -= 4
   }
 
-  // Tag-level unsynchronisation for ID3v2.2 / ID3v2.3 has already been
-  // applied by `decode()` before frame parsing (v2.2 §6.1 / v2.3 §5), so
-  // at this point only the per-frame v2.4 unsync flag matters.
+  // ID3v2.3 §5 unsynchronisation is a tag-level flag (all frames share it).
+  // ID3v2.4 §4.1 makes it a per-frame flag (§4.1.2 bit %0000000a); the
+  // tag-level bit only hints "at least one frame is unsynchronised".
   // Previously this compared `version === 4` where `version` is the
-  // `[major, revision]` array, making the check dead code — the fallback
-  // silently re-applied tag-level un-unsync per frame, which was
-  // accidentally correct only because the writer also unsynchronised
-  // frame bodies individually (non-compliant for v2.3).
-  const unsynchedData = version[0] === 4 && frame.flags.unsynchronisation
+  // `[major, revision]` array returned from the header — always false —
+  // so v2.4 frames with per-frame unsync could not be decoded.
+  let unsynchedData = flags && flags.unsynchronisation
+  if (version[0] === 4) unsynchedData = frame.flags.unsynchronisation
 
   if (unsynchedData) {
     const uint8 = view.getUint8(offset, dataLength)
