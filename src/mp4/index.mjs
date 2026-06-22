@@ -1,7 +1,7 @@
 
 import BufferView from '../viewer.mjs'
 import * as ID3v2 from '../id3v2/index.mjs'
-import { encoding2Index } from '../utils/strings.mjs'
+import { encodeID3v2 } from '../utils/container.mjs'
 
 import {
   findID32Box,
@@ -68,17 +68,6 @@ export function decode (buffer, options = {}) {
 }
 
 /**
- * Validate tags for writing to MP4
- * @param {object} tags - ID3v2 tags object
- * @param {boolean} strict - Strict validation mode
- * @param {object} options - Write options
- * @returns {boolean}
- */
-export function validate (tags, strict, options) {
-  return ID3v2.validate(tags, strict, options)
-}
-
-/**
  * Encode ID3v2 tags into MP4 buffer with ID32 box
  * @param {ArrayBuffer|Buffer} buffer - Original MP4 buffer
  * @param {object} tags - Tags object with v2 property
@@ -91,32 +80,13 @@ export function validate (tags, strict, options) {
  * @returns {ArrayBuffer}
  */
 export function encode (buffer, tags, options = {}) {
-  const defaultVersion = tags.v2Details ? tags.v2Details.version[0] : 3
-  const defaultEncoding = 'utf-8'
-
-  const id3v2Options = {
-    version: defaultVersion,
-    padding: 0, // No padding needed in ID32 box
-    unsynch: false,
-    unsupported: false,
-    encoding: defaultEncoding,
-    ...options.id3v2
-  }
-
-  id3v2Options.encodingIndex = encoding2Index(id3v2Options.encoding)
+  // No padding needed inside the ID32 box
+  const id3Data = encodeID3v2(tags, options)
 
   const mp4Options = {
     language: 'und',
     ...options.mp4
   }
-
-  // Validate tags
-  if (options.strict !== false) {
-    ID3v2.validate(tags.v2, options.strict, id3v2Options)
-  }
-
-  // Encode ID3v2 data
-  const id3Data = ID3v2.encode(tags.v2, id3v2Options)
 
   // Build ID32 box
   const id32Box = buildID32Box(id3Data, mp4Options.language)

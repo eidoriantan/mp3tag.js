@@ -2,7 +2,7 @@
 import BufferView from '../viewer.mjs'
 import * as ID3v2 from '../id3v2/index.mjs'
 import { mergeBytes } from '../utils/bytes.mjs'
-import { encoding2Index } from '../utils/strings.mjs'
+import { encodeID3v2 } from '../utils/container.mjs'
 
 /**
  * AIFF File Structure:
@@ -110,17 +110,6 @@ export function decode (buffer, options = {}) {
 }
 
 /**
- * Validate tags for writing to AIFF
- * @param {object} tags
- * @param {boolean} strict
- * @param {object} options
- * @returns {boolean}
- */
-export function validate (tags, strict, options) {
-  return ID3v2.validate(tags, strict, options)
-}
-
-/**
  * Encode ID3v2 tags into AIFF buffer
  * @param {ArrayBuffer|Buffer} buffer
  * @param {object} tags
@@ -128,25 +117,7 @@ export function validate (tags, strict, options) {
  * @returns {ArrayBuffer}
  */
 export function encode (buffer, tags, options = {}) {
-  const defaultVersion = tags.v2Details ? tags.v2Details.version[0] : 3
-  const defaultEncoding = 'utf-8'
-
-  const id3v2Options = {
-    version: defaultVersion,
-    padding: 0,
-    unsynch: false,
-    unsupported: false,
-    encoding: defaultEncoding,
-    ...options.id3v2
-  }
-
-  id3v2Options.encodingIndex = encoding2Index(id3v2Options.encoding)
-
-  if (options.strict !== false) {
-    ID3v2.validate(tags.v2, options.strict, id3v2Options)
-  }
-
-  const id3Data = new Uint8Array(ID3v2.encode(tags.v2, id3v2Options))
+  const id3Data = encodeID3v2(tags, options)
   const id3Chunk = buildID3Chunk(id3Data)
 
   return rebuildAIFFWithID3(buffer, id3Chunk)

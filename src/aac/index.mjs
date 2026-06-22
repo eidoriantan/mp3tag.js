@@ -2,7 +2,7 @@
 import BufferView from '../viewer.mjs'
 import * as ID3v2 from '../id3v2/index.mjs'
 import { mergeBytes } from '../utils/bytes.mjs'
-import { encoding2Index } from '../utils/strings.mjs'
+import { encodeID3v2 } from '../utils/container.mjs'
 
 /**
  * AAC/ADTS File Structure:
@@ -76,17 +76,6 @@ export function decode (buffer, options = {}) {
 }
 
 /**
- * Validate tags for writing to AAC
- * @param {object} tags
- * @param {boolean} strict
- * @param {object} options
- * @returns {boolean}
- */
-export function validate (tags, strict, options) {
-  return ID3v2.validate(tags, strict, options)
-}
-
-/**
  * Encode ID3v2 tags into AAC buffer
  * @param {ArrayBuffer|Buffer} buffer
  * @param {object} tags
@@ -94,29 +83,11 @@ export function validate (tags, strict, options) {
  * @returns {ArrayBuffer}
  */
 export function encode (buffer, tags, options = {}) {
-  const defaultVersion = tags.v2Details ? tags.v2Details.version[0] : 3
-  const defaultEncoding = 'utf-8'
-
-  const id3v2Options = {
-    version: defaultVersion,
-    padding: options.id3v2?.padding ?? 1024,
-    unsynch: true, // Unsynchronisation recommended for AAC
-    unsupported: false,
-    encoding: defaultEncoding,
-    ...options.id3v2
-  }
-
-  id3v2Options.encodingIndex = encoding2Index(id3v2Options.encoding)
-
-  if (options.strict !== false) {
-    ID3v2.validate(tags.v2, options.strict, id3v2Options)
-  }
+  // Unsynchronisation is recommended for AAC; default to 1024 bytes of padding
+  const id3Data = encodeID3v2(tags, options, { padding: 1024, unsynch: true })
 
   // Get audio data without existing ID3 tags
   const audioData = new Uint8Array(getAudioBuffer(buffer))
-
-  // Encode new ID3v2 tag
-  const id3Data = new Uint8Array(ID3v2.encode(tags.v2, id3v2Options))
 
   // Prepend ID3v2 tag to audio
   const result = mergeBytes(id3Data, audioData)
