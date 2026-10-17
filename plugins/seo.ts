@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import type { Plugin } from 'vite'
-import { SITE_NAME } from '../src/config.ts'
+import { AUTHOR_NAME, OWNER, REPOSITORY_URL, SITE_NAME, TAGLINE } from '../src/config.ts'
 import { SITE_URL, documentTitle, getPage, pageOutput, pages, type PageMeta } from '../src/site.ts'
 
 /** Placeholder in index.html replaced with each page's SEO tags */
@@ -14,18 +14,76 @@ function escape (value: string): string {
     .replace(/"/g, '&quot;')
 }
 
+const WEBSITE_ID = `${SITE_URL}/#website`
+
+/** Structured data: the library itself on the home page, breadcrumbs elsewhere */
+function structuredData (page: PageMeta, title: string, url: string): object {
+  const website = {
+    '@type': 'WebSite',
+    '@id': WEBSITE_ID,
+    name: SITE_NAME,
+    url: `${SITE_URL}/`,
+    inLanguage: 'en'
+  }
+
+  if (page.path === '/') {
+    return {
+      '@context': 'https://schema.org',
+      '@graph': [
+        { ...website, description: page.description },
+        {
+          '@type': 'SoftwareSourceCode',
+          name: SITE_NAME,
+          description: TAGLINE,
+          url: `${SITE_URL}/`,
+          image: `${SITE_URL}/images/banner.png`,
+          codeRepository: REPOSITORY_URL,
+          programmingLanguage: 'JavaScript',
+          runtimePlatform: ['Node.js', 'Web browser'],
+          license: 'https://opensource.org/license/mit',
+          author: { '@type': 'Person', name: AUTHOR_NAME, url: OWNER.url }
+        }
+      ]
+    }
+  }
+
+  // Home › [Documentations ›] page; the last item is the current page
+  const crumbs = [
+    { name: SITE_NAME, url: `${SITE_URL}/` },
+    ...(page.path.startsWith('/docs/') ? [{ name: 'Documentations', url: SITE_URL + pageOutput('/docs').url }] : []),
+    { name: page.title ?? SITE_NAME, url }
+  ]
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      website,
+      {
+        '@type': 'WebPage',
+        '@id': url,
+        name: title,
+        description: page.description,
+        url,
+        inLanguage: 'en',
+        isPartOf: { '@id': WEBSITE_ID },
+        breadcrumb: {
+          '@type': 'BreadcrumbList',
+          itemListElement: crumbs.map((crumb, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: crumb.name,
+            item: crumb.url
+          }))
+        }
+      }
+    ]
+  }
+}
+
 function renderTags (page: PageMeta): string {
   const title = documentTitle(page.title)
   const url = SITE_URL + pageOutput(page.path).url
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': page.path === '/' ? 'WebSite' : 'WebPage',
-    name: title,
-    headline: title,
-    description: page.description,
-    url,
-    ...(page.path === '/' ? {} : { isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` } })
-  }
+  const jsonLd = structuredData(page, title, url)
 
   return [
     `<title>${escape(title)}</title>`,
