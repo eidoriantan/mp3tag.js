@@ -1,79 +1,58 @@
----
-layout: default
-keywords: mp3, id3, audio, tag, edit, write
-last_modified_at: 2021-06-11T23:03:00+08:00
----
-<div class="blankslate my-6 my-md-12 anim-fade-in" itemscope itemtype="http://schema.org/SoftwareSourceCode">
-  <h1 class="h00-mktg" itemprop="name">mp3tag.js</h1>
-  <p class="lead" itemprop="abstract">
-    <i>mp3tag.js</i> is an open sourced
-    <span itemprop="programmingLanguage">JavaScript</span>
-    library used to edit the metadata of audio files.<br> Licensed under the
-    <a href="https://choosealicense.com/licenses/mit/" itemprop="license">MIT License</a>.
-  </p>
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="mp3tag.js is an open-source JavaScript library used to edit the metadata of audio files.">
+  <meta name="keywords" content="mp3, id3, audio, tag, edit, write">
+  <meta name="author" content="Adriane Justine Tan">
+  <meta name="google-site-verification" content="pygHTY6j2sle4JJ1YmSCYlf8nxIxnq4u9bHe48Mc9do">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0c110f" media="(prefers-color-scheme: dark)">
+  <meta name="msapplication-TileColor" content="#1f7a5c">
 
-  <a href="{{ site.github.repository_url }}" class="btn btn-primary btn-large" role="button" itemprop="codeRepository">
-    {% octicon mark-github height:20 aria-hidden:true %}
-    Visit GitHub repository
-  </a>
-</div>
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="mp3tag.js">
+  <meta property="og:title" content="mp3tag.js">
+  <meta property="og:description" content="MP3 tagging library written in pure JavaScript">
+  <meta property="og:url" content="https://mp3tag.js.org/">
+  <meta property="og:image" content="https://mp3tag.js.org/images/logo.png">
+  <meta name="twitter:card" content="summary">
 
-<hr class="col-6 mx-auto">
+  <link rel="canonical" href="https://mp3tag.js.org/">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#1f7a5c">
 
-<div class="col-9 text-center mx-auto my-8">
-  <h1 class="h0 mx-auto mb-5">Features</h1>
-  <div class="d-flex flex-wrap flex-justify-around flex-content-around">
-    <div class="col-12 col-md-3 hover-grow">
-      {% octicon code height:72 aria-hidden:true %}
-      <h3>Open Source</h3>
-      <p class="lead">
-        It is an open-sourced project and free for everyone to use! You can view
-        the source codes at <a href="{{ site.github.repository_url }}">GitHub</a>
-      </p>
-    </div>
+  <script>
+    // Restores the path GitHub Pages' 404.html redirected to `/?/path`
+    (function (l) {
+      if (l.search[1] === '/') {
+        var decoded = l.search.slice(1).split('&').map(function (s) {
+          return s.replace(/~and~/g, '&')
+        }).join('?')
+        window.history.replaceState(null, '', l.pathname.slice(0, -1) + decoded + l.hash)
+      }
+    }(window.location));
 
-    <div class="col-12 col-md-3 hover-grow">
-      {% octicon browser height:72 aria-hidden:true %}
-      <h3>Node & Browser</h3>
-      <p class="lead">
-        It can run on both <a href="https://nodejs.org">Node.js</a> and browsers.
-        It was transpiled with <a href="https://babeljs.io/">Babel</a> to support
-        the older browsers
-      </p>
-    </div>
+    // Applies the theme before the first paint to avoid a flash
+    (function () {
+      var theme = null
+      try { theme = localStorage.getItem('theme') } catch (e) {}
+      var dark = theme ? theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+      document.documentElement.classList.toggle('dark', dark)
+    }());
+  </script>
 
-    <div class="col-12 col-md-3 hover-grow">
-      {% octicon shield-check height:72 aria-hidden:true %}
-      <h3>Standards Compliant</h3>
-      <p class="lead">
-        It follows the <a href="http://id3.org">ID3 Specifications</a> and can
-        validate the user's inputs to comply with the standards
-      </p>
-    </div>
-  </div>
-</div>
-
-<hr class="col-6 mx-auto">
-
-<div class="col-10 col-md-6 text-center mx-auto my-8">
-  <h1 class="h0 mx-auto mb-3">Editor</h1>
-  <p class="lead">
-    You can use this editor as a live demonstration. The source codes are
-    available at
-    <a href="{{ site.github.repository_url }}/tree/gh-pages/">GitHub</a>.
-    It also works offline so no worries about uploading your files.
-  </p>
-  <a href="/editor/" class="btn btn-large btn-outline" role="button">
-    {% octicon pencil height:20 class:'mr-2' aria-hidden:true %}
-    <span>Editor</span>
-  </a>
-</div>
-
-<hr class="col-6 mx-auto">
-
-<div class="col-10 col-md-6 text-center mx-auto my-8">
-  <h1 class="h0 mx-auto mb-5">Documentations</h1>
-  <p class="lead">
-    You can read the full documentations <a href="/docs/">here</a>.
-  </p>
-</div>
+  <title>mp3tag.js</title>
+</head>
+<body>
+  <div id="root"></div>
+  <noscript>
+    <p style="padding:2rem;text-align:center">mp3tag.js needs JavaScript enabled to display this website.</p>
+  </noscript>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>

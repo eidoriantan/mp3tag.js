@@ -1,0 +1,13 @@
+{
+  "name": "mp3tag.js",
+  "short_name": "mp3tag.js",
+  "start_url": "./",
+  "display": "standalone",
+  "description": "MP3 tagging library written in pure JavaScript",
+  "background_color": "#ffffff",
+  "theme_color": "#1f7a5c",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
