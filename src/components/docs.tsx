@@ -36,7 +36,7 @@ interface EntryProps {
 /** A documented property, method, or frame */
 export function Entry ({ id, name, kind, meta = [], code, mono = true, children }: EntryProps) {
   return (
-    <article id={id} className="group/entry mt-4 overflow-hidden rounded-xl border border-border target:border-accent target:ring-3 target:ring-accent/15">
+    <article id={id} className="group/entry mt-4 overflow-hidden rounded-xl border border-border transition-[border-color,box-shadow] duration-500 data-highlight:border-accent data-highlight:ring-3 data-highlight:ring-accent/15">
       <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 pt-3.5 pb-3">
         {kind && <span className="text-xs font-medium tracking-wide text-muted uppercase">{kind}</span>}
         <h3 className={`text-[15px] font-semibold text-fg ${mono ? 'font-mono' : ''}`}>

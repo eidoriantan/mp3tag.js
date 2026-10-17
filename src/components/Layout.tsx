@@ -4,19 +4,26 @@ import { Footer } from './Footer'
 import { Header } from './Header'
 
 function ScrollManager () {
-  const { pathname, hash } = useLocation()
+  const { pathname, hash, key } = useLocation()
 
   useEffect(() => {
     if (hash) {
       const target = document.getElementById(decodeURIComponent(hash.slice(1)))
       if (target) {
         target.scrollIntoView()
-        return
+
+        // Briefly highlights the target, since :target doesn't update on client-side navigation
+        target.setAttribute('data-highlight', '')
+        const timeout = setTimeout(() => target.removeAttribute('data-highlight'), 1600)
+        return () => {
+          clearTimeout(timeout)
+          target.removeAttribute('data-highlight')
+        }
       }
     }
 
     window.scrollTo(0, 0)
-  }, [pathname, hash])
+  }, [pathname, hash, key])
 
   return null
 }
