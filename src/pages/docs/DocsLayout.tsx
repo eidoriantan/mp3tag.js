@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { Pencil } from 'lucide-react'
 import { SITE_EDIT_URL } from '../../config'
 import { usePageMeta } from '../../hooks/usePageMeta'
+import { OnThisPage, OnThisPageCollapsible } from './OnThisPage'
 import { docPages } from './pages'
 
 export function DocsLayout () {
@@ -12,7 +13,7 @@ export function DocsLayout () {
   usePageMeta(page.title, page.description)
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 md:flex-row md:gap-12 md:py-12">
+    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 md:flex-row md:gap-10 md:py-12">
       <aside className="md:w-56 md:shrink-0">
         <nav className="md:sticky md:top-24" aria-label="Documentations">
           <p className="mb-3 hidden text-xs font-semibold tracking-wide text-muted uppercase md:block">Documentations</p>
@@ -31,7 +32,7 @@ export function DocsLayout () {
 
                 {doc === page && (
                   <ul className="mt-1 mb-2 ml-3 hidden border-l border-border md:block">
-                    {doc.sections.map((section) => (
+                    {doc.outline.map((section) => (
                       <li key={section.id}>
                         <Link to={`${doc.path}#${section.id}`} className="-ml-px block border-l border-transparent py-1 pl-3 text-[13px] text-muted transition-colors hover:border-fg hover:text-fg">
                           {section.title}
@@ -55,8 +56,16 @@ export function DocsLayout () {
           </a>
         </header>
 
+        <div className="xl:hidden">
+          <OnThisPageCollapsible key={page.path} page={page} />
+        </div>
+
         <Outlet />
       </article>
+
+      <aside className="hidden w-56 shrink-0 xl:block">
+        <OnThisPage page={page} />
+      </aside>
     </div>
   )
 }
