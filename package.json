@@ -3,6 +3,13 @@
   "private": true,
   "version": "2.0.0",
   "type": "module",
+  "homepage": "https://mp3tag.js.org",
+  "license": "MIT",
+  "author": {
+    "name": "Adriane Justine Tan",
+    "email": "me@eidoriantan.com",
+    "url": "https://eidoriantan.com"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
