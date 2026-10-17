@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { Pencil } from 'lucide-react'
 import { SITE_EDIT_URL } from '../../config'
 import { usePageMeta } from '../../hooks/usePageMeta'
+import { getPage } from '../../site'
 import { OnThisPage, OnThisPageCollapsible } from './OnThisPage'
 import { docPages } from './pages'
 
@@ -10,7 +11,7 @@ export function DocsLayout () {
   const normalized = pathname.replace(/\/+$/, '') || '/'
   const page = docPages.find((doc) => doc.path === normalized) ?? docPages[0]
 
-  usePageMeta(page.title, page.description)
+  usePageMeta(getPage(page.path))
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 md:flex-row md:gap-10 md:py-12">

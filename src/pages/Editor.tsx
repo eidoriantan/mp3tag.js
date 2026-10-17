@@ -4,6 +4,7 @@ import MP3Tag from 'mp3tag.js'
 import { useToast } from '../components/Toaster'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { bytesToURL, downloadFile, loadFile } from '../lib/files'
+import { getPage } from '../site'
 
 interface AudioItem {
   id: number
@@ -33,7 +34,7 @@ const emptyValues: TagValues = {
 }
 
 export default function Editor () {
-  usePageMeta('Editor', 'Edit your audio files easily with this mp3tagger!')
+  usePageMeta(getPage('/editor'))
   const toast = useToast()
 
   const [files, setFiles] = useState<AudioItem[]>([])

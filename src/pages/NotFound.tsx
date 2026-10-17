@@ -3,7 +3,7 @@ import { House } from 'lucide-react'
 import { usePageMeta } from '../hooks/usePageMeta'
 
 export default function NotFound () {
-  usePageMeta('404 Not Found')
+  usePageMeta({ title: '404 Not Found' })
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-4 py-24 text-center">

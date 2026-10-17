@@ -1,11 +1,17 @@
 import { useEffect } from 'react'
-import { SITE_NAME } from '../config'
+import { SITE_URL, documentTitle, pageOutput, type PageMeta } from '../site'
 
-export function usePageMeta (title?: string, description?: string): void {
+/**
+ * Keeps the document's title, description, and canonical URL in sync during
+ * client-side navigation. The initial HTML for each route already has them,
+ * written at build time by plugins/seo.ts.
+ */
+export function usePageMeta (page: PageMeta | { title: string }): void {
   useEffect(() => {
-    document.title = title ? `${title} | ${SITE_NAME}` : SITE_NAME
-    if (description) {
-      document.querySelector('meta[name="description"]')?.setAttribute('content', description)
-    }
-  }, [title, description])
+    document.title = documentTitle(page.title)
+    if (!('path' in page)) return
+
+    document.querySelector('meta[name="description"]')?.setAttribute('content', page.description)
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', SITE_URL + pageOutput(page.path).url)
+  }, [page])
 }
