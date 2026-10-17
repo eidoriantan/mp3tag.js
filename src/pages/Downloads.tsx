@@ -2,11 +2,12 @@ import { Code, ExternalLink, Package } from 'lucide-react'
 import { REPOSITORY_URL } from '../config'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { useReleases } from '../hooks/useReleases'
+import { getPage } from '../site'
 
 const dateFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'long', day: 'numeric' })
 
 export default function Downloads () {
-  usePageMeta('Downloads', 'JavaScript library download page')
+  usePageMeta(getPage('/downloads'))
   const releases = useReleases()
 
   return (

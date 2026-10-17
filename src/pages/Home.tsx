@@ -4,6 +4,7 @@ import { GithubIcon } from '../components/GithubIcon'
 import { InstallCommand } from '../components/InstallCommand'
 import { REPOSITORY_URL, SITE_SOURCE_URL } from '../config'
 import { usePageMeta } from '../hooks/usePageMeta'
+import { getPage } from '../site'
 
 const features = [
   {
@@ -40,7 +41,7 @@ const features = [
 ]
 
 export default function Home () {
-  usePageMeta()
+  usePageMeta(getPage('/'))
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">

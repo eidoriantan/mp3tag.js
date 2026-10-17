@@ -24,6 +24,10 @@ npm run preview   # Serve the production build
 - `src/pages/docs/` - Documentation pages; `pages.ts` lists them for the sidebar
 - `src/components/` - Shared layout and UI components
 - `src/index.css` - Tailwind setup and the light/dark color tokens
+- `src/site.ts` - Title, description, and keywords of every page. Add new
+  pages here so they get their own SEO tags and a sitemap entry
+- `plugins/seo.ts` - Vite plugin that writes an HTML file per page with its SEO
+  tags, plus `sitemap.xml` (dated by each page's last commit) and `robots.txt`
 - `public/` - Static files copied as-is, including `CNAME` and the `404.html`
   fallback that lets GitHub Pages serve client-side routes
 

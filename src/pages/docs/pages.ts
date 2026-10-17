@@ -1,3 +1,4 @@
+import { getPage } from '../../site'
 import { tagsProperties, v1Frames, v2Frames } from './data/frames'
 import { methods, properties, type Member } from './data/mp3tag'
 
@@ -20,7 +21,6 @@ export interface OutlineSection {
 export interface DocPage {
   path: string
   title: string
-  description: string
   /** Source file name in src/pages/docs, used by the "Improve this page" link */
   file: string
   outline: OutlineSection[]
@@ -36,8 +36,7 @@ const memberEntry = (member: Member): OutlineEntry => ({
 export const docPages: DocPage[] = [
   {
     path: '/docs',
-    title: 'Installation',
-    description: 'JavaScript library documentations page. How to install the library',
+    title: getPage('/docs').title!,
     file: 'Installation.tsx',
     outline: [
       { id: 'integrating-from-v2-v3', title: 'Integrating from v2 - v3', entries: [] }
@@ -45,8 +44,7 @@ export const docPages: DocPage[] = [
   },
   {
     path: '/docs/usage',
-    title: 'Usage',
-    description: 'JavaScript library documentations page. How to use the library',
+    title: getPage('/docs/usage').title!,
     file: 'Usage.tsx',
     outline: [
       { id: 'simple-usage', title: 'Simple Usage', entries: [] },
@@ -58,8 +56,7 @@ export const docPages: DocPage[] = [
   },
   {
     path: '/docs/mp3tag',
-    title: 'MP3Tag',
-    description: 'JavaScript library documentations page. mp3tag.js exported class documentation',
+    title: getPage('/docs/mp3tag').title!,
     file: 'MP3TagClass.tsx',
     outline: [
       { id: 'properties', title: 'Properties', entries: properties.map(memberEntry) },
@@ -68,8 +65,7 @@ export const docPages: DocPage[] = [
   },
   {
     path: '/docs/frames',
-    title: 'Tags and Frames',
-    description: 'JavaScript library documentations page. Learn more about the frames objects in this library',
+    title: getPage('/docs/frames').title!,
     file: 'Frames.tsx',
     outline: [
       {
