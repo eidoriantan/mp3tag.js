@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>mp3tag.js</title>
+  <script>
+    // GitHub Pages serves this file for unknown paths. Redirect to the SPA
+    // with the path in the query string so the client-side router handles it.
+    // See https://github.com/rafgraph/spa-github-pages
+    var l = window.location
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/?/' +
+      l.pathname.slice(1).replace(/&/g, '~and~') +
+      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    )
+  </script>
+</head>
+<body></body>
+</html>

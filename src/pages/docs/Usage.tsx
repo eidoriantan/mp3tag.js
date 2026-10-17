@@ -1,0 +1,174 @@
+import { CodeBlock } from '../../components/CodeBlock'
+import { Callout, Section } from '../../components/docs'
+import { REPOSITORY_URL } from '../../config'
+
+const simple = `
+const buffer = null // Replace this with the mp3 file's buffer
+const verbose = true // Logs all processes using \`console.log\`
+const mp3tag = new MP3Tag(buffer, verbose)
+
+// Read the tags from the buffer
+mp3tag.read()
+
+// Handle error if there's any
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+
+console.log(mp3tag.tags)
+
+// Please see \`Tags and Frames\`
+mp3tag.tags.title = 'New Title'
+mp3tag.tags.artist = 'New Artist'
+mp3tag.tags.album = 'New Album'
+
+mp3tag.save() // Saves the new changes
+`
+
+const advanced = `
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+const buffer = fs.readFileSync('/path/to/mp3')
+const verbose = true // Logs all processes using \`console.log\`
+const mp3tag = new MP3Tag(buffer, verbose)
+
+// Read the tags from the buffer
+mp3tag.read({
+  id3v1: false // Ignore ID3v1 tags when reading
+})
+
+// Handle error if there's any
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+
+console.log(mp3tag.tags)
+mp3tag.tags.title = 'New Title'
+mp3tag.tags.artist = 'New Artist'
+mp3tag.tags.album = 'New Album'
+
+// Access ID3v2 Tags
+// Comment Tag. See more ID3v2 tags at id3.org
+mp3tag.tags.v2.COMM = [{
+  language: 'eng',
+  descriptor: '',
+  text: 'Comment tag'
+}]
+
+mp3tag.save({
+  strict: true, // Strict mode, validates all inputs against the standards. See id3.org
+  // ID3v2 Options
+  id3v2: { padding: 4096 }
+})
+`
+
+const mp4 = `
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+const buffer = fs.readFileSync('/path/to/audio.m4a')
+const mp3tag = new MP3Tag(buffer)
+
+mp3tag.read()
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+console.log(mp3tag.tags.title)
+
+// Writing to MP4/M4A
+mp3tag.tags.v2.TIT2 = 'New Title'
+mp3tag.save({
+  id3v2: { padding: 0 },
+  mp4: { language: 'eng' } // Optional: ISO-639-2/T language code (default: 'und')
+})
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+fs.writeFileSync('/path/to/audio.m4a', Buffer.from(mp3tag.buffer))
+`
+
+const aiff = `
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+const buffer = fs.readFileSync('/path/to/audio.aiff')
+const mp3tag = new MP3Tag(buffer)
+
+mp3tag.read()
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+console.log(mp3tag.tags.title)
+
+// Writing to AIFF
+mp3tag.tags.v2.TIT2 = 'New Title'
+mp3tag.save({ id3v2: { padding: 0 } })
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+fs.writeFileSync('/path/to/audio.aiff', Buffer.from(mp3tag.buffer))
+`
+
+const aac = `
+const MP3Tag = require('mp3tag.js')
+const fs = require('fs')
+
+const buffer = fs.readFileSync('/path/to/audio.aac')
+const mp3tag = new MP3Tag(buffer)
+
+mp3tag.read()
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+console.log(mp3tag.tags.title)
+
+// Writing to AAC
+mp3tag.tags.v2.TIT2 = 'New Title'
+mp3tag.save({ id3v2: { padding: 1024, unsynch: true } })
+
+if (mp3tag.error !== '') throw new Error(mp3tag.error)
+fs.writeFileSync('/path/to/audio.aac', Buffer.from(mp3tag.buffer))
+`
+
+export default function Usage () {
+  return (
+    <div className="prose-doc">
+      <Section id="simple-usage" title="Simple Usage">
+        <CodeBlock code={simple} />
+      </Section>
+
+      <Section id="advanced-usage" title="Advanced Usage">
+        <CodeBlock code={advanced} />
+      </Section>
+
+      <Section id="mp4-usage" title="MP4/M4A Usage">
+        <p>
+          mp3tag.js automatically detects MP4/M4A containers and reads ID3v2 tags from
+          the ID32 box. The same <code>read()</code> and <code>save()</code> API works
+          transparently.
+        </p>
+        <CodeBlock code={mp4} className="mt-4" />
+        <Callout variant="warning">
+          <strong>Note:</strong> MP4 support focuses on ID32 boxes containing ID3v2
+          data. Native iTunes metadata (ilst atoms) is not supported.
+        </Callout>
+      </Section>
+
+      <Section id="aiff-usage" title="AIFF/AIFC Usage">
+        <p>
+          mp3tag.js automatically detects AIFF and AIFC files and reads ID3v2 tags from
+          the "ID3 " chunk within the AIFF container.
+        </p>
+        <CodeBlock code={aiff} className="mt-4" />
+      </Section>
+
+      <Section id="aac-usage" title="AAC/ADTS Usage">
+        <p>
+          mp3tag.js supports raw AAC/ADTS streams (.aac files) with ID3v2 tags
+          prepended to the audio data, similar to MP3.
+        </p>
+        <CodeBlock code={aac} className="mt-4" />
+        <Callout variant="warning">
+          <strong>Note:</strong> AAC support is for raw ADTS streams (.aac files). For
+          AAC audio in MP4 containers (.m4a files), see the MP4/M4A section above.
+        </Callout>
+        <Callout>
+          You can browse more examples at the{' '}
+          <a href={`${REPOSITORY_URL}/tree/master/examples`}>GitHub Repository</a>
+        </Callout>
+      </Section>
+    </div>
+  )
+}
