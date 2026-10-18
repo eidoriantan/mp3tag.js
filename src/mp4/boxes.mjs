@@ -32,6 +32,10 @@ export function parseBoxHeader (view, offset) {
     size = view.byteLength - offset
   }
 
+  // Validate size to prevent integer overflow when computing 'end' and
+  // ensure the resulting box boundaries stay within the buffer.
+  if (size < headerSize || offset + size > view.byteLength) return null
+
   return {
     size,
     type,
