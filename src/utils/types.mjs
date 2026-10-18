@@ -1,5 +1,5 @@
 
 export function isBuffer (param) {
-  return param instanceof ArrayBuffer ||
+  return (typeof ArrayBuffer !== 'undefined' && param instanceof ArrayBuffer) ||
     (typeof Buffer !== 'undefined' && param instanceof Buffer)
 }
